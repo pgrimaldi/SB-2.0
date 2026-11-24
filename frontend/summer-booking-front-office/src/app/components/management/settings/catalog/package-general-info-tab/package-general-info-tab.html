@@ -1,0 +1,144 @@
+@if (mainTranslation(); as main) {
+  <app-filled-text-field
+    [label]="'management.settings.catalog.packages.form.name' | translate"
+    [isMandatory]="true"
+    [formField]="main.packageName"
+    [error]="validationText.text(main.packageName) ?? validationText.text(form().translations)"
+  />
+}
+<app-expansion-panel
+  [title]="'management.settings.catalog.packages.form.other_languages' | translate"
+  [pathIcon]="languagesIcons"
+  [(isExpanded)]="areLanguagesExpanded"
+>
+  <div class="package__general__info__tab__languages">
+    @for (translation of otherTranslations(); track translation) {
+      <app-form-row>
+        <span appFormRowLabel>
+          {{
+            'management.settings.catalog.packages.form.translated_name'
+              | translate: { language: languageName(translation.language().value()) }
+          }}
+        </span>
+        <app-filled-text-field
+          class="package__general__info__tab__translation"
+          [formField]="translation.packageName"
+          [error]="validationText.text(translation.packageName)"
+        />
+      </app-form-row>
+    }
+  </div>
+</app-expansion-panel>
+
+<app-filled-select
+  [label]="'management.settings.catalog.packages.form.max_additional_items' | translate"
+  [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+  [options]="additionalItemOptions()"
+  [value]="optionOf(form().maxAdditionalItemQuantity().value())"
+  [readonly]="form().maxAdditionalItemQuantity().readonly()"
+  [error]="validationText.text(form().maxAdditionalItemQuantity)"
+  (valueChange)="setQuantity(form().maxAdditionalItemQuantity, $event)"
+/>
+<app-filled-select
+  [label]="'management.settings.catalog.packages.form.max_people' | translate"
+  [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+  [options]="peopleOptions()"
+  [value]="optionOf(form().maxPeopleQuantity().value())"
+  [readonly]="form().maxPeopleQuantity().readonly()"
+  [error]="validationText.text(form().maxPeopleQuantity)"
+  (valueChange)="setQuantity(form().maxPeopleQuantity, $event)"
+/>
+
+<app-section-title
+  [text]="'management.settings.catalog.packages.form.articles.title' | translate"
+/>
+@if (hasUnavailableArticles()) {
+  <p class="package__general__info__tab__note">
+    {{ 'management.settings.catalog.packages.form.articles.unavailable_note' | translate }}
+  </p>
+}
+<div class="package__general__info__tab__articles">
+  @for (row of articleRows(); track $index) {
+    <app-filled-select
+      [label]="articleLabel(row, row.labelKey | translate: row.labelParams)"
+      [placeholder]="
+        (row.isAvailable
+          ? 'management.settings.catalog.packages.form.choose'
+          : 'management.settings.catalog.packages.form.articles.unavailable'
+        ) | translate
+      "
+      [options]="row.options"
+      [value]="optionOf(row.quantity)"
+      [disabled]="!row.isAvailable && row.quantity === null"
+      [readonly]="form().items().readonly()"
+      [error]="
+        !row.isAvailable && row.quantity !== null
+          ? ('management.settings.catalog.packages.form.articles.unavailable' | translate)
+          : null
+      "
+      (valueChange)="setArticleQuantity(row, $event)"
+    />
+  }
+</div>
+@if (validationText.text(form().items); as error) {
+  <p class="package__general__info__tab__error">{{ error }}</p>
+}
+
+<app-filled-text-field
+  [label]="'management.settings.catalog.packages.form.included_services' | translate"
+  [formField]="form().includedServices"
+  [error]="validationText.text(form().includedServices)"
+/>
+<app-filled-multi-select
+  [label]="'management.settings.catalog.packages.form.enabled_areas' | translate"
+  [placeholder]="
+    sectorAreas().loadError()
+      ? ''
+      : ('management.settings.catalog.packages.form.choose' | translate)
+  "
+  [options]="sectorAreaOptions()"
+  [formField]="form().idSectorAreas"
+  [error]="sectorAreas().loadError() ?? validationText.text(form().idSectorAreas)"
+  (openRequest)="sectorAreas().retry()"
+/>
+<app-filled-multi-select
+  [label]="'management.settings.catalog.packages.form.sectors' | translate"
+  [placeholder]="
+    sectors().loadError()
+      ? ''
+      : ('management.settings.catalog.packages.form.all_sectors' | translate)
+  "
+  [options]="sectorOptions()"
+  [formField]="form().idSectors"
+  [error]="sectors().loadError() ?? validationText.text(form().idSectors)"
+  (openRequest)="sectors().retry()"
+/>
+
+<div class="package__general__info__tab__options">
+  <app-checkbox
+    class="package__general__info__tab__default"
+    [formField]="form().isDefault"
+    [error]="validationText.text(form().isDefault)"
+  >
+    {{ 'management.settings.catalog.packages.form.is_default' | translate }}
+  </app-checkbox>
+  <app-checkbox
+    class="package__general__info__tab__default"
+    [formField]="form().isDefaultOnline"
+    [error]="validationText.text(form().isDefaultOnline)"
+  >
+    {{ 'management.settings.catalog.packages.form.is_default_online' | translate }}
+  </app-checkbox>
+  <app-checkbox
+    [formField]="form().isOnlineEnabled"
+    [error]="validationText.text(form().isOnlineEnabled)"
+  >
+    {{ 'management.settings.catalog.packages.form.online_enabled' | translate }}
+  </app-checkbox>
+  <app-checkbox
+    [formField]="form().isOnlineOnly"
+    [error]="validationText.text(form().isOnlineOnly)"
+  >
+    {{ 'management.settings.catalog.packages.form.online_only' | translate }}
+  </app-checkbox>
+</div>

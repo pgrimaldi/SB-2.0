@@ -5,6 +5,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Observable, Subject, map, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { PageRequest } from '../../../entities/pagination/page';
 import { FileDownloadBehaviour } from '../../../behaviours/files/file-download.behaviour';
 import { TaxationService } from '../../../services/api/taxation/taxation.service';
@@ -90,7 +91,6 @@ describe('Taxation', () => {
     const { element, printerList, electronicReceipt } = await setup('<p>Termini</p>');
 
     expect(printerList).toHaveBeenCalledWith({
-      idProperty: 'p1',
       page: 1,
       pageSize: 5,
       search: '',
@@ -98,7 +98,7 @@ describe('Taxation', () => {
       sortField: '',
       sortDirection: 'Ascending',
     });
-    expect(electronicReceipt).toHaveBeenCalledWith('p1');
+    expect(electronicReceipt).toHaveBeenCalledWith();
     expect(
       [...element.querySelectorAll('.taxation__printers tbody tr.table__row')].map((row) =>
         [...row.querySelectorAll('td')].slice(0, 2).map((cell) => cell.textContent?.trim()),
@@ -150,7 +150,6 @@ describe('Taxation', () => {
     element.querySelector<HTMLButtonElement>('tbody tr.table__row app-toggle button')!.click();
     await fixture.whenStable();
     expect(setPrinterIsActive).toHaveBeenCalledWith({
-      idProperty: 'p1',
       idPrinter: 'pr1',
       isEnabled: true,
     });
@@ -162,7 +161,6 @@ describe('Taxation', () => {
     await settle(fixture);
     expect(spinner()).toBeNull();
     expect(printerList).toHaveBeenCalledWith({
-      idProperty: 'p1',
       page: 1,
       pageSize: 5,
       search: '',
@@ -182,13 +180,12 @@ describe('Taxation', () => {
     answer.error(
       new HttpErrorResponse({
         status: 404,
-        error: { status: 404, code: 'resource.not_found', title: 'Resource not found' },
+        error: { status: 404, code: ApiErrorCode.ResourceNotFound, title: 'Resource not found' },
       }),
     );
     await settle(fixture);
 
     expect(printerList).toHaveBeenCalledWith({
-      idProperty: 'p1',
       page: 1,
       pageSize: 5,
       search: '',
@@ -216,14 +213,13 @@ describe('Taxation', () => {
     buttons.at(-1)!.click();
     await fixture.whenStable();
 
-    expect(deletePrinter).toHaveBeenCalledWith({ idProperty: 'p1', idPrinter: 'pr1' });
+    expect(deletePrinter).toHaveBeenCalledWith('pr1');
     expect(document.querySelector('mat-dialog-container')).toBeNull();
     expect(spinner()).not.toBeNull();
     answer.next();
     answer.complete();
     await settle(fixture);
     expect(printerList).toHaveBeenCalledWith({
-      idProperty: 'p1',
       page: 1,
       pageSize: 5,
       search: '',
@@ -240,7 +236,7 @@ describe('Taxation', () => {
 
     button().click();
     await fixture.whenStable();
-    expect(downloadGuideElectronicReceipt).toHaveBeenCalledWith('p1');
+    expect(downloadGuideElectronicReceipt).toHaveBeenCalledWith();
     expect(element.querySelector('.taxation__guide mat-progress-spinner')).not.toBeNull();
     button().click(); // ignored while it is running
     expect(downloadGuideElectronicReceipt).toHaveBeenCalledTimes(1);
@@ -300,10 +296,7 @@ describe('Taxation', () => {
 
     send().click();
     await settle(fixture);
-    expect(activateElectronicReceipt).toHaveBeenCalledWith({
-      idProperty: 'p1',
-      isElectronicReceiptAccepted: true,
-    });
+    expect(activateElectronicReceipt).toHaveBeenCalledWith(true);
   });
 
   it('should show the account form once the server accepted the receipt', async () => {

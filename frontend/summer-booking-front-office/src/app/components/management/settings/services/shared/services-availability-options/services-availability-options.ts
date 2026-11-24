@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { ServiceAvailabilityOption } from '../../../../../../entities/settings/services/service-availability-option';
+import { ServiceAvailabilityOptionDraft } from '../../../../../../entities/settings/services/service-availability-option-draft';
 import {
   Button,
   ButtonAppearance,
@@ -21,7 +21,7 @@ import { ServicesAvailabilityOption } from '../services-availability-option/serv
 })
 export class ServicesAvailabilityOptions {
   /** The options of the form of the panel, which validates and saves them. */
-  readonly form = input.required<FieldTree<ServiceAvailabilityOption[]>>();
+  readonly form = input.required<FieldTree<ServiceAvailabilityOptionDraft[]>>();
   /** Only to look at: adding and removing an option are off. */
   readonly isReadonly = input(false);
 
@@ -31,7 +31,7 @@ export class ServicesAvailabilityOptions {
   protected readonly removeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
 
   protected addOption(): void {
-    this.form()().value.update((options) => [...options, new ServiceAvailabilityOption()]);
+    this.form()().value.update((options) => [...options, new ServiceAvailabilityOptionDraft()]);
   }
 
   protected removeOption(index: number): void {

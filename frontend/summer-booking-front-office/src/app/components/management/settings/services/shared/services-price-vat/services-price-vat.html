@@ -2,6 +2,7 @@
   <app-filled-number-field
     class="services__price__vat__field"
     [label]="'management.settings.services.form.prices.price' | translate"
+    [isMandatory]="isPriceMandatory()"
     [isDecimal]="true"
     [isCurrency]="true"
     [formField]="price()"
@@ -11,6 +12,7 @@
 </div>
 <app-filled-number-field
   [label]="'management.settings.services.form.prices.vat' | translate"
+  [isMandatory]="isVatMandatory()"
   [isDecimal]="true"
   [formField]="vatRate()"
   [error]="validationText.text(vatRate())"

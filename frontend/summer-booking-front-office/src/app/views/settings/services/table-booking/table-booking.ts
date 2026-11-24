@@ -15,6 +15,8 @@ import {
   TableRowId,
 } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { TableServiceItem } from '../../../../entities/settings/services/table-service-item';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 
@@ -54,10 +56,9 @@ export class TableBooking {
   protected readonly duplicating = signal(false);
   protected readonly idTableServicesToDuplicate = signal<readonly string[]>([]);
   protected readonly tableServiceNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/Services_TableBookingTitle.png'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -90,10 +91,10 @@ export class TableBooking {
     edit: ({ idTableService }) => idTableService && this.openEdit(idTableService),
   });
 
-  protected readonly deleteTableServices = (idProperty: string, idTableServices: string[]) =>
-    this.catalog.deleteTableServiceItems({ idProperty, idTableServices });
-  protected readonly duplicateTableServices = (idProperty: string, idTableServices: string[]) =>
-    this.catalog.duplicateTableServiceItems({ idProperty, idTableServices });
+  protected readonly deleteTableServices = (idTableServices: string[]) =>
+    this.catalog.deleteTableServiceItems(idTableServices);
+  protected readonly duplicateTableServices = (idTableServices: string[]) =>
+    this.catalog.duplicateTableServiceItems(idTableServices);
 
   protected openEdit(idTableService: string): void {
     this.idTableServiceToEdit.set(idTableService);
@@ -125,11 +126,28 @@ export class TableBooking {
     }
   }
 
-  protected forgetDeleted(idTableServices: readonly string[]): void {
+  protected forgetDeleted(idTableServices: readonly (string | null)[]): void {
     this.idSelectedTableServices.update((idSelected) =>
       idSelected.filter(
         (idSelectedTableService) => !idTableServices.includes(String(idSelectedTableService)),
       ),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idTableServices: readonly (string | null)[],
+  ): void {
+    if (problem.code === ApiErrorCode.ServiceTableServiceNotFound) {
+      this.forgetDeleted(idTableServices);
+      table.reload();
+    }
+  }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+      table.reload();
+    }
   }
 }

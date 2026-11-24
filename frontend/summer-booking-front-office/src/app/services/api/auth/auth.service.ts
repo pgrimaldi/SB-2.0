@@ -27,8 +27,8 @@ export class AuthService {
   }
 
   /**
-   * Revokes the session of the refresh cookie on the server and clears the cookie; 401 when there is
-   * no valid session any more (already signed out).
+   * Revokes the session of the refresh cookie on the server, if there is one, and clears the cookie:
+   * always 204, also when the session was already closed.
    */
   logout(): Observable<void> {
     return this.httpClient.post<void>(`${this.endpoint}/logout`, null);

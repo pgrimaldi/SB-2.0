@@ -23,6 +23,9 @@
     [value]="value()"
     (valueChange)="value.set($event)"
     (closed)="touch.emit()"
+    (click)="requestOpen()"
+    (keydown.enter)="requestOpen()"
+    (keydown.space)="requestOpen()"
   >
     @for (option of options(); track option.value) {
       <mat-option [value]="option.value">

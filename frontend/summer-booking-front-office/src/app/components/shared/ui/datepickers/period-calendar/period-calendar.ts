@@ -20,8 +20,8 @@ import { PERIOD_CALENDAR_ICONS, PeriodCalendarHeader } from './period-calendar-h
 
 /** First and last day of a period, each at midnight UTC as an ISO string. */
 export interface PeriodCalendarPeriod {
-  dateFrom: string | null;
-  dateTo: string | null;
+  startsOn: string | null;
+  endsOn: string | null;
 }
 
 export interface PeriodCalendarTexts {
@@ -144,10 +144,10 @@ export class PeriodCalendar {
       return;
     }
     this.draft.set(null);
-    const period = { dateFrom: this.utcDay(start), dateTo: this.utcDay(date) };
+    const period = { startsOn: this.utcDay(start), endsOn: this.utcDay(date) };
     if (
       !this.value().some(
-        ({ dateFrom, dateTo }) => dateFrom === period.dateFrom && dateTo === period.dateTo,
+        ({ startsOn, endsOn }) => startsOn === period.startsOn && endsOn === period.endsOn,
       )
     ) {
       this.value.update((periods) => [...periods, period]);
@@ -165,8 +165,8 @@ export class PeriodCalendar {
 
   private toDays(periods: readonly PeriodCalendarPeriod[]): Days[] {
     return periods.flatMap((period): Days[] => {
-      const start = this.day(period.dateFrom);
-      const end = this.day(period.dateTo);
+      const start = this.day(period.startsOn);
+      const end = this.day(period.endsOn);
       return start && end ? [{ start, end }] : [];
     });
   }

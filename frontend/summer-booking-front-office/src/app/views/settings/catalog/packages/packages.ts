@@ -1,0 +1,150 @@
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Observable } from 'rxjs';
+import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
+import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
+import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
+import { PackageAddItemPanel } from '../../../../components/management/settings/catalog/package-add-item-panel/package-add-item-panel';
+import { PackageEditItemPanel } from '../../../../components/management/settings/catalog/package-edit-item-panel/package-edit-item-panel';
+import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
+import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
+import {
+  Table,
+  TableColumn,
+  TableLoad,
+  TableRowId,
+} from '../../../../components/shared/ui/tables/table/table';
+import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
+import { PackageItem } from '../../../../entities/settings/catalog/package-item';
+import { PriceListService } from '../../../../services/api/catalog/price-list.service';
+
+interface PackagesTableTexts {
+  package_name: string;
+}
+
+@Component({
+  selector: 'app-packages',
+  imports: [
+    DeleteItemsPopup,
+    DuplicateItemsPopup,
+    PackageAddItemPanel,
+    PackageEditItemPanel,
+    PageTitle,
+    Table,
+    TableErrorPopup,
+    TranslatePipe,
+  ],
+  templateUrl: './packages.html',
+  styleUrl: './packages.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class Packages {
+  private readonly auth = inject(AuthBehaviour);
+  private readonly priceLists = inject(PriceListService);
+  private readonly translateService = inject(TranslateService);
+
+  protected readonly loadFailed = signal(false);
+  protected readonly adding = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly idPackageToEdit = signal<string | null>(null);
+  protected readonly idSelectedPackages = signal<readonly TableRowId[]>([]);
+  protected readonly deleting = signal(false);
+  protected readonly idPackagesToDelete = signal<readonly string[]>([]);
+  protected readonly packageNameToDelete = signal<string | null>(null);
+  protected readonly duplicating = signal(false);
+  protected readonly idPackagesToDuplicate = signal<readonly string[]>([]);
+  protected readonly packageNameToDuplicate = signal<string | null>(null);
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
+  protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
+  /** [X, warning]. */
+  protected readonly alertIcons = [
+    '/assets/images/GeneralIcon_Close.svg',
+    '/assets/images/GeneralIcon_Warning.svg',
+  ] as const;
+  /** In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create]. */
+  protected readonly tableIcons = [
+    '/assets/images/GeneralIcon_Search.svg',
+    '/assets/images/GeneralIcon_Clear.svg',
+    '/assets/images/GeneralIcon_DuplicateSelected.svg',
+    '/assets/images/GeneralIcon_DeleteSelected.svg',
+    '/assets/images/GeneralIcon_Add.svg',
+  ] as const;
+  private readonly headers = toSignal(
+    this.translateService.stream(
+      'management.settings.catalog.packages.table',
+    ) as Observable<PackagesTableTexts>,
+    { initialValue: { package_name: '' } },
+  );
+  protected readonly columns = computed<readonly TableColumn<PackageItem>[]>(() => [
+    { field: 'packageName', header: this.headers().package_name, sortable: true },
+  ]);
+  protected readonly rowActions = standardRowActions<PackageItem>({
+    delete: ({ idPackage, packageName }) => idPackage && this.askDelete([idPackage], packageName),
+    duplicate: ({ idPackage, packageName }) =>
+      idPackage && this.askDuplicate([idPackage], packageName),
+    edit: ({ idPackage }) => idPackage && this.askEdit(idPackage),
+  });
+
+  protected readonly load: TableLoad<object, PackageItem> = (request) =>
+    this.priceLists.packageList(request);
+
+  protected readonly deletePackages = (idPackages: string[]) =>
+    this.priceLists.deletePackageItems(idPackages);
+  protected readonly duplicatePackages = (idPackages: string[]) =>
+    this.priceLists.duplicatePackageItems(idPackages);
+
+  protected askDelete(idPackages: readonly TableRowId[], packageName: string | null = null): void {
+    this.idPackagesToDelete.set(idPackages.map(String));
+    this.packageNameToDelete.set(packageName);
+    this.deleting.set(true);
+  }
+
+  protected askEdit(idPackage: string): void {
+    this.idPackageToEdit.set(idPackage);
+    this.editing.set(true);
+  }
+
+  protected askDuplicate(
+    idPackages: readonly TableRowId[],
+    packageName: string | null = null,
+  ): void {
+    this.idPackagesToDuplicate.set(idPackages.map(String));
+    this.packageNameToDuplicate.set(packageName);
+    this.duplicating.set(true);
+  }
+
+  /** Only after "Duplica selezione" (no name): the chosen rows are done with. */
+  protected afterDuplicate(): void {
+    if (this.packageNameToDuplicate() === null) {
+      this.idSelectedPackages.set([]);
+    }
+  }
+
+  protected forgetDeleted(idPackages: readonly (string | null)[]): void {
+    this.idSelectedPackages.update((idSelected) =>
+      idSelected.filter((idSelectedPackage) => !idPackages.includes(String(idSelectedPackage))),
+    );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idPackages: readonly (string | null)[],
+  ): void {
+    if (problem.code === ApiErrorCode.PricingPriceListNotFound) {
+      this.forgetDeleted(idPackages);
+      table.reload();
+    }
+  }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+      table.reload();
+    }
+  }
+}

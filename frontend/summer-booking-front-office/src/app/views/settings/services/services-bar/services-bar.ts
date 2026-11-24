@@ -18,6 +18,8 @@ import {
 } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
 import { BarServiceCategory } from '../../../../entities/enums/bar-service-category';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 
 interface ServicesBarTexts {
@@ -27,11 +29,18 @@ interface ServicesBarTexts {
 }
 
 interface BarServiceCategoryTexts {
-  cafeteria: string;
-  drinks: string;
-  snacks_and_sandwiches: string;
-  ice_creams: string;
+  bar: string;
+  pizzeria: string;
+  restaurant: string;
+  fry_shop: string;
+  sandwich_shop: string;
+  appetizers: string;
+  first_courses: string;
+  second_courses: string;
   desserts: string;
+  fruit: string;
+  ice_cream_shop: string;
+  drinks: string;
 }
 
 interface BarServiceRow {
@@ -44,11 +53,18 @@ interface BarServiceRow {
 const BAR_SERVICE_CATEGORY_KEYS: Readonly<
   Record<BarServiceCategory, keyof BarServiceCategoryTexts>
 > = {
-  [BarServiceCategory.Cafeteria]: 'cafeteria',
-  [BarServiceCategory.Drinks]: 'drinks',
-  [BarServiceCategory.SnacksAndSandwiches]: 'snacks_and_sandwiches',
-  [BarServiceCategory.IceCreams]: 'ice_creams',
+  [BarServiceCategory.Bar]: 'bar',
+  [BarServiceCategory.Pizzeria]: 'pizzeria',
+  [BarServiceCategory.Restaurant]: 'restaurant',
+  [BarServiceCategory.FryShop]: 'fry_shop',
+  [BarServiceCategory.SandwichShop]: 'sandwich_shop',
+  [BarServiceCategory.Appetizers]: 'appetizers',
+  [BarServiceCategory.FirstCourses]: 'first_courses',
+  [BarServiceCategory.SecondCourses]: 'second_courses',
   [BarServiceCategory.Desserts]: 'desserts',
+  [BarServiceCategory.Fruit]: 'fruit',
+  [BarServiceCategory.IceCreamShop]: 'ice_cream_shop',
+  [BarServiceCategory.Drinks]: 'drinks',
 };
 
 @Component({
@@ -84,10 +100,9 @@ export class ServicesBar {
   protected readonly duplicating = signal(false);
   protected readonly idBarServicesToDuplicate = signal<readonly string[]>([]);
   protected readonly barServiceNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/Services_BarTitle.png'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -122,7 +137,7 @@ export class ServicesBar {
     edit: ({ idBarService }) => idBarService && this.openEdit(idBarService),
   });
 
-  protected readonly load: TableLoad<{ idProperty: string }, BarServiceRow> = (request) =>
+  protected readonly load: TableLoad<object, BarServiceRow> = (request) =>
     this.catalog.barServiceList(request).pipe(
       switchMap((page) =>
         (
@@ -150,10 +165,10 @@ export class ServicesBar {
       ),
     );
 
-  protected readonly deleteBarServices = (idProperty: string, idBarServices: string[]) =>
-    this.catalog.deleteBarServiceItems({ idProperty, idBarServices });
-  protected readonly duplicateBarServices = (idProperty: string, idBarServices: string[]) =>
-    this.catalog.duplicateBarServiceItems({ idProperty, idBarServices });
+  protected readonly deleteBarServices = (idBarServices: string[]) =>
+    this.catalog.deleteBarServiceItems(idBarServices);
+  protected readonly duplicateBarServices = (idBarServices: string[]) =>
+    this.catalog.duplicateBarServiceItems(idBarServices);
 
   protected askDelete(
     idBarServices: readonly TableRowId[],
@@ -185,11 +200,28 @@ export class ServicesBar {
     }
   }
 
-  protected forgetDeleted(idBarServices: readonly string[]): void {
+  protected forgetDeleted(idBarServices: readonly (string | null)[]): void {
     this.idSelectedBarServices.update((idSelected) =>
       idSelected.filter(
         (idSelectedBarService) => !idBarServices.includes(String(idSelectedBarService)),
       ),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idBarServices: readonly (string | null)[],
+  ): void {
+    if (problem.code === ApiErrorCode.ServiceNotFound) {
+      this.forgetDeleted(idBarServices);
+      table.reload();
+    }
+  }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+      table.reload();
+    }
   }
 }

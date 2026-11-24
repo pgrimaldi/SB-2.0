@@ -1,20 +1,34 @@
 <ng-template #content>
-  <div class="voucher__edit__item__panel">
+  <div #panel class="voucher__edit__item__panel">
     <h2 class="voucher__edit__item__panel__title">
-      {{ 'management.settings.vouchers.form.title' | translate }}
+      {{ 'management.settings.vouchers.form.edit_title' | translate }}
     </h2>
 
     <div [attr.inert]="isLoading() || isFetching() ? '' : null">
-      <app-filled-text-field
-        [label]="'management.settings.vouchers.form.name' | translate"
-        [isMandatory]="true"
-        [formField]="draftForm.voucherName"
-        [error]="voucherNameError()"
-      />
+      <div class="voucher__edit__item__panel__names">
+        <app-filled-text-field
+          [label]="'management.settings.vouchers.form.name' | translate"
+          [isMandatory]="true"
+          [formField]="draftForm.voucherName"
+          [error]="voucherNameError()"
+        />
+        <app-filled-text-field
+          [label]="'management.settings.vouchers.form.code' | translate"
+          [isMandatory]="true"
+          [isCodeField]="true"
+          [formField]="draftForm.voucherCode"
+          [error]="voucherCodeError()"
+        />
+      </div>
 
       <section class="voucher__edit__item__panel__section">
         <app-section-title [text]="'management.settings.vouchers.form.periods.title' | translate">
-          <app-button [size]="ButtonSize.Small" [pathIcon]="addPeriodIcon" (clicked)="addPeriod()">
+          <app-button
+            [size]="ButtonSize.Small"
+            [pathIcon]="addPeriodIcon"
+            [disabled]="!canAddPeriod() || isFetching()"
+            (clicked)="addPeriod()"
+          >
             {{ 'management.settings.vouchers.form.periods.add' | translate }}
           </app-button>
         </app-section-title>
@@ -100,6 +114,7 @@
                       <app-filled-time-field
                         class="voucher__edit__item__panel__field"
                         [pathIcon]="clockIcon"
+                        [error]="validationText.text(timeSlot.from)"
                         [formField]="timeSlot.from"
                       />
                     </div>
@@ -110,6 +125,7 @@
                       <app-filled-time-field
                         class="voucher__edit__item__panel__field"
                         [pathIcon]="clockIcon"
+                        [error]="validationText.text(timeSlot.to)"
                         [formField]="timeSlot.to"
                       />
                     </div>
@@ -125,6 +141,7 @@
                   [appearance]="ButtonAppearance.Secondary"
                   [size]="ButtonSize.Small"
                   [pathIcon]="addTimeSlotIcon"
+                  [disabled]="!canAddTimeSlot(period)"
                   (clicked)="addTimeSlot(period)"
                 >
                   {{ 'management.settings.vouchers.form.periods.add_time_slot' | translate }}
@@ -160,25 +177,21 @@
             </span>
             <app-filled-number-field
               class="voucher__edit__item__panel__value"
-              [isDecimal]="!isPercentage()"
+              [isDecimal]="true"
               [isCurrency]="!isPercentage()"
+              [maxDecimals]="2"
               [formField]="draftForm.discountValue"
               [error]="discountValueError()"
             />
             <span class="voucher__edit__item__panel__word">{{ isPercentage() ? '%' : '€' }}</span>
           </app-form-row>
 
-          <app-form-row>
-            <span appFormRowLabel>
-              {{ 'management.settings.vouchers.form.options.applies_to' | translate }}
-            </span>
-            <app-filled-select
-              class="voucher__edit__item__panel__option"
-              [options]="scopeOptions()"
-              [formField]="draftForm.discountScope"
-              [error]="discountScopeError()"
-            />
-          </app-form-row>
+          <app-voucher-scope
+            [scope]="draftForm.discountScope"
+            [categories]="draftForm.serviceCategories"
+            [sectors]="draftForm.idSectors"
+            [sectorsVersion]="sectorsVersion()"
+          />
 
           <app-form-row>
             <span appFormRowLabel>
@@ -228,3 +241,5 @@
     </div>
   </div>
 </ng-template>
+<app-read-error-popup [pathIcon]="pathIcon()" [(problem)]="readError" (retry)="retryRead()" />
+<app-version-conflict-popup [pathIcon]="pathIcon()" [(open)]="isConflictShown" />

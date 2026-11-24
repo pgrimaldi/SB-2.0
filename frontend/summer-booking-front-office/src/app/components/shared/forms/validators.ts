@@ -37,25 +37,67 @@ export interface MissingLowercaseError extends ValidationError {
   readonly kind: 'missing_lowercase';
 }
 
+export const OVERLAP_KIND = 'overlap';
+
 export interface OverlapError extends ValidationError {
-  readonly kind: 'overlap';
+  readonly kind: typeof OVERLAP_KIND;
+}
+
+export interface WebLinkError extends ValidationError {
+  readonly kind: 'web_link';
+}
+
+export interface EmailError extends ValidationError {
+  readonly kind: 'email';
+}
+
+export interface MaxLengthError extends ValidationError {
+  readonly kind: 'max_length';
+  readonly max: number;
+}
+
+export interface PhoneDigitsError extends ValidationError {
+  readonly kind: 'phone_digits';
+}
+
+export interface PhoneDigitsWithoutPrefixError extends ValidationError {
+  readonly kind: 'phone_digits_without_prefix';
+}
+
+export interface PhoneMaxLengthError extends ValidationError {
+  readonly kind: 'phone_max_length';
+  readonly max: number;
+}
+
+export interface TimeBeforeEndError extends ValidationError {
+  readonly kind: 'time_before_end';
+}
+
+export interface TimeAfterStartError extends ValidationError {
+  readonly kind: 'time_after_start';
 }
 
 /** First and last day, at midnight UTC as ISO strings. */
 export interface DayRange {
-  dateFrom: string | null;
-  dateTo: string | null;
+  startsOn: string | null;
+  endsOn: string | null;
 }
 
 /** At least one day in common; a range without both of its days has none. */
 export function rangesOverlap(first: DayRange, second: DayRange): boolean {
-  if (!first.dateFrom || !first.dateTo || !second.dateFrom || !second.dateTo) {
+  if (!first.startsOn || !first.endsOn || !second.startsOn || !second.endsOn) {
     return false;
   }
   return (
-    first.dateFrom.slice(0, 10) <= second.dateTo.slice(0, 10) &&
-    second.dateFrom.slice(0, 10) <= first.dateTo.slice(0, 10)
+    first.startsOn.slice(0, 10) <= second.endsOn.slice(0, 10) &&
+    second.startsOn.slice(0, 10) <= first.endsOn.slice(0, 10)
   );
+}
+
+/** The same text as one of `others`, not minding capitals and the spaces at the ends (e.g. a name already used). */
+export function isTextTaken(text: string | null, others: readonly (string | null)[]): boolean {
+  const wanted = text?.trim().toLowerCase();
+  return !!wanted && others.some((other) => other?.trim().toLowerCase() === wanted);
 }
 
 /** A range of days (the form itself, e.g. Dal / Al) that shares a day with one of `others`. */
@@ -64,7 +106,7 @@ export function noOverlap<T extends DayRange, TPathKind extends PathKind = PathK
   others: () => readonly DayRange[],
 ): void {
   validate(path, ({ value }): OverlapError | undefined =>
-    others().some((other) => rangesOverlap(value(), other)) ? { kind: 'overlap' } : undefined,
+    others().some((other) => rangesOverlap(value(), other)) ? { kind: OVERLAP_KIND } : undefined,
   );
 }
 
@@ -80,7 +122,7 @@ export function noOverlaps<T extends DayRange, TPathKind extends PathKind = Path
         others().some((other) => rangesOverlap(range, other)) ||
         ranges.some((other, otherIndex) => otherIndex !== index && rangesOverlap(range, other)),
     );
-    return isClash ? { kind: 'overlap' } : undefined;
+    return isClash ? { kind: OVERLAP_KIND } : undefined;
   });
 }
 
@@ -91,6 +133,111 @@ export function requiredText<TPathKind extends PathKind = PathKind.Root>(
   validate(path, ({ value }): RequiredTextError | undefined =>
     value()?.trim() ? undefined : { kind: 'required' },
   );
+}
+
+/** A text that is not a full http or https address; an empty field is left to `requiredText`. */
+export function webLink<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+): void {
+  validate(path, ({ value }): WebLinkError | undefined => {
+    const text = value()?.trim();
+    return !text || isWebLink(text) ? undefined : { kind: 'web_link' };
+  });
+}
+
+/** Like the backend: one `@`, neither first nor last. An empty field is left to `requiredText`. */
+export function emailAddress<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+): void {
+  validate(path, ({ value }): EmailError | undefined => {
+    const email = value();
+    return !email || isEmailAddress(email) ? undefined : { kind: 'email' };
+  });
+}
+
+/** The backend's check of an email: one `@`, neither first nor last. */
+export function isEmailAddress(text: string): boolean {
+  const at = text.indexOf('@');
+  return at > 0 && at < text.length - 1 && at === text.lastIndexOf('@');
+}
+
+/** Rich text (HTML) whose text, as the user sees it, is longer than `max` characters. */
+export function maxRichTextLength<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+  max: number,
+): void {
+  validate(path, ({ value }): MaxLengthError | undefined =>
+    visibleTextLength(value()) > max ? { kind: 'max_length', max } : undefined,
+  );
+}
+
+/**
+ * A phone number with something other than digits and spaces (the prefix has its own field), then
+ * one longer than `maxLength` characters, spaces included.
+ */
+export function phoneNumber<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+  maxLength: number,
+): void {
+  validate(path, ({ value }) => phoneError(value(), maxLength, { kind: 'phone_digits' }));
+}
+
+/** The same rules, for a phone number with no prefix field beside it: its text asks for no `+`. */
+export function phoneNumberWithoutPrefix<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+  maxLength: number,
+): void {
+  validate(path, ({ value }) =>
+    phoneError(value(), maxLength, { kind: 'phone_digits_without_prefix' }),
+  );
+}
+
+/**
+ * A start and an end time (`HH:mm`): when both are set, the end must come after the start (the same
+ * time is an error). Each field gets its own error, so the message shows under the one the user
+ * changed.
+ */
+export function timeRange<TPathKind extends PathKind = PathKind.Root>(
+  start: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+  end: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+): void {
+  validate(start, ({ value, valueOf }): TimeBeforeEndError | undefined =>
+    isNotLater(valueOf(end), value()) ? { kind: 'time_before_end' } : undefined,
+  );
+  validate(end, ({ value, valueOf }): TimeAfterStartError | undefined =>
+    isNotLater(value(), valueOf(start)) ? { kind: 'time_after_start' } : undefined,
+  );
+}
+
+function isNotLater(time: string | null, other: string | null): boolean {
+  return !!time && !!other && time <= other;
+}
+
+function phoneError<TDigitsError extends ValidationError>(
+  value: string | null,
+  maxLength: number,
+  digitsError: TDigitsError,
+): TDigitsError | PhoneMaxLengthError | undefined {
+  const number = value ?? '';
+  if (!/^[0-9 ]*$/.test(number)) {
+    return digitsError;
+  }
+  return number.length > maxLength ? { kind: 'phone_max_length', max: maxLength } : undefined;
+}
+
+/** `DOMParser` builds an inert document: nothing in the HTML runs or loads. */
+function visibleTextLength(html: string | null): number {
+  return html
+    ? (new DOMParser().parseFromString(html, 'text/html').body.textContent ?? '').length
+    : 0;
+}
+
+function isWebLink(text: string): boolean {
+  try {
+    return ['http:', 'https:'].includes(new URL(text).protocol);
+  } catch {
+    return false;
+  }
 }
 
 /** Unlike Angular's `min`, an empty field is an error too: "greater than 0" also means "required". */

@@ -12,10 +12,19 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, TreeValidationResult, disabled, form, submit } from '@angular/forms/signals';
+import {
+  FormField,
+  TreeValidationResult,
+  disabled,
+  form,
+  max,
+  min,
+  required,
+  submit,
+} from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
-import { firstValueFrom, of, switchMap } from 'rxjs';
+import { Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
@@ -24,21 +33,36 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
+import { WarehouseItemStock } from '../../../../../entities/warehouse/warehouse-item-stock';
+import { MAX_WAREHOUSE_QUANTITY } from '../../../../../entities/warehouse/warehouse-limits';
+import { WarehouseSelectedItem } from '../../../../../entities/warehouse/warehouse-selected-item';
+import { WarehouseSettingItem } from '../../../../../entities/warehouse/warehouse-setting-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
-import { greaterThan } from '../../../../shared/forms/validators';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 @Component({
   selector: 'app-form-warehouse-edit-item-popup',
-  imports: [Button, FilledNumberField, FilledSelect, FormField, Toggle, TranslatePipe],
+  imports: [
+    Button,
+    FilledNumberField,
+    FilledSelect,
+    FormField,
+    ReadErrorPopup,
+    Toggle,
+    TranslatePipe,
+    VersionConflictPopup,
+  ],
   templateUrl: './form-warehouse-edit-item-popup.html',
   styleUrl: './form-warehouse-edit-item-popup.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,8 +70,9 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
   encapsulation: ViewEncapsulation.None,
 })
 export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChanges, OnDestroy {
-  readonly item = input<WarehouseItem | null>(null);
+  readonly item = input<WarehouseSettingItem | null>(null);
   readonly saved = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly warehouse = inject(WarehouseService);
   private readonly auth = inject(AuthBehaviour);
@@ -62,30 +87,33 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     const item = this.item();
     return item?.idArticle ? [{ value: item.idArticle, label: item.name ?? '' }] : [];
   });
-  protected readonly draft = signal(new WarehouseItem());
+  protected readonly isLoading = signal(false);
+  protected readonly isFetching = signal(false);
+  private readonly loaded = signal<WarehouseSelectedItem | null>(null);
+  private opened: WarehouseItemStock | null = null;
+  protected readonly draft = signal(new WarehouseItemStock());
   protected readonly draftForm = form(this.draft, (path) => {
-    greaterThan(path.totalQuantity, 0);
+    required(path.totalQuantity);
+    min(path.totalQuantity, ({ valueOf }) => valueOf(path.lowStockThreshold) ?? 0);
+    max(path.totalQuantity, MAX_WAREHOUSE_QUANTITY);
+    max(path.lowStockThreshold, ({ valueOf }) => valueOf(path.totalQuantity) ?? undefined);
+    disabled(path, () => this.isFetching());
     disabled(
-      path.isThresholdWarningActive,
-      ({ valueOf }) => (valueOf(path.thresholdQuantity) ?? 0) <= 0,
+      path.lowStockAlertEnabled,
+      ({ valueOf }) => (valueOf(path.lowStockThreshold) ?? 0) <= 0,
     );
   });
-  protected readonly totalQuantityError = this.validationText.message(
-    this.draftForm.totalQuantity,
-    'management.settings.warehouse.form.field_names.total',
+  protected readonly totalQuantityError = this.validationText.message(this.draftForm.totalQuantity);
+  protected readonly lowStockThresholdError = this.validationText.message(
+    this.draftForm.lowStockThreshold,
   );
-  protected readonly thresholdQuantityError = this.validationText.message(
-    this.draftForm.thresholdQuantity,
+  protected readonly lowStockAlertEnabledError = this.validationText.message(
+    this.draftForm.lowStockAlertEnabled,
   );
-  protected readonly isThresholdWarningActiveError = this.validationText.message(
-    this.draftForm.isThresholdWarningActive,
-  );
-  protected readonly isLoading = signal(false);
-  private opened: WarehouseItem | null = null;
-  protected readonly canSave = computed(
-    () => this.draft().idArticle !== null && this.draftForm().valid(),
-  );
+  protected readonly canSave = computed(() => this.loaded() !== null && this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -97,32 +125,33 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     super();
     this.unsaved.watch(this);
     effect(() => {
-      if (this.draftForm.isThresholdWarningActive().disabled()) {
-        untracked(() => this.draftForm.isThresholdWarningActive().value.set(false));
+      if (this.draftForm.lowStockAlertEnabled().disabled()) {
+        untracked(() => this.draftForm.lowStockAlertEnabled().value.set(false));
       }
     });
-    effect(() => {
-      if (this.open()) {
-        untracked(() => this.fill());
+    effect((onCleanup) => {
+      const idArticle = this.item()?.idArticle ?? null;
+      const isOpen = this.open();
+      untracked(() => this.reset());
+      if (isOpen && idArticle) {
+        const subscription = untracked(() => this.fetch(idArticle));
+        onCleanup(() => subscription.unsubscribe());
       }
     });
   }
 
   hasUnsavedChanges(): boolean {
-    if (!this.open() || !this.opened) {
-      return false;
-    }
-    const draft = this.draft();
     return (
-      draft.totalQuantity !== this.opened.totalQuantity ||
-      draft.thresholdQuantity !== this.opened.thresholdQuantity ||
-      draft.isThresholdWarningActive !== this.opened.isThresholdWarningActive
+      this.open() &&
+      this.opened !== null &&
+      comparableJson(this.draft()) !== comparableJson(this.opened)
     );
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty || !this.canSave()) {
+    const loaded = this.loaded();
+    const idArticle = loaded?.id;
+    if (this.isLoading() || !this.auth.user()?.propertyId || !this.canSave() || !idArticle) {
       return;
     }
 
@@ -130,13 +159,31 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.warehouse.editWarehouseItem(idProperty, this.draft()));
+        await firstValueFrom(
+          this.warehouse.updateArticle(
+            idArticle,
+            {
+              articleCode: loaded.articleCode,
+              name: loaded.name,
+              ...this.draft(),
+            },
+            loaded.version,
+          ),
+        );
         this.isLoading.set(false);
         this.close();
         this.saved.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.isLoading.set(false);
+          this.close();
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isLoading.set(false);
@@ -168,19 +215,43 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     };
   }
 
-  private fill(): void {
-    const item = this.item();
-    const draft = item
-      ? {
-          ...item,
-          isThresholdWarningActive:
-            item.isThresholdWarningActive && (item.thresholdQuantity ?? 0) > 0,
-        }
-      : new WarehouseItem();
-    this.draft.set(draft);
+  protected retryRead(): void {
+    this.open.set(true);
+  }
+
+  private reset(): void {
+    this.loaded.set(null);
+    this.opened = null;
+    this.draft.set(new WarehouseItemStock());
     this.draftForm().reset();
-    this.opened = item ? draft : null;
     this.error.set(null);
+  }
+
+  private fetch(idArticle: string): Subscription {
+    this.isFetching.set(true);
+    return this.warehouse
+      .selectedArticle(idArticle)
+      .pipe(finalize(() => this.isFetching.set(false)))
+      .subscribe({
+        next: (article) => {
+          const stock: WarehouseItemStock = {
+            totalQuantity: article.totalQuantity,
+            lowStockThreshold: article.lowStockThreshold,
+            lowStockAlertEnabled:
+              article.lowStockAlertEnabled && (article.lowStockThreshold ?? 0) > 0,
+          };
+          this.loaded.set(article);
+          this.opened = structuredClone(stock);
+          this.draft.set(stock);
+          this.draftForm().reset();
+        },
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          this.failed.emit(problem);
+          this.readError.set(problem);
+          this.close();
+        },
+      });
   }
 
   override ngOnDestroy(): void {

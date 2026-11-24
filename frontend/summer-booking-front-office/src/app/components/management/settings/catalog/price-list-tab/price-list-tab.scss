@@ -1,0 +1,73 @@
+@use '../../../../../styles/info-button' as info;
+@use '../../../../../styles/price-grid';
+
+// Room under the last section: its border and shadow stay off the end of the panel.
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+// The two grids in their sections, as wide as them: more room for the prices on phones.
+.price__list__tab__section {
+  --expansion-panel-content-padding: 1rem;
+}
+
+.price__list__tab__grid {
+  @include price-grid.scroll;
+}
+
+.price__list__tab__table {
+  @include price-grid.price-table;
+}
+
+// Sector above, period below.
+.price__list__tab__sector {
+  display: block;
+}
+
+// An error of a whole grid (e.g. from the backend), under its section.
+.price__list__tab__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.price__list__tab__empty {
+  margin: 0;
+  color: var(--color__layout__text__soft);
+  font-size: 0.75rem;
+}
+
+.price__list__tab__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+// A label or a checkbox with its (i) right after.
+.price__list__tab__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.price__list__tab__label {
+  color: var(--color__layout__text__soft);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.price__list__tab__info {
+  @include info.info-button;
+}
+
+// Phones: more room for the titles, as in the sections of the reduced seasonal prices.
+@media (width < 48rem) {
+  .price__list__tab__section {
+    --expansion-panel-header-padding-inline: 1.25rem 1rem;
+  }
+}

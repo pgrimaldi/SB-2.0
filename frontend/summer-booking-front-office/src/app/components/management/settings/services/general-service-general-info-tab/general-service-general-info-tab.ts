@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
 import { StandardServiceAddItemRequest } from '../../../../../entities/settings/services/standard-service-add-item-request';
 import { Language } from '../../../../../entities/shared/language';
@@ -21,8 +22,12 @@ export class GeneralServiceGeneralInfoTab {
   /** Only to look at: the buttons that change the data (icons, image) are off. */
   readonly isReadonly = input(false);
   readonly imagePreviewUrl = input<string | null>(null);
+  readonly imageError = input<string | null>(null);
   readonly iconChosen = output<StandardServiceIcon>();
   readonly imageChosen = output<File>();
+  readonly imageRemoveRequest = output<void>();
+
+  protected readonly validationText = inject(ValidationTextBehaviour);
 
   /** Every icon a service can have, as shown in the grid. */
   protected readonly icons: readonly ServicesImagesIcon<StandardServiceIcon>[] = Object.values(

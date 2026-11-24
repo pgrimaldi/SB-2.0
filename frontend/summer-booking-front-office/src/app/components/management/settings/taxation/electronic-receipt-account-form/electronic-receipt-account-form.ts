@@ -29,6 +29,7 @@ import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { ElectronicReceiptAccount } from '../../../../../entities/settings/taxation/electronic-receipt-account';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { TaxationService } from '../../../../../services/api/taxation/taxation.service';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
@@ -193,12 +194,11 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.accountForm().dirty();
+    return comparableJson(this.account()) !== comparableJson(this.savedAccount);
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty) {
+    if (this.isLoading() || !this.auth.user()?.propertyId) {
       return;
     }
     void submit(this.accountForm, async (): Promise<TreeValidationResult> => {
@@ -206,7 +206,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       const sent = this.account();
       try {
-        await firstValueFrom(this.taxation.saveElectronicReceiptAccount(idProperty, sent));
+        await firstValueFrom(this.taxation.saveElectronicReceiptAccount(sent));
         // Once saved, PIN and password leave the page: the fields are empty again.
         this.savedAccount = { ...sent, pin: null, password: null };
         this.account.set(this.savedAccount);
@@ -227,6 +227,12 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
 
   protected edit(): void {
     this.isEditing.set(true);
+  }
+
+  protected async requestCancel(): Promise<void> {
+    if (await this.unsaved.confirmDiscard(this)) {
+      this.cancel();
+    }
   }
 
   protected cancel(): void {

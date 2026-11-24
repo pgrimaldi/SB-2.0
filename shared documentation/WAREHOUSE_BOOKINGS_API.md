@@ -12,7 +12,6 @@
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "lettino",
@@ -43,7 +42,6 @@
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `lettino` |
@@ -92,23 +90,15 @@
 | `rows[].thresholdQuantity` | number (intero) \| null | `10` |
 | `rows[].isThresholdWarningActive` | boolean | `true` |
 
-### POST `/api/warehouse/combobox-list`
+### POST `/api/warehouse/article-combobox`
 
-**Usata da:** Popup "Aggiungi articolo" (`FormWarehouseAddItemPopup`, Impostazioni magazzino): tendina degli articoli
+**Usata da:** Popup "Aggiungi articolo" (`FormWarehouseAddItemPopup`, Impostazioni magazzino) e pannelli "Aggiungi nuovo articolo/servizio aggiuntivo" e "Modifica articolo/servizio aggiuntivo" (`AdditionalItemAddItemPanel`, `AdditionalItemEditItemPanel`, pagina Listino): tendina degli articoli
 
-**Rotta:** `POST /api/warehouse/combobox-list`
+**Rotta:** `POST /api/warehouse/article-combobox`
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -150,7 +140,6 @@
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
   "name": "Lettino",
   "totalQuantity": 10,
@@ -162,7 +151,6 @@
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
 | `name` | string \| null | `Lettino` |
 | `totalQuantity` | number (intero > 0) | `10` |
@@ -184,7 +172,6 @@
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
   "name": "Lettino",
   "totalQuantity": 110,
@@ -196,7 +183,6 @@
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
 | `name` | string \| null | `Lettino` |
 | `totalQuantity` | number (intero > 0) | `110` |
@@ -210,7 +196,7 @@
 
 ### POST `/api/warehouse/delete-warehouse-item`
 
-**Usata da:** Popup di conferma `DeleteWarehouseItemsPopup` (Impostazioni magazzino): elimina riga / elimina selezionati
+**Usata da:** Popup di conferma `DeleteItemsPopup` (Impostazioni magazzino): elimina riga / elimina selezionati
 
 **Rotta:** `POST /api/warehouse/delete-warehouse-item`
 
@@ -218,7 +204,6 @@
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idItems": [
     "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
     "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b"
@@ -228,7 +213,6 @@
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idItems` | string[] (UUID, almeno uno) | `["8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c", "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b"]` |
 
 #### Response
@@ -237,7 +221,7 @@
 
 ### POST `/api/warehouse/duplicate-warehouse-item`
 
-**Usata da:** Popup di conferma `DuplicateWarehouseItemsPopup` (Impostazioni magazzino): duplica riga / duplica selezionati
+**Usata da:** Popup di conferma `DuplicateItemsPopup` (Impostazioni magazzino): duplica riga / duplica selezionati
 
 **Rotta:** `POST /api/warehouse/duplicate-warehouse-item`
 
@@ -245,7 +229,6 @@
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idItems": [
     "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c"
   ]
@@ -254,7 +237,6 @@
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idItems` | string[] (UUID, almeno uno) | `["8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c"]` |
 
 #### Response
@@ -273,7 +255,6 @@
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "rossi",
@@ -326,7 +307,6 @@
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `rossi` |
@@ -381,23 +361,15 @@
 | `rows[].reservationStatus` | string (enum ReservationStatus) \| null | `Confirmed` |
 | `rows[].isTrashed` | boolean | `false` |
 
-### POST `/api/database/get-affiliated-hotel-combobox`
+### POST `/api/database/affiliated-hotel-combobox`
 
 **Usata da:** Popup Filtri (`ExistingBookingFiltersPopup`, pagina Database): tendina Strutture convenzionate
 
-**Rotta:** `POST /api/database/get-affiliated-hotel-combobox`
+**Rotta:** `POST /api/database/affiliated-hotel-combobox`
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -439,7 +411,6 @@
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idBookings": [
     "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70",
     "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01"
@@ -450,7 +421,6 @@
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idBookings` | string[] (UUID, almeno uno) | `["3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70", "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01"]` |
 | `password` | string | `password-digitata` |
 
@@ -468,7 +438,6 @@
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "lilla",
@@ -517,7 +486,6 @@
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `lilla` |
@@ -570,15 +538,7 @@
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -594,7 +554,6 @@
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idBookings": [
     "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"
   ]
@@ -603,7 +562,6 @@
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idBookings` | string[] (UUID, almeno uno) | `["9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"]` |
 
 #### Response
@@ -620,7 +578,6 @@
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idBookings": [
     "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"
   ]
@@ -629,7 +586,6 @@
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idBookings` | string[] (UUID, almeno uno) | `["9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"]` |
 
 #### Response

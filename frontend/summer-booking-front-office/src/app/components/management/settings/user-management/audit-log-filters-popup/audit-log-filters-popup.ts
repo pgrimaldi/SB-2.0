@@ -14,17 +14,24 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
+import {
+  UnsavedChanges,
+  UnsavedChangesBehaviour,
+} from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../../entities/settings/user-management/audit-log-filters';
-import { AuditService } from '../../../../../services/api/audit/audit.service';
+import { IdentityService } from '../../../../../services/api/identity/identity.service';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { AUDIT_ACTIONS } from '../audit-actions';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 /** The translated backend action codes: `actions.<module>.<action>`. */
 type ActionTexts = Partial<Record<string, Partial<Record<string, string>>>>;
@@ -37,23 +44,28 @@ type ActionTexts = Partial<Record<string, Partial<Record<string, string>>>>;
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
+export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, OnDestroy {
   readonly filters = input(new AuditLogFilters());
   /** The only users of the Utente list, instead of all the users of the log. */
   readonly onlyUsers = input<readonly ComboboxItem[] | null>(null);
   readonly applied = output<AuditLogFilters>();
 
   private readonly translateService = inject(TranslateService);
-  private readonly audit = inject(AuditService);
+  private readonly identity = inject(IdentityService);
   private readonly auth = inject(AuthBehaviour);
+  private readonly errorText = inject(ErrorTextBehaviour);
   private readonly language = inject(LanguageBehaviour).current;
+  private readonly unsaved = inject(UnsavedChangesBehaviour);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly actionCodes = signal<readonly string[]>([]);
   protected readonly idUsers = signal<readonly string[]>([]);
-  private readonly users = signal<readonly ComboboxItem[]>([]);
-  private usersSubscription?: Subscription;
+  protected readonly users = new DropdownList(
+    () => (this.auth.user()?.propertyId ? this.identity.userCombobox() : EMPTY),
+    this.errorText,
+  );
+  private pristineChoices = '';
   private readonly actionTexts = toSignal(
     this.translateService.stream(
       'management.settings.user_management.logs.actions',
@@ -64,28 +76,46 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
   );
   protected readonly userOptions = computed<readonly SelectOption[]>(() =>
     byLabel(
-      (this.onlyUsers() ?? this.users()).map((user) => ({ value: user.id, label: user.value })),
+      (this.onlyUsers() ?? this.users.items()).map((user) => ({
+        value: user.id,
+        label: user.value,
+      })),
       this.language(),
     ),
   );
 
   constructor() {
     super();
+    this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
         untracked(() => {
           this.reset();
           if (!this.onlyUsers()) {
-            this.loadUsers();
+            this.users.load();
           }
         });
       }
     });
   }
 
+  hasUnsavedChanges(): boolean {
+    return this.open() && this.choices() !== this.pristineChoices;
+  }
+
   protected apply(): void {
     this.applied.emit({ actionCodes: [...this.actionCodes()], users: this.chosenUsers() });
     this.close();
+  }
+
+  protected async leave(): Promise<void> {
+    if (await this.unsaved.confirmDiscard(this)) {
+      this.close();
+    }
+  }
+
+  protected override closeRequested(): void {
+    void this.leave();
   }
 
   protected dialogConfig(): MatDialogConfig {
@@ -94,6 +124,7 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
       maxWidth: 'none',
       position: { top: '6.875rem' },
       panelClass: 'audit__log__filters__popup__panel',
+      disableClose: true,
       autoFocus: false,
     };
   }
@@ -102,31 +133,25 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
     const filters = this.filters();
     this.actionCodes.set(filters.actionCodes);
     this.idUsers.set(filters.users.map((user) => user.id));
+    this.pristineChoices = this.choices();
+    this.users.clear();
+  }
+
+  private choices(): string {
+    return comparableJson([this.actionCodes(), this.idUsers()]);
   }
 
   /** With their names, for the chips: from the list of the server, or as they were applied. */
   private chosenUsers(): ComboboxItem[] {
     const known = new Map(
-      [...this.filters().users, ...this.users()].map((user) => [user.id, user]),
+      [...this.filters().users, ...this.users.items()].map((user) => [user.id, user]),
     );
     return this.idUsers().flatMap((id) => known.get(id) ?? []);
   }
 
-  private loadUsers(): void {
-    // A slower answer of an earlier opening must not replace the list of this one.
-    this.usersSubscription?.unsubscribe();
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
-      return;
-    }
-    this.usersSubscription = this.audit.userCombobox(idProperty).subscribe({
-      next: (users) => this.users.set(users),
-      error: () => this.users.set([]),
-    });
-  }
-
   override ngOnDestroy(): void {
-    this.usersSubscription?.unsubscribe();
+    this.unsaved.unwatch(this);
+    this.users.destroy();
     super.ngOnDestroy();
   }
 }
@@ -142,6 +167,6 @@ function actionOptionsOf(texts: ActionTexts | undefined): SelectOption[] {
 /** A to Z by name, in the alphabet of the current language. */
 function byLabel(options: SelectOption[], language: string): SelectOption[] {
   return options.sort((first, second) =>
-    first.label.localeCompare(second.label, language, { sensitivity: 'base' }),
+    first.label.trim().localeCompare(second.label.trim(), language, { sensitivity: 'base' }),
   );
 }

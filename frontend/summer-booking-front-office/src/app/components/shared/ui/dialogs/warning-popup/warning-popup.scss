@@ -1,0 +1,58 @@
+@use '@angular/material' as mat;
+@use '../popup' as popup;
+
+@include popup.popup(warning__popup, app-warning-popup);
+
+.warning__popup {
+  position: relative;
+}
+
+.warning__popup__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color__layout__error);
+}
+
+// Same size for an image or a Material icon.
+.warning__popup__icon {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.5rem;
+}
+
+// A text on more lines keeps its line breaks.
+.warning__popup__text {
+  white-space: pre-line;
+}
+
+.warning__popup__error {
+  margin: -0.5rem 0 0;
+  color: var(--color__layout__error);
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+}
+
+// Two halves of the row; one under the other when a text does not fit.
+.warning__popup__actions {
+  --button-padding: 1rem;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  width: 100%;
+
+  app-button {
+    flex: 1 1 15rem;
+  }
+}
+
+// Set on the inner button, because app-button sets its own colours on its host.
+.warning__popup__confirm button {
+  @include mat.button-overrides(
+    (
+      filled-container-color: var(--color__layout__error),
+    )
+  );
+}

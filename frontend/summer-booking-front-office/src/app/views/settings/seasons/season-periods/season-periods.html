@@ -35,6 +35,7 @@
         class="season__periods__delete"
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
+        [disabled]="!canAct()"
         (clicked)="askDeleteSelected()"
       >
         {{ 'management.settings.seasons.periods.delete_selected' | translate }}
@@ -45,7 +46,8 @@
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
       [pathIcon]="addIcon"
-      (clicked)="isAddOpen.set(true)"
+      [disabled]="!canAct()"
+      (clicked)="openAdd()"
     >
       {{ 'management.settings.seasons.periods.add' | translate }}
     </app-button>
@@ -56,13 +58,14 @@
   }
 
   @if (periods(); as periods) {
-    @for (period of periods; track period.idPeriod) {
-      <app-expansion-panel [title]="period.periodName" [pathIcon]="periodIcons">
+    @for (period of periods; track period.key) {
+      <app-expansion-panel [title]="period.name" [pathIcon]="periodIcons">
         <app-icon-button
           appExpansionPanelStart
           class="season__periods__icon"
           [label]="'table.actions.delete' | translate"
           [pathIcon]="deleteIcon"
+          [disabled]="!canAct()"
           (click)="askDelete(period)"
         />
         <app-icon-button
@@ -70,6 +73,7 @@
           class="season__periods__icon season__periods__name__icon"
           [label]="'table.actions.edit' | translate"
           [pathIcon]="editIcon"
+          [disabled]="!canAct()"
           (click)="editPeriod(period)"
         />
         <app-icon-button
@@ -77,6 +81,7 @@
           class="season__periods__icon season__periods__name__icon"
           [label]="'management.settings.seasons.add_interval_popup.title' | translate"
           [pathIcon]="addIntervalIcon"
+          [disabled]="!canAct()"
           (click)="addInterval(period)"
         />
         <div class="season__periods__dates">
@@ -89,27 +94,29 @@
                 {{ 'management.settings.seasons.periods.date_to' | translate }}
               </span>
             </div>
-            @for (interval of period.intervals; track interval.idInterval) {
+            @for (interval of period.intervals; track interval.item) {
               <div class="season__periods__row season__periods__interval">
                 <app-selection-checkbox
                   class="season__periods__check"
-                  [checked]="isIntervalSelected(interval.idInterval)"
-                  (checkedChange)="selectInterval(interval.idInterval, $event)"
+                  [checked]="isIntervalSelected(interval)"
+                  (checkedChange)="selectInterval(interval, $event)"
                 />
-                <span class="season__periods__from">{{ interval.dateFrom }}</span>
-                <span class="season__periods__to">{{ interval.dateTo }}</span>
+                <span class="season__periods__from">{{ interval.startsOn }}</span>
+                <span class="season__periods__to">{{ interval.endsOn }}</span>
                 <span class="season__periods__actions">
                   <app-icon-button
                     class="season__periods__icon"
                     [label]="'table.actions.delete' | translate"
                     [pathIcon]="deleteIcon"
+                    [disabled]="!canAct()"
                     (click)="askDeleteInterval(interval)"
                   />
                   <app-icon-button
                     class="season__periods__icon"
                     [label]="'table.actions.edit' | translate"
                     [pathIcon]="editIcon"
-                    (click)="editInterval(interval)"
+                    [disabled]="!canAct()"
+                    (click)="editInterval(period, interval)"
                   />
                 </span>
               </div>
@@ -130,46 +137,81 @@
   [isNextSeason]="isNextSeason"
   [season]="season()"
   [seasonIntervals]="seasonIntervals()"
+  [periods]="periodItems() ?? []"
   [(open)]="isAddOpen"
   (added)="reload()"
+  (failed)="reloadIfStale($event)"
 />
 <app-delete-items-popup
-  [idItems]="idPeriodsToDelete()"
-  [itemName]="periodToDelete()?.periodName ?? null"
+  [idItems]="keysToDelete()"
+  [itemName]="periodToDelete()?.name ?? null"
   translationKey="management.settings.seasons.delete"
   [action]="deletePeriod"
   [pathIcon]="alertIcons"
   [(open)]="isDeleteAsked"
   (deleted)="reload()"
+  (failed)="reloadIfStale($event)"
 />
 <app-season-period-edit-popup
   [pathIcon]="closeIcon"
+  [isNextSeason]="isNextSeason"
   [period]="periodToEdit()"
+  [periods]="periodItems() ?? []"
   [(open)]="isEditPeriodOpen"
   (updated)="reload()"
+  (failed)="reloadIfStale($event)"
 />
 <app-season-interval-add-popup
   [pathIcon]="closeIcon"
+  [isNextSeason]="isNextSeason"
   [period]="periodToExtend()"
   [season]="season()"
   [seasonIntervals]="seasonIntervals()"
   [(open)]="isAddIntervalOpen"
   (added)="reload()"
+  (failed)="reloadIfStale($event)"
 />
 <app-season-interval-edit-popup
   [pathIcon]="closeIcon"
+  [isNextSeason]="isNextSeason"
+  [period]="periodOfInterval()"
   [interval]="intervalToEdit()"
   [season]="season()"
   [seasonIntervals]="seasonIntervals()"
   [(open)]="isEditIntervalOpen"
   (updated)="reload()"
+  (failed)="reloadIfStale($event)"
 />
 <app-delete-items-popup
-  [idItems]="intervalsToDelete().idIntervals"
+  [idItems]="intervalsToDelete().intervals"
   [itemName]="intervalsToDelete().name"
   translationKey="management.settings.seasons.delete_intervals"
   [action]="deleteIntervals"
   [pathIcon]="alertIcons"
   [(open)]="isDeleteIntervalsAsked"
   (deleted)="reload()"
+  (failed)="reloadIfStale($event)"
+/>
+<app-alert-popup
+  [title]="'alert.error_title' | translate"
+  [text]="'management.settings.seasons.delete_intervals.period_left_empty' | translate"
+  [texts]="'alert' | translate"
+  [pathIcon]="alertIcons"
+  [(open)]="isPeriodLeftEmpty"
+/>
+<app-alert-popup
+  [title]="'alert.error_title' | translate"
+  [text]="'management.settings.seasons.periods.period_full' | translate: { max: maxRanges }"
+  [texts]="'alert' | translate"
+  [pathIcon]="alertIcons"
+  [(open)]="isPeriodFull"
+/>
+<app-alert-popup
+  [title]="'alert.error_title' | translate"
+  [text]="
+    'management.settings.seasons.delete_intervals.too_many' | translate: { max: maxDeletedRanges }
+  "
+  [texts]="'alert' | translate"
+  [pathIcon]="alertIcons"
+  [(open)]="isTooManyIntervals"
 />

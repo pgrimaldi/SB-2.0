@@ -1,0 +1,190 @@
+<app-expansion-panel
+  class="price__list__tab__section"
+  [title]="'management.settings.catalog.price_list.seasonal_prices' | translate"
+  [pathIcon]="sectionIcons"
+  [(isExpanded)]="isSeasonalExpanded"
+>
+  @if (form().sectorPrices().value().length) {
+    @if (isSeasonalExpanded()) {
+      <div class="price__list__tab__grid">
+        <table class="price__list__tab__table">
+          <thead>
+            <tr>
+              <th></th>
+              @for (column of seasonalColumns; track column.field) {
+                <th scope="col">{{ column.label | translate }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of form().sectorPrices; track row) {
+              <tr>
+                <th scope="row">{{ sectorName(row.idSector().value()) }}</th>
+                @for (column of seasonalColumns; track column.field) {
+                  <td>
+                    <app-filled-number-field
+                      [isDecimal]="true"
+                      [isCurrency]="true"
+                      [formField]="row[column.field]"
+                    />
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  } @else if (isLoaded()) {
+    <p class="price__list__tab__empty">
+      {{ 'management.settings.catalog.price_list.no_sectors' | translate }}
+    </p>
+  }
+</app-expansion-panel>
+@if (validationText.text(form().sectorPrices); as error) {
+  <p class="price__list__tab__error">{{ error }}</p>
+}
+<ng-content />
+<app-expansion-panel
+  class="price__list__tab__section"
+  [title]="'management.settings.catalog.price_list.period_prices' | translate"
+  [pathIcon]="sectionIcons"
+  [(isExpanded)]="isPeriodExpanded"
+>
+  @if (form().periodPrices().value().length) {
+    @if (isPeriodExpanded()) {
+      <div class="price__list__tab__grid">
+        <table class="price__list__tab__table">
+          <thead>
+            <tr>
+              <th></th>
+              @for (column of periodColumns; track column.field) {
+                <th scope="col">{{ column.label | translate }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of form().periodPrices; track row) {
+              <tr>
+                <th scope="row">
+                  <span class="price__list__tab__sector">{{
+                    sectorName(row.idSector().value())
+                  }}</span>
+                  {{ periodName(row.idPeriod().value()) }}
+                </th>
+                @for (column of periodColumns; track column.field) {
+                  <td>
+                    <app-filled-number-field
+                      [isDecimal]="true"
+                      [isCurrency]="true"
+                      [formField]="row[column.field]"
+                    />
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  } @else if (isLoaded()) {
+    <p class="price__list__tab__empty">
+      {{ 'management.settings.catalog.price_list.no_periods' | translate }}
+    </p>
+  }
+</app-expansion-panel>
+@if (validationText.text(form().periodPrices); as error) {
+  <p class="price__list__tab__error">{{ error }}</p>
+}
+
+<app-filled-number-field
+  [label]="'management.settings.catalog.price_list.vat' | translate"
+  [isDecimal]="true"
+  [formField]="form().vatRate"
+  [error]="validationText.text(form().vatRate)"
+/>
+<div class="price__list__tab__field">
+  <div class="price__list__tab__heading">
+    <span class="price__list__tab__label">
+      {{ 'management.settings.catalog.price_list.calculation_method' | translate }}
+    </span>
+    <app-icon-button
+      class="price__list__tab__info"
+      [pathIcon]="infoIcon"
+      (click)="showingCalculationInfo.set(true)"
+    />
+  </div>
+  <app-filled-select
+    [placeholder]="'management.settings.catalog.price_list.choose' | translate"
+    [options]="calculationMethods()"
+    [value]="form().calculationMethod().value()"
+    [readonly]="form().calculationMethod().readonly()"
+    [error]="validationText.text(form().calculationMethod)"
+    (valueChange)="choose(form().calculationMethod().value, $event)"
+    (touch)="form().calculationMethod().markAsTouched()"
+  />
+</div>
+
+<div class="price__list__tab__heading">
+  <app-checkbox
+    [formField]="form().isCumulative"
+    [error]="validationText.text(form().isCumulative)"
+  >
+    {{ 'management.settings.catalog.price_list.cumulative' | translate }}
+  </app-checkbox>
+  <app-icon-button
+    class="price__list__tab__info"
+    [pathIcon]="infoIcon"
+    (click)="showingCumulativeInfo.set(true)"
+  />
+</div>
+
+<app-filled-select
+  [label]="'management.settings.catalog.price_list.monthly_setting' | translate"
+  [placeholder]="'management.settings.catalog.price_list.choose' | translate"
+  [options]="monthlySettings()"
+  [value]="form().monthlySetting().value()"
+  [readonly]="form().monthlySetting().readonly()"
+  [error]="validationText.text(form().monthlySetting)"
+  (valueChange)="choose(form().monthlySetting().value, $event)"
+  (touch)="form().monthlySetting().markAsTouched()"
+/>
+<app-filled-select
+  [label]="'management.settings.catalog.price_list.weekend_setting' | translate"
+  [placeholder]="'management.settings.catalog.price_list.choose' | translate"
+  [options]="weekendSettings()"
+  [value]="form().weekendSetting().value()"
+  [readonly]="form().weekendSetting().readonly()"
+  [error]="validationText.text(form().weekendSetting)"
+  (valueChange)="choose(form().weekendSetting().value, $event)"
+  (touch)="form().weekendSetting().markAsTouched()"
+/>
+
+<app-public-holidays
+  [isIncluded]="form().isPublicHolidaysIncluded"
+  [dates]="form().publicHolidayDates"
+/>
+
+<app-intermediate-prices
+  [isIncluded]="form().isIntermediatePricesIncluded"
+  [isEnabled]="isIntermediatePricesEnabled()"
+  [prices]="form().intermediatePrices"
+  [periodPrices]="form().periodPrices"
+  [idFirstSector]="idFirstSector()"
+  [hasOtherSectors]="sectors().length > 1"
+  [periods]="periods()"
+  [name]="itemName()"
+/>
+
+<app-info-popup
+  [title]="'management.settings.catalog.price_list.calculation_method' | translate"
+  [text]="'management.settings.catalog.price_list.calculation_method_info' | translate"
+  [pathIcon]="infoPopupIcons"
+  [(open)]="showingCalculationInfo"
+/>
+<app-info-popup
+  [title]="'management.settings.catalog.price_list.cumulative' | translate"
+  [text]="'management.settings.catalog.price_list.cumulative_info' | translate"
+  [pathIcon]="infoPopupIcons"
+  [(open)]="showingCumulativeInfo"
+/>

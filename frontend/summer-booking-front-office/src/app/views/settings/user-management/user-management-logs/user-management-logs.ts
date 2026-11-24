@@ -9,11 +9,11 @@ import {
 } from '@angular/core';
 import { Location } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, firstValueFrom, map, switchMap } from 'rxjs';
+import { Observable, firstValueFrom, map, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import {
   dateRangeFilters,
@@ -22,6 +22,7 @@ import {
   thisWeekPeriod,
   todayPeriod,
 } from '../../../../behaviours/dates/date-periods';
+import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
 import { FileDownloadBehaviour } from '../../../../behaviours/files/file-download.behaviour';
 import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
 import {
@@ -44,6 +45,8 @@ import { TableFilterBar } from '../../../../components/shared/ui/tables/table/ta
 import { TableHeadingAction } from '../../../../components/shared/ui/tables/table/table-heading-action';
 import { Table, TableColumn, TableLoad } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
+import { FilterField } from '../../../../entities/enums/filter-field';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { PageFilter } from '../../../../entities/pagination/page';
 import { ComboboxItem } from '../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../entities/settings/user-management/audit-log-filters';
@@ -51,6 +54,9 @@ import { AuditLogUserState } from '../../../../entities/settings/user-management
 import { AuditLogFiltersRequest } from '../../../../entities/settings/user-management/audit-log-filters-request';
 import { DateRange } from '../../../../entities/shared/date-range';
 import { AuditService } from '../../../../services/api/audit/audit.service';
+import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
+import { IdentityService } from '../../../../services/api/identity/identity.service';
+import { comparableJson } from '../../../../components/shared/forms/text-comparison';
 
 interface UserManagementLogsTexts {
   date_filter: {
@@ -63,7 +69,6 @@ interface UserManagementLogsTexts {
   };
   table: {
     booking_number: string;
-    user_number: string;
     full_name: string;
     spot: string;
     action: string;
@@ -85,15 +90,14 @@ interface AuditLogFilterChip extends FilterChip {
 interface AuditEntryRow {
   idAuditEntry: string | null;
   bookingNumber: string | null;
-  userNumber: string | null;
   actorName: string | null;
   spotLabel: string | null;
   actionCode: string | null;
   occurredAt: string | null;
 }
 
-const EXPORT_FALLBACK_NAME = 'log';
-const PRINT_FALLBACK_NAME = 'log-print';
+const EXPORT_FALLBACK_NAME = 'log.xlsx';
+const PRINT_FALLBACK_NAME = 'log-print.xlsx';
 
 @Component({
   selector: 'app-user-management-logs',
@@ -118,23 +122,31 @@ const PRINT_FALLBACK_NAME = 'log-print';
 export class UserManagementLogs {
   private readonly auth = inject(AuthBehaviour);
   private readonly audit = inject(AuditService);
+  private readonly identity = inject(IdentityService);
   private readonly translateService = inject(TranslateService);
   private readonly dateLanguage = inject(DateLanguageBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
   private readonly location = inject(Location);
   private readonly fileDownload = inject(FileDownloadBehaviour);
-  private readonly table = viewChild.required<Table<AuditEntryRow, { idProperty: string }>>(Table);
+  private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly table = viewChild.required<Table<AuditEntryRow, object>>(Table);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly loadFailed = signal(false);
   protected readonly isExporting = signal(false);
   protected readonly isPrinting = signal(false);
-  protected readonly isNotImplementedShown = signal(false);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  private readonly downloadError = signal<ApiProblem | null>(null);
+  protected readonly downloadErrorMessage = toSignal(
+    toObservable(this.downloadError).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
+  protected readonly isDownloadErrorShown = signal(false);
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly dateRange = signal<DateRange | null>(null);
   protected readonly isFiltersOpen = signal(false);
   /** From the Log button of a user row: the only user of the Utente filter while it is chosen. */
@@ -247,7 +259,6 @@ export class UserManagementLogs {
     {
       initialValue: {
         booking_number: '',
-        user_number: '',
         full_name: '',
         spot: '',
         action: '',
@@ -257,10 +268,9 @@ export class UserManagementLogs {
   );
   protected readonly columns = computed<readonly TableColumn<AuditEntryRow>[]>(() => [
     { field: 'bookingNumber', header: this.headers().booking_number, sortable: true },
-    { field: 'userNumber', header: this.headers().user_number, sortable: true },
     { field: 'actorName', header: this.headers().full_name, sortable: true },
     { field: 'spotLabel', header: this.headers().spot, sortable: true },
-    { field: 'actionCode', header: this.headers().action, width: 24, sortable: true },
+    { field: 'actionCode', header: this.headers().action, width: 24 },
     { field: 'occurredAt', header: this.headers().occurred_at, width: 18, sortable: true },
   ]);
 
@@ -268,7 +278,7 @@ export class UserManagementLogs {
     this.nameLogUser();
   }
 
-  protected readonly load: TableLoad<{ idProperty: string }, AuditEntryRow> = (request) =>
+  protected readonly load: TableLoad<object, AuditEntryRow> = (request) =>
     this.audit.entriesList(request).pipe(
       switchMap((page) =>
         (
@@ -332,11 +342,10 @@ export class UserManagementLogs {
 
   /** The row brings the email: the name comes from the users of the log, matched by id. */
   private nameLogUser(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (!this.logUser() || !idProperty) {
+    if (!this.logUser() || !this.auth.user()?.propertyId) {
       return;
     }
-    this.audit.userCombobox(idProperty).subscribe({
+    this.identity.userCombobox().subscribe({
       next: (users) => {
         const named = users.find(({ id }) => id === this.logUser()?.id);
         if (!named) {
@@ -362,22 +371,21 @@ export class UserManagementLogs {
     if (!request || this.isExporting() || this.isPrinting()) {
       return;
     }
-    const { idProperty, search, filters, sortField, sortDirection } = request;
+    const { search, filters, sortField, sortDirection } = request;
     isRunning.set(true);
     try {
-      const file = await firstValueFrom(
-        call({ idProperty, search, filters, sortField, sortDirection }),
-      );
+      const file = await firstValueFrom(call({ search, filters, sortField, sortDirection }));
       this.fileDownload.save(file, fallbackName);
-    } catch {
-      this.isNotImplementedShown.set(true);
+    } catch (error: unknown) {
+      this.downloadError.set(toApiProblem(error));
+      this.isDownloadErrorShown.set(true);
     } finally {
       isRunning.set(false);
     }
   }
 }
 
-/** The translation of a backend action code (`booking.spot_added`); the code itself when unknown. */
+/** The translation of a backend action code (`catalog.sector_created`); the code itself when unknown. */
 function actionLabelOf(actions: UserManagementLogsTexts['actions'], actionCode: string): string {
   const [module, action] = actionCode.split('.');
   return (action && actions[module]?.[action]) || actionCode;
@@ -386,14 +394,14 @@ function actionLabelOf(actions: UserManagementLogsTexts['actions'], actionCode: 
 /** One filter per field with its chosen values (alternatives); a field with no choice is left out. */
 function pageFiltersOf(filters: AuditLogFilters): PageFilter[] {
   const all: PageFilter[] = [
-    { field: 'actionCode', value: [...filters.actionCodes] },
-    { field: 'idUser', value: filters.users.map(({ id }) => id) },
+    { field: FilterField.ActionCode, value: [...filters.actionCodes] },
+    { field: FilterField.IdUser, value: filters.users.map(({ id }) => id) },
   ];
   return all.filter(({ value }) => value.length);
 }
 
 function sameFilters(first: readonly PageFilter[], second: readonly PageFilter[]): boolean {
-  return JSON.stringify(first) === JSON.stringify(second);
+  return comparableJson(first) === comparableJson(second);
 }
 
 function logUserOf(state: unknown): ComboboxItem | null {

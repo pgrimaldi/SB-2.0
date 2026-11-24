@@ -13,12 +13,16 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  MAX_LENGTH,
   TreeValidationResult,
   applyEach,
   applyWhen,
   disabled,
   form,
+  max,
+  metadata,
   readonly,
+  required,
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -30,11 +34,16 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldErrorsOrGeneral,
+  clearApiFieldErrors,
+} from '../../../../../behaviours/validation/api-field-errors';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { BarServiceAddItemRequest } from '../../../../../entities/settings/services/bar-service-add-item-request';
+import { BarServiceSelectedBookingOptions } from '../../../../../entities/settings/services/bar-service-selected-booking-options';
 import { BarServiceSelectedGeneralInfo } from '../../../../../entities/settings/services/bar-service-selected-general-info';
 import { BarServiceSelectedPrices } from '../../../../../entities/settings/services/bar-service-selected-prices';
 import { BarServiceUpdateBookingRequest } from '../../../../../entities/settings/services/bar-service-update-booking-request';
@@ -42,20 +51,37 @@ import { BarServiceUpdateGeneralRequest } from '../../../../../entities/settings
 import { BarServiceUpdatePricesRequest } from '../../../../../entities/settings/services/bar-service-update-prices-request';
 import { ServiceBookingOption } from '../../../../../entities/settings/services/service-booking-option';
 import { ServicePeriodPrice } from '../../../../../entities/settings/services/service-period-price';
-import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import { MAX_SERVICE_PRICE } from '../../../../../entities/settings/services/service-price';
+import {
+  MAX_SERVICE_DESCRIPTION_LENGTH,
+  MAX_SERVICE_NAME_LENGTH,
+  ServiceTranslation,
+} from '../../../../../entities/settings/services/service-translation';
 import { ServiceVariant } from '../../../../../entities/settings/services/service-variant';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
 import { requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
+import { ConfirmPopup } from '../../../../shared/ui/dialogs/confirm-popup/confirm-popup';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { SidePanelButtons } from '../../../../shared/ui/dialogs/side-panel/side-panel-buttons';
+import { PageSpinner } from '../../../../shared/ui/spinners/page-spinner/page-spinner';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { ServiceBookingsTab } from '../service-bookings-tab/service-bookings-tab';
 import { ServicePricesTab } from '../service-prices-tab/service-prices-tab';
+import { serviceFieldError } from '../service-field-errors';
+import {
+  otherTranslationRules,
+  serviceBookingOptionRules,
+  serviceVariantRules,
+} from '../service-form-rules';
 import { ServiceGeneralInfoTab } from '../service-general-info-tab/service-general-info-tab';
+import { ServiceImageErrorPopup } from '../service-image-error-popup/service-image-error-popup';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 interface ServiceFormTexts {
   tabs: {
@@ -91,13 +117,18 @@ const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof BarServiceAddItemReq
   selector: 'app-bar-service-edit-item-panel',
   imports: [
     Button,
+    ConfirmPopup,
+    PageSpinner,
+    ReadErrorPopup,
     ServiceBookingsTab,
     ServiceGeneralInfoTab,
+    ServiceImageErrorPopup,
     ServicePricesTab,
     SidePanel,
     SidePanelButtons,
     TabGroup,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './bar-service-edit-item-panel.html',
   styleUrl: './bar-service-edit-item-panel.scss',
@@ -109,6 +140,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly updated = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly catalog = inject(CatalogService);
@@ -128,7 +160,11 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Modifica pressed: the fields of the tab can be changed, until Annulla or Salva. */
   protected readonly isEditing = signal(false);
   protected readonly isSaving = signal(false);
-  protected readonly isLocked = computed(() => !this.isEditing() || this.isSaving());
+  protected readonly isRemovingImage = signal(false);
+  protected readonly isImageDeletionAsked = signal(false);
+  protected readonly isLocked = computed(
+    () => !this.isEditing() || this.isSaving() || this.isRemovingImage(),
+  );
   private readonly texts = toSignal(
     this.translateService.stream(
       'management.settings.services.form',
@@ -148,6 +184,8 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     disabled(path.idSectors, () => this.isLocked());
     disabled(path.isOnlinePurchaseEnabled, () => this.isLocked());
     applyEach(path.translations, (translation) => {
+      metadata(translation.serviceName, MAX_LENGTH, () => MAX_SERVICE_NAME_LENGTH);
+      metadata(translation.description, MAX_LENGTH, () => MAX_SERVICE_DESCRIPTION_LENGTH);
       applyWhen(
         translation,
         ({ valueOf }) =>
@@ -158,26 +196,80 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
           requiredText(main.description);
         },
       );
+      applyWhen(
+        translation,
+        ({ valueOf }) =>
+          this.selectedTab() === PanelTab.GeneralInfo &&
+          valueOf(translation.language) !== this.mainLanguage(),
+        otherTranslationRules,
+      );
     });
+    applyWhen(
+      path,
+      () => this.selectedTab() === PanelTab.Prices,
+      (prices) => {
+        required(prices.price);
+        max(prices.price, MAX_SERVICE_PRICE);
+        applyEach(prices.variants, serviceVariantRules);
+        applyEach(prices.periodPrices, (periodPrice) => max(periodPrice.price, MAX_SERVICE_PRICE));
+      },
+    );
+    applyWhen(
+      path.bookingOptions,
+      () => this.selectedTab() === PanelTab.Bookings,
+      (options) => applyEach(options, serviceBookingOptionRules),
+    );
   });
   /** The values as the APIs gave them, tab by tab: the form is compared with them. */
   private readonly pristine = signal(newDraft());
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
+  /** Prices read for periods the tab does not show (e.g. of no current period): sent back as read. */
+  private readonly hiddenPeriodPrices = signal<readonly ServicePeriodPrice[]>([]);
+  protected readonly sectorsVersion = signal(0);
   /** The tabs read (or being read) since the panel opened: changing tab keeps their data. */
   private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
   /** The tabs whose data are being read: their fields cannot be used meanwhile. */
   private readonly loadingTabs = signal<ReadonlySet<PanelTab>>(new Set());
+  /** The version of each tab read: its save sends it back. */
+  private readonly versions = new Map<PanelTab, string | null>();
   protected readonly isEditDisabled = computed(() => {
     const tab = this.selectedTab() as PanelTab;
     return this.loadingTabs().has(tab) || !this.loadedTabs().has(tab);
   });
   protected readonly isSaveDisabled = computed(
-    () => this.loadingTabs().has(this.selectedTab()) || this.draftForm().invalid(),
+    () =>
+      this.loadingTabs().has(this.selectedTab()) ||
+      !this.loadedTabs().has(this.selectedTab()) ||
+      this.draftForm().invalid(),
   );
   /** The image chosen from the computer, instead of an icon of the list. */
   private readonly image = signal<File | null>(null);
-  protected readonly imagePreviewUrl = signal<string | null>(null);
+  private readonly chosenImageUrl = signal<string | null>(null);
+  /** The icon read when it is not one of the list: sent back as read until another is chosen. */
+  private readonly otherIcon = signal<string | null>(null);
+  /** The image the service has, until an icon or another image is chosen. */
+  private readonly savedImageUrl = signal<string | null>(null);
+  protected readonly imagePreviewUrl = computed(
+    () => this.chosenImageUrl() ?? (this.draft().icon === null ? this.savedImageUrl() : null),
+  );
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly imageError = signal<ApiProblem | null>(null);
+  private readonly imageRemovalError = signal<ApiProblem | null>(null);
+  protected readonly imageRemovalMessage = toSignal(
+    toObservable(this.imageRemovalError).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
+  protected readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
+  private readonly tabErrors = signal<ReadonlyMap<PanelTab, ApiProblem>>(new Map());
+  protected readonly tabErrorMessage = toSignal(
+    toObservable(computed(() => this.tabErrors().get(this.selectedTab() as PanelTab) ?? null)).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -185,12 +277,17 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     { initialValue: null },
   );
   private readonly loadings = new Map<PanelTab, Subscription>();
+  /** Changed by someone else: the user is told once the tab has been read again. */
+  private isConflictPending = false;
+  private imageRemoval?: Subscription;
 
   constructor() {
     this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
         untracked(() => this.reset());
+      } else {
+        untracked(() => this.stopLoadings());
       }
     });
   }
@@ -198,7 +295,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.open() &&
-      (this.image() !== null || JSON.stringify(this.draft()) !== JSON.stringify(this.pristine()))
+      (this.image() !== null || comparable(this.draft()) !== comparable(this.pristine()))
     );
   }
 
@@ -208,27 +305,76 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   protected chooseIcon(icon: BarServiceIcon): void {
     this.draftForm.icon().value.set(icon);
+    this.imageRemovalError.set(null);
     this.setImage(null);
   }
 
   protected chooseImage(image: File): void {
     this.draftForm.icon().value.set(null);
+    this.imageRemovalError.set(null);
     this.setImage(image);
   }
 
+  /** The X of the image: one not saved yet just goes away, the saved one once confirmed. */
+  protected removeImage(): void {
+    if (this.isLocked()) {
+      return;
+    }
+    if (this.image()) {
+      this.setImage(null);
+      this.draftForm.icon().value.set(this.pristine().icon);
+    } else {
+      this.isImageDeletionAsked.set(true);
+    }
+  }
+
+  protected confirmImageDeletion(): void {
+    this.isImageDeletionAsked.set(false);
+    const idBarService = this.idBarService();
+    if (this.isLocked() || !idBarService) {
+      return;
+    }
+    this.imageRemovalError.set(null);
+    this.isRemovingImage.set(true);
+    this.imageRemoval = this.catalog
+      .deleteServiceImage(idBarService)
+      .pipe(finalize(() => this.isRemovingImage.set(false)))
+      .subscribe({
+        next: () => this.savedImageUrl.set(null),
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          this.imageRemovalError.set(problem);
+          this.failed.emit(problem);
+        },
+      });
+  }
+
   protected startEdit(): void {
+    if (this.isEditDisabled()) {
+      return;
+    }
     this.error.set(null);
     this.isEditing.set(true);
+    // What was read already wrong shows at once: it keeps Salva off.
+    this.draftForm().markAsTouched();
   }
 
   /** Annulla: the tab goes back to the values read, only to look at. */
+  protected async requestCancel(): Promise<void> {
+    if (await this.unsaved.confirmDiscard(this)) {
+      this.cancelEdit();
+    }
+  }
+
   protected cancelEdit(): void {
     const tab = this.selectedTab() as PanelTab;
     const pristine = structuredClone(this.pristine());
     this.draft.update((draft) => ({ ...draft, ...pick(pristine, tab) }));
     if (tab === PanelTab.GeneralInfo) {
       this.setImage(null);
+      this.imageRemovalError.set(null);
     }
+    clearApiFieldErrors(this.draftForm);
     this.draftForm().reset();
     this.error.set(null);
     this.isEditing.set(false);
@@ -257,9 +403,13 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Salva: only the tab being edited, with its API. */
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idBarService = this.idBarService();
-    if (this.isSaving() || !idProperty || !idBarService) {
+    if (
+      this.isSaving() ||
+      this.isSaveDisabled() ||
+      !this.auth.user()?.propertyId ||
+      !idBarService
+    ) {
       return;
     }
     const tab = this.selectedTab() as PanelTab;
@@ -267,13 +417,29 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.update(tab, idProperty, idBarService));
+        await firstValueFrom(this.update(tab, idBarService));
+        const imageError = await this.uploadImage(idBarService);
         this.isSaving.set(false);
         this.open.set(false);
         this.updated.emit();
+        this.imageError.set(imageError);
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictPending = true;
+          this.reloadTab(tab);
+          return undefined;
+        }
+        if (problem.code === ApiErrorCode.CatalogSectorNotFound) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.PricingPeriodNotFound) {
+          this.refreshPeriods();
+        }
+        return (
+          serviceFieldError(problem, this.draftForm) ??
+          apiFieldErrorsOrGeneral(problem, this.draftForm, (general) => this.error.set(general))
         );
       } finally {
         this.isSaving.set(false);
@@ -290,12 +456,16 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** The data of a tab, read from its API the first time the tab is opened. */
   private loadTab(tab: PanelTab): void {
     const idBarService = this.idBarService();
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idBarService || !idProperty || this.loadedTabs().has(tab)) {
+    if (!idBarService || !this.auth.user()?.propertyId || this.loadedTabs().has(tab)) {
       return;
     }
     this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
     this.error.set(null);
+    this.tabErrors.update((errors) => {
+      const next = new Map(errors);
+      next.delete(tab);
+      return next;
+    });
     this.setLoading(tab, true);
     if (tab === PanelTab.GeneralInfo) {
       this.loadings.set(
@@ -313,7 +483,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         tab,
         forkJoin({
           prices: this.catalog.barServicePrices(idBarService),
-          periods: this.seasons.periodList(idProperty, false),
+          periods: this.seasons.periodList(false),
         })
           .pipe(finalize(() => this.setLoading(tab, false)))
           .subscribe({
@@ -328,57 +498,124 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
           .barServiceBookingOptions(idBarService)
           .pipe(finalize(() => this.setLoading(tab, false)))
           .subscribe({
-            next: (options) => this.setBookingOptions(options),
+            next: (answer) => this.setBookingOptions(answer),
             error: (error: unknown) => this.loadFailed(tab, error),
           }),
       );
     }
   }
 
-  /** The tab is read again the next time it is opened. */
+  /**
+   * At the opening (no tab read yet) the panel closes for the read-error popup; later the error stays
+   * in the tab, with Riprova.
+   */
   private loadFailed(tab: PanelTab, error: unknown): void {
     this.loadedTabs.update((tabs) => {
       const next = new Set(tabs);
       next.delete(tab);
       return next;
     });
-    this.error.set(toApiProblem(error));
+    this.isConflictPending = false;
+    const problem = toApiProblem(error);
+    this.failed.emit(problem);
+    if (this.loadedTabs().size === 0) {
+      this.readError.set(problem);
+      this.open.set(false);
+      return;
+    }
+    this.tabErrors.update((errors) => new Map(errors).set(tab, problem));
   }
 
-  /** The update API of the tab, with the fields of that tab only. */
-  private update(tab: PanelTab, idProperty: string, idBarService: string): Observable<void> {
+  private reloadTab(tab: PanelTab): void {
+    this.cancelEdit();
+    this.loadedTabs.update((tabs) => {
+      const next = new Set(tabs);
+      next.delete(tab);
+      return next;
+    });
+    this.loadTab(tab);
+  }
+
+  /** The update API of the tab, with the fields of that tab only, and the version read. */
+  private update(tab: PanelTab, idBarService: string): Observable<string | null> {
     const draft = this.draft();
+    const version = this.versions.get(tab) ?? null;
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateBarServiceGeneral(
-        idProperty,
-        Object.assign(new BarServiceUpdateGeneralRequest(), { idBarService, ...pick(draft, tab) }),
+        Object.assign(new BarServiceUpdateGeneralRequest(), {
+          idBarService,
+          ...pick(draft, tab),
+          // The upload itself takes the icon away: without it, the icon stays.
+          icon: draft.icon ?? (this.image() ? this.pristine().icon : null) ?? this.otherIcon(),
+        }),
+        version,
       );
     }
     if (tab === PanelTab.Prices) {
       return this.catalog.updateBarServicePrices(
-        idProperty,
-        Object.assign(new BarServiceUpdatePricesRequest(), { idBarService, ...pick(draft, tab) }),
+        Object.assign(new BarServiceUpdatePricesRequest(), {
+          idBarService,
+          ...pick(draft, tab),
+          periodPrices: [...draft.periodPrices, ...this.hiddenPeriodPrices()],
+        }),
+        version,
       );
     }
     return this.catalog.updateBarServiceBooking(
-      idProperty,
       Object.assign(new BarServiceUpdateBookingRequest(), { idBarService, ...pick(draft, tab) }),
+      version,
     );
   }
 
-  private reset(): void {
+  /** The image goes after the data of its tab, which stay saved also without it. */
+  private async uploadImage(idBarService: string): Promise<ApiProblem | null> {
+    const image = this.image();
+    if (!image) {
+      return null;
+    }
+    try {
+      await firstValueFrom(this.catalog.uploadServiceImage(idBarService, image));
+      return null;
+    } catch (error: unknown) {
+      return toApiProblem(error);
+    }
+  }
+
+  protected retryRead(): void {
+    this.open.set(true);
+  }
+
+  protected retryTab(): void {
+    this.loadTab(this.selectedTab());
+  }
+
+  /** Closed while a tab is being read: its answer, or its error, is not wanted any more. */
+  private stopLoadings(): void {
     this.loadings.forEach((loading) => loading.unsubscribe());
     this.loadings.clear();
+  }
+
+  private reset(): void {
+    this.tabErrors.set(new Map());
+    this.stopLoadings();
+    this.isConflictPending = false;
+    this.versions.clear();
     this.loadedTabs.set(new Set());
     this.loadingTabs.set(new Set());
     this.error.set(null);
     this.isEditing.set(false);
     this.isSaving.set(false);
     this.draft.set(newDraft());
+    this.hiddenPeriodPrices.set([]);
     this.pristine.set(newDraft());
     this.draftForm().reset();
     this.periods.set([]);
     this.setImage(null);
+    this.savedImageUrl.set(null);
+    this.otherIcon.set(null);
+    this.imageRemoval?.unsubscribe();
+    this.imageRemovalError.set(null);
+    this.isImageDeletionAsked.set(false);
     this.selectedTab.set(PanelTab.GeneralInfo);
     this.tabIndex.set(PanelTab.GeneralInfo);
     this.loadTab(PanelTab.GeneralInfo);
@@ -386,6 +623,10 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Name and description in every language, also those the API leaves out (empty). */
   private setGeneralInfo(info: BarServiceSelectedGeneralInfo): void {
+    this.versions.set(PanelTab.GeneralInfo, info.version);
+    this.savedImageUrl.set(info.imageUrl);
+    const icon = Object.values(BarServiceIcon).find((value) => value === info.icon) ?? null;
+    this.otherIcon.set(icon ? null : info.icon);
     this.applyLoaded({
       translations: SERVICE_LANGUAGES.map((language) => {
         const translation = info.translations.find((item) => item.language === language);
@@ -396,14 +637,16 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         });
       }),
       category: info.category,
-      icon: info.icon,
+      icon,
       isHighlighted: info.isHighlighted ?? false,
     });
   }
 
   /** A price for each period of the current season: the saved one, or empty. */
   private setPrices(prices: BarServiceSelectedPrices, periods: readonly SeasonPeriodItem[]): void {
+    this.versions.set(PanelTab.Prices, prices.version);
     this.periods.set(periods);
+    this.hiddenPeriodPrices.set(hiddenOf(prices.periodPrices, periods));
     this.applyLoaded({
       price: prices.price,
       vatRate: prices.vatRate,
@@ -411,7 +654,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         Object.assign(new ServiceVariant(), { variantName, price }),
       ),
       isPeriodPricingEnabled: prices.isPeriodPricingEnabled ?? false,
-      periodPrices: periods.map(({ idPeriod }) =>
+      periodPrices: periods.map(({ key: idPeriod }) =>
         Object.assign(new ServicePeriodPrice(), {
           idPeriod,
           price: prices.periodPrices.find((item) => item.idPeriod === idPeriod)?.price ?? null,
@@ -422,9 +665,48 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     });
   }
 
-  private setBookingOptions(options: readonly ServiceBookingOption[]): void {
+  /**
+   * A period refused is no longer of the season: the periods are read again, with the prices written.
+   * The saved prices of those no longer there are sent back as read.
+   */
+  private refreshPeriods(): void {
+    this.setLoading(PanelTab.Prices, true);
+    this.loadings.set(
+      PanelTab.Prices,
+      this.seasons
+        .periodList(false)
+        .pipe(finalize(() => this.setLoading(PanelTab.Prices, false)))
+        .subscribe({
+          next: (periods) => {
+            const rowsOf = (rows: readonly ServicePeriodPrice[]): ServicePeriodPrice[] =>
+              periods.map(
+                ({ key }) =>
+                  rows.find(({ idPeriod }) => idPeriod === key) ??
+                  Object.assign(new ServicePeriodPrice(), { idPeriod: key }),
+              );
+            const gone = hiddenOf(this.pristine().periodPrices, periods);
+            this.hiddenPeriodPrices.update((hidden) => [
+              ...hidden,
+              ...gone.filter(({ price }) => price !== null),
+            ]);
+            this.periods.set(periods);
+            this.draft.update((draft) => ({ ...draft, periodPrices: rowsOf(draft.periodPrices) }));
+            this.pristine.update((pristine) => ({
+              ...pristine,
+              periodPrices: rowsOf(pristine.periodPrices),
+            }));
+          },
+          error: (error: unknown) => this.error.set(toApiProblem(error)),
+        }),
+    );
+  }
+
+  private setBookingOptions(answer: BarServiceSelectedBookingOptions): void {
+    this.versions.set(PanelTab.Bookings, answer.version);
     this.applyLoaded({
-      bookingOptions: options.map((option) => Object.assign(new ServiceBookingOption(), option)),
+      bookingOptions: answer.bookingOptions.map((option) =>
+        Object.assign(new ServiceBookingOption(), option),
+      ),
     });
   }
 
@@ -432,6 +714,10 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   private applyLoaded(values: Partial<BarServiceAddItemRequest>): void {
     this.draft.update((draft) => ({ ...draft, ...values }));
     this.pristine.update((pristine) => ({ ...pristine, ...structuredClone(values) }));
+    if (this.isConflictPending) {
+      this.isConflictPending = false;
+      this.isConflictShown.set(true);
+    }
   }
 
   private setLoading(tab: PanelTab, isLoading: boolean): void {
@@ -447,17 +733,18 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   private setImage(image: File | null): void {
-    const previewUrl = this.imagePreviewUrl();
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
+    const chosenImageUrl = this.chosenImageUrl();
+    if (chosenImageUrl) {
+      URL.revokeObjectURL(chosenImageUrl);
     }
     this.image.set(image);
-    this.imagePreviewUrl.set(image ? URL.createObjectURL(image) : null);
+    this.chosenImageUrl.set(image ? URL.createObjectURL(image) : null);
   }
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
-    this.loadings.forEach((loading) => loading.unsubscribe());
+    this.stopLoadings();
+    this.imageRemoval?.unsubscribe();
     this.setImage(null);
   }
 }
@@ -469,6 +756,20 @@ function newDraft(): BarServiceAddItemRequest {
       Object.assign(new ServiceTranslation(), { language }),
     ),
   });
+}
+
+/** The rows read for a period the tab does not show. */
+function hiddenOf<T extends { idPeriod: number | null }>(
+  rows: readonly T[],
+  periods: readonly SeasonPeriodItem[],
+): T[] {
+  const idPeriods = new Set(periods.map(({ key }) => key));
+  return rows.filter(({ idPeriod }) => idPeriod === null || !idPeriods.has(idPeriod));
+}
+
+/** The order of the sectors is not a change. */
+function comparable(values: BarServiceAddItemRequest): string {
+  return comparableJson({ ...values, idSectors: [...values.idSectors].sort() });
 }
 
 /** The values of the fields of one tab. */

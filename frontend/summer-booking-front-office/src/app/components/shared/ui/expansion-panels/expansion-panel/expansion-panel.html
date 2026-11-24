@@ -1,6 +1,7 @@
 <mat-expansion-panel
   class="expansion__panel"
   hideToggle
+  [disabled]="disabled()"
   [expanded]="isExpanded()"
   (expandedChange)="isExpanded.set($event)"
 >

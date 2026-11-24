@@ -8,6 +8,8 @@ import { FilledNumberField } from './filled-number-field';
     label="Soglia"
     [isDecimal]="decimal()"
     [isCurrency]="currency()"
+    [maxDecimals]="maxDecimals()"
+    [isSigned]="signed()"
     [pathIcon]="['/assets/images/euro.svg']"
     [error]="error()"
     [(value)]="threshold"
@@ -17,14 +19,17 @@ class FilledNumberFieldHost {
   readonly threshold = signal<number | null>(3);
   readonly decimal = signal(false);
   readonly currency = signal(false);
+  readonly maxDecimals = signal<number | undefined>(undefined);
+  readonly signed = signal(false);
   readonly error = signal<string | null>(null);
 }
 
 describe('FilledNumberField', () => {
-  const setup = async (decimal = false, currency = false) => {
+  const setup = async (decimal = false, currency = false, signed = false) => {
     const fixture = TestBed.createComponent(FilledNumberFieldHost);
     fixture.componentInstance.decimal.set(decimal);
     fixture.componentInstance.currency.set(currency);
+    fixture.componentInstance.signed.set(signed);
     await fixture.whenStable();
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
     const type = async (text: string) => {
@@ -63,6 +68,18 @@ describe('FilledNumberField', () => {
     expect(host.threshold()).toBeNull();
   });
 
+  it('should drop the zeros before the number, keeping a lone zero', async () => {
+    const { host, input, type } = await setup();
+
+    await type('0005');
+    expect(input.value).toBe('5');
+    expect(host.threshold()).toBe(5);
+
+    await type('000');
+    expect(input.value).toBe('0');
+    expect(host.threshold()).toBe(0);
+  });
+
   it('should accept one separator, comma or dot, with decimal', async () => {
     const { host, input, type } = await setup(true);
 
@@ -77,6 +94,10 @@ describe('FilledNumberField', () => {
 
     await type('0.25');
     expect(host.threshold()).toBe(0.25);
+
+    await type('00,5');
+    expect(input.value).toBe('0,5');
+    expect(host.threshold()).toBe(0.5);
   });
 
   it('should keep at most 2 decimal digits of an amount', async () => {
@@ -85,6 +106,35 @@ describe('FilledNumberField', () => {
     await type('12,345');
     expect(input.value).toBe('12,34');
     expect(host.threshold()).toBe(12.34);
+  });
+
+  it('should keep at most the decimals asked for', async () => {
+    const { fixture, host, type } = await setup(true);
+
+    await type('0,0015');
+    expect(host.threshold()).toBe(0.0015);
+    host.maxDecimals.set(2);
+    await fixture.whenStable();
+    await type('33,339');
+    expect(host.threshold()).toBe(33.33);
+  });
+
+  it('should accept a minus only at the start, with signed', async () => {
+    const { host, input, type } = await setup(false, false, true);
+
+    expect(input.getAttribute('inputmode')).toBeNull();
+    expect(input.getAttribute('dir')).toBe('ltr');
+    await type('-');
+    expect(input.value).toBe('-');
+    expect(host.threshold()).toBeNull();
+
+    await type('-0045-');
+    expect(input.value).toBe('-45');
+    expect(host.threshold()).toBe(-45);
+
+    await type('4-5');
+    expect(input.value).toBe('45');
+    expect(host.threshold()).toBe(45);
   });
 
   it('should write a number given from outside', async () => {

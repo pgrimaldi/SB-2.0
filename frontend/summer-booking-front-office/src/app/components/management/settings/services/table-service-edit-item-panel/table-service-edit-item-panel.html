@@ -11,7 +11,14 @@
     [(selectedIndex)]="tabIndex"
     (selectedIndexChange)="requestTab($event)"
   >
-    @if (selectedTab() === PanelTab.GeneralInfo) {
+    @if (tabErrorMessage(); as tabErrorMessage) {
+      <div class="table__service__edit__item__panel__tab__error">
+        <p class="table__service__edit__item__panel__error">{{ tabErrorMessage }}</p>
+        <app-button [size]="ButtonSize.Small" (clicked)="retryTab()">{{
+          'table.load_error.retry' | translate
+        }}</app-button>
+      </div>
+    } @else if (selectedTab() === PanelTab.GeneralInfo) {
       <app-table-service-general-info-tab
         [attr.inert]="isLoading(PanelTab.GeneralInfo) ? '' : null"
         [form]="draftForm"
@@ -36,7 +43,7 @@
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
         [disabled]="isSaving()"
-        (clicked)="cancelEdit()"
+        (clicked)="requestCancel()"
       >
         {{ 'management.settings.services.form.cancel' | translate }}
       </app-button>
@@ -62,3 +69,5 @@
     }
   </div>
 </app-side-panel>
+<app-read-error-popup [pathIcon]="pathIcon()" [(problem)]="readError" (retry)="retryRead()" />
+<app-version-conflict-popup [pathIcon]="pathIcon()" [(open)]="isConflictShown" />

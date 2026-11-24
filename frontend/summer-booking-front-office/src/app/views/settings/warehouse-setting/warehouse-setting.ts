@@ -3,6 +3,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WarehouseService } from '../../../services/api/warehouse/warehouse.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../entities/errors/api-problem';
 import {
   Table,
   TableColumn,
@@ -10,7 +12,7 @@ import {
   TableRowId,
 } from '../../../components/shared/ui/tables/table/table';
 import { standardRowActions } from '../../../components/shared/tables/standard-row-actions';
-import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
+import { WarehouseSettingItem } from '../../../entities/warehouse/warehouse-setting-item';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
@@ -47,13 +49,12 @@ export class WarehouseSetting {
   private readonly translateService = inject(TranslateService);
 
   protected readonly loadFailed = signal(false);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly adding = signal(false);
   protected readonly editing = signal(false);
-  protected readonly editedItem = signal<WarehouseItem | null>(null);
+  protected readonly editedItem = signal<WarehouseSettingItem | null>(null);
   protected readonly idSelectedItems = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idItemsToDelete = signal<readonly string[]>([]);
@@ -85,7 +86,7 @@ export class WarehouseSetting {
     ) as Observable<WarehouseSettingsHeaders>,
     { initialValue: { name: '', total: '', threshold: '' } },
   );
-  protected readonly columns = computed<readonly TableColumn<WarehouseItem>[]>(() => [
+  protected readonly columns = computed<readonly TableColumn<WarehouseSettingItem>[]>(() => [
     { field: 'name', header: this.headers().name, width: 50, sortable: true },
     {
       field: 'totalQuantity',
@@ -94,22 +95,21 @@ export class WarehouseSetting {
       sortable: true,
     },
     {
-      field: 'thresholdQuantity',
+      field: 'lowStockThreshold',
       header: this.headers().threshold,
       align: TableColumnAlign.Center,
       sortable: true,
     },
   ]);
-  protected readonly rowActions = standardRowActions<WarehouseItem>({
+  protected readonly rowActions = standardRowActions<WarehouseSettingItem>({
     delete: ({ idArticle, name }) => idArticle && this.askDelete([idArticle], name),
     duplicate: ({ idArticle, name }) => idArticle && this.askDuplicate([idArticle], name),
     edit: (item) => this.editItem(item),
   });
 
-  protected readonly deleteItems = (idProperty: string, idItems: string[]) =>
-    this.warehouse.deleteWarehouseItems({ idProperty, idItems });
-  protected readonly duplicateItems = (idProperty: string, idItems: string[]) =>
-    this.warehouse.duplicateWarehouseItems({ idProperty, idItems });
+  protected readonly deleteItems = (idItems: string[]) => this.warehouse.deleteArticles(idItems);
+  protected readonly duplicateItems = (idItems: string[]) =>
+    this.warehouse.duplicateWarehouseItems(idItems);
 
   protected askDelete(idItems: readonly TableRowId[], itemName: string | null = null): void {
     this.idItemsToDelete.set(idItems.map(String));
@@ -130,13 +130,35 @@ export class WarehouseSetting {
     }
   }
 
-  protected forgetDeleted(idItems: readonly string[]): void {
+  protected forgetDeleted(idItems: readonly (string | null)[]): void {
     this.idSelectedItems.update((idSelected) =>
       idSelected.filter((idSelectedItem) => !idItems.includes(String(idSelectedItem))),
     );
   }
 
-  private editItem(item: WarehouseItem): void {
+  /**
+   * An article deleted meanwhile by someone else (delete, duplicate or edit): the table shows it is
+   * gone and the ids of the action leave the selection (all of them after an action on the
+   * selection, where nothing was done).
+   */
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idItems: readonly (string | null)[],
+  ): void {
+    if (problem.code === ApiErrorCode.InventoryItemNotFound) {
+      this.forgetDeleted(idItems);
+      table.reload();
+    }
+  }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+      table.reload();
+    }
+  }
+
+  private editItem(item: WarehouseSettingItem): void {
     this.editedItem.set(item);
     this.editing.set(true);
   }

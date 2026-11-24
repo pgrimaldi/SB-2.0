@@ -14,12 +14,18 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   ExistingBookingFilterTexts,
   filterOptionsOf,
 } from '../../../../../behaviours/database/existing-booking-filter-options';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
+import {
+  UnsavedChanges,
+  UnsavedChangesBehaviour,
+} from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import {
   AgreementBookingFilter,
@@ -32,6 +38,7 @@ import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/butt
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 @Component({
   selector: 'app-existing-booking-filters-popup',
@@ -42,13 +49,15 @@ import { SelectOption } from '../../../../shared/ui/selects/select/select';
   // The popup is rendered by Material in an overlay outside this component.
   encapsulation: ViewEncapsulation.None,
 })
-export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy {
+export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedChanges, OnDestroy {
   readonly filters = input(new ExistingBookingFilters());
   readonly applied = output<ExistingBookingFilters>();
 
   private readonly translateService = inject(TranslateService);
   private readonly database = inject(DatabaseService);
   private readonly auth = inject(AuthBehaviour);
+  private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly unsaved = inject(UnsavedChangesBehaviour);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
@@ -56,8 +65,11 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
   protected readonly agreementBookings = signal<readonly AgreementBookingFilter[]>([]);
   protected readonly idAffiliatedHotels = signal<readonly string[]>([]);
   protected readonly paymentStatuses = signal<readonly PaymentStatusFilter[]>([]);
-  private readonly affiliatedHotels = signal<readonly ComboboxItem[]>([]);
-  private affiliatedHotelsSubscription?: Subscription;
+  protected readonly affiliatedHotels = new DropdownList(
+    () => (this.auth.user()?.propertyId ? this.database.affiliatedHotelCombobox() : EMPTY),
+    this.errorText,
+  );
+  private pristineChoices = '';
   private readonly texts = toSignal(
     this.translateService.stream(
       'management.settings.database.filters',
@@ -70,7 +82,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
     filterOptionsOf(Object.values(AgreementBookingFilter), this.texts()?.agreement_booking.options),
   );
   protected readonly affiliatedHotelOptions = computed<readonly SelectOption[]>(() =>
-    this.affiliatedHotels().map((hotel) => ({ value: hotel.id, label: hotel.value })),
+    this.affiliatedHotels.items().map((hotel) => ({ value: hotel.id, label: hotel.value })),
   );
   protected readonly paymentStatusOptions = computed(() =>
     filterOptionsOf(Object.values(PaymentStatusFilter), this.texts()?.payment_status.options),
@@ -78,14 +90,19 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
 
   constructor() {
     super();
+    this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
         untracked(() => {
           this.reset();
-          this.loadAffiliatedHotels();
+          this.affiliatedHotels.load();
         });
       }
     });
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.open() && this.choices() !== this.pristineChoices;
   }
 
   protected apply(): void {
@@ -98,12 +115,23 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
     this.close();
   }
 
+  protected async leave(): Promise<void> {
+    if (await this.unsaved.confirmDiscard(this)) {
+      this.close();
+    }
+  }
+
+  protected override closeRequested(): void {
+    void this.leave();
+  }
+
   protected dialogConfig(): MatDialogConfig {
     return {
       width: 'min(32rem, 90vw)',
       maxWidth: 'none',
       position: { top: '6.875rem' },
       panelClass: 'existing__booking__filters__popup__panel',
+      disableClose: true,
       autoFocus: false,
     };
   }
@@ -114,12 +142,23 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
     this.agreementBookings.set(filters.agreementBookings);
     this.idAffiliatedHotels.set(filters.affiliatedHotels.map((hotel) => hotel.id));
     this.paymentStatuses.set(filters.paymentStatuses);
+    this.pristineChoices = this.choices();
+    this.affiliatedHotels.clear();
+  }
+
+  private choices(): string {
+    return comparableJson([
+      this.bookingTypologies(),
+      this.agreementBookings(),
+      this.idAffiliatedHotels(),
+      this.paymentStatuses(),
+    ]);
   }
 
   /** With their names, for the chips: from the list of the server, or as they were applied. */
   private chosenHotels(): ComboboxItem[] {
     const known = new Map(
-      [...this.filters().affiliatedHotels, ...this.affiliatedHotels()].map((hotel) => [
+      [...this.filters().affiliatedHotels, ...this.affiliatedHotels.items()].map((hotel) => [
         hotel.id,
         hotel,
       ]),
@@ -127,23 +166,9 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
     return this.idAffiliatedHotels().flatMap((id) => known.get(id) ?? []);
   }
 
-  private loadAffiliatedHotels(): void {
-    // A slower answer of an earlier opening must not replace the list of this one.
-    this.affiliatedHotelsSubscription?.unsubscribe();
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
-      return;
-    }
-    this.affiliatedHotelsSubscription = this.database
-      .affiliatedHotelCombobox(idProperty)
-      .subscribe({
-        next: (hotels) => this.affiliatedHotels.set(hotels),
-        error: () => this.affiliatedHotels.set([]),
-      });
-  }
-
   override ngOnDestroy(): void {
-    this.affiliatedHotelsSubscription?.unsubscribe();
+    this.unsaved.unwatch(this);
+    this.affiliatedHotels.destroy();
     super.ngOnDestroy();
   }
 }

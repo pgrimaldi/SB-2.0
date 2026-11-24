@@ -8,7 +8,8 @@ export interface AuthUser {
   id: string;
   email: string;
   role: string;
-  propertyId: string;
+  /** Null for an account without a property (`AuthUserDto.PropertyId`). */
+  propertyId: string | null;
 }
 
 export interface AuthSession {

@@ -5,8 +5,11 @@
   [chosenIcon]="form().icon().value()"
   [imagePreviewUrl]="imagePreviewUrl()"
   [isReadonly]="isReadonly()"
+  [error]="imageError() ?? validationText.text(form().icon)"
+  [isImageRemovable]="true"
   (iconChosen)="iconChosen.emit($event)"
   (imageChosen)="imageChosen.emit($event)"
+  (imageRemoveRequest)="imageRemoveRequest.emit()"
 />
 
 <app-services-highlighted [form]="form().isHighlighted" />

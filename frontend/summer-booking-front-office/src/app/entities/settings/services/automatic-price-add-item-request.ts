@@ -10,6 +10,8 @@ export class AutomaticPriceAddItemRequest {
   vatRate: number | null = null;
   isOnlinePurchaseEnabled = false;
   validityPeriods: AutomaticPriceValidityPeriod[] = [];
+  isAllServicesEnabled = false;
+  /** Without `isAllServicesEnabled`, as the two lists after it. */
   idBarServices: string[] = [];
   idStandardServices: string[] = [];
   idHourlyServices: string[] = [];

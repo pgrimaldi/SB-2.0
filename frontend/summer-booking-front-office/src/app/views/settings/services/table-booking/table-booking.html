@@ -34,6 +34,7 @@
   [idTableService]="idTableServiceToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
+  (failed)="reloadIfGone($event, table, [idTableServiceToEdit()]); reloadIfChanged($event, table)"
 />
 
 <app-delete-items-popup
@@ -44,6 +45,7 @@
   [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idTableServicesToDelete())"
 />
 <app-duplicate-items-popup
   [idItems]="idTableServicesToDuplicate()"
@@ -53,6 +55,7 @@
   [pathIcon]="alertIcons"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idTableServicesToDuplicate())"
 />
 
 <app-table-error-popup

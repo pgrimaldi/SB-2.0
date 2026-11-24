@@ -6,6 +6,8 @@ import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { AutomaticPriceAddItemPanel } from '../../../../components/management/settings/services/automatic-price-add-item-panel/automatic-price-add-item-panel';
 import { AutomaticPriceEditItemPanel } from '../../../../components/management/settings/services/automatic-price-edit-item-panel/automatic-price-edit-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
@@ -63,10 +65,9 @@ export class AutomaticPrices {
   protected readonly duplicating = signal(false);
   protected readonly idAutomaticPricesToDuplicate = signal<readonly string[]>([]);
   protected readonly automaticPriceNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/Services_AutomaticPricesTitle.png'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -100,7 +101,7 @@ export class AutomaticPrices {
     edit: ({ idAutomaticPrice }) => idAutomaticPrice && this.openEdit(idAutomaticPrice),
   });
 
-  protected readonly load: TableLoad<{ idProperty: string }, AutomaticPriceRow> = (request) =>
+  protected readonly load: TableLoad<object, AutomaticPriceRow> = (request) =>
     this.catalog.automaticPriceList(request).pipe(
       map((page) => {
         const amount = new Intl.NumberFormat(this.dateLanguage.locale(), {
@@ -117,10 +118,10 @@ export class AutomaticPrices {
       }),
     );
 
-  protected readonly deleteAutomaticPrices = (idProperty: string, idAutomaticPrices: string[]) =>
-    this.catalog.deleteAutomaticPriceItems({ idProperty, idAutomaticPrices });
-  protected readonly duplicateAutomaticPrices = (idProperty: string, idAutomaticPrices: string[]) =>
-    this.catalog.duplicateAutomaticPriceItems({ idProperty, idAutomaticPrices });
+  protected readonly deleteAutomaticPrices = (idAutomaticPrices: string[]) =>
+    this.catalog.deleteAutomaticPriceItems(idAutomaticPrices);
+  protected readonly duplicateAutomaticPrices = (idAutomaticPrices: string[]) =>
+    this.catalog.duplicateAutomaticPriceItems(idAutomaticPrices);
 
   protected openEdit(idAutomaticPrice: string): void {
     this.idAutomaticPriceToEdit.set(idAutomaticPrice);
@@ -152,11 +153,28 @@ export class AutomaticPrices {
     }
   }
 
-  protected forgetDeleted(idAutomaticPrices: readonly string[]): void {
+  protected forgetDeleted(idAutomaticPrices: readonly (string | null)[]): void {
     this.idSelectedAutomaticPrices.update((idSelected) =>
       idSelected.filter(
         (idSelectedAutomaticPrice) => !idAutomaticPrices.includes(String(idSelectedAutomaticPrice)),
       ),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idAutomaticPrices: readonly (string | null)[],
+  ): void {
+    if (problem.code === ApiErrorCode.ServiceAutomaticPriceNotFound) {
+      this.forgetDeleted(idAutomaticPrices);
+      table.reload();
+    }
+  }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+      table.reload();
+    }
   }
 }

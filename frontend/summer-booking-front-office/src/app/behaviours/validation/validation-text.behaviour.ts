@@ -1,9 +1,9 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FieldTree, ValidationError } from '@angular/forms/signals';
+import { FieldTree, ReadonlyFieldTree, ValidationError } from '@angular/forms/signals';
 import { TranslateService } from '@ngx-translate/core';
 import { ErrorTextBehaviour } from '../errors/error-text.behaviour';
-import { ApiValidationError } from './api-field-errors';
+import { API_ERROR_KIND, ApiValidationError } from './api-field-errors';
 
 /** Properties of an error that are not values for the message. */
 const NOT_VALUES = new Set(['kind', 'message', 'fieldTree', 'formField']);
@@ -26,7 +26,7 @@ export class ValidationTextBehaviour {
   }
 
   /** The same text, read where a signal per field cannot be kept (e.g. the items of a list). */
-  text(field: FieldTree<unknown>, fieldNameKey?: string): string | null {
+  text(field: ReadonlyFieldTree<unknown>, fieldNameKey?: string): string | null {
     const state = field();
     const [error] = state.errors();
     if (!error || !(state.dirty() || state.touched())) {
@@ -47,5 +47,5 @@ export class ValidationTextBehaviour {
 }
 
 function isApiError(error: ValidationError): error is ApiValidationError {
-  return error.kind === 'api';
+  return error.kind === API_ERROR_KIND;
 }

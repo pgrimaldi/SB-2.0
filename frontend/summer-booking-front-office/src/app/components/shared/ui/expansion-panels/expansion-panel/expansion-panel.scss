@@ -1,8 +1,12 @@
 @use '@angular/material' as mat;
 
 // White panel with a thin border, blue bold title with its icon, an arrow pointing right when closed and down when open.
-// A page can change --expansion-panel-header-padding (0 1.5rem 0 2rem) and --expansion-panel-title-gap
-// (0.75rem, between what is before the title, its icon and the text).
+// A page can change --expansion-panel-header-padding-block (0), --expansion-panel-header-padding-inline
+// (2rem 1.5rem, start and end of the line), --expansion-panel-header-height (2.5rem; auto lets a long title wrap) and --expansion-panel-title-gap (0.75rem, between what is before
+// the title, its icon and the text). The actions can go on their own line under the title (e.g. on phones):
+// --expansion-panel-header-wrap: wrap, --expansion-panel-actions-order: 1 (after the arrow) and
+// --expansion-panel-actions-basis: calc(100% - 1rem) (the actions keep 1rem after them); by default they
+// stay in the title row.
 :host {
   display: block;
 
@@ -18,8 +22,9 @@
       header-text-font: inherit,
       header-text-size: 1rem,
       header-text-weight: 600,
-      header-collapsed-state-height: 2.5rem,
-      header-expanded-state-height: 2.5rem,
+      header-collapsed-state-height: var(--expansion-panel-header-height, 2.5rem),
+      header-expanded-state-height: var(--expansion-panel-header-height, 2.5rem),
+      header-disabled-state-text-color: var(--color__layout__muted),
     )
   );
 }
@@ -29,7 +34,8 @@
 }
 
 .expansion__panel__header {
-  padding: var(--expansion-panel-header-padding, 0 1.5rem 0 2rem);
+  padding-block: var(--expansion-panel-header-padding-block, 0);
+  padding-inline: var(--expansion-panel-header-padding-inline, 2rem 1.5rem);
 }
 
 .expansion__panel.mat-expanded .expansion__panel__header {
@@ -59,6 +65,8 @@
 // would push half of the arrow out. The box is as wide as the image turned (14px).
 .expansion__panel__actions {
   display: flex;
+  flex-basis: var(--expansion-panel-actions-basis, auto);
+  order: var(--expansion-panel-actions-order, 0);
   align-items: center;
   gap: 0.5rem;
   margin-inline-end: 1rem;
@@ -88,8 +96,21 @@
   transform: rotate(90deg);
 }
 
+// Disabled: the images of the title and the arrow look off too, as in the icon buttons.
+.expansion__panel__header[aria-disabled='true'] {
+  .expansion__panel__title > img,
+  .expansion__panel__arrow > img {
+    opacity: 0.4;
+  }
+}
+
 .expansion__panel__content {
   padding: var(--expansion-panel-content-padding, 1.5rem 2rem 2rem);
+}
+
+// Material lays the header out in its own .mat-content, with no token to let it wrap.
+:host ::ng-deep .mat-content {
+  flex-wrap: var(--expansion-panel-header-wrap, nowrap);
 }
 
 // Material puts its own padding around the content, with no token to change it.

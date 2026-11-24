@@ -5,6 +5,7 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { AddPrinterItemRequest } from '../../../../../entities/settings/taxation/add-printer-item-request';
 import { TaxationService } from '../../../../../services/api/taxation/taxation.service';
 import { AddPrinterItemPopup } from './add-printer-item-popup';
@@ -52,7 +53,7 @@ describe('AddPrinterItemPopup', () => {
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
 
-  it('should send the form with the property, with a spinner, then close and tell the page', async () => {
+  it('should send the form, with a spinner, then close and tell the page', async () => {
     const { host, popup, save, typeName, settle, addPrinter } = await setup();
     const answer = new Subject<void>();
     addPrinter.mockReturnValue(answer);
@@ -60,7 +61,7 @@ describe('AddPrinterItemPopup', () => {
 
     save().click();
     await settle();
-    expect(addPrinter).toHaveBeenCalledWith('p1', {
+    expect(addPrinter).toHaveBeenCalledWith({
       ...new AddPrinterItemRequest(),
       printerName: 'EPSON - 3',
     });
@@ -106,11 +107,11 @@ describe('AddPrinterItemPopup', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.failed',
+              code: ApiErrorCode.ValidationFailed,
               title: 'Invalid request',
               errors: [
-                { field: 'printerName', code: 'validation.invalid' },
-                { field: 'isSsl', code: 'validation.invalid' },
+                { field: 'printerName', code: ApiErrorCode.ValidationInvalid },
+                { field: 'isSsl', code: ApiErrorCode.ValidationInvalid },
               ],
             },
           }),

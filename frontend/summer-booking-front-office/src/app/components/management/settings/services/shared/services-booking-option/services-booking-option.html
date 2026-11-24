@@ -138,8 +138,11 @@
           class="services__booking__option__value"
           [placeholder]="'management.settings.services.form.choose' | translate"
           [options]="timeIntervalOptions()"
-          [formField]="option.timeInterval"
-          [error]="validationText.text(option.timeInterval)"
+          [value]="timeIntervalOf(option.intervalMinutes().value())"
+          [readonly]="option.intervalMinutes().readonly()"
+          [error]="validationText.text(option.intervalMinutes)"
+          (valueChange)="chooseTimeInterval(option.intervalMinutes, $event)"
+          (touch)="option.intervalMinutes().markAsTouched()"
         />
       </app-form-row>
 
@@ -165,6 +168,9 @@
         />
       </app-form-row>
     </div>
+  }
+  @if (validationText.text(form()); as error) {
+    <p class="services__booking__option__error">{{ error }}</p>
   }
 </section>
 

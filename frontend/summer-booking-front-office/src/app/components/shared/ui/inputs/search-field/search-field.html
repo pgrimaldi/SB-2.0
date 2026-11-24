@@ -5,6 +5,7 @@
     type="search"
     autocomplete="off"
     [placeholder]="placeholder() ?? ''"
+    [attr.maxlength]="maxLength()"
     [value]="text()"
     (input)="text.set(field.value)"
   />
@@ -42,3 +43,6 @@
     </button>
   }
 </mat-form-field>
+@if (limitText(); as limitText) {
+  <p class="search__field__limit">{{ limitText }}</p>
+}

@@ -16,27 +16,31 @@ import {
   TreeValidationResult,
   disabled,
   form,
+  max,
   required,
   submit,
 } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription, firstValueFrom, of, switchMap } from 'rxjs';
+import { EMPTY, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
-import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
+import { WarehouseItemAddStock } from '../../../../../entities/warehouse/warehouse-item-add-stock';
+import { WarehouseItemAddRequest } from '../../../../../entities/warehouse/warehouse-item-add-request';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
 import { greaterThan } from '../../../../shared/forms/validators';
+import { MAX_WAREHOUSE_QUANTITY } from '../../../../../entities/warehouse/warehouse-limits';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
@@ -64,30 +68,34 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
 
-  private readonly articles = signal<readonly ComboboxItem[]>([]);
-  private articlesSubscription?: Subscription;
-  protected readonly articleOptions = computed<readonly SelectOption[]>(() =>
-    this.articles().map(({ id, value }) => ({ value: id, label: value })),
+  protected readonly articles = new DropdownList(
+    () => (this.auth.user()?.propertyId ? this.warehouse.articleCombobox() : EMPTY),
+    this.errorText,
   );
-  private readonly draft = signal(new WarehouseItem());
+  protected readonly articleOptions = computed<readonly SelectOption[]>(() =>
+    this.articles.items().map(({ id, value }) => ({ value: id, label: value })),
+  );
+  private readonly draft = signal(new WarehouseItemAddStock());
   protected readonly draftForm = form(this.draft, (path) => {
     required(path.idArticle);
     greaterThan(path.totalQuantity, 0);
+    max(path.totalQuantity, MAX_WAREHOUSE_QUANTITY);
+    max(path.lowStockThreshold, MAX_WAREHOUSE_QUANTITY);
     disabled(
-      path.isThresholdWarningActive,
-      ({ valueOf }) => (valueOf(path.thresholdQuantity) ?? 0) <= 0,
+      path.lowStockAlertEnabled,
+      ({ valueOf }) => (valueOf(path.lowStockThreshold) ?? 0) <= 0,
     );
   });
   protected readonly idArticleError = this.validationText.message(this.draftForm.idArticle);
   protected readonly totalQuantityError = this.validationText.message(
     this.draftForm.totalQuantity,
-    'management.settings.warehouse.form.field_names.total',
+    'management.settings.warehouse.form.field_names.quantity',
   );
-  protected readonly thresholdQuantityError = this.validationText.message(
-    this.draftForm.thresholdQuantity,
+  protected readonly lowStockThresholdError = this.validationText.message(
+    this.draftForm.lowStockThreshold,
   );
-  protected readonly isThresholdWarningActiveError = this.validationText.message(
-    this.draftForm.isThresholdWarningActive,
+  protected readonly lowStockAlertEnabledError = this.validationText.message(
+    this.draftForm.lowStockAlertEnabled,
   );
   protected readonly isLoading = signal(false);
   protected readonly canAdd = computed(() => this.draftForm().valid());
@@ -103,42 +111,37 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     super();
     this.unsaved.watch(this);
     effect(() => {
-      if (this.draftForm.isThresholdWarningActive().disabled()) {
-        untracked(() => this.draftForm.isThresholdWarningActive().value.set(false));
+      if (this.draftForm.lowStockAlertEnabled().disabled()) {
+        untracked(() => this.draftForm.lowStockAlertEnabled().value.set(false));
       }
     });
     effect(() => {
       if (this.open()) {
         untracked(() => {
           this.reset();
-          this.loadArticles();
+          this.articles.load();
         });
       }
     });
   }
 
   hasUnsavedChanges(): boolean {
-    const { idArticle, totalQuantity, thresholdQuantity, isThresholdWarningActive } = this.draft();
     return (
-      this.open() &&
-      (idArticle !== null ||
-        totalQuantity !== null ||
-        thresholdQuantity !== null ||
-        isThresholdWarningActive)
+      this.open() && comparableJson(this.draft()) !== comparableJson(new WarehouseItemAddStock())
     );
   }
 
   protected add(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty || !this.canAdd()) {
+    if (this.isLoading() || !this.auth.user()?.propertyId || !this.canAdd()) {
       return;
     }
 
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
+      const request = this.request();
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.warehouse.addWarehouseItem(idProperty, this.draft()));
+        await firstValueFrom(this.warehouse.addWarehouseItem(request));
         this.isLoading.set(false);
         this.close();
         this.added.emit();
@@ -177,26 +180,28 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   }
 
   private reset(): void {
-    this.draft.set(new WarehouseItem());
+    this.draft.set(new WarehouseItemAddStock());
     this.draftForm().reset();
     this.error.set(null);
+    this.articles.clear();
   }
 
-  private loadArticles(): void {
-    // A slower answer of an earlier opening must not replace the list of this one.
-    this.articlesSubscription?.unsubscribe();
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
-      return;
-    }
-    this.articlesSubscription = this.warehouse.comboboxList(idProperty).subscribe({
-      next: (articles) => this.articles.set(articles),
-      error: () => this.articles.set([]),
-    });
+  /**
+   * The popup does not show threshold and alert of the article: without a threshold both go as null
+   * and stay as they are; with one, the alert goes as the popup shows it.
+   */
+  private request(): WarehouseItemAddRequest {
+    const { idArticle, totalQuantity, lowStockThreshold, lowStockAlertEnabled } = this.draft();
+    return {
+      idArticle,
+      totalQuantity,
+      lowStockThreshold,
+      lowStockAlertEnabled: lowStockThreshold === null ? null : lowStockAlertEnabled,
+    };
   }
 
   override ngOnDestroy(): void {
-    this.articlesSubscription?.unsubscribe();
+    this.articles.destroy();
     this.unsaved.unwatch(this);
     super.ngOnDestroy();
   }

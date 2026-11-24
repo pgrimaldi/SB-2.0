@@ -20,3 +20,10 @@
   flex: 1 1 auto;
   min-width: 0;
 }
+
+.services__translations__error {
+  margin: -0.5rem 0 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}

@@ -94,6 +94,7 @@ export class AutomaticPriceValidityPeriods {
     day: number,
     isChosen: boolean,
   ): void {
+    period.daysOfWeek().markAsTouched();
     period
       .daysOfWeek()
       .value.update((days) =>

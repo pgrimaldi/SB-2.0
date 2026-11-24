@@ -32,6 +32,11 @@ export class FilledSelect<K extends string = string> {
   readonly error = input<string | null>();
   /** The panel was closed: a Signal Forms `[formField]` marks the select as touched. */
   readonly touch = output<void>();
+  /**
+   * The user tried to open the list (click, Enter or Space), also while it has no options and so
+   * does not open: e.g. to read again a list that could not be loaded.
+   */
+  readonly openRequest = output<void>();
 
   /** As in the filled text field: the error look follows our `error`, not a classic form control. */
   protected readonly errorMatcher: ErrorStateMatcher = { isErrorState: () => !!this.error() };
@@ -42,5 +47,11 @@ export class FilledSelect<K extends string = string> {
       this.error();
       this.matSelect().updateErrorState();
     });
+  }
+
+  protected requestOpen(): void {
+    if (!this.disabled() && !this.readonly()) {
+      this.openRequest.emit();
+    }
   }
 }

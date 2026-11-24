@@ -1,0 +1,11 @@
+<svg width="78" height="79" viewBox="0 0 78 79" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M39.5 39.5L71.66 41.19L64.77 51.55L61.05 63.43Z" fill="#F6FF00" stroke="#F6FF00" stroke-width="0.3" stroke-linejoin="round"/>
+<path d="M39.5 39.5L61.05 63.43L48.85 65.89L37.81 71.66Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.3" stroke-linejoin="round"/>
+<path d="M39.5 39.5L37.81 71.66L27.45 64.77L15.57 61.05Z" fill="#F6FF00" stroke="#F6FF00" stroke-width="0.3" stroke-linejoin="round"/>
+<path d="M39.5 39.5L15.57 61.05L13.11 48.85L7.34 37.81Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.3" stroke-linejoin="round"/>
+<path d="M39.5 39.5L7.34 37.81L14.23 27.45L17.95 15.57Z" fill="#F6FF00" stroke="#F6FF00" stroke-width="0.3" stroke-linejoin="round"/>
+<path d="M39.5 39.5L17.95 15.57L30.15 13.11L41.19 7.34Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.3" stroke-linejoin="round"/>
+<path d="M39.5 39.5L41.19 7.34L51.55 14.23L63.43 17.95Z" fill="#F6FF00" stroke="#F6FF00" stroke-width="0.3" stroke-linejoin="round"/>
+<path d="M39.5 39.5L63.43 17.95L65.89 30.15L71.66 41.19Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.3" stroke-linejoin="round"/>
+<circle cx="39.5" cy="39.5" r="3.3" fill="#DDAB45"/>
+</svg>

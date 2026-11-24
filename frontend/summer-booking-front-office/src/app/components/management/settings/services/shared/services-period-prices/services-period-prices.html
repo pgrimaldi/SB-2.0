@@ -1,5 +1,8 @@
 <div class="services__period__prices__heading">
-  <app-toggle [formField]="isPeriodPricingEnabled()">
+  <app-toggle
+    [formField]="isPeriodPricingEnabled()"
+    [error]="validationText.text(isPeriodPricingEnabled())"
+  >
     {{ 'management.settings.services.form.prices.period_pricing.enable' | translate }}
   </app-toggle>
   <app-icon-button
@@ -9,21 +12,26 @@
   />
 </div>
 @if (isPeriodPricingEnabled()().value()) {
-  @for (period of periods(); track period.idPeriod) {
-    <app-expansion-panel [title]="period.periodName ?? ''" [pathIcon]="periodIcons">
+  @for (period of periods(); track period.key) {
+    <app-expansion-panel
+      [title]="period.name ?? ''"
+      [pathIcon]="periodIcons"
+      [isExpanded]="openPeriods().has(period.key)"
+      (isExpandedChange)="openPeriod(period.key, $event)"
+    >
       <div class="services__period__prices__body">
         <div class="services__period__prices__period">
           <div class="services__period__prices__dates">
             <div class="services__period__prices__intervals">
-              @for (interval of period.intervals; track interval.idInterval) {
+              @for (range of period.ranges; track $index) {
                 <div class="services__period__prices__interval">
-                  <span>{{ day(interval.dateFrom) }}</span>
-                  <span class="services__period__prices__to">{{ day(interval.dateTo) }}</span>
+                  <span>{{ day(range.startsOn) }}</span>
+                  <span class="services__period__prices__to">{{ day(range.endsOn) }}</span>
                 </div>
               }
             </div>
           </div>
-          @if (priceByPeriod().get(period.idPeriod); as periodPrice) {
+          @if (priceByPeriod().get(period.key); as periodPrice) {
             <div class="services__period__prices__amount services__period__prices__price">
               <app-filled-number-field
                 class="services__period__prices__field"
@@ -50,10 +58,16 @@
     </p>
   }
 }
+@for (error of hiddenErrors(); track error) {
+  <p class="services__period__prices__error">{{ error }}</p>
+}
+@if (periodPricesError(); as error) {
+  <p class="services__period__prices__error">{{ error }}</p>
+}
 
 <app-info-popup
   [title]="'management.settings.services.form.prices.period_pricing.enable' | translate"
-  [text]="'management.settings.services.form.prices.period_pricing.info' | translate"
+  [text]="infoKey() | translate"
   [pathIcon]="infoPopupIcons"
   [(open)]="showingInfo"
 />

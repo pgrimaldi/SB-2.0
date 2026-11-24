@@ -17,6 +17,8 @@
       <app-search-field
         class="table__search"
         [placeholder]="texts()?.search?.placeholder"
+        [maxLength]="searchMaxLength()"
+        [maxLengthText]="texts()?.search?.max_length"
         [matIcon]="matIcon()"
         [pathIcon]="pathIcon()"
         (searched)="search.set($event)"

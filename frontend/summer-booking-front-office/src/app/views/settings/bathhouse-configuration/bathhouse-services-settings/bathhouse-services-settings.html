@@ -1,9 +1,9 @@
 <div class="bathhouse__services__settings" [attr.inert]="isLoading() ? '' : null">
-  @for (section of sections(); track section.categoryCode) {
+  @for (section of sections(); track section.group) {
     <section class="bathhouse__services__settings__section">
       <app-section-title
         [text]="
-          'management.settings.bathhouse_configuration.services.categories.' + section.categoryCode
+          'management.settings.bathhouse_configuration.services.categories.' + section.group
             | translate
         "
       />
@@ -11,7 +11,7 @@
         @for (item of section.services; track item.service.idService) {
           <app-checkbox [formField]="servicesForm[item.index].isSelected">
             <span class="bathhouse__services__settings__service">
-              @if (item.service.iconUrl; as iconUrl) {
+              @if (item.iconUrl; as iconUrl) {
                 <img [src]="iconUrl" width="20" height="20" alt="" />
               }
               {{ item.service.name }}
@@ -28,7 +28,7 @@
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
         [disabled]="isSaving()"
-        (clicked)="cancel()"
+        (clicked)="requestCancel()"
       >
         {{ 'management.settings.bathhouse_configuration.services.cancel' | translate }}
       </app-button>
@@ -41,7 +41,12 @@
         {{ 'management.settings.bathhouse_configuration.services.save' | translate }}
       </app-button>
     } @else {
-      <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="edit()">
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="!isLoaded()"
+        (clicked)="edit()"
+      >
         {{ 'management.settings.bathhouse_configuration.services.edit' | translate }}
       </app-button>
     }
@@ -50,3 +55,4 @@
     <p class="bathhouse__services__settings__error">{{ errorMessage }}</p>
   }
 </div>
+<app-version-conflict-popup [pathIcon]="popupIcons" [(open)]="isConflictShown" />

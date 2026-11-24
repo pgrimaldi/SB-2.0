@@ -21,8 +21,8 @@ let nextId = 0;
 const CURRENCY_DECIMALS = 2;
 
 /**
- * Only digits 0-9 can be typed (no signs, no exponent); with `isDecimal` also one separator, comma or
- * dot.
+ * Only digits 0-9 can be typed (no exponent); with `isDecimal` also one separator, comma or dot, and
+ * with `isSigned` a minus at the start.
  */
 @Component({
   selector: 'app-filled-number-field',
@@ -44,11 +44,21 @@ export class FilledNumberField {
   readonly autocomplete = input<string>();
   readonly isDecimal = input(false);
   readonly isCurrency = input(false);
+  /** Decimals that can be typed with `isDecimal`: 2 for a currency and any number of them otherwise. */
+  readonly maxDecimals = input<number>();
+  /** Negative numbers too: a minus at the start, kept on the left also in Arabic. */
+  readonly isSigned = input(false);
   /** The digits are dots, as in a password field, with the eye after them to show them. */
   readonly isMasked = input(false);
-  /** Icons as Material icon names (Material Symbols font): [currency, content shown, content hidden]. */
+  /**
+   * Icons as Material icon names (Material Symbols font): [currency, content shown, content hidden,
+   * before the number].
+   */
   readonly matIcon = input<readonly string[] | null>();
-  /** Icons as image paths, used when `matIcon` is not given: [currency, content shown, content hidden]. */
+  /**
+   * Icons as image paths, used when `matIcon` is not given: [currency, content shown, content hidden,
+   * before the number].
+   */
   readonly pathIcon = input<readonly string[] | null>();
   readonly error = input<string | null>();
   /** The field was left: a Signal Forms `[formField]` marks it as touched. */
@@ -66,8 +76,14 @@ export class FilledNumberField {
   protected readonly inputType = computed(() =>
     this.isMasked() && !this.visible() ? 'password' : 'text',
   );
+  /** Number pads have no minus: a signed field opens the full keyboard. */
+  protected readonly inputMode = computed(() =>
+    this.isSigned() ? null : this.isDecimal() ? 'decimal' : 'numeric',
+  );
   protected readonly decimals = computed(() =>
-    !this.isDecimal() ? 0 : this.isCurrency() ? CURRENCY_DECIMALS : Infinity,
+    this.isDecimal()
+      ? (this.maxDecimals() ?? (this.isCurrency() ? CURRENCY_DECIMALS : Infinity))
+      : 0,
   );
   /**
    * Text in the field. It stays as typed while it means the same number (e.g. "3," while typing
@@ -89,11 +105,17 @@ export class FilledNumberField {
 
   protected changeValue(field: HTMLInputElement): void {
     const decimals = this.decimals();
-    const text = keepNumber(field.value, decimals);
+    const isSigned = this.isSigned();
+    const kept = keepNumber(field.value, decimals, isSigned);
+    const sign = kept.startsWith('-') ? 1 : 0;
+    const zeros = leadingZeros(kept.slice(sign));
+    const text = kept.slice(0, sign) + kept.slice(sign + zeros);
     if (text !== field.value) {
-      const cursor = keepNumber(field.value.slice(0, field.selectionStart ?? 0), decimals).length;
+      const before = field.value.slice(0, field.selectionStart ?? 0);
+      const cursor = keepNumber(before, decimals, isSigned).length;
+      const position = Math.max(Math.min(cursor, sign), cursor - zeros);
       field.value = text;
-      field.setSelectionRange(cursor, cursor);
+      field.setSelectionRange(position, position);
     }
     this.text.set(text);
     this.value.set(toNumber(text));
@@ -104,7 +126,7 @@ export class FilledNumberField {
   }
 }
 
-function keepNumber(text: string, decimals: number): string {
+function keepNumber(text: string, decimals: number, isSigned: boolean): string {
   let kept = '';
   let separator = false;
   let fraction = 0;
@@ -117,12 +139,23 @@ function keepNumber(text: string, decimals: number): string {
     } else if ((char === ',' || char === '.') && decimals > 0 && !separator) {
       separator = true;
       kept += char;
+    } else if (char === '-' && isSigned && kept === '') {
+      kept += char;
     }
   }
   return kept;
 }
 
-/** Empty text or a lone separator is `null`. */
+/** Zeros before another digit: "007" has 2, while "0" and "0,5" keep their zero. */
+function leadingZeros(text: string): number {
+  let zeros = 0;
+  while (text[zeros] === '0' && /[0-9]/.test(text[zeros + 1] ?? '')) {
+    zeros++;
+  }
+  return zeros;
+}
+
+/** Empty text, a lone separator or a lone minus is `null`. */
 function toNumber(text: string): number | null {
   const number = text === '' ? NaN : Number(text.replace(',', '.'));
   return Number.isFinite(number) ? number : null;

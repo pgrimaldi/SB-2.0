@@ -14,9 +14,15 @@
       />
       <app-filled-multi-select
         [label]="'management.settings.user_management.logs.filters_popup.user' | translate"
-        [placeholder]="'management.settings.user_management.logs.filters_popup.choose' | translate"
+        [placeholder]="
+          users.loadError()
+            ? ''
+            : ('management.settings.user_management.logs.filters_popup.choose' | translate)
+        "
         [options]="userOptions()"
         [(value)]="idUsers"
+        [error]="users.loadError()"
+        (openRequest)="users.retry()"
       />
     </div>
 
@@ -25,7 +31,7 @@
         [appearance]="ButtonAppearance.Light"
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
-        (clicked)="close()"
+        (clicked)="leave()"
       >
         {{ 'management.settings.user_management.logs.filters_popup.cancel' | translate }}
       </app-button>

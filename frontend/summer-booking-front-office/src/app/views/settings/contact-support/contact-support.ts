@@ -21,6 +21,7 @@ import {
 import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
+import { comparableJson } from '../../../components/shared/forms/text-comparison';
 import { requiredText } from '../../../components/shared/forms/validators';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
@@ -104,12 +105,11 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
     // Loaded again when the language changes: the support hours come translated by the server.
     effect((onCleanup) => {
       this.dataReload?.();
-      const idProperty = this.auth.user()?.propertyId;
-      if (!idProperty) {
+      if (!this.auth.user()?.propertyId) {
         return;
       }
       const subscription = untracked(() =>
-        this.system.supportInfo(idProperty).subscribe({
+        this.system.supportInfo().subscribe({
           next: (supportInfo) => {
             this.supportInfo.set(supportInfo);
             this.supportInfoError.set(null);
@@ -125,13 +125,12 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.contactForm().dirty();
+    return comparableJson(this.contact()) !== comparableJson(new ContactSupportRequest());
   }
 
   protected send(event: Event): void {
     event.preventDefault();
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty) {
+    if (this.isLoading() || !this.auth.user()?.propertyId) {
       return;
     }
     // Every field becomes touched and nothing is sent while one is wrong; an error of the backend on
@@ -144,7 +143,6 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
         await firstValueFrom(
           this.system.contactSupport({
             ...contact,
-            idProperty,
             firstName: trimmed(contact.firstName),
             lastName: trimmed(contact.lastName),
             email: trimmed(contact.email),

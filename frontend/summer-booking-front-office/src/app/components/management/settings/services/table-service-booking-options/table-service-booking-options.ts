@@ -6,7 +6,10 @@ import { Observable } from 'rxjs';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { TableServiceBookingPayment } from '../../../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../../../entities/enums/table-service-deposit-mode';
-import { TableServiceMealDuration } from '../../../../../entities/enums/table-service-meal-duration';
+import {
+  TABLE_SERVICE_MEAL_DURATION_MINUTES,
+  TableServiceMealDuration,
+} from '../../../../../entities/enums/table-service-meal-duration';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { ConfirmPopup } from '../../../../shared/ui/dialogs/confirm-popup/confirm-popup';
 import { InfoPopup } from '../../../../shared/ui/dialogs/info-popup/info-popup';
@@ -19,6 +22,7 @@ import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 
 interface MealDurationTexts {
+  none: string;
   thirty_minutes: string;
   forty_five_minutes: string;
   one_hour: string;
@@ -76,11 +80,12 @@ const MEAL_DURATION_KEYS: Readonly<Record<TableServiceMealDuration, keyof MealDu
 })
 export class TableServiceBookingOptions {
   /** The fields of the form of the panel, which validates and saves them. */
-  readonly averageMealDuration = input.required<FieldTree<TableServiceMealDuration | null>>();
+  readonly averageMealMinutes = input.required<FieldTree<number | null>>();
   readonly maxBookingPerTimeSlotQuantity = input.required<FieldTree<number | null>>();
   readonly bookingPayment = input.required<FieldTree<TableServiceBookingPayment>>();
   readonly depositMode = input.required<FieldTree<TableServiceDepositMode>>();
   readonly depositPercentage = input.required<FieldTree<number | null>>();
+  readonly depositAmount = input.required<FieldTree<number | null>>();
 
   private readonly translateService = inject(TranslateService);
   protected readonly validationText = inject(ValidationTextBehaviour);
@@ -101,12 +106,23 @@ export class TableServiceBookingOptions {
     ) as Observable<BookingOptionsTexts>,
     { initialValue: null },
   );
-  protected readonly mealDurations = computed<readonly SelectOption<TableServiceMealDuration>[]>(
+  /** First the empty choice, to take the duration away. */
+  protected readonly mealDurations = computed<
+    readonly SelectOption<TableServiceMealDuration | ''>[]
+  >(() => [
+    { value: '', label: this.texts()?.meal_durations.none ?? '' },
+    ...Object.values(TableServiceMealDuration).map((value) => ({
+      value,
+      label: this.texts()?.meal_durations[MEAL_DURATION_KEYS[value]] ?? '',
+    })),
+  ]);
+  /** The choice of the minutes; none for other minutes, which stay until one is chosen. */
+  protected readonly mealDuration = computed(
     () =>
-      Object.values(TableServiceMealDuration).map((value) => ({
-        value,
-        label: this.texts()?.meal_durations[MEAL_DURATION_KEYS[value]] ?? '',
-      })),
+      Object.values(TableServiceMealDuration).find(
+        (value) =>
+          TABLE_SERVICE_MEAL_DURATION_MINUTES[value] === this.averageMealMinutes()().value(),
+      ) ?? null,
   );
   protected readonly payments = computed<readonly RadioOption<TableServiceBookingPayment>[]>(() => [
     { value: TableServiceBookingPayment.None, label: this.texts()?.payments.none ?? '' },
@@ -122,6 +138,19 @@ export class TableServiceBookingOptions {
     ],
   );
 
+  protected chooseMealDuration(duration: TableServiceMealDuration | '' | null): void {
+    const field = this.averageMealMinutes()();
+    field.value.set(duration ? TABLE_SERVICE_MEAL_DURATION_MINUTES[duration] : null);
+    field.markAsDirty();
+  }
+
+  /** The percentage written takes the place of the amount read. */
+  protected changeDepositPercentage(percentage: number | null): void {
+    if (percentage !== null) {
+      this.depositAmount()().value.set(null);
+    }
+  }
+
   /** Leaving the deposit with its data typed asks first: the data is lost. */
   protected changePayment(payment: TableServiceBookingPayment | null): void {
     if (payment === TableServiceBookingPayment.None && this.hasDeposit()) {
@@ -132,6 +161,7 @@ export class TableServiceBookingOptions {
   protected confirmPaymentChange(): void {
     this.depositMode()().value.set(TableServiceDepositMode.Total);
     this.depositPercentage()().value.set(null);
+    this.depositAmount()().value.set(null);
     this.isAskingPaymentChange.set(false);
   }
 
@@ -147,6 +177,7 @@ export class TableServiceBookingOptions {
   private hasDeposit(): boolean {
     return (
       this.depositPercentage()().value() !== null ||
+      this.depositAmount()().value() !== null ||
       this.depositMode()().value() !== TableServiceDepositMode.Total
     );
   }

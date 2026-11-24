@@ -1,12 +1,12 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { SharingGeneralInformation } from '../../../entities/settings/sharing/sharing-general-information';
+import { SharingSaveInformationRequest } from '../../../entities/settings/sharing/sharing-save-information-request';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { forbidden } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
-let generalInformation: SharingGeneralInformation = {
+let generalInformation: SharingSaveInformationRequest = {
   isSharingEnabled: true,
   isMinimumBookingDayEnabled: true,
   minimumBookingDayQuantity: 3,
@@ -23,8 +23,8 @@ let generalInformation: SharingGeneralInformation = {
 };
 
 /**
- * `GET /api/sharing/general-information?idProperty=…`: the sharing settings of the property. 401
- * without a valid access token; 403 for a missing or unknown property.
+ * `GET /api/sharing/general-information`: the sharing settings of the property and their version.
+ * 401 without a valid access token.
  */
 export const sharingGeneralInformationMock = (
   request: HttpRequest<unknown>,
@@ -32,18 +32,20 @@ export const sharingGeneralInformationMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  if (!propertyOf(request.params.get('idProperty'))) {
-    return forbidden(request);
-  }
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: { ...generalInformation } }),
-  ).pipe(delay(150));
+  const information: SharingGeneralInformation = {
+    ...generalInformation,
+    version: versionOf(generalInformation),
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body: information })).pipe(
+    delay(150),
+  );
 };
 
 /**
- * `POST /api/sharing/save-information` with every setting of the page and `idProperty`: keeps them
- * (until the page is reloaded). 204 without a body; 401 without a valid access token; 403 for a
- * missing or unknown property.
+ * `POST /api/sharing/save-information` with every setting of the page and the version read in
+ * `If-Match`: keeps them (until the page is reloaded). 204 without a body, the new version in
+ * `ETag`; 401 without a valid access token; 409 `resource.version_conflict` when the settings
+ * changed after the read.
  */
 export const saveSharingInformationMock = (
   request: HttpRequest<unknown>,
@@ -51,15 +53,14 @@ export const saveSharingInformationMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<SharingGeneralInformation> & {
-    idProperty?: unknown;
-  };
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
+  const conflict = versionConflict(request, generalInformation);
+  if (conflict) {
+    return conflict;
   }
-  generalInformation = onlyFieldsOf(SharingGeneralInformation, {
+  const body = (request.body ?? {}) as Partial<SharingSaveInformationRequest>;
+  generalInformation = onlyFieldsOf(SharingSaveInformationRequest, {
     ...generalInformation,
     ...body,
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, generalInformation);
 };

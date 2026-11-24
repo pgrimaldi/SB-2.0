@@ -74,18 +74,15 @@ export class ConfirmDeleteBookingPopup {
   }
 
   protected confirm(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idBookings = [...this.idBookings()];
-    if (this.isLoading() || !idProperty || !idBookings.length) {
+    if (this.isLoading() || !this.auth.user()?.propertyId || !idBookings.length) {
       return;
     }
     void submit(this.requestForm, async (): Promise<TreeValidationResult> => {
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(
-          this.database.moveToTrash(idProperty, { ...this.request(), idBookings }),
-        );
+        await firstValueFrom(this.database.moveToTrash({ ...this.request(), idBookings }));
         this.isLoading.set(false);
         this.open.set(false);
         this.confirmed.emit(idBookings);

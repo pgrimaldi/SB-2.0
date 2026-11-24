@@ -33,10 +33,11 @@ export class DuplicateItemsPopup {
   readonly idItems = input<readonly string[]>([]);
   readonly itemName = input<string | null>(null);
   readonly translationKey = input.required<string>();
-  readonly action = input.required<(idProperty: string, idItems: string[]) => Observable<void>>();
+  readonly action = input.required<(idItems: string[]) => Observable<void>>();
   /** [X of both popups, warning of the error popup]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly duplicated = output<readonly string[]>();
+  readonly failed = output<ApiProblem>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
@@ -52,22 +53,23 @@ export class DuplicateItemsPopup {
   );
 
   protected duplicateItems(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idItems = [...this.idItems()];
-    if (this.isLoading() || !idProperty || !idItems.length) {
+    if (this.isLoading() || !this.auth.user()?.propertyId || !idItems.length) {
       return;
     }
     this.open.set(false);
     this.isLoading.set(true);
-    this.action()(idProperty, idItems).subscribe({
+    this.action()(idItems).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.duplicated.emit(idItems);
       },
       error: (error: unknown) => {
+        const problem = toApiProblem(error);
         this.isLoading.set(false);
-        this.error.set(toApiProblem(error));
+        this.error.set(problem);
         this.isErrorShown.set(true);
+        this.failed.emit(problem);
       },
     });
   }

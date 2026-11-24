@@ -8,7 +8,7 @@
     #table
     [columns]="columns()"
     [params]="params()"
-    [load]="warehouse.list"
+    [load]="warehouse.inventoryItemsList"
     idField="idArticle"
     [texts]="'table' | translate"
     [isSearchable]="true"
@@ -36,6 +36,9 @@
   [item]="editedItem()"
   [(open)]="editing"
   (saved)="table.reload()"
+  (failed)="
+    reloadIfGone($event, table, [editedItem()?.idArticle ?? null]); reloadIfChanged($event, table)
+  "
 />
 <app-delete-items-popup
   [idItems]="idItemsToDelete()"
@@ -45,6 +48,7 @@
   [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idItemsToDelete())"
 />
 <app-duplicate-items-popup
   [idItems]="idItemsToDuplicate()"
@@ -54,6 +58,7 @@
   [pathIcon]="alertIcons"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idItemsToDuplicate())"
 />
 
 <app-table-error-popup

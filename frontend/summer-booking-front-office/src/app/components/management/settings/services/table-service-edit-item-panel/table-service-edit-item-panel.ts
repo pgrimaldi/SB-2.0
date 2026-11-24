@@ -13,11 +13,13 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  MAX_LENGTH,
   TreeValidationResult,
   applyEach,
   applyWhen,
   disabled,
   form,
+  metadata,
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -29,14 +31,23 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldErrorsOrGeneral,
+  clearApiFieldErrors,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { TableServiceAvailabilityMode } from '../../../../../entities/enums/table-service-availability-mode';
 import { TableServiceBookingPayment } from '../../../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../../../entities/enums/table-service-deposit-mode';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import {
+  MAX_SERVICE_DESCRIPTION_LENGTH,
+  MAX_SERVICE_NAME_LENGTH,
+  ServiceTranslation,
+} from '../../../../../entities/settings/services/service-translation';
 import { TableServiceAddItemRequest } from '../../../../../entities/settings/services/table-service-add-item-request';
 import { TableServiceAvailability } from '../../../../../entities/settings/services/table-service-availability';
+import { TableServiceAvailabilityDraft } from '../../../../../entities/settings/services/table-service-availability-draft';
 import { TableServiceAvailabilityDay } from '../../../../../entities/settings/services/table-service-availability-day';
 import { TableServiceSelectedAvailabilityBookings } from '../../../../../entities/settings/services/table-service-selected-availability-bookings';
 import { TableServiceSelectedGeneralInfo } from '../../../../../entities/settings/services/table-service-selected-general-info';
@@ -51,9 +62,14 @@ import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/butt
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { SidePanelButtons } from '../../../../shared/ui/dialogs/side-panel/side-panel-buttons';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
+import { hiddenTableServiceFields } from '../service-field-errors';
+import { otherTranslationRules, tableServiceRules } from '../service-form-rules';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 import { TableServiceAvailabilityBookingsTab } from '../table-service-availability-bookings-tab/table-service-availability-bookings-tab';
 import { TableServiceGeneralInfoTab } from '../table-service-general-info-tab/table-service-general-info-tab';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 interface ServiceFormTexts {
   tabs: {
@@ -76,11 +92,14 @@ const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof TableServiceAddItemR
     'availabilityMode',
     'tableGroups',
     'totalSeatQuantity',
-    'averageMealDuration',
+    'averageMealMinutes',
     'maxBookingPerTimeSlotQuantity',
+    'minSeatPerBookingQuantity',
+    'maxSeatPerBookingQuantity',
     'bookingPayment',
     'depositMode',
     'depositPercentage',
+    'depositAmount',
     'isOnlineBookingEnabled',
   ],
 };
@@ -89,12 +108,14 @@ const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof TableServiceAddItemR
   selector: 'app-table-service-edit-item-panel',
   imports: [
     Button,
+    ReadErrorPopup,
     SidePanel,
     SidePanelButtons,
     TabGroup,
     TableServiceAvailabilityBookingsTab,
     TableServiceGeneralInfoTab,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './table-service-edit-item-panel.html',
   styleUrl: './table-service-edit-item-panel.scss',
@@ -106,6 +127,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly updated = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly catalog = inject(CatalogService);
@@ -139,6 +161,8 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly draftForm = form(this.draft, (path) => {
     disabled(path, () => this.isLocked());
     applyEach(path.translations, (translation) => {
+      metadata(translation.serviceName, MAX_LENGTH, () => MAX_SERVICE_NAME_LENGTH);
+      metadata(translation.description, MAX_LENGTH, () => MAX_SERVICE_DESCRIPTION_LENGTH);
       applyWhen(
         translation,
         ({ valueOf }) =>
@@ -148,6 +172,13 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
           requiredText(main.serviceName);
           requiredText(main.description);
         },
+      );
+      applyWhen(
+        translation,
+        ({ valueOf }) =>
+          this.selectedTab() === PanelTab.GeneralInfo &&
+          valueOf(translation.language) !== this.mainLanguage(),
+        otherTranslationRules,
       );
     });
     applyEach(path.availabilities, (availability) => {
@@ -161,6 +192,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         disabled(day.endTime, ({ valueOf }) => valueOf(availability.isSameTimeForAllDays));
       });
     });
+    applyWhen(path, () => this.selectedTab() === PanelTab.AvailabilityBookings, tableServiceRules);
   });
   /** The values as the APIs gave them, tab by tab: the form is compared with them. */
   private readonly pristine = signal(newDraft());
@@ -168,14 +200,28 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
   /** The tabs whose data are being read: their fields cannot be used meanwhile. */
   private readonly loadingTabs = signal<ReadonlySet<PanelTab>>(new Set());
+  /** The version of each tab read: its save sends it back. */
+  private readonly versions = new Map<PanelTab, string | null>();
   protected readonly isEditDisabled = computed(() => {
     const tab = this.selectedTab() as PanelTab;
     return this.loadingTabs().has(tab) || !this.loadedTabs().has(tab);
   });
   protected readonly isSaveDisabled = computed(
-    () => this.loadingTabs().has(this.selectedTab()) || this.draftForm().invalid(),
+    () =>
+      this.loadingTabs().has(this.selectedTab()) ||
+      !this.loadedTabs().has(this.selectedTab()) ||
+      this.draftForm().invalid(),
   );
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
+  private readonly tabErrors = signal<ReadonlyMap<PanelTab, ApiProblem>>(new Map());
+  protected readonly tabErrorMessage = toSignal(
+    toObservable(computed(() => this.tabErrors().get(this.selectedTab() as PanelTab) ?? null)).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -183,18 +229,22 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     { initialValue: null },
   );
   private readonly loadings = new Map<PanelTab, Subscription>();
+  /** Changed by someone else: the user is told once the tab has been read again. */
+  private isConflictPending = false;
 
   constructor() {
     this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
         untracked(() => this.reset());
+      } else {
+        untracked(() => this.stopLoadings());
       }
     });
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && JSON.stringify(this.draft()) !== JSON.stringify(this.pristine());
+    return this.open() && comparableJson(this.draft()) !== comparableJson(this.pristine());
   }
 
   protected isLoading(tab: PanelTab): boolean {
@@ -202,15 +252,27 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected startEdit(): void {
+    if (this.isEditDisabled()) {
+      return;
+    }
     this.error.set(null);
     this.isEditing.set(true);
+    // What was read already wrong shows at once: it keeps Salva off.
+    this.draftForm().markAsTouched();
   }
 
   /** Annulla: the tab goes back to the values read, only to look at. */
+  protected async requestCancel(): Promise<void> {
+    if (await this.unsaved.confirmDiscard(this)) {
+      this.cancelEdit();
+    }
+  }
+
   protected cancelEdit(): void {
     const tab = this.selectedTab() as PanelTab;
     const pristine = structuredClone(this.pristine());
     this.draft.update((draft) => ({ ...draft, ...pick(pristine, tab) }));
+    clearApiFieldErrors(this.draftForm);
     this.draftForm().reset();
     this.error.set(null);
     this.isEditing.set(false);
@@ -239,9 +301,13 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Salva: only the tab being edited, with its API. */
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idTableService = this.idTableService();
-    if (this.isSaving() || !idProperty || !idTableService) {
+    if (
+      this.isSaving() ||
+      this.isSaveDisabled() ||
+      !this.auth.user()?.propertyId ||
+      !idTableService
+    ) {
       return;
     }
     const tab = this.selectedTab() as PanelTab;
@@ -249,13 +315,23 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.update(tab, idProperty, idTableService));
+        await firstValueFrom(this.update(tab, idTableService));
         this.isSaving.set(false);
         this.open.set(false);
         this.updated.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictPending = true;
+          this.reloadTab(tab);
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(
+          problem,
+          this.draftForm,
+          (general) => this.error.set(general),
+          hiddenTableServiceFields(this.draft()),
         );
       } finally {
         this.isSaving.set(false);
@@ -277,6 +353,11 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
     this.error.set(null);
+    this.tabErrors.update((errors) => {
+      const next = new Map(errors);
+      next.delete(tab);
+      return next;
+    });
     this.setLoading(tab, true);
     if (tab === PanelTab.GeneralInfo) {
       this.loadings.set(
@@ -303,40 +384,78 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
   }
 
-  /** The tab is read again the next time it is opened. */
+  /**
+   * At the opening (no tab read yet) the panel closes for the read-error popup; later the error stays
+   * in the tab, with Riprova.
+   */
   private loadFailed(tab: PanelTab, error: unknown): void {
     this.loadedTabs.update((tabs) => {
       const next = new Set(tabs);
       next.delete(tab);
       return next;
     });
-    this.error.set(toApiProblem(error));
+    this.isConflictPending = false;
+    const problem = toApiProblem(error);
+    this.failed.emit(problem);
+    if (this.loadedTabs().size === 0) {
+      this.readError.set(problem);
+      this.open.set(false);
+      return;
+    }
+    this.tabErrors.update((errors) => new Map(errors).set(tab, problem));
   }
 
-  /** The update API of the tab, with the fields of that tab only. */
-  private update(tab: PanelTab, idProperty: string, idTableService: string): Observable<void> {
+  private reloadTab(tab: PanelTab): void {
+    this.cancelEdit();
+    this.loadedTabs.update((tabs) => {
+      const next = new Set(tabs);
+      next.delete(tab);
+      return next;
+    });
+    this.loadTab(tab);
+  }
+
+  /** The update API of the tab, with the fields of that tab only, and the version read. */
+  private update(tab: PanelTab, idTableService: string): Observable<string | null> {
     const draft = this.draft();
+    const version = this.versions.get(tab) ?? null;
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateTableServiceGeneral(
-        idProperty,
         Object.assign(new TableServiceUpdateGeneralRequest(), {
           idTableService,
           ...pick(draft, tab),
         }),
+        version,
       );
     }
     return this.catalog.updateTableServiceAvailabilityBookings(
-      idProperty,
       Object.assign(new TableServiceUpdateAvailabilityBookingsRequest(), {
         idTableService,
         ...pick(draft, tab),
       }),
+      version,
     );
   }
 
-  private reset(): void {
+  protected retryRead(): void {
+    this.open.set(true);
+  }
+
+  protected retryTab(): void {
+    this.loadTab(this.selectedTab());
+  }
+
+  /** Closed while a tab is being read: its answer, or its error, is not wanted any more. */
+  private stopLoadings(): void {
     this.loadings.forEach((loading) => loading.unsubscribe());
     this.loadings.clear();
+  }
+
+  private reset(): void {
+    this.tabErrors.set(new Map());
+    this.stopLoadings();
+    this.isConflictPending = false;
+    this.versions.clear();
     this.loadedTabs.set(new Set());
     this.loadingTabs.set(new Set());
     this.error.set(null);
@@ -352,6 +471,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Name and description in every language, also those the API leaves out (empty). */
   private setGeneralInfo(info: TableServiceSelectedGeneralInfo): void {
+    this.versions.set(PanelTab.GeneralInfo, info.version);
     this.applyLoaded({
       translations: SERVICE_LANGUAGES.map((language) => {
         const translation = info.translations.find((item) => item.language === language);
@@ -365,30 +485,23 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     });
   }
 
-  /** Every availability with its seven days, also those the API leaves out (unticked). */
   private setAvailabilityBookings(values: TableServiceSelectedAvailabilityBookings): void {
+    this.versions.set(PanelTab.AvailabilityBookings, values.version);
     this.applyLoaded({
-      availabilities: values.availabilities.map((availability) =>
-        Object.assign(new TableServiceAvailability(), availability, {
-          days: DAYS_OF_WEEK.map(({ number }) =>
-            Object.assign(
-              new TableServiceAvailabilityDay(),
-              availability.days.find((day) => day.dayOfWeek === number),
-              { dayOfWeek: number },
-            ),
-          ),
-        }),
-      ),
+      availabilities: values.availabilities.map(availabilityDraftOf),
       availabilityMode: values.availabilityMode ?? TableServiceAvailabilityMode.Tables,
       tableGroups: values.tableGroups.map((tableGroup) =>
         Object.assign(new TableServiceTableGroup(), tableGroup),
       ),
       totalSeatQuantity: values.totalSeatQuantity,
-      averageMealDuration: values.averageMealDuration,
+      averageMealMinutes: values.averageMealMinutes,
       maxBookingPerTimeSlotQuantity: values.maxBookingPerTimeSlotQuantity,
+      minSeatPerBookingQuantity: values.minSeatPerBookingQuantity,
+      maxSeatPerBookingQuantity: values.maxSeatPerBookingQuantity,
       bookingPayment: values.bookingPayment ?? TableServiceBookingPayment.None,
       depositMode: values.depositMode ?? TableServiceDepositMode.Total,
       depositPercentage: values.depositPercentage,
+      depositAmount: values.depositAmount,
       isOnlineBookingEnabled: values.isOnlineBookingEnabled ?? false,
     });
   }
@@ -397,6 +510,10 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   private applyLoaded(values: Partial<TableServiceAddItemRequest>): void {
     this.draft.update((draft) => ({ ...draft, ...values }));
     this.pristine.update((pristine) => ({ ...pristine, ...structuredClone(values) }));
+    if (this.isConflictPending) {
+      this.isConflictPending = false;
+      this.isConflictShown.set(true);
+    }
   }
 
   private setLoading(tab: PanelTab, isLoading: boolean): void {
@@ -413,7 +530,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
-    this.loadings.forEach((loading) => loading.unsubscribe());
+    this.stopLoadings();
   }
 }
 
@@ -423,6 +540,33 @@ function newDraft(): TableServiceAddItemRequest {
     translations: SERVICE_LANGUAGES.map((language) =>
       Object.assign(new ServiceTranslation(), { language }),
     ),
+  });
+}
+
+/**
+ * A saved availability with its seven days, also those the API leaves out (unticked). When two days
+ * or more are ticked, all with the same hours, these are the hours for all the days.
+ */
+function availabilityDraftOf(saved: TableServiceAvailability): TableServiceAvailabilityDraft {
+  const days = DAYS_OF_WEEK.map(({ number }) =>
+    Object.assign(
+      new TableServiceAvailabilityDay(),
+      saved.days.find((day) => day.dayOfWeek === number),
+      { dayOfWeek: number },
+    ),
+  );
+  const [first, ...others] = days.filter(({ isEnabled }) => isEnabled);
+  const isSameTimeForAllDays =
+    others.length > 0 &&
+    others.every(
+      ({ startTime, endTime }) => startTime === first.startTime && endTime === first.endTime,
+    );
+  const times = isSameTimeForAllDays
+    ? { startTime: first.startTime, endTime: first.endTime }
+    : { startTime: null, endTime: null };
+  return Object.assign(new TableServiceAvailabilityDraft(), saved, times, {
+    isSameTimeForAllDays,
+    days: isSameTimeForAllDays ? days.map((day) => ({ ...day, ...times })) : days,
   });
 }
 

@@ -19,9 +19,15 @@
       />
       <app-filled-multi-select
         [label]="'management.settings.database.filters.agreement_structure.label' | translate"
-        [placeholder]="'management.settings.database.filters.choose' | translate"
+        [placeholder]="
+          affiliatedHotels.loadError()
+            ? ''
+            : ('management.settings.database.filters.choose' | translate)
+        "
         [options]="affiliatedHotelOptions()"
         [(value)]="idAffiliatedHotels"
+        [error]="affiliatedHotels.loadError()"
+        (openRequest)="affiliatedHotels.retry()"
       />
       <app-filled-multi-select
         [label]="'management.settings.database.filters.payment_status.label' | translate"
@@ -36,7 +42,7 @@
         [appearance]="ButtonAppearance.Light"
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
-        (clicked)="close()"
+        (clicked)="leave()"
       >
         {{ 'management.settings.database.filters.cancel' | translate }}
       </app-button>

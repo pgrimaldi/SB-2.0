@@ -9,21 +9,32 @@
       <app-filled-text-field
         class="season__period__add__popup__field"
         autocomplete="off"
-        [formField]="draftForm.periodName"
-        [error]="periodNameError()"
+        [formField]="draftForm.name"
+        [error]="nameError()"
       />
     </app-form-row>
 
     <app-period-calendar
       [texts]="'management.settings.seasons.add_popup.calendar' | translate"
       [pathIcon]="calendarIcons"
-      [minDate]="season()?.dateFrom ?? null"
-      [maxDate]="season()?.dateTo ?? null"
+      [minDate]="season()?.startsOn ?? null"
+      [maxDate]="season()?.endsOn ?? null"
       [disabledPeriods]="takenIntervals()"
-      [formField]="draftForm.intervals"
+      [formField]="draftForm.ranges"
     />
     @if (intervalsError(); as intervalsError) {
       <p class="season__period__add__popup__error">{{ intervalsError }}</p>
+    }
+
+    @if (isSeasonMissing()) {
+      <p class="season__period__add__popup__error">
+        {{
+          (isNextSeason()
+            ? 'invalidate.seasons.next_season_required'
+            : 'invalidate.seasons.season_required'
+          ) | translate
+        }}
+      </p>
     }
 
     @if (errorMessage(); as errorMessage) {

@@ -92,6 +92,7 @@
               <app-checkbox
                 class="table__service__availabilities__check"
                 [formField]="day.isEnabled"
+                (checkedChange)="touchDay(availability, day)"
               >
                 {{ dayName(day.dayOfWeek().value()) }}
               </app-checkbox>
@@ -117,10 +118,32 @@
                   [error]="validationText.text(day.endTime)"
                 />
               </div>
+              @if (day.otherTimeSlots().value().length) {
+                <p class="table__service__availabilities__others">
+                  {{ 'management.settings.services.form.tables.other_time_slots' | translate }}
+                  @for (timeSlot of day.otherTimeSlots().value(); track $index) {
+                    <span dir="ltr" class="table__service__availabilities__other">
+                      {{ timeSlot.startTime }}–{{ timeSlot.endTime }}
+                    </span>
+                  }
+                </p>
+              }
             </div>
+          }
+          @if (
+            validationText.text(
+              availability.days,
+              'management.settings.services.form.availability.field_names.day_of_week'
+            );
+            as error
+          ) {
+            <p class="table__service__availabilities__error">{{ error }}</p>
           }
         </div>
       </app-form-row>
     </div>
+  }
+  @if (validationText.text(form()); as error) {
+    <p class="table__service__availabilities__error">{{ error }}</p>
   }
 </section>

@@ -42,8 +42,20 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
     label: 'management.settings.menu.seasons',
     loadChildren: () => import('./seasons/seasons.routes').then((routes) => routes.SEASONS_ROUTES),
   },
-  { path: 'sectors', label: 'management.settings.menu.sectors' },
-  { path: 'map', label: 'management.settings.menu.map' },
+  {
+    path: 'rows-and-sectors',
+    label: 'management.settings.menu.sectors',
+    loadComponent: () =>
+      import('./rows-and-sectors/rows-and-sectors').then((component) => component.RowsAndSectors),
+  },
+  {
+    path: 'map-configuration',
+    label: 'management.settings.menu.map',
+    loadComponent: () =>
+      import('./map-configuration/map-configuration').then(
+        (component) => component.MapConfiguration,
+      ),
+  },
   {
     path: 'warehouse-setting',
     label: 'management.settings.menu.warehouse',
@@ -52,7 +64,11 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
         (component) => component.WarehouseSetting,
       ),
   },
-  { path: 'price-list', label: 'management.settings.menu.price_list' },
+  {
+    path: 'catalog',
+    label: 'management.settings.menu.price_list',
+    loadChildren: () => import('./catalog/catalog.routes').then((routes) => routes.CATALOG_ROUTES),
+  },
   {
     path: 'services',
     label: 'management.settings.menu.services',

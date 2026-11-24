@@ -11,11 +11,14 @@
       <app-filled-text-field
         class="season__period__edit__popup__field"
         autocomplete="off"
-        [formField]="draftForm.periodName"
-        [error]="periodNameError()"
+        [formField]="draftForm.name"
+        [error]="nameError()"
       />
     </app-form-row>
 
+    @if (rangesError(); as rangesError) {
+      <p class="season__period__edit__popup__error">{{ rangesError }}</p>
+    }
     @if (errorMessage(); as errorMessage) {
       <p class="season__period__edit__popup__error">{{ errorMessage }}</p>
     }
@@ -42,3 +45,4 @@
     </div>
   </div>
 </ng-template>
+<app-version-conflict-popup [pathIcon]="pathIcon()" [(open)]="isConflictShown" />

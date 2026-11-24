@@ -6,6 +6,8 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { Observable, Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { DuplicateItemsPopup } from './duplicate-items-popup';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../entities/errors/api-problem';
 
 @Component({
   imports: [DuplicateItemsPopup],
@@ -16,14 +18,16 @@ import { DuplicateItemsPopup } from './duplicate-items-popup';
     [action]="action"
     [(open)]="open"
     (duplicated)="duplicated = $event"
+    (failed)="failed = $event"
   />`,
 })
 class DuplicateItemsPopupHost {
   readonly idItems = signal<readonly string[]>(['a1']);
   readonly itemName = signal<string | null>('Lettino');
   readonly open = signal(false);
-  action: (idProperty: string, idItems: string[]) => Observable<void> = vi.fn();
+  action: (idItems: string[]) => Observable<void> = vi.fn();
   duplicated: readonly string[] = [];
+  failed: ApiProblem | null = null;
 }
 
 describe('DuplicateItemsPopup', () => {
@@ -60,7 +64,7 @@ describe('DuplicateItemsPopup', () => {
     });
 
     await confirm();
-    expect(action).toHaveBeenCalledWith('p1', ['a1', 'a2']);
+    expect(action).toHaveBeenCalledWith(['a1', 'a2']);
     expect(host.open()).toBe(false);
     expect(document.querySelector('.page__spinner')).not.toBeNull();
 
@@ -71,14 +75,14 @@ describe('DuplicateItemsPopup', () => {
     expect(host.duplicated).toEqual(['a1', 'a2']);
   });
 
-  it('should show the error in a popup when nothing is duplicated', async () => {
+  it('should show the error in a popup and give it to the page when nothing is duplicated', async () => {
     const { host, confirm } = await setup((page) => {
       page.action = () =>
         throwError(
           () =>
             new HttpErrorResponse({
               status: 400,
-              error: { status: 400, code: 'validation.failed', title: 'Invalid request' },
+              error: { status: 400, code: ApiErrorCode.ValidationFailed, title: 'Invalid request' },
             }),
         );
     });
@@ -86,6 +90,7 @@ describe('DuplicateItemsPopup', () => {
     await confirm();
     expect(host.open()).toBe(false);
     expect(host.duplicated).toEqual([]);
+    expect(host.failed?.code).toBe(ApiErrorCode.ValidationFailed);
     expect(document.querySelector('.page__spinner')).toBeNull();
     // The message of the code (here the fallback key: the test has no translations).
     expect(document.querySelector('.alert__popup__text')?.textContent?.trim()).toBe(

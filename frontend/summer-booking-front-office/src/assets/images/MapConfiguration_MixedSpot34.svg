@@ -1,0 +1,7 @@
+<svg width="71" height="71" viewBox="0 0 71 71" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs><radialGradient id="outer" cx="35.5" cy="35" r="32.5" gradientUnits="userSpaceOnUse"><stop offset="0.68" stop-color="#EF8515"/><stop offset="0.77" stop-color="#E1710F"/><stop offset="1" stop-color="#C24503"/></radialGradient><radialGradient id="middle" cx="35.5" cy="35" r="25" gradientUnits="userSpaceOnUse"><stop offset="0.6" stop-color="#FE9B1B"/><stop offset="1" stop-color="#C34703"/></radialGradient><radialGradient id="inner" cx="35.5" cy="35" r="14" gradientUnits="userSpaceOnUse"><stop offset="0.64" stop-color="#FE9B1B"/><stop offset="1" stop-color="#CA5006"/></radialGradient></defs>
+<path d="M67.96 36.7L61.13 47.23L57.25 59.15L44.98 61.77L33.8 67.46L23.27 60.63L11.35 56.75L8.73 44.48L3.04 33.3L9.87 22.77L13.75 10.85L26.02 8.23L37.2 2.54L47.73 9.37L59.65 13.25L62.27 25.52Z" fill="url(#outer)"/>
+<path d="M60.47 36.31L55.54 44.56L52.23 53.58L42.91 55.93L34.19 59.97L25.94 55.04L16.92 51.73L14.57 42.41L10.53 33.69L15.46 25.44L18.77 16.42L28.09 14.07L36.81 10.03L45.06 14.96L54.08 18.27L56.43 27.59Z" fill="url(#middle)"/>
+<path d="M49.48 35.73L47.05 40.51L44.87 45.4L39.77 47.07L34.77 48.98L29.99 46.55L25.1 44.37L23.43 39.27L21.52 34.27L23.95 29.49L26.13 24.6L31.23 22.93L36.23 21.02L41.01 23.45L45.9 25.63L47.57 30.73Z" fill="url(#inner)"/>
+<circle cx="35.5" cy="35" r="3.3" fill="#D87A01"/>
+</svg>

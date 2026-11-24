@@ -51,6 +51,15 @@
         />
       </div>
     }
+    @if (
+      validationText.text(
+        tableGroups(),
+        'management.settings.services.form.tables.field_names.table'
+      );
+      as error
+    ) {
+      <p class="table__service__capacity__error">{{ error }}</p>
+    }
     <app-button
       class="table__service__capacity__add"
       [appearance]="ButtonAppearance.Secondary"

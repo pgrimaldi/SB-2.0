@@ -5,6 +5,7 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { SystemService } from '../../../services/api/system/system.service';
 import { EmailConfiguration } from './email-configuration';
 
@@ -18,9 +19,9 @@ describe('EmailConfiguration', () => {
     smtpSecurity: 'Tls' as const,
   };
   /** The server never sends the SMTP password: only that one is saved. */
-  const CONFIGURATION = { ...FIELDS, hasSmtpPassword: true };
+  const CONFIGURATION = { ...FIELDS, hasSmtpPassword: true, version: 'v1' };
   /** Without a new password typed, the saved one is kept (null). */
-  const SENT = { idProperty: 'p1', ...FIELDS, smtpPassword: null };
+  const SENT = { ...FIELDS, smtpPassword: null };
 
   const setup = async (
     emailConfiguration = vi.fn(() => of(CONFIGURATION)),
@@ -89,7 +90,7 @@ describe('EmailConfiguration', () => {
   it('should fill the fields with the configuration of the property, all hidden but the security', async () => {
     const { element, emailConfiguration } = await setup();
 
-    expect(emailConfiguration).toHaveBeenCalledWith('p1');
+    expect(emailConfiguration).toHaveBeenCalledWith();
     expect([...element.querySelectorAll('input')].map((input) => input.value)).toEqual([
       'prenotazioni@lido-demo.example',
       'Lido Demo',
@@ -101,16 +102,19 @@ describe('EmailConfiguration', () => {
     expect(element.querySelector('.mat-mdc-select-value')?.textContent?.trim()).toBe('TLS');
   });
 
-  it('should show the error when the configuration does not arrive', async () => {
-    const { element } = await setup(
+  it('should show the error when the configuration does not arrive, and send nothing', async () => {
+    const { element, buttons } = await setup(
       vi.fn(() => throwError(() => new HttpErrorResponse({ status: 0, statusText: 'Unknown' }))),
     );
 
     expect(element.querySelector('.email__configuration__error')?.textContent?.trim()).not.toBe('');
-    // Without the values of the server nothing can be changed: Reset reads them again.
+    // Without the values of the server nothing can be changed or sent: Reset reads them again.
     expect(
       element.querySelector<HTMLButtonElement>('.email__configuration__override button')!.disabled,
     ).toBe(true);
+    const [sendTest, , save] = buttons();
+    expect(sendTest.disabled).toBe(true);
+    expect(save.disabled).toBe(true);
   });
 
   it('should send the values in the fields as the test email, then say it was sent', async () => {
@@ -168,9 +172,9 @@ describe('EmailConfiguration', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.failed',
+              code: ApiErrorCode.ValidationFailed,
               title: 'Invalid request',
-              errors: [{ field: 'senderName', code: 'validation.invalid' }],
+              errors: [{ field: 'senderName', code: ApiErrorCode.ValidationInvalid }],
             },
           }),
       ),
@@ -209,10 +213,13 @@ describe('EmailConfiguration', () => {
 
     buttons()[2].click();
     await fixture.whenStable();
-    expect(saveEmailConfiguration).toHaveBeenCalledWith({
-      ...SENT,
-      senderName: 'Lido Nuovo',
-    });
+    expect(saveEmailConfiguration).toHaveBeenCalledWith(
+      {
+        ...SENT,
+        senderName: 'Lido Nuovo',
+      },
+      'v1',
+    );
     expect(buttons()[0].disabled).toBe(true);
     expect(buttons()[1].disabled).toBe(true);
 
@@ -244,10 +251,13 @@ describe('EmailConfiguration', () => {
     buttons()[2].click();
     await settle();
 
-    expect(saveEmailConfiguration).toHaveBeenCalledWith({
-      ...SENT,
-      smtpPassword: 'nuova-password',
-    });
+    expect(saveEmailConfiguration).toHaveBeenCalledWith(
+      {
+        ...SENT,
+        smtpPassword: 'nuova-password',
+      },
+      'v1',
+    );
     expect(password().value).toBe(''); // saved: the field never holds it again
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
   });
@@ -266,6 +276,39 @@ describe('EmailConfiguration', () => {
     answer.error(new HttpErrorResponse({ status: 500 }));
     await settle();
     expect(inputs().some((input) => input.readOnly)).toBe(false);
+    document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
+  });
+
+  it('should read the configuration again and say why when someone changed it after the read', async () => {
+    const {
+      element,
+      inputs,
+      buttons,
+      type,
+      settle,
+      allowChanges,
+      emailConfiguration,
+      saveEmailConfiguration,
+    } = await setup();
+    saveEmailConfiguration.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { status: 409, code: ApiErrorCode.ResourceVersionConflict },
+          }),
+      ),
+    );
+    await allowChanges();
+    await type(1, 'Lido Nuovo');
+
+    buttons()[2].click();
+    await settle();
+    expect(emailConfiguration).toHaveBeenCalledTimes(2);
+    expect(inputs()[1].value).toBe('Lido Demo');
+    expect(inputs().every((input) => input.readOnly)).toBe(true);
+    expect(document.querySelector('.table__error__popup')).not.toBeNull();
+    expect(element.querySelector('.email__configuration__error')).toBeNull();
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
   });
 
@@ -339,5 +382,29 @@ describe('EmailConfiguration', () => {
     expect(inputs().every((input) => input.readOnly)).toBe(true);
     expect(element.querySelector('mat-select')?.getAttribute('aria-disabled')).toBe('true');
     expect(yes.disabled).toBe(false);
+  });
+
+  it('should count as a change only a value different from the one read, spaces at the sides aside', async () => {
+    const { fixture, type, allowChanges } = await setup();
+    await allowChanges();
+
+    await type(1, 'Lido Nuovo');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    await type(1, ' Lido Demo ');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('should keep the saved password for the same server, user and security typed with spaces at the sides', async () => {
+    const { element, buttons, type, allowChanges } = await setup();
+    const passwordError = () =>
+      element
+        .querySelectorAll('app-filled-text-field')[4]
+        .querySelector('.filled__text__field__error');
+    await allowChanges();
+
+    await type(2, ' smtp.lido-demo.example ');
+    await type(4, ' prenotazioni@lido-demo.example ');
+    expect(passwordError()).toBeNull();
+    expect(buttons()[2].disabled).toBe(false);
   });
 });

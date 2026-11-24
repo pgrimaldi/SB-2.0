@@ -13,11 +13,13 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  MAX_LENGTH,
   TreeValidationResult,
   applyEach,
   applyWhen,
   disabled,
   form,
+  metadata,
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -30,13 +32,18 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
-import { HourlyServiceAddItemRequest } from '../../../../../entities/settings/services/hourly-service-add-item-request';
-import { ServiceAvailabilityOption } from '../../../../../entities/settings/services/service-availability-option';
-import { ServicePeriodAvailability } from '../../../../../entities/settings/services/service-period-availability';
-import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import { HourlyServiceDraft } from '../../../../../entities/settings/services/hourly-service-draft';
+import { ServiceAvailabilityOptionDraft } from '../../../../../entities/settings/services/service-availability-option-draft';
+import { ServicePeriodAvailabilityDraft } from '../../../../../entities/settings/services/service-period-availability-draft';
+import {
+  MAX_SERVICE_DESCRIPTION_LENGTH,
+  MAX_SERVICE_NAME_LENGTH,
+  ServiceTranslation,
+} from '../../../../../entities/settings/services/service-translation';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
@@ -46,7 +53,21 @@ import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-
 import { HourlyServiceBookingsTab } from '../hourly-service-bookings-tab/hourly-service-bookings-tab';
 import { HourlyServiceGeneralInfoTab } from '../hourly-service-general-info-tab/hourly-service-general-info-tab';
 import { HourlyServicePricesTab } from '../hourly-service-prices-tab/hourly-service-prices-tab';
+import {
+  hiddenHourlyServiceFields,
+  serviceErrorFields,
+  serviceFieldError,
+} from '../service-field-errors';
+import {
+  hourlyServicePriceRules,
+  otherTranslationRules,
+  serviceAvailabilityRules,
+  withAvailabilitiesInForce,
+  withoutEmptyAvailabilities,
+} from '../service-form-rules';
+import { ServiceImageErrorPopup } from '../service-image-error-popup/service-image-error-popup';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServiceFormTexts {
   tabs: {
@@ -63,12 +84,28 @@ enum PanelTab {
   Bookings,
 }
 
+/** The fields of the form each tab shows. */
+const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof HourlyServiceDraft)[]>> = {
+  [PanelTab.GeneralInfo]: ['translations', 'icon', 'isHighlighted'],
+  [PanelTab.Prices]: [
+    'price',
+    'vatRate',
+    'isPeriodPricingEnabled',
+    'availabilityOptions',
+    'periodAvailabilities',
+    'idSectors',
+    'isOnlinePurchaseEnabled',
+  ],
+  [PanelTab.Bookings]: ['bookingOptions'],
+};
+
 @Component({
   selector: 'app-hourly-service-add-item-panel',
   imports: [
     HourlyServiceBookingsTab,
     HourlyServiceGeneralInfoTab,
     HourlyServicePricesTab,
+    ServiceImageErrorPopup,
     SidePanel,
     TabGroup,
     TranslatePipe,
@@ -111,6 +148,8 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly draftForm = form(this.draft, (path) => {
     disabled(path.isPeriodPricingEnabled, () => !this.arePeriodsLoaded());
     applyEach(path.translations, (translation) => {
+      metadata(translation.serviceName, MAX_LENGTH, () => MAX_SERVICE_NAME_LENGTH);
+      metadata(translation.description, MAX_LENGTH, () => MAX_SERVICE_DESCRIPTION_LENGTH);
       applyWhen(
         translation,
         ({ valueOf }) => valueOf(translation.language) === this.mainLanguage(),
@@ -119,11 +158,19 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
           requiredText(main.description);
         },
       );
+      applyWhen(
+        translation,
+        ({ valueOf }) => valueOf(translation.language) !== this.mainLanguage(),
+        otherTranslationRules,
+      );
     });
+    hourlyServicePriceRules(path);
+    applyEach(path.bookingOptions, (option) => serviceAvailabilityRules(option.availabilityOption));
   });
-  /** The form as it was when the panel opened, with an empty availability option for every period. */
-  private readonly pristine = signal(JSON.stringify(newDraft()));
+  /** What would be sent of the form as it was when the panel opened. */
+  private readonly pristine = signal(comparableJson(withoutEmptyAvailabilities(newDraft())));
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
+  protected readonly sectorsVersion = signal(0);
   protected readonly isFetching = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly isSaveDisabled = computed(
@@ -133,6 +180,7 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   private readonly image = signal<File | null>(null);
   protected readonly imagePreviewUrl = signal<string | null>(null);
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly imageError = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -152,7 +200,9 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
 
   hasUnsavedChanges(): boolean {
     return (
-      this.open() && (this.image() !== null || JSON.stringify(this.draft()) !== this.pristine())
+      this.open() &&
+      (this.image() !== null ||
+        comparableJson(withoutEmptyAvailabilities(this.draft())) !== this.pristine())
     );
   }
 
@@ -166,9 +216,13 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     this.setImage(image);
   }
 
+  /** The image is not saved yet: it just goes away. */
+  protected removeImage(): void {
+    this.setImage(null);
+  }
+
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isSaving() || !idProperty) {
+    if (this.isSaving() || !this.auth.user()?.propertyId) {
       return;
     }
 
@@ -176,13 +230,31 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.catalog.createHourlyService(idProperty, this.draft()));
+        const idHourlyService = await firstValueFrom(
+          this.catalog.createHourlyService(withAvailabilitiesInForce(this.draft())),
+        );
+        const imageError = await this.uploadImage(idHourlyService);
         this.isSaving.set(false);
         this.open.set(false);
         this.created.emit();
+        this.imageError.set(imageError);
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.showTabOf(problem);
+        if (problem.code === ApiErrorCode.CatalogSectorNotFound) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.PricingPeriodNotFound) {
+          this.fetchPeriods();
+        }
+        return (
+          serviceFieldError(problem, { icon: this.draftForm.icon }) ??
+          apiFieldErrorsOrGeneral(
+            problem,
+            this.draftForm,
+            (general) => this.error.set(general),
+            hiddenHourlyServiceFields(this.draft()),
+          )
         );
       } finally {
         this.isSaving.set(false);
@@ -193,6 +265,33 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   protected async leave(): Promise<void> {
     if (await this.unsaved.confirmDiscard(this)) {
       this.open.set(false);
+    }
+  }
+
+  /** The image goes after the service, which stays saved also without it. */
+  private async uploadImage(idHourlyService: string): Promise<ApiProblem | null> {
+    const image = this.image();
+    if (!image) {
+      return null;
+    }
+    try {
+      await firstValueFrom(this.catalog.uploadServiceImage(idHourlyService, image));
+      return null;
+    } catch (error: unknown) {
+      return toApiProblem(error);
+    }
+  }
+
+  /** The tab of the first wrong field, where its error shows. */
+  private showTabOf(problem: ApiProblem): void {
+    // The VAT refused can be of an availability too: its message is the general one.
+    const fields =
+      problem.code === ApiErrorCode.CatalogVatRateNotAllowed ? [] : serviceErrorFields(problem);
+    const tab = [PanelTab.GeneralInfo, PanelTab.Prices, PanelTab.Bookings].find((panelTab) =>
+      TAB_FIELDS[panelTab].some((field) => fields.includes(field)),
+    );
+    if (tab !== undefined) {
+      this.selectedTab.set(tab);
     }
   }
 
@@ -210,13 +309,12 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   private fetchPeriods(): void {
     this.fetching?.unsubscribe();
     this.error.set(null);
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
+    if (!this.auth.user()?.propertyId) {
       return;
     }
     this.isFetching.set(true);
     this.fetching = this.seasons
-      .periodList(idProperty, false)
+      .periodList(false)
       .pipe(finalize(() => this.isFetching.set(false)))
       .subscribe({
         next: (periods) => {
@@ -227,18 +325,22 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       });
   }
 
-  /** An empty availability option for each period of the season: the form without changes. */
+  /** The availabilities written of each period of the season, or an empty one. */
   private setPeriods(periods: readonly SeasonPeriodItem[]): void {
-    this.periods.set(periods);
-    this.draftForm.periodAvailabilities().value.set(
-      periods.map(({ idPeriod }) =>
-        Object.assign(new ServicePeriodAvailability(), {
-          idPeriod,
-          availabilityOptions: [new ServiceAvailabilityOption()],
-        }),
-      ),
+    const written = this.draft().periodAvailabilities;
+    const empty = periods.map(({ key: idPeriod }) =>
+      Object.assign(new ServicePeriodAvailabilityDraft(), {
+        idPeriod,
+        availabilityOptions: [new ServiceAvailabilityOptionDraft()],
+      }),
     );
-    this.pristine.set(JSON.stringify(this.draft()));
+    this.periods.set(periods);
+    this.draftForm
+      .periodAvailabilities()
+      .value.set(
+        empty.map((row) => written.find(({ idPeriod }) => idPeriod === row.idPeriod) ?? row),
+      );
+    this.pristine.set(comparableJson(withoutEmptyAvailabilities(newDraft())));
   }
 
   private setImage(image: File | null): void {
@@ -257,9 +359,13 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 }
 
-/** Empty, with a name and a description for every language: the user's one is the main. */
-function newDraft(): HourlyServiceAddItemRequest {
-  return Object.assign(new HourlyServiceAddItemRequest(), {
+/**
+ * Empty, with a name and a description for every language (the user's one is the main) and an
+ * availability option.
+ */
+function newDraft(): HourlyServiceDraft {
+  return Object.assign(new HourlyServiceDraft(), {
+    availabilityOptions: [new ServiceAvailabilityOptionDraft()],
     translations: SERVICE_LANGUAGES.map((language) =>
       Object.assign(new ServiceTranslation(), { language }),
     ),

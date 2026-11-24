@@ -13,11 +13,13 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  MAX_LENGTH,
   TreeValidationResult,
   applyEach,
   applyWhen,
   disabled,
   form,
+  metadata,
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -31,16 +33,23 @@ import {
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import {
+  MAX_SERVICE_DESCRIPTION_LENGTH,
+  MAX_SERVICE_NAME_LENGTH,
+  ServiceTranslation,
+} from '../../../../../entities/settings/services/service-translation';
 import { TableServiceAddItemRequest } from '../../../../../entities/settings/services/table-service-add-item-request';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { requiredText } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
+import { hiddenTableServiceFields, serviceErrorFields } from '../service-field-errors';
+import { otherTranslationRules, tableServiceRules } from '../service-form-rules';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 import { TableServiceAvailabilityBookingsTab } from '../table-service-availability-bookings-tab/table-service-availability-bookings-tab';
 import { TableServiceGeneralInfoTab } from '../table-service-general-info-tab/table-service-general-info-tab';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServiceFormTexts {
   tabs: {
@@ -54,6 +63,12 @@ enum PanelTab {
   GeneralInfo,
   AvailabilityBookings,
 }
+
+/** The fields of the form the Info Generali tab shows: the others are in the other tab. */
+const GENERAL_INFO_FIELDS: readonly string[] = [
+  'translations',
+  'isHighlighted',
+] satisfies (keyof TableServiceAddItemRequest)[];
 
 @Component({
   selector: 'app-table-service-add-item-panel',
@@ -97,6 +112,8 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   private readonly draft = signal(newDraft());
   protected readonly draftForm = form(this.draft, (path) => {
     applyEach(path.translations, (translation) => {
+      metadata(translation.serviceName, MAX_LENGTH, () => MAX_SERVICE_NAME_LENGTH);
+      metadata(translation.description, MAX_LENGTH, () => MAX_SERVICE_DESCRIPTION_LENGTH);
       applyWhen(
         translation,
         ({ valueOf }) => valueOf(translation.language) === this.mainLanguage(),
@@ -105,7 +122,13 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
           requiredText(main.description);
         },
       );
+      applyWhen(
+        translation,
+        ({ valueOf }) => valueOf(translation.language) !== this.mainLanguage(),
+        otherTranslationRules,
+      );
     });
+    tableServiceRules(path);
     applyEach(path.availabilities, (availability) => {
       disabled(
         availability.startTime,
@@ -119,7 +142,7 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     });
   });
   /** The form as it was when the panel opened. */
-  private readonly pristine = JSON.stringify(newDraft());
+  private readonly pristine = comparableJson(newDraft());
   protected readonly isSaving = signal(false);
   protected readonly isSaveDisabled = computed(() => this.draftForm().invalid());
   private readonly error = signal<ApiProblem | null>(null);
@@ -140,12 +163,11 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && JSON.stringify(this.draft()) !== this.pristine;
+    return this.open() && comparableJson(this.draft()) !== this.pristine;
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isSaving() || !idProperty) {
+    if (this.isSaving() || !this.auth.user()?.propertyId) {
       return;
     }
 
@@ -153,13 +175,18 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.catalog.createTableService(idProperty, this.draft()));
+        await firstValueFrom(this.catalog.createTableService(this.draft()));
         this.isSaving.set(false);
         this.open.set(false);
         this.created.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.showTabOf(problem);
+        return apiFieldErrorsOrGeneral(
+          problem,
+          this.draftForm,
+          (general) => this.error.set(general),
+          hiddenTableServiceFields(this.draft()),
         );
       } finally {
         this.isSaving.set(false);
@@ -170,6 +197,18 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   protected async leave(): Promise<void> {
     if (await this.unsaved.confirmDiscard(this)) {
       this.open.set(false);
+    }
+  }
+
+  /** The tab of the first wrong field, where its error shows. */
+  private showTabOf(problem: ApiProblem): void {
+    const fields = serviceErrorFields(problem);
+    if (fields.length) {
+      this.selectedTab.set(
+        fields.some((field) => GENERAL_INFO_FIELDS.includes(field))
+          ? PanelTab.GeneralInfo
+          : PanelTab.AvailabilityBookings,
+      );
     }
   }
 

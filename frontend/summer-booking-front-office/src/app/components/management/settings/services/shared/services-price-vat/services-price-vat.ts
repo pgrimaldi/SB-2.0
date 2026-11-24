@@ -16,6 +16,10 @@ export class ServicesPriceVat {
   /** The fields of the form of the panel, which validates and saves them. */
   readonly price = input.required<FieldTree<number | null>>();
   readonly vatRate = input.required<FieldTree<number | null>>();
+  /** Asterisk after the label of the price. */
+  readonly isPriceMandatory = input(false);
+  /** Asterisk after the label of the VAT. */
+  readonly isVatMandatory = input(false);
 
   protected readonly validationText = inject(ValidationTextBehaviour);
 }

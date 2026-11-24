@@ -1,17 +1,36 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { isUploadable } from '../../../behaviours/files/uploadable-file';
+import { isEmailAddress } from '../../../components/shared/forms/validators';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
-import { BookingTimeInterval } from '../../../entities/enums/booking-time-interval';
+import { Weekday } from '../../../entities/enums/weekday';
 import { StandardServiceIcon } from '../../../entities/enums/standard-service-icon';
 import { TableServiceAvailabilityMode } from '../../../entities/enums/table-service-availability-mode';
 import { TableServiceBookingPayment } from '../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../entities/enums/table-service-deposit-mode';
-import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
-import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
-import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
-import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
+import {
+  BathhouseGeneralInformation,
+  MAX_BATHHOUSE_PHONE_LENGTH,
+  MAX_BATHHOUSE_POSTAL_CODE_LENGTH,
+  MAX_BATHHOUSE_TEXT_LENGTH,
+} from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { BathhouseDocument } from '../../../entities/enums/bathhouse-document';
+import { BathhouseServiceGroup } from '../../../entities/enums/bathhouse-service-group';
+import { PetPolicy } from '../../../entities/enums/pet-policy';
+import {
+  BathhouseMedia,
+  MAX_BATHHOUSE_PDF_MEGABYTES,
+  MAX_BATHHOUSE_PHOTO_QUANTITY,
+  MAX_VIRTUAL_TOUR_URL_LENGTH,
+} from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
+import { BathhouseMediaRequest } from '../../../entities/settings/bathhouse-configuration/bathhouse-media-request';
+import { BathhouseSelectedMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-selected-media';
+import { BathhouseSelectedServices } from '../../../entities/settings/bathhouse-configuration/bathhouse-selected-services';
+import { PropertyInfoDocument } from '../../../entities/settings/bathhouse-configuration/property-info-document';
+import { PropertyInfoMedia } from '../../../entities/settings/bathhouse-configuration/property-info-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceAddItemRequest } from '../../../entities/settings/services/automatic-price-add-item-request';
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
@@ -20,75 +39,130 @@ import { AutomaticPriceSelectedPricesValidity } from '../../../entities/settings
 import { AutomaticPriceServices } from '../../../entities/settings/services/automatic-price-services';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
+import { BarServiceSelectedBookingOptions } from '../../../entities/settings/services/bar-service-selected-booking-options';
 import { BarServiceSelectedGeneralInfo } from '../../../entities/settings/services/bar-service-selected-general-info';
 import { BarServiceSelectedPrices } from '../../../entities/settings/services/bar-service-selected-prices';
-import { DeleteBarServiceItemsRequest } from '../../../entities/settings/services/delete-bar-service-items-request';
-import { DuplicateBarServiceItemsRequest } from '../../../entities/settings/services/duplicate-bar-service-items-request';
-import { DeleteStandardServiceItemsRequest } from '../../../entities/settings/services/delete-standard-service-items-request';
-import { DuplicateStandardServiceItemsRequest } from '../../../entities/settings/services/duplicate-standard-service-items-request';
-import { DeleteHourlyServiceItemsRequest } from '../../../entities/settings/services/delete-hourly-service-items-request';
-import { DuplicateHourlyServiceItemsRequest } from '../../../entities/settings/services/duplicate-hourly-service-items-request';
-import { DeleteAutomaticPriceItemsRequest } from '../../../entities/settings/services/delete-automatic-price-items-request';
-import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/services/duplicate-automatic-price-items-request';
-import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
-import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
 import { ServiceTimeSlot } from '../../../entities/enums/service-time-slot';
 import { HourlyServiceAddItemRequest } from '../../../entities/settings/services/hourly-service-add-item-request';
 import { HourlyServiceBookingOption } from '../../../entities/settings/services/hourly-service-booking-option';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
+import { HourlyServiceSelectedBookingOptions } from '../../../entities/settings/services/hourly-service-selected-booking-options';
 import { HourlyServiceSelectedGeneralInfo } from '../../../entities/settings/services/hourly-service-selected-general-info';
 import { HourlyServiceSelectedPrices } from '../../../entities/settings/services/hourly-service-selected-prices';
-import { ServiceAvailabilityOption } from '../../../entities/settings/services/service-availability-option';
+import {
+  MAX_CUSTOM_TIME_SLOT_MINUTES,
+  ServiceAvailabilityOption,
+} from '../../../entities/settings/services/service-availability-option';
+import { MAX_SERVICE_BOOKING_QUANTITY } from '../../../entities/settings/services/service-booking-option';
 import { ServicePeriodAvailability } from '../../../entities/settings/services/service-period-availability';
+import { ServicePeriodPrice } from '../../../entities/settings/services/service-period-price';
+import { MAX_SERVICE_PRICE } from '../../../entities/settings/services/service-price';
 import { ServiceTranslation } from '../../../entities/settings/services/service-translation';
+import { MAX_SERVICE_VARIANT_NAME_LENGTH } from '../../../entities/settings/services/service-variant';
 import { StandardServiceAddItemRequest } from '../../../entities/settings/services/standard-service-add-item-request';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
+import { StandardServiceSelectedBookingOptions } from '../../../entities/settings/services/standard-service-selected-booking-options';
 import { StandardServiceSelectedGeneralInfo } from '../../../entities/settings/services/standard-service-selected-general-info';
 import { StandardServiceSelectedPrices } from '../../../entities/settings/services/standard-service-selected-prices';
 import { TableServiceAddItemRequest } from '../../../entities/settings/services/table-service-add-item-request';
+import { TableServiceAvailabilityDay } from '../../../entities/settings/services/table-service-availability-day';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { TableServiceSelectedAvailabilityBookings } from '../../../entities/settings/services/table-service-selected-availability-bookings';
 import { TableServiceSelectedGeneralInfo } from '../../../entities/settings/services/table-service-selected-general-info';
+import {
+  MAX_SEAT_PER_TABLE_QUANTITY,
+  MAX_TABLE_QUANTITY,
+  MAX_TOTAL_SEAT_QUANTITY,
+} from '../../../entities/settings/services/table-service-table-group';
+import { MAX_EMAIL_LENGTH } from '../../../entities/shared/email-address';
+import {
+  IMAGE_UPLOAD_TYPES,
+  MAX_IMAGE_UPLOAD_MEGABYTES,
+  MEGABYTE,
+} from '../../../entities/shared/image-upload-types';
+import { DAYS_OF_WEEK } from '../../../entities/shared/days-of-week';
 import { Language } from '../../../entities/shared/language';
+import { Country } from '../../../entities/shared/country';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { PDF_UPLOAD_TYPES } from '../../../entities/shared/pdf-upload-types';
+import {
+  MockFieldError,
+  notFoundWithoutBody,
+  problem,
+  resourceNotFound,
+} from '../errors/problem.mock';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { DELETED_SECTOR } from './sectors-data.mock';
+import {
+  bookingOptionErrors,
+  iconErrors,
+  isNotLater,
+  isPeriodOfSeason,
+  isSectorOfProperty,
+  missingPeriod,
+  missingSector,
+  sectorErrors,
+  translationErrors,
+  VAT_RATES,
+  vatRateNotAllowed,
+} from './service-checks.mock';
+import {
+  MockCopyError,
+  ServiceTable,
+  deleteServicesAnswer,
+  duplicateServicesAnswer,
+  languageOf,
+  nameToSave,
+  naturalOrder,
+  serviceListAnswer,
+  shownName,
+} from './service-tables.mock';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
 /** ISO 3166-1 alpha-2 codes, in the order of `catalog.countries.sort_order`. */
 const COUNTRY_CODES = ['IT', 'FR', 'DE', 'CN'] as const;
+const COUNTRY_CODE_LENGTH = 2;
+/** As `PUT /property-info/amenities`. */
+const MAX_SAVED_SERVICE_QUANTITY = 200;
+/** The backend's limit of Descrizione and Regolamento, counted on their HTML. */
+const MAX_BACKEND_RICH_TEXT_LENGTH = 20_000;
+const MIN_NOTICE_HOURS = 1;
+const MAX_NOTICE_HOURS = 720;
 
 /**
- * `GET /api/catalog/countries-combobox`: the selectable countries, `id` = ISO code and `value` = name
- * in the language of `Accept-Language` (the backend has a translation per country and language).
- * 401 without a valid access token.
+ * `GET /api/catalog/lookups/countries`: the active countries, `code` = ISO code and `name` in the language
+ * of `Accept-Language` (the backend has a translation per country and language), in the order of
+ * `sort_order`. Open also without an access token, as in the backend.
  */
-export const countriesComboboxMock = (
+export const lookupCountriesMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
   const names = new Intl.DisplayNames([request.headers.get('Accept-Language') ?? 'it'], {
     type: 'region',
   });
-  const countries: ComboboxItem[] = COUNTRY_CODES.map((code) => ({
-    id: code,
-    value: names.of(code) ?? code,
+  const countries: Country[] = COUNTRY_CODES.map((code) => ({
+    code,
+    name: names.of(code) ?? code,
   }));
   return of(new HttpResponse({ status: 200, url: request.url, body: countries })).pipe(delay(150));
 };
 
 const SERVICE_LANGUAGES = ['it', 'en', 'fr', 'es', 'de', 'zh', 'ar'] as const;
 
-/** The services of the catalogue: category, icon and the name in it, en, fr, es, de, zh, ar. */
+/**
+ * The services of the catalogue as the backend has them (`catalog.service_amenities`, in its order):
+ * id, category, icon and the name in it, en, fr, es, de, zh, ar.
+ */
 const SERVICES: readonly {
-  categoryCode: string;
+  idService: number;
+  categoryCode: BathhouseServiceGroup;
   icon: string;
   names: readonly [string, string, string, string, string, string, string];
 }[] = [
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 14,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'AccessibleForward',
     names: [
       'Accesso disabili',
@@ -101,7 +175,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 1,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Accessible',
     names: [
       'Doccia per disabili',
@@ -114,12 +189,14 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 31,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Shower',
     names: ['Doccia', 'Shower', 'Douche', 'Ducha', 'Dusche', '淋浴', 'دش'],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 36,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Shower',
     names: [
       'Doccia calda',
@@ -132,7 +209,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 34,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Shower',
     names: [
       'Tabacchi/edicola',
@@ -145,17 +223,20 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 38,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Parking',
     names: ['Wifi', 'Wi-Fi', 'Wi-Fi', 'Wifi', 'WLAN', '无线网络', 'واي فاي'],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 35,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Wc',
     names: ['Toilette', 'Toilets', 'Toilettes', 'Aseos', 'Toiletten', '卫生间', 'دورات مياه'],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 23,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Parking',
     names: [
       'Parcheggio',
@@ -168,7 +249,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 30,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Parking',
     names: [
       'Parcheggio custodito',
@@ -181,7 +263,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 7,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Parking',
     names: [
       'Parcheggio bici',
@@ -194,7 +277,22 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 22,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
+    icon: 'Parking',
+    names: [
+      'Parcheggio incluso',
+      'Parking included',
+      'Parking inclus',
+      'Aparcamiento incluido',
+      'Parkplatz inklusive',
+      '含停车位',
+      'موقف سيارات مشمول',
+    ],
+  },
+  {
+    idService: 29,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Lock',
     names: [
       'Cassette di sicurezza',
@@ -207,7 +305,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 8,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Cabin',
     names: [
       'Cabine',
@@ -220,7 +319,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 21,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Translate',
     names: [
       'Personale multilingua',
@@ -233,7 +333,22 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 18,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
+    icon: 'Infirmary',
+    names: [
+      'Infermeria',
+      'Infirmary',
+      'Infirmerie',
+      'Enfermería',
+      'Krankenstation',
+      '医务室',
+      'مستوصف',
+    ],
+  },
+  {
+    idService: 4,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Soccer',
     names: [
       'Beach soccer',
@@ -246,7 +361,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 5,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Volleyball',
     names: [
       'Beach volley',
@@ -259,7 +375,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 15,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Tennis',
     names: [
       'Beach tennis',
@@ -272,7 +389,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 17,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'TableFootball',
     names: [
       'Calcio balilla',
@@ -285,12 +403,14 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 10,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Luggage',
     names: ['Escursioni', 'Excursions', 'Excursions', 'Excursiones', 'Ausflüge', '远足', 'رحلات'],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 2,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Celebration',
     names: [
       'Animazione',
@@ -303,7 +423,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 19,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Kitesurfing',
     names: [
       'Kitesurf',
@@ -316,17 +437,20 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 33,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Surfing',
     names: ['Surf', 'Surfing', 'Surf', 'Surf', 'Surfen', '冲浪', 'ركوب الأمواج'],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 9,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Canoe',
     names: ['Canoa', 'Canoeing', 'Canoë', 'Canoa', 'Kanu', '皮划艇', 'قوارب الكانو'],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 37,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'JetSki',
     names: [
       'Moto d’acqua',
@@ -339,7 +463,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 20,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Motorboat',
     names: [
       'Motoscafo',
@@ -352,7 +477,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 32,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Snorkel',
     names: [
       'Sub/snorkeling',
@@ -365,17 +491,20 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 24,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'PedalBoat',
     names: ['Pedalò', 'Pedal boat', 'Pédalo', 'Hidropedal', 'Tretboot', '脚踏船', 'قارب بدواسات'],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 27,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Pool',
     names: ['Piscina', 'Swimming pool', 'Piscine', 'Piscina', 'Pool', '游泳池', 'مسبح'],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 13,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'HotTub',
     names: [
       'Idromassaggio',
@@ -388,7 +517,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 16,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Playground',
     names: [
       'Area giochi',
@@ -401,7 +531,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 6,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Anchor',
     names: [
       'Posto barca',
@@ -414,7 +545,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 11,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'FitnessCenter',
     names: [
       'Palestra',
@@ -427,22 +559,26 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'food_extra',
+    idService: 3,
+    categoryCode: BathhouseServiceGroup.FoodExtra,
     icon: 'Cafe',
     names: ['Bar', 'Bar', 'Bar', 'Bar', 'Bar', '酒吧', 'بار'],
   },
   {
-    categoryCode: 'food_extra',
+    idService: 28,
+    categoryCode: BathhouseServiceGroup.FoodExtra,
     icon: 'Restaurant',
     names: ['Ristorante', 'Restaurant', 'Restaurant', 'Restaurante', 'Restaurant', '餐厅', 'مطعم'],
   },
   {
-    categoryCode: 'food_extra',
+    idService: 26,
+    categoryCode: BathhouseServiceGroup.FoodExtra,
     icon: 'Pizza',
     names: ['Pizzeria', 'Pizzeria', 'Pizzeria', 'Pizzería', 'Pizzeria', '披萨店', 'مطعم بيتزا'],
   },
   {
-    categoryCode: 'food_extra',
+    idService: 12,
+    categoryCode: BathhouseServiceGroup.FoodExtra,
     icon: 'Cocktail',
     names: [
       'Happy hour',
@@ -455,33 +591,22 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'food_extra',
+    idService: 57,
+    categoryCode: BathhouseServiceGroup.FoodExtra,
     icon: 'Leaf',
     names: [
-      'Cibo vegano',
-      'Vegan food',
-      'Cuisine végane',
-      'Comida vegana',
-      'Veganes Essen',
-      '纯素食品',
-      'طعام نباتي',
+      'Cibo vegano - Cibo senza glutine',
+      'Vegan food - Gluten free food',
+      'Cuisine végane - Cuisine sans gluten',
+      'Comida vegana - Comida sin gluten',
+      'Veganes Essen - Glutenfreies Essen',
+      '纯素食品 - 无麸质食品',
+      'طعام نباتي - طعام خالٍ من الغلوتين',
     ],
   },
   {
-    categoryCode: 'food_extra',
-    icon: 'GlutenFree',
-    names: [
-      'Cibo senza glutine',
-      'Gluten-free food',
-      'Cuisine sans gluten',
-      'Comida sin gluten',
-      'Glutenfreies Essen',
-      '无麸质食品',
-      'طعام خالٍ من الغلوتين',
-    ],
-  },
-  {
-    categoryCode: 'beach',
+    idService: 25,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Pets',
     names: [
       'Animali ammessi',
@@ -494,7 +619,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 40,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Person',
     names: [
       'Spiaggia per single',
@@ -507,7 +633,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 48,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'BeachUmbrella',
     names: [
       'Servizio spiaggia',
@@ -520,7 +647,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 53,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Rainbow',
     names: [
       'Spiaggia LGBT',
@@ -533,7 +661,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 44,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'VolumeOff',
     names: [
       'Spiaggia del silenzio',
@@ -546,7 +675,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 49,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Family',
     names: [
       'Spiaggia per famiglie',
@@ -559,7 +689,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 56,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'PalmTree',
     names: [
       'Spiaggia naturista',
@@ -572,7 +703,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 39,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Inventory',
     names: [
       'Pacchetti all inclusive',
@@ -585,7 +717,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 45,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Elderly',
     names: [
       'Spiaggia per anziani',
@@ -598,7 +731,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 52,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Fan',
     names: [
       'Ventilatore sotto l’ombrellone',
@@ -616,9 +750,11 @@ let generalInformation = new BathhouseGeneralInformation();
 let idOfferedServices = new Set<number>();
 
 /**
- * `GET /api/catalog/bathhouse-configuration-general?idProperty=…`: the general information of the
- * property, for the tab "Informazioni generali"; all empty until saved, a form to fill in. 401
- * without a valid access token; 403 for a missing or unknown property.
+ * `GET /api/catalog/property-info/bathhouse-configuration-general`: the general information of the
+ * property of the token, for the tab "Informazioni generali"; all empty until saved, a form to fill
+ * in, except `isFreeCancellation` false and `petPolicy` OnRequest, as the backend for a bathhouse
+ * without a card. 401 without a valid access token. The version covers all of it, what the save of
+ * the tab writes.
  */
 export const bathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -626,20 +762,15 @@ export const bathhouseConfigurationGeneralMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf(request.params.get('idProperty'));
-  if (!property) {
-    return forbidden(request);
-  }
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: { ...generalInformation } }),
-  ).pipe(delay(300));
+  return versionedAnswer(request, generalInformation);
 };
 
 /**
- * `GET /api/catalog/bathhouse-configuration-services?idProperty=…`: every service of the catalogue,
- * in the order of the categories and then of the services, with the name in the language of
- * `Accept-Language`; offered as last saved, none at the start. 401 without a valid access token;
- * 403 for a missing or unknown property.
+ * `GET /api/catalog/property-info/bathhouse-configuration-services`: the services of the catalogue
+ * the page shows, in the order of the categories and then of the services, with the name in the
+ * language of `Accept-Language`; offered by the property of the token as last saved, none at the
+ * start; the version covers only which services are offered (`offeredServices`), not the names. 401
+ * without a valid access token.
  */
 export const bathhouseConfigurationServicesMock = (
   request: HttpRequest<unknown>,
@@ -647,26 +778,57 @@ export const bathhouseConfigurationServicesMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  if (!propertyOf(request.params.get('idProperty'))) {
-    return forbidden(request);
-  }
   const language = SERVICE_LANGUAGES.indexOf(
     request.headers.get('Accept-Language') as (typeof SERVICE_LANGUAGES)[number],
   );
-  const services: BathhouseServiceItem[] = SERVICES.map(({ categoryCode, icon, names }, index) => ({
-    idService: index + 1,
-    name: names[Math.max(language, 0)],
-    categoryCode,
-    iconUrl: `/assets/images/BathhouseConfiguration_${icon}.svg`,
-    isSelected: idOfferedServices.has(index + 1),
+  const services: BathhouseServiceItem[] = SERVICES.map(
+    ({ idService, categoryCode, icon, names }) => ({
+      idService,
+      name: names[Math.max(language, 0)],
+      categoryCode,
+      iconUrl: completeLink(`/assets/images/BathhouseConfiguration_${icon}.svg`),
+      isSelected: idOfferedServices.has(idService),
+    }),
+  );
+  const answer: BathhouseSelectedServices = { services, version: versionOf(offeredServices()) };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
+};
+
+/** What the save of the services writes: whether the property offers each service of the page. */
+function offeredServices(): Pick<BathhouseServiceItem, 'idService' | 'isSelected'>[] {
+  return SERVICES.map(({ idService }) => ({
+    idService,
+    isSelected: idOfferedServices.has(idService),
   }));
-  return of(new HttpResponse({ status: 200, url: request.url, body: services })).pipe(delay(300));
+}
+
+/** The backend's limits of the texts of the general information (Descrizione and Regolamento on their HTML). */
+const GENERAL_TEXT_LIMITS: Partial<Record<keyof BathhouseGeneralInformation, number>> = {
+  bathhouseName: MAX_BATHHOUSE_TEXT_LENGTH,
+  address: MAX_BATHHOUSE_TEXT_LENGTH,
+  postalCode: MAX_BATHHOUSE_POSTAL_CODE_LENGTH,
+  city: MAX_BATHHOUSE_TEXT_LENGTH,
+  province: MAX_BATHHOUSE_TEXT_LENGTH,
+  region: MAX_BATHHOUSE_TEXT_LENGTH,
+  email: MAX_EMAIL_LENGTH,
+  website: MAX_BATHHOUSE_TEXT_LENGTH,
+  facebook: MAX_BATHHOUSE_TEXT_LENGTH,
+  instagram: MAX_BATHHOUSE_TEXT_LENGTH,
+  description: MAX_BACKEND_RICH_TEXT_LENGTH,
+  regulation: MAX_BACKEND_RICH_TEXT_LENGTH,
 };
 
 /**
- * `POST /api/catalog/save-bathhouse-configuration-general` with every field of the tab and
- * `idProperty`: keeps them (until the page is reloaded). 204 without a body; 401 without a valid
- * access token; 403 for a missing or unknown property.
+ * `POST /api/catalog/property-info/save-bathhouse-configuration-general` with every field of the
+ * tab, for the property of the token: keeps them (until the page is reloaded). 204 without a body,
+ * with the new version in its `ETag`; 400 with an error per field, as the backend: no name, a text
+ * over its limit (`GENERAL_TEXT_LIMITS`), an email that is not one, a phone or WhatsApp number that
+ * is not digits and spaces up to 32 characters (see `phoneErrors`), a country code not of 2
+ * letters, a time not `HH:mm`, no `isFreeCancellation`, notice hours with `isFreeCancellation`
+ * false and out of 1-720 (two errors when both), no `petPolicy` of `PetPolicy`, a `closingTime` not
+ * after the `openingTime`; 422 catalog.country_not_found for a country not in the list; 409
+ * `resource.version_conflict` when `If-Match` is not the version of the information; 401 without a
+ * valid access token.
  */
 export const saveBathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -674,24 +836,123 @@ export const saveBathhouseConfigurationGeneralMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<BathhouseGeneralInformation> & {
-    idProperty?: unknown;
-  };
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
+  const body = (request.body ?? {}) as Partial<BathhouseGeneralInformation>;
+  const errors: MockFieldError[] = [];
+  if (typeof body.bathhouseName !== 'string' || !body.bathhouseName.trim()) {
+    errors.push({ field: 'bathhouseName', code: ApiErrorCode.ValidationRequired });
+  }
+  for (const [field, max] of Object.entries(GENERAL_TEXT_LIMITS)) {
+    const value = body[field as keyof BathhouseGeneralInformation];
+    if (typeof value === 'string' && value.length > max) {
+      errors.push({ field, code: ApiErrorCode.ValidationMaxLength, args: { max, min: 0 } });
+    }
+  }
+  if (
+    typeof body.email === 'string' &&
+    body.email &&
+    body.email.length <= MAX_EMAIL_LENGTH &&
+    !isEmailAddress(body.email)
+  ) {
+    errors.push({ field: 'email', code: ApiErrorCode.ValidationEmail });
+  }
+  errors.push(...phoneErrors('phone', body.phone), ...phoneErrors('whatsapp', body.whatsapp));
+  if (typeof body.country === 'string' && body.country.length !== COUNTRY_CODE_LENGTH) {
+    errors.push({
+      field: 'country',
+      code: ApiErrorCode.ValidationInvalid,
+      args: { min: COUNTRY_CODE_LENGTH, max: COUNTRY_CODE_LENGTH },
+    });
+  }
+  if (body.openingTime !== null && body.openingTime !== undefined && !isTime(body.openingTime)) {
+    errors.push({ field: 'openingTime', code: ApiErrorCode.ValidationInvalid });
+  }
+  if (body.closingTime !== null && body.closingTime !== undefined && !isTime(body.closingTime)) {
+    errors.push({ field: 'closingTime', code: ApiErrorCode.ValidationInvalid });
+  }
+  if (typeof body.isFreeCancellation !== 'boolean') {
+    errors.push({ field: 'isFreeCancellation', code: ApiErrorCode.ValidationRequired });
+  }
+  const hours = body.cancellationNoticeHours;
+  if (body.isFreeCancellation === false && hours !== null && hours !== undefined) {
+    errors.push({ field: 'cancellationNoticeHours', code: ApiErrorCode.ValidationInvalid });
+  }
+  if (typeof hours === 'number' && (hours < MIN_NOTICE_HOURS || hours > MAX_NOTICE_HOURS)) {
+    errors.push({
+      field: 'cancellationNoticeHours',
+      code: ApiErrorCode.ValidationOutOfRange,
+      args: { from: MIN_NOTICE_HOURS, to: MAX_NOTICE_HOURS },
+    });
+  }
+  if (!Object.values<unknown>(PetPolicy).includes(body.petPolicy)) {
+    errors.push({ field: 'petPolicy', code: ApiErrorCode.ValidationInvalid });
+  }
+  if (
+    isTime(body.openingTime) &&
+    isTime(body.closingTime) &&
+    body.closingTime <= body.openingTime
+  ) {
+    errors.push({
+      field: 'closingTime',
+      code: ApiErrorCode.ValidationOutOfRange,
+      args: { value: `${body.openingTime}:00` },
+    });
+  }
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
+  }
+  const country = body.country?.toUpperCase();
+  if (country && !COUNTRY_CODES.some((code) => code === country)) {
+    return problem(request, 422, ApiErrorCode.CatalogCountryNotFound);
+  }
+  const conflict = versionConflict(request, generalInformation);
+  if (conflict) {
+    return conflict;
   }
   generalInformation = onlyFieldsOf(BathhouseGeneralInformation, {
     ...generalInformation,
     ...body,
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, generalInformation);
 };
 
+/** `HH:mm` on 24 hours, as the backend wants the opening hours. */
+function isTime(value: unknown): value is string {
+  return typeof value === 'string' && TIME_PATTERN.test(value);
+}
+
+const TIME_PATTERN = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
+
+/** A phone number of the property as the backend checks it: at most 32 characters, only digits and spaces. */
+function phoneErrors(field: string, value: unknown): MockFieldError[] {
+  if (value === null || value === undefined) {
+    return [];
+  }
+  if (typeof value !== 'string') {
+    return [{ field, code: ApiErrorCode.ValidationPhone }];
+  }
+  if (value.length > MAX_BATHHOUSE_PHONE_LENGTH) {
+    return [
+      {
+        field,
+        code: ApiErrorCode.ValidationMaxLength,
+        args: { max: MAX_BATHHOUSE_PHONE_LENGTH, min: 0 },
+      },
+    ];
+  }
+  return /^[0-9 ]*$/.test(value) ? [] : [{ field, code: ApiErrorCode.ValidationPhone }];
+}
+
 /**
- * `POST /api/catalog/save-bathhouse-configuration-services` with `idProperty` and `services`, the
- * services the property offers: keeps them (until the page is reloaded). 204 without a body; 401
- * without a valid access token; 403 for a missing or unknown property; 404 for a service that does
- * not exist.
+ * `POST /api/catalog/property-info/save-bathhouse-configuration-services` with `services`, every
+ * service the tab read, each with `isSelected`: a service is offered or not as its `isSelected`
+ * says, a service not in the list stays as it was (until the page is reloaded). 204 without a body,
+ * with the new version in its `ETag`; first 400 without `services` (never read as `[]`), with more
+ * than 200 or a repeated `idService`, with an `isSelected` that is not true or false in an element;
+ * then 404 for a null element, one without `idService` or with a service that does not exist; 409
+ * `resource.version_conflict` when `If-Match` is not the version of the services offered; 401
+ * without a valid access token.
  */
 export const saveBathhouseConfigurationServicesMock = (
   request: HttpRequest<unknown>,
@@ -699,30 +960,169 @@ export const saveBathhouseConfigurationServicesMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as { idProperty?: unknown; services?: unknown };
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
+  const body = (request.body ?? {}) as { services?: unknown };
+  if (!Array.isArray(body.services)) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors: [{ field: 'services', code: ApiErrorCode.ValidationRequired }],
+    });
   }
-  const services = Array.isArray(body.services) ? (body.services as BathhouseServiceItem[]) : [];
-  const idServices = services.map(({ idService }) => idService);
-  if (!idServices.every(isServiceId)) {
+  const services = body.services as (BathhouseServiceItem | null)[];
+  const idServices = services.flatMap((service) =>
+    service?.idService === undefined || service.idService === null ? [] : [service.idService],
+  );
+  const errors: MockFieldError[] = [];
+  if (
+    services.length > MAX_SAVED_SERVICE_QUANTITY ||
+    new Set(idServices).size !== idServices.length
+  ) {
+    errors.push({ field: 'services', code: ApiErrorCode.ValidationInvalid });
+  }
+  services.forEach((service, index) => {
+    if (service !== null && typeof service.isSelected !== 'boolean') {
+      errors.push({
+        field: `services[${index}].isSelected`,
+        code: ApiErrorCode.ValidationRequired,
+      });
+    }
+  });
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
+  }
+  if (!services.every((service) => isServiceId(service?.idService))) {
     return resourceNotFound(request);
   }
-  idOfferedServices = new Set(idServices);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  const conflict = versionConflict(request, offeredServices());
+  if (conflict) {
+    return conflict;
+  }
+  const offered = new Set(idOfferedServices);
+  for (const { idService, isSelected } of services as BathhouseServiceItem[]) {
+    if (isSelected) {
+      offered.add(idService as number);
+    } else {
+      offered.delete(idService as number);
+    }
+  }
+  idOfferedServices = offered;
+  return savedWithVersion(request, offeredServices());
 };
 
 function isServiceId(value: unknown): value is number {
-  return (
-    typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= SERVICES.length
-  );
+  return SERVICES.some(({ idService }) => idService === value);
 }
 
 /**
- * `GET /api/catalog/bathhouse-configuration-media?idProperty=…`: links of the photos (the main one
- * and the gallery, in order), of the virtual tour and of the two PDF documents. Example data until
- * the backend decides how files are kept. 401 without a valid access token; 403 for a missing or
- * unknown property.
+ * `POST /api/catalog/property-info/save-bathhouse-configuration-media` with `virtualTourUrl` (null
+ * or empty removes it), `latitude` and `longitude` (both or neither) of the property of the token:
+ * keeps them (until the page is reloaded). 204 without a body, with the new version in its `ETag`;
+ * 400 with an error per field for a link that is not http or https or longer than 500 characters, a
+ * coordinate out of range or only one of the two; 409 `resource.version_conflict` when `If-Match`
+ * is not the version of these three fields; 401 without a valid access token.
+ */
+export const saveBathhouseConfigurationMediaMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<Record<keyof BathhouseMediaRequest, unknown>>;
+  const link =
+    typeof body.virtualTourUrl === 'string' && body.virtualTourUrl ? body.virtualTourUrl : null;
+  const latitude = typeof body.latitude === 'number' ? body.latitude : null;
+  const longitude = typeof body.longitude === 'number' ? body.longitude : null;
+  const errors: MockFieldError[] = [];
+  if (link && link.length > MAX_VIRTUAL_TOUR_URL_LENGTH) {
+    errors.push({
+      field: 'virtualTourUrl',
+      code: ApiErrorCode.ValidationMaxLength,
+      args: { max: MAX_VIRTUAL_TOUR_URL_LENGTH, min: 0 },
+    });
+  } else if (link && !isHttpLink(link)) {
+    errors.push({ field: 'virtualTourUrl', code: ApiErrorCode.ValidationInvalid });
+  }
+  errors.push(
+    ...coordinateErrors('latitude', latitude, longitude, MAX_LATITUDE),
+    ...coordinateErrors('longitude', longitude, latitude, MAX_LONGITUDE),
+  );
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
+  }
+  const conflict = versionConflict(request, mediaFields());
+  if (conflict) {
+    return conflict;
+  }
+  bathhouseMedia = { ...bathhouseMedia, virtualTourUrl: link, latitude, longitude };
+  return savedWithVersion(request, mediaFields());
+};
+
+/** What the save of the Media tab writes: photos and PDFs have their own calls. */
+function mediaFields(): BathhouseMediaRequest {
+  const { virtualTourUrl, latitude, longitude } = bathhouseMedia;
+  return { virtualTourUrl, latitude, longitude };
+}
+
+const MAX_LATITUDE = 90;
+const MAX_LONGITUDE = 180;
+
+/** As the backend: within ±`max`, and given only together with the other coordinate. */
+function coordinateErrors(
+  field: keyof BathhouseMediaRequest,
+  value: number | null,
+  other: number | null,
+  max: number,
+): MockFieldError[] {
+  if (value === null) {
+    return other === null ? [] : [{ field, code: ApiErrorCode.ValidationRequired }];
+  }
+  return Math.abs(value) > max
+    ? [{ field, code: ApiErrorCode.ValidationOutOfRange, args: { from: -max, to: max } }]
+    : [];
+}
+
+function isHttpLink(link: string): boolean {
+  try {
+    return ['http:', 'https:'].includes(new URL(link).protocol);
+  } catch {
+    return false;
+  }
+}
+
+/** Complete links, as the backend gives them: here files of the app, on its own origin. */
+function completeLink(path: string): string {
+  return new URL(path, globalThis.location.origin).href;
+}
+
+/** The media of the property of the token: the Media tab reads them and its uploads change them. */
+let bathhouseMedia: BathhouseMedia = {
+  mainPhotoUrl: completeLink('/assets/images/hub/hero-beach-desktop.webp'),
+  photos: [
+    {
+      idPhoto: '0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01',
+      url: completeLink('/assets/images/hub/hero-beach-mobile-863.webp'),
+    },
+    {
+      idPhoto: '0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02',
+      url: completeLink('/assets/images/hub/hero-beach-mobile-1290.webp'),
+    },
+  ],
+  virtualTourUrl: 'https://tour.example.com/lido-demo',
+  latitude: 44.063812,
+  longitude: 12.580143,
+  priceListPdfUrl: 'https://files.example.com/lido-demo/listino-prezzi.pdf',
+  priceListPdfFileName: 'listino-prezzi.pdf',
+  menuPdfUrl: null,
+  menuPdfFileName: null,
+};
+const MAX_PHOTO_BYTES = MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE;
+const MAX_PDF_BYTES = MAX_BATHHOUSE_PDF_MEGABYTES * MEGABYTE;
+
+/**
+ * `GET /api/catalog/property-info/bathhouse-configuration-media`: links of the main photo, of the
+ * gallery (in order), of the virtual tour and of the two PDF documents of the property of the
+ * token, with the version of what the save of the tab writes (`mediaFields`): uploads do not change
+ * it. 401 without a valid access token.
  */
 export const bathhouseConfigurationMediaMock = (
   request: HttpRequest<unknown>,
@@ -730,38 +1130,217 @@ export const bathhouseConfigurationMediaMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  if (!propertyOf(request.params.get('idProperty'))) {
-    return forbidden(request);
-  }
-  const media: BathhouseMedia = {
-    photos: [
-      { idPhoto: 1, url: '/assets/images/hub/hero-beach-desktop.webp', isMain: true },
-      { idPhoto: 2, url: '/assets/images/hub/hero-beach-mobile-863.webp', isMain: false },
-      { idPhoto: 3, url: '/assets/images/hub/hero-beach-mobile-1290.webp', isMain: false },
-    ],
-    virtualTourUrl: 'https://tour.example.com/lido-demo',
-    priceListPdfUrl: 'https://files.example.com/lido-demo/listino-prezzi.pdf',
-    menuPdfUrl: null,
+  const answer: BathhouseSelectedMedia = {
+    ...structuredClone(bathhouseMedia),
+    version: versionOf(mediaFields()),
   };
-  return of(new HttpResponse({ status: 200, url: request.url, body: media })).pipe(delay(300));
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
 };
+
+/**
+ * `POST /api/catalog/property-info/main-photo` with the image in the multipart field `file`: it
+ * becomes the main photo (an object URL stands for the address of the backend's storage). 422
+ * catalog.invalid_image for a type other than png, jpeg or webp, an empty file or one over 5 MB; 401 without a
+ * valid access token. Like every call of `property-info`, it answers with the public card, here
+ * only its media.
+ */
+export const uploadBathhouseMainPhotoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  withImage(request, (image) => {
+    bathhouseMedia = { ...bathhouseMedia, mainPhotoUrl: URL.createObjectURL(image) };
+    return propertyInfoAnswer(request);
+  });
+
+/** `DELETE /api/catalog/property-info/main-photo`: no main photo any more. 401 without a token. */
+export const deleteBathhouseMainPhotoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  bathhouseMedia = { ...bathhouseMedia, mainPhotoUrl: null };
+  return propertyInfoAnswer(request);
+};
+
+/**
+ * `POST /api/catalog/property-info/photos` with the image in the multipart field `file`: added at
+ * the end of the gallery. 422 catalog.invalid_image as for the main photo, catalog.gallery_full
+ * with 30 photos already; 401 without a valid access token.
+ */
+export const addBathhousePhotoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  withImage(request, (image) => {
+    if (bathhouseMedia.photos.length >= MAX_BATHHOUSE_PHOTO_QUANTITY) {
+      return problem(request, 422, ApiErrorCode.CatalogGalleryFull, {
+        args: { max: MAX_BATHHOUSE_PHOTO_QUANTITY },
+      });
+    }
+    bathhouseMedia = {
+      ...bathhouseMedia,
+      photos: [
+        ...bathhouseMedia.photos,
+        { idPhoto: crypto.randomUUID(), url: URL.createObjectURL(image) },
+      ],
+    };
+    return propertyInfoAnswer(request);
+  });
+
+/**
+ * `DELETE /api/catalog/property-info/photos/{id}`: the photo leaves the gallery. 404
+ * catalog.photo_not_found for an id that is not in it; 401 without a valid access token.
+ */
+export const deleteBathhousePhotoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const idPhoto = decodeURIComponent(request.url.split('/').pop() ?? '');
+  if (!bathhouseMedia.photos.some((photo) => photo.idPhoto === idPhoto)) {
+    return problem(request, 404, ApiErrorCode.CatalogPhotoNotFound);
+  }
+  bathhouseMedia = {
+    ...bathhouseMedia,
+    photos: bathhouseMedia.photos.filter((photo) => photo.idPhoto !== idPhoto),
+  };
+  return propertyInfoAnswer(request);
+};
+
+/**
+ * `POST /api/catalog/property-info/documents/{price-list|menu}` with the PDF in the multipart field
+ * `file`: it replaces the one of that document. 422 catalog.invalid_pdf for another type, an empty
+ * file or one over 10 MB; 404 without a body for another document; 401 without a valid access token.
+ */
+export const uploadBathhouseDocumentMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const document = documentOf(request);
+  if (!document) {
+    return notFoundWithoutBody(request);
+  }
+  const pdf = request.body instanceof FormData ? request.body.get('file') : null;
+  if (!(pdf instanceof File) || !isUploadable(pdf, PDF_UPLOAD_TYPES, MAX_BATHHOUSE_PDF_MEGABYTES)) {
+    return problem(request, 422, ApiErrorCode.CatalogInvalidPdf, {
+      args: { maxBytes: MAX_PDF_BYTES, contentTypes: PDF_UPLOAD_TYPES },
+    });
+  }
+  setDocument(document, URL.createObjectURL(pdf), pdf.name);
+  return propertyInfoAnswer(request);
+};
+
+/**
+ * `DELETE /api/catalog/property-info/documents/{price-list|menu}`: the document has no PDF any more.
+ * 404 without a body for another document; 401 without a valid access token.
+ */
+export const deleteBathhouseDocumentMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const document = documentOf(request);
+  if (!document) {
+    return notFoundWithoutBody(request);
+  }
+  setDocument(document, null, null);
+  return propertyInfoAnswer(request);
+};
+
+function withImage(
+  request: HttpRequest<unknown>,
+  keep: (image: File) => Observable<HttpEvent<unknown>>,
+): Observable<HttpEvent<unknown>> {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const image = request.body instanceof FormData ? request.body.get('file') : null;
+  if (
+    !(image instanceof File) ||
+    !isUploadable(image, IMAGE_UPLOAD_TYPES, MAX_IMAGE_UPLOAD_MEGABYTES)
+  ) {
+    return problem(request, 422, ApiErrorCode.CatalogInvalidImage, {
+      args: { maxBytes: MAX_PHOTO_BYTES, contentTypes: IMAGE_UPLOAD_TYPES },
+    });
+  }
+  return keep(image);
+}
+
+/** The last part of `/property-info/documents/{document}`, if it is one of the two. */
+function documentOf(request: HttpRequest<unknown>): BathhouseDocument | undefined {
+  const code = request.url.split('/').pop();
+  return Object.values(BathhouseDocument).find((document) => document === code);
+}
+
+function setDocument(document: BathhouseDocument, url: string | null, name: string | null): void {
+  bathhouseMedia =
+    document === BathhouseDocument.PriceList
+      ? { ...bathhouseMedia, priceListPdfUrl: url, priceListPdfFileName: name }
+      : { ...bathhouseMedia, menuPdfUrl: url, menuPdfFileName: name };
+}
+
+/** The public card as `property-info` answers it: here only the media, the fields the tab reads. */
+function propertyInfoAnswer(request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
+  const documentOfLink = (
+    url: string | null,
+    fileName: string | null,
+  ): PropertyInfoDocument | null => (url ? { fileName: fileName ?? 'documento.pdf', url } : null);
+  const body: PropertyInfoMedia = {
+    mainPhotoUrl: bathhouseMedia.mainPhotoUrl,
+    photos: bathhouseMedia.photos.map(({ idPhoto, url }, index) => ({
+      id: idPhoto,
+      url,
+      sortOrder: index,
+    })),
+    virtualTourUrl: bathhouseMedia.virtualTourUrl,
+    latitude: bathhouseMedia.latitude,
+    longitude: bathhouseMedia.longitude,
+    priceListPdf: documentOfLink(
+      bathhouseMedia.priceListPdfUrl,
+      bathhouseMedia.priceListPdfFileName,
+    ),
+    menuPdf: documentOfLink(bathhouseMedia.menuPdfUrl, bathhouseMedia.menuPdfFileName),
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body })).pipe(delay(600));
+}
+
+/**
+ * 200 with the data of a tab and their version: the save of the tab sends it back in `If-Match`.
+ */
+function versionedAnswer<T extends object>(
+  request: HttpRequest<unknown>,
+  data: T,
+  withoutVersion: object = {},
+): Observable<HttpEvent<unknown>> {
+  return of(
+    new HttpResponse({
+      status: 200,
+      url: request.url,
+      body: { ...structuredClone(data), ...withoutVersion, version: versionOf(data) },
+    }),
+  ).pipe(delay(300));
+}
 
 type BarServiceRow = BarServiceItem & { propertyId: number };
 
 const BAR_SERVICES: BarServiceRow[] = (
   [
-    ['01', 'Caffè', BarServiceCategory.Cafeteria, 1],
+    ['01', 'Caffè', BarServiceCategory.Bar, 1],
     ['02', 'Croissant', BarServiceCategory.Desserts, 1.4],
-    ['03', 'Panino', BarServiceCategory.SnacksAndSandwiches, 3],
+    ['03', 'Panino', BarServiceCategory.SandwichShop, 3],
     ['04', 'Succo di frutta', BarServiceCategory.Drinks, 2],
-    ['05', 'Pizza', BarServiceCategory.SnacksAndSandwiches, 3],
+    ['05', 'Pizza', BarServiceCategory.Pizzeria, 3],
     ['06', 'Sfoglia', BarServiceCategory.Desserts, 1.3],
     ['07', 'Bibita lattina', BarServiceCategory.Drinks, 2.5],
     ['08', 'Acqua naturale 1L', BarServiceCategory.Drinks, 1.2],
     ['09', 'Acqua frizzante 1L', BarServiceCategory.Drinks, 1.2],
-    ['10', 'Schiacciata', BarServiceCategory.SnacksAndSandwiches, 3],
-    ['11', 'Tramezzino', BarServiceCategory.SnacksAndSandwiches, 2.8],
-    ['12', 'Gelato', BarServiceCategory.IceCreams, 2.5],
+    ['10', 'Schiacciata', BarServiceCategory.SandwichShop, 3],
+    ['11', 'Tramezzino', BarServiceCategory.SandwichShop, 2.8],
+    ['12', 'Gelato', BarServiceCategory.IceCreamShop, 2.5],
   ] as const
 ).map(([suffix, serviceName, category, price]) => ({
   propertyId: 1,
@@ -783,14 +1362,14 @@ const BAR_SERVICE_DETAILS = new Map<string, BarServiceAddItemRequest>([
         { language: Language.It, serviceName: 'Caffè', description: 'Espresso in tazzina.' },
         { language: Language.En, serviceName: 'Coffee', description: 'Espresso in a small cup.' },
       ],
-      category: BarServiceCategory.Cafeteria,
+      category: BarServiceCategory.Bar,
       icon: BarServiceIcon.Coffee,
       isHighlighted: true,
       price: 1,
       vatRate: 10,
-      variants: [{ variantName: 'Doppio', price: 1.8 }],
+      variants: [{ variantName: 'Doppio', price: 0.8 }],
       isPeriodPricingEnabled: true,
-      periodPrices: [{ idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01', price: 1.2 }],
+      periodPrices: [{ idPeriod: 0, price: 1.2 }],
       isOnlinePurchaseEnabled: true,
       bookingOptions: [
         {
@@ -802,13 +1381,36 @@ const BAR_SERVICE_DETAILS = new Map<string, BarServiceAddItemRequest>([
           onlineEndTime: '11:30',
           maxBookingPerHourQuantity: 20,
           maxBookingPerDayQuantity: 80,
-          timeInterval: BookingTimeInterval.ThirtyMinutes,
+          weekdays: [Weekday.Saturday, Weekday.Sunday],
+          maxPerSlot: 5,
+          intervalMinutes: 30,
           minItemPerBookingQuantity: 1,
           maxItemPerBookingQuantity: 4,
         },
       ],
     }),
   ],
+  [
+    '8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c10',
+    Object.assign(new BarServiceAddItemRequest(), {
+      translations: [
+        { language: Language.It, serviceName: 'Schiacciata', description: 'Farcita al momento.' },
+      ],
+      category: BarServiceCategory.SandwichShop,
+      icon: BarServiceIcon.Sandwich,
+      price: 3,
+      vatRate: 10,
+      idSectors: ['5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01', DELETED_SECTOR],
+    }),
+  ],
+]);
+
+/** The uploaded images, by id of the service or of the automatic price. */
+const SERVICE_IMAGES = new Map<string, string>([
+  ['8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c05', '/assets/images/hub/hero-beach-mobile-863.webp'],
+  ['9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d03', '/assets/images/hub/hero-beach-mobile-1290.webp'],
+  ['4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a03', '/assets/images/hub/hero-beach-desktop.webp'],
+  ['7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d02', '/assets/images/hub/hero-beach-mobile-863.webp'],
 ]);
 
 function detailsOf(row: BarServiceRow): BarServiceAddItemRequest {
@@ -836,9 +1438,10 @@ function requestedBarService(request: HttpRequest<unknown>): BarServiceRow | und
 }
 
 /**
- * `GET /api/catalog/get-bar-service-general-info?idBarService=…`: the Info Generali tab of the edit
- * panel. 200 with `BarServiceSelectedGeneralInfo`, only the languages written; 401 without a valid
- * access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/services/get-bar-service-general-info?idBarService=…`: the Info Generali tab of the edit
+ * panel. 200 with `BarServiceSelectedGeneralInfo` and the version of the tab, only the languages
+ * written and the uploaded image, which the version does not cover; 401 without a valid access
+ * token; 404 `service.not_found` for an unknown id.
  */
 export const barServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -848,10 +1451,23 @@ export const barServiceGeneralInfoMock = (
   }
   const row = requestedBarService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
+  const imageUrl = SERVICE_IMAGES.get(row.idBarService ?? '');
+  return versionedAnswer(request, barGeneralInfoOf(row), {
+    imageUrl: imageUrl ? completeLink(imageUrl) : null,
+  });
+};
+
+/**
+ * What `GET /api/catalog/services/get-bar-service-general-info` answers besides the version and the
+ * image: the version covers it.
+ */
+function barGeneralInfoOf(
+  row: BarServiceRow,
+): Omit<BarServiceSelectedGeneralInfo, 'imageUrl' | 'version'> {
   const details = detailsOf(row);
-  const answer: BarServiceSelectedGeneralInfo = {
+  return {
     idBarService: row.idBarService,
     translations: details.translations.filter(
       ({ serviceName, description }) => serviceName || description,
@@ -860,15 +1476,12 @@ export const barServiceGeneralInfoMock = (
     icon: details.icon,
     isHighlighted: details.isHighlighted,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
- * `GET /api/catalog/get-bar-service-prices?idBarService=…`: the Prezzi tab of the edit panel. 200 with
- * `BarServiceSelectedPrices`, a price only for the periods that have one; 401 without a valid access
- * token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/services/get-bar-service-prices?idBarService=…`: the Prezzi tab of the edit panel. 200
+ * with `BarServiceSelectedPrices` and the version of the tab, a price only for the periods that
+ * have one; 401 without a valid access token; 404 `service.not_found` for an unknown id.
  */
 export const barServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -878,27 +1491,35 @@ export const barServicePricesMock = (
   }
   const row = requestedBarService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
+  return versionedAnswer(request, barPricesOf(row));
+};
+
+/**
+ * What `GET /api/catalog/services/get-bar-service-prices` answers besides the version: the version covers
+ * it.
+ */
+function barPricesOf(row: BarServiceRow): Omit<BarServiceSelectedPrices, 'version'> {
   const details = detailsOf(row);
-  const answer: BarServiceSelectedPrices = {
+  return {
     price: details.price,
     vatRate: details.vatRate,
     variants: details.variants,
     isPeriodPricingEnabled: details.isPeriodPricingEnabled,
-    periodPrices: details.periodPrices.filter(({ price }) => price !== null),
+    periodPrices: details.periodPrices.filter(
+      ({ idPeriod, price }) => price !== null && isPeriodOfSeason(idPeriod),
+    ),
     idSectors: details.idSectors,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
- * `GET /api/catalog/get-bar-service-booking-options?idBarService=…`: the Prenotazioni tab of the
- * edit panel, the array of the booking options (empty when there are none). 401 without a valid
- * access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/services/get-bar-service-booking-options?idBarService=…`: the Prenotazioni tab of the
+ * edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there are
+ * none) and the version of the tab. 401 without a valid access token; 404 `service.not_found` for
+ * an unknown id.
  */
 export const barServiceBookingOptionsMock = (
   request: HttpRequest<unknown>,
@@ -908,62 +1529,79 @@ export const barServiceBookingOptionsMock = (
   }
   const row = requestedBarService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  return of(
-    new HttpResponse({
-      status: 200,
-      url: request.url,
-      body: structuredClone(detailsOf(row).bookingOptions),
-    }),
-  ).pipe(delay(300));
+  return versionedAnswer(request, barBookingOptionsOf(row));
 };
 
-const MAX_PAGE_SIZE = 100;
+/**
+ * What `GET /api/catalog/services/get-bar-service-booking-options` answers besides the version: the version
+ * covers it.
+ */
+function barBookingOptionsOf(
+  row: BarServiceRow,
+): Omit<BarServiceSelectedBookingOptions, 'version'> {
+  return { bookingOptions: detailsOf(row).bookingOptions };
+}
+
+function copyImage(id: string, idCopy: string): void {
+  const image = SERVICE_IMAGES.get(id);
+  if (image) {
+    SERVICE_IMAGES.set(idCopy, image);
+  }
+}
+
+/** As `ServiceSaleItem.MaxVariants`. */
+const MAX_VARIANT_QUANTITY = 50;
+
+/** The VAT of the element, or of its availabilities, still allowed; no period or sector deleted. */
+function copyError(
+  vatRates: readonly (number | null)[],
+  idSectors: readonly string[],
+  idPeriods: readonly (number | null)[] = [],
+): MockCopyError | null {
+  if (!vatRates.every((vatRate) => vatRate === null || VAT_RATES.includes(vatRate))) {
+    return { code: ApiErrorCode.ServiceDuplicateVatRateNotAllowed, args: { rates: VAT_RATES } };
+  }
+  if (!idPeriods.every(isPeriodOfSeason)) {
+    return { code: ApiErrorCode.ServiceDuplicatePeriodNotFound, args: {} };
+  }
+  return idSectors.every(isSectorOfProperty)
+    ? null
+    : { code: ApiErrorCode.ServiceDuplicateSectorNotFound, args: {} };
+}
+
+function idPeriodsOf(periodPrices: readonly ServicePeriodPrice[]): (number | null)[] {
+  return periodPrices.filter(({ price }) => price !== null).map(({ idPeriod }) => idPeriod);
+}
+
 const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'category', 'price'] as const;
 
-/**
- * `POST /api/catalog/bar-service-list`: one page of the bar services of the requested property,
- * searched in the name. 401 without a valid access token; 403 for a missing or unknown property.
- */
-export const barServiceListMock = (
-  request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = BAR_SERVICES.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.serviceName?.toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(BarServiceItem, row));
-  const field = BAR_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
-  }
-  const answer: Page<BarServiceItem> = {
-    total: found.length,
-    rows: found.slice((page - 1) * pageSize, page * pageSize),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
+const BAR_SERVICE_TABLE = {
+  rows: BAR_SERVICES,
+  idField: 'idBarService' as const,
+  details: BAR_SERVICE_DETAILS,
+  detailsOf,
+  notFoundCode: ApiErrorCode.ServiceNotFound,
+  copyMore: copyImage,
+  deleteMore: leaveAutomaticPrices,
+  copyError: ({ vatRate, idSectors, periodPrices }: BarServiceAddItemRequest) =>
+    copyError([vatRate], idSectors, idPeriodsOf(periodPrices)),
 };
 
-type CreateBarServiceBody = Partial<BarServiceAddItemRequest> & { idProperty?: unknown };
+/** `POST /api/catalog/services/bar-service-list`: one page of the bar services (see `serviceListAnswer`). */
+export const barServiceListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> =>
+  serviceListAnswer(request, BAR_SERVICE_TABLE, BarServiceItem, BAR_SERVICE_SORT_FIELDS, {
+    category: Object.values(BarServiceCategory),
+  });
+
+type CreateBarServiceBody = Partial<BarServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-bar-service` with `BarServiceAddItemRequest` and `idProperty`: the new
- * bar service goes into the list, with the name in the language of `Accept-Language`. 204 without a
- * body; 401 without a valid access token; 403 for an unknown property; 400 with one error per wrong
- * field (see `barServiceErrors`).
+ * `POST /api/catalog/services/create-bar-service` with `BarServiceAddItemRequest`: the new bar service goes
+ * into the list, with the name in the language of `Accept-Language`. 201 with its id alone; 401
+ * without a valid access token; 400 with one error per wrong field (see `barServiceErrors`); 422 and
+ * 404 of its references (`referenceProblem`).
  */
 export const createBarServiceMock = (
   request: HttpRequest<unknown>,
@@ -972,16 +1610,18 @@ export const createBarServiceMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateBarServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = barServiceErrors(body, language);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
   }
-  const main = body.translations?.find((translation) => translation.language === language);
+  const missing = referenceProblem(request, body);
+  if (missing) {
+    return missing;
+  }
   const idBarService = crypto.randomUUID();
   BAR_SERVICE_DETAILS.set(
     idBarService,
@@ -990,94 +1630,244 @@ export const createBarServiceMock = (
   BAR_SERVICES.push({
     propertyId: property.id,
     idBarService,
-    serviceName: main?.serviceName?.trim() ?? null,
+    serviceName: nameToSave(body.translations ?? [], language),
     category: body.category ?? null,
     price: body.price ?? null,
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return of(new HttpResponse({ status: 201, url: request.url, body: idBarService })).pipe(
+    delay(600),
+  );
+};
+
+/**
+ * `POST /api/catalog/services/{id}/image` with the image in the multipart field `file`: it replaces
+ * the icon or the image of the service. 200 with the service, here without data: the frontend does
+ * not read it; 422 `catalog.invalid_image` as for the photos of the property; 404
+ * `service.not_found` for an unknown id; 401 without a valid access token.
+ */
+export const uploadServiceImageMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  withImage(request, (image) => {
+    const idService = decodeURIComponent(request.url.split('/').at(-2) ?? '');
+    const barRow = BAR_SERVICES.find((item) => item.idBarService === idService);
+    const standardRow = STANDARD_SERVICES.find((item) => item.idStandardService === idService);
+    const hourlyRow = HOURLY_SERVICES.find((item) => item.idHourlyService === idService);
+    if (barRow) {
+      BAR_SERVICE_DETAILS.set(idService, { ...structuredClone(detailsOf(barRow)), icon: null });
+    } else if (standardRow) {
+      STANDARD_SERVICE_DETAILS.set(idService, {
+        ...structuredClone(standardDetailsOf(standardRow)),
+        icon: null,
+      });
+    } else if (hourlyRow) {
+      HOURLY_SERVICE_DETAILS.set(idService, {
+        ...structuredClone(hourlyDetailsOf(hourlyRow)),
+        icon: null,
+      });
+    } else {
+      return problem(request, 404, ApiErrorCode.ServiceNotFound);
+    }
+    SERVICE_IMAGES.set(idService, URL.createObjectURL(image));
+    return of(new HttpResponse({ status: 200, url: request.url, body: {} })).pipe(delay(600));
+  });
+
+/**
+ * `DELETE /api/catalog/services/{id}/image`: the service has no image any more. 200 with the
+ * service, here without data; 404 `service.not_found` for an unknown id; 401 without a valid access
+ * token.
+ */
+export const deleteServiceImageMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const idService = decodeURIComponent(request.url.split('/').at(-2) ?? '');
+  if (
+    !BAR_SERVICES.some((item) => item.idBarService === idService) &&
+    !STANDARD_SERVICES.some((item) => item.idStandardService === idService) &&
+    !HOURLY_SERVICES.some((item) => item.idHourlyService === idService)
+  ) {
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
+  }
+  SERVICE_IMAGES.delete(idService);
+  return of(new HttpResponse({ status: 200, url: request.url, body: {} })).pipe(delay(600));
 };
 
 function barServiceErrors(body: CreateBarServiceBody, language: string): MockFieldError[] {
-  return [...generalErrors(body, language), ...priceErrors(body)];
+  return [
+    ...generalErrors(body, language),
+    ...iconErrors(body.icon, Object.values(BarServiceIcon)),
+    ...barPriceErrors(body),
+    ...bookingOptionErrors(body.bookingOptions),
+  ];
 }
 
-/**
- * Name and description in the language of the request (the user's), as the panel requires; category
- * and icon, when given, among the values of their enums.
- */
-function generalErrors(body: CreateBarServiceBody, language: string): MockFieldError[] {
-  const errors: MockFieldError[] = [];
-  const translations = Array.isArray(body.translations) ? body.translations : [];
-  const index = translations.findIndex((translation) => translation.language === language);
-  const main = translations[index];
-  const at = `translations[${Math.max(index, 0)}]`;
-  if (typeof main?.serviceName !== 'string' || !main.serviceName.trim()) {
-    errors.push({ field: `${at}.serviceName`, code: 'validation.required' });
+/** As `servicePriceErrors`, with name and price of every variant always filled. */
+function barPriceErrors(body: CreateBarServiceBody): MockFieldError[] {
+  const variants = body.variants ?? [];
+  return [
+    ...servicePriceErrors(body),
+    ...(variants.length > MAX_VARIANT_QUANTITY
+      ? [{ field: 'variants', code: ApiErrorCode.ValidationInvalid }]
+      : []),
+    ...variants.flatMap(({ variantName, price }, index): MockFieldError[] => [
+      ...variantNameErrors(`variants[${index}].variantName`, variantName),
+      ...requiredPriceErrors(`variants[${index}].price`, price),
+    ]),
+  ];
+}
+
+/** The price always filled, prices up to the limit; one wrong price of a period for all. */
+function servicePriceErrors(body: {
+  price?: number | null;
+  vatRate?: number | null;
+  periodPrices?: ServicePeriodPrice[];
+  idSectors?: string[];
+}): MockFieldError[] {
+  const errors = [...requiredPriceErrors('price', body.price), ...sectorErrors(body.idSectors)];
+  if (body.vatRate != null && (body.vatRate <= 0 || body.vatRate >= 100)) {
+    errors.push({ field: 'vatRate', code: ApiErrorCode.ValidationInvalid });
   }
-  if (typeof main?.description !== 'string' || !main.description.trim()) {
-    errors.push({ field: `${at}.description`, code: 'validation.required' });
-  }
-  if (body.category != null && !Object.values(BarServiceCategory).includes(body.category)) {
-    errors.push({ field: 'category', code: 'validation.invalid' });
-  }
-  if (body.icon != null && !Object.values(BarServiceIcon).includes(body.icon)) {
-    errors.push({ field: 'icon', code: 'validation.invalid' });
+  const idPeriods = (body.periodPrices ?? []).map(({ idPeriod }) => idPeriod);
+  if (
+    body.periodPrices?.some(({ price }) => price !== null && !isServicePrice(price)) ||
+    new Set(idPeriods).size !== idPeriods.length
+  ) {
+    errors.push({ field: 'periodPrices', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
 }
 
-/** A price, when given, not below 0. */
-function priceErrors(body: { price?: number | null }): MockFieldError[] {
-  return body.price != null && !(typeof body.price === 'number' && body.price >= 0)
-    ? [{ field: 'price', code: 'validation.invalid' }]
+function requiredPriceErrors(field: string, price: number | null | undefined): MockFieldError[] {
+  if (price == null) {
+    return [{ field, code: ApiErrorCode.ValidationRequired }];
+  }
+  return isServicePrice(price)
+    ? []
+    : [
+        {
+          field,
+          code: ApiErrorCode.ValidationOutOfRange,
+          args: { from: 0, to: MAX_SERVICE_PRICE },
+        },
+      ];
+}
+
+function variantNameErrors(field: string, name: string | null): MockFieldError[] {
+  if (!name?.trim()) {
+    return [{ field, code: ApiErrorCode.ValidationRequired }];
+  }
+  return name.trim().length > MAX_SERVICE_VARIANT_NAME_LENGTH
+    ? [
+        {
+          field,
+          code: ApiErrorCode.ValidationMaxLength,
+          args: { max: MAX_SERVICE_VARIANT_NAME_LENGTH },
+        },
+      ]
     : [];
+}
+
+function isServicePrice(price: number): boolean {
+  return typeof price === 'number' && price >= 0 && price <= MAX_SERVICE_PRICE;
+}
+
+/**
+ * The VAT, the periods and the sectors of the body, in the order of the backend: 422
+ * `catalog.vat_rate_not_allowed`, 422 `pricing.period_not_found`, 404 `catalog.sector_not_found`.
+ */
+function referenceProblem(
+  request: HttpRequest<unknown>,
+  body: { vatRate?: number | null; periodPrices?: ServicePeriodPrice[]; idSectors?: string[] },
+  saved: readonly ServicePeriodPrice[] = [],
+): Observable<never> | null {
+  return (
+    vatRateNotAllowed(request, body.vatRate) ??
+    missingPeriod(
+      request,
+      (body.periodPrices ?? []).map(({ idPeriod }) => idPeriod),
+      saved.map(({ idPeriod }) => idPeriod),
+    ) ??
+    missingSector(request, body.idSectors)
+  );
+}
+
+/** The texts, and the category among the values of its enum (see `translationErrors`). */
+function generalErrors(body: CreateBarServiceBody, language: string): MockFieldError[] {
+  return [
+    ...translationErrors(body.translations, language),
+    ...(body.category != null && !Object.values(BarServiceCategory).includes(body.category)
+      ? [{ field: 'category', code: ApiErrorCode.ValidationInvalid }]
+      : []),
+  ];
 }
 
 type UpdateBarServiceBody = CreateBarServiceBody & { idBarService?: unknown };
 
 /**
- * The common part of the three updates of the edit panel: 401 without a valid access token; 403 for
- * an unknown property; 404 `resource.not_found` for an `idBarService` that is not one of its bar
- * services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab and
- * the answer is 204 without a body.
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 400 with
+ * one error per wrong field; 404 `service.not_found` for an `idBarService` that is not one of
+ * its bar services; 400 for what depends on
+ * the saved service (`savedErrorsOf`); 422 and 404 of its references (`referenceProblem`); 409
+ * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their new
+ * version in its `ETag`.
  */
 function updateBarService(
   request: HttpRequest<unknown>,
+  dataOf: (row: BarServiceRow) => unknown,
   errorsOf: (body: UpdateBarServiceBody) => MockFieldError[],
   apply: (
     details: BarServiceAddItemRequest,
     body: UpdateBarServiceBody,
     row: BarServiceRow,
   ) => void,
+  savedErrorsOf: (
+    body: UpdateBarServiceBody,
+    details: BarServiceAddItemRequest,
+  ) => MockFieldError[] = () => [],
 ): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateBarServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
+  const property = DEMO_PROPERTY;
+  const errors = errorsOf(body);
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
   }
   const row = BAR_SERVICES.find(
     (item) => item.idBarService === body.idBarService && item.propertyId === property.id,
   );
   if (!row?.idBarService) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  const errors = errorsOf(body);
-  if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  const savedErrors = savedErrorsOf(body, detailsOf(row));
+  if (savedErrors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
+  }
+  const missing = referenceProblem(request, body, detailsOf(row).periodPrices);
+  if (missing) {
+    return missing;
+  }
+  const conflict = versionConflict(request, dataOf(row));
+  if (conflict) {
+    return conflict;
   }
   const details = structuredClone(detailsOf(row));
   apply(details, structuredClone(body), row);
   BAR_SERVICE_DETAILS.set(row.idBarService, details);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, dataOf(row));
 }
 
 /**
- * `POST /api/catalog/update-bar-service-general` with `BarServiceUpdateGeneralRequest` and
- * `idProperty`: names, descriptions, category, icon and Metti in evidenza; the list shows the new name
- * (language of `Accept-Language`) and category. Errors as the creation (see `generalErrors`).
+ * `POST /api/catalog/services/update-bar-service-general` with `BarServiceUpdateGeneralRequest`: names,
+ * descriptions, category, icon and Metti in evidenza; the list shows the new name (language of
+ * `Accept-Language`) and category. Errors as the creation (see `generalErrors`).
  */
 export const updateBarServiceGeneralMock = (
   request: HttpRequest<unknown>,
@@ -1085,27 +1875,31 @@ export const updateBarServiceGeneralMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   return updateBarService(
     request,
+    barGeneralInfoOf,
     (body) => generalErrors(body, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.category = body.category ?? null;
       details.icon = body.icon ?? null;
       details.isHighlighted = body.isHighlighted === true;
-      const main = details.translations.find((translation) => translation.language === language);
-      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+      row.serviceName = nameToSave(details.translations, language) ?? row.serviceName;
       row.category = details.category;
+      if (details.icon !== null) {
+        SERVICE_IMAGES.delete(row.idBarService ?? '');
+      }
     },
+    (body, details) => iconErrors(body.icon, Object.values(BarServiceIcon), details.icon),
   );
 };
 
 /**
- * `POST /api/catalog/update-bar-service-prices` with `BarServiceUpdatePricesRequest` and `idProperty`:
- * the Prezzi tab; the list shows the new price. 400 for a price below 0.
+ * `POST /api/catalog/services/update-bar-service-prices` with `BarServiceUpdatePricesRequest`: the Prezzi
+ * tab; the list shows the new price. Errors as the creation (see `barPriceErrors`).
  */
 export const updateBarServicePricesMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
-  updateBarService(request, priceErrors, (details, body, row) => {
+  updateBarService(request, barPricesOf, barPriceErrors, (details, body, row) => {
     details.price = body.price ?? null;
     details.vatRate = body.vatRate ?? null;
     details.variants = body.variants ?? [];
@@ -1117,102 +1911,32 @@ export const updateBarServicePricesMock = (
   });
 
 /**
- * `POST /api/catalog/update-bar-service-booking` with `BarServiceUpdateBookingRequest` and
- * `idProperty`: the booking options of the Prenotazioni tab, all of them.
+ * `POST /api/catalog/services/update-bar-service-booking` with `BarServiceUpdateBookingRequest`: the booking
+ * options of the Prenotazioni tab, all of them.
  */
 export const updateBarServiceBookingMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
   updateBarService(
     request,
-    () => [],
+    barBookingOptionsOf,
+    (body) => bookingOptionErrors(body.bookingOptions),
     (details, body) => {
       details.bookingOptions = body.bookingOptions ?? [];
     },
   );
 
-/**
- * `POST /api/catalog/delete-bar-service-item` with `DeleteBarServiceItemsRequest`: all or nothing. If
- * one id is not a bar service of the property nothing is deleted (404 `resource.not_found`). Repeated
- * ids count once. 204 without a body; 401 without a valid access token; 403 for an unknown property.
- */
+/** `POST /api/catalog/services/delete-bar-service-item` with `{ idBarServices }` (see `deleteServicesAnswer`). */
 export const deleteBarServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<DeleteBarServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const barServices = barServicesOf(property.id, body.idBarServices);
-  if (!barServices) {
-    return resourceNotFound(request);
-  }
-  for (const barService of barServices) {
-    BAR_SERVICES.splice(BAR_SERVICES.indexOf(barService), 1);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  deleteServicesAnswer(request, BAR_SERVICE_TABLE, 'idBarServices');
 
-/**
- * `POST /api/catalog/duplicate-bar-service-item` with `DuplicateBarServiceItemsRequest`: all or
- * nothing, like the delete. Each copy keeps the price; the name is chosen by the backend: the mock
- * invents "Caffè (copia)", then "Caffè (copia 2)" and so on.
- */
+/** `POST /api/catalog/services/duplicate-bar-service-item` with `{ idBarServices }` (see `duplicateServicesAnswer`). */
 export const duplicateBarServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<DuplicateBarServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const barServices = barServicesOf(property.id, body.idBarServices);
-  if (!barServices) {
-    return resourceNotFound(request);
-  }
-  for (const barService of barServices) {
-    BAR_SERVICES.push({
-      ...barService,
-      idBarService: crypto.randomUUID(),
-      serviceName: barServiceCopyName(barService),
-    });
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
-
-/**
- * The bar services of the property for `idBarServices` (repeated ids once); null when one id is not
- * one of them, or there are none: the whole request is cancelled.
- */
-function barServicesOf(propertyId: number, idBarServices: unknown): BarServiceRow[] | null {
-  const ids = Array.isArray(idBarServices) ? [...new Set(idBarServices)] : [];
-  const barServices = ids
-    .map((id) =>
-      BAR_SERVICES.find((row) => row.idBarService === id && row.propertyId === propertyId),
-    )
-    .filter((barService): barService is BarServiceRow => barService !== undefined);
-  return ids.length && barServices.length === ids.length ? barServices : null;
-}
-
-function barServiceCopyName(barService: BarServiceRow): string {
-  const taken = new Set(
-    BAR_SERVICES.filter((row) => row.propertyId === barService.propertyId).map(
-      (row) => row.serviceName,
-    ),
-  );
-  let copy = `${barService.serviceName} (copia)`;
-  for (let number = 2; taken.has(copy); number++) {
-    copy = `${barService.serviceName} (copia ${number})`;
-  }
-  return copy;
-}
+): Observable<HttpEvent<unknown>> =>
+  duplicateServicesAnswer(request, BAR_SERVICE_TABLE, 'idBarServices');
 
 type StandardServiceRow = StandardServiceItem & { propertyId: number };
 
@@ -1229,43 +1953,20 @@ const STANDARD_SERVICES: StandardServiceRow[] = (
   price,
 }));
 
+/** Of "Cassetta di Sicurezza": it cannot be duplicated, and is refused when it is saved. */
+const VAT_RATE_NO_LONGER_ALLOWED = 20;
 const STANDARD_SERVICE_SORT_FIELDS = ['serviceName', 'price'] as const;
 
-/**
- * `POST /api/catalog/standard-service-list`: one page of the services (neither bar nor hourly) of
- * the requested property, searched in the name. 401 without a valid access token; 403 for a missing
- * or unknown property.
- */
+/** `POST /api/catalog/services/standard-service-list`: one page of the services (neither bar nor hourly) (see `serviceListAnswer`). */
 export const standardServiceListMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = STANDARD_SERVICES.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.serviceName?.toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(StandardServiceItem, row));
-  const field = STANDARD_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
-  }
-  const answer: Page<StandardServiceItem> = {
-    total: found.length,
-    rows: found.slice((page - 1) * pageSize, page * pageSize),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
-};
+): Observable<HttpEvent<unknown>> =>
+  serviceListAnswer(
+    request,
+    STANDARD_SERVICE_TABLE,
+    StandardServiceItem,
+    STANDARD_SERVICE_SORT_FIELDS,
+  );
 
 /**
  * The data of the add panel of a service, by id: those created with the panel and Doccia calda; the
@@ -1292,7 +1993,7 @@ const STANDARD_SERVICE_DETAILS = new Map<string, StandardServiceAddItemRequest>(
       price: 3,
       vatRate: 22,
       isPeriodPricingEnabled: true,
-      periodPrices: [{ idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01', price: 2.5 }],
+      periodPrices: [{ idPeriod: 1, price: 2.5 }],
       isOnlinePurchaseEnabled: true,
       bookingOptions: [
         {
@@ -1304,7 +2005,9 @@ const STANDARD_SERVICE_DETAILS = new Map<string, StandardServiceAddItemRequest>(
           onlineEndTime: '18:00',
           maxBookingPerHourQuantity: 6,
           maxBookingPerDayQuantity: 50,
-          timeInterval: BookingTimeInterval.FifteenMinutes,
+          weekdays: [],
+          maxPerSlot: null,
+          intervalMinutes: 15,
           minItemPerBookingQuantity: 1,
           maxItemPerBookingQuantity: 2,
         },
@@ -1325,10 +2028,22 @@ function standardDetailsOf(row: StandardServiceRow): StandardServiceAddItemReque
         },
       ],
       price: row.price,
-      vatRate: 22,
+      vatRate: row.idStandardService?.endsWith('02') ? VAT_RATE_NO_LONGER_ALLOWED : 22,
     })
   );
 }
+
+const STANDARD_SERVICE_TABLE = {
+  rows: STANDARD_SERVICES,
+  idField: 'idStandardService' as const,
+  details: STANDARD_SERVICE_DETAILS,
+  detailsOf: standardDetailsOf,
+  notFoundCode: ApiErrorCode.ServiceNotFound,
+  copyMore: copyImage,
+  deleteMore: leaveAutomaticPrices,
+  copyError: ({ vatRate, idSectors, periodPrices }: StandardServiceAddItemRequest) =>
+    copyError([vatRate], idSectors, idPeriodsOf(periodPrices)),
+};
 
 /** The service of the `idStandardService` of the query string, if it exists. */
 function requestedStandardService(request: HttpRequest<unknown>): StandardServiceRow | undefined {
@@ -1337,9 +2052,10 @@ function requestedStandardService(request: HttpRequest<unknown>): StandardServic
 }
 
 /**
- * `GET /api/catalog/get-standard-service-general-info?idStandardService=…`: the Info Generali tab of
- * the edit panel. 200 with `StandardServiceSelectedGeneralInfo`, only the languages written; 401
- * without a valid access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/services/get-standard-service-general-info?idStandardService=…`: the Info Generali tab
+ * of the edit panel. 200 with `StandardServiceSelectedGeneralInfo` and the version of the tab, only
+ * the languages written and the uploaded image, which the version does not cover; 401 without a valid access token; 404 `service.not_found` for an unknown
+ * id.
  */
 export const standardServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -1349,10 +2065,23 @@ export const standardServiceGeneralInfoMock = (
   }
   const row = requestedStandardService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
+  const imageUrl = SERVICE_IMAGES.get(row.idStandardService ?? '');
+  return versionedAnswer(request, standardGeneralInfoOf(row), {
+    imageUrl: imageUrl ? completeLink(imageUrl) : null,
+  });
+};
+
+/**
+ * What `GET /api/catalog/services/get-standard-service-general-info` answers besides the version and
+ * the image: the version covers it.
+ */
+function standardGeneralInfoOf(
+  row: StandardServiceRow,
+): Omit<StandardServiceSelectedGeneralInfo, 'imageUrl' | 'version'> {
   const details = standardDetailsOf(row);
-  const answer: StandardServiceSelectedGeneralInfo = {
+  return {
     idStandardService: row.idStandardService,
     translations: details.translations.filter(
       ({ serviceName, description }) => serviceName || description,
@@ -1360,15 +2089,13 @@ export const standardServiceGeneralInfoMock = (
     icon: details.icon,
     isHighlighted: details.isHighlighted,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
- * `GET /api/catalog/get-standard-service-prices?idStandardService=…`: the Prezzi tab of the edit
- * panel. 200 with `StandardServiceSelectedPrices`, a price only for the periods that have one; 401
- * without a valid access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/services/get-standard-service-prices?idStandardService=…`: the Prezzi tab of the edit
+ * panel. 200 with `StandardServiceSelectedPrices` and the version of the tab, a price only for the
+ * periods that have one; 401 without a valid access token; 404 `service.not_found` for an unknown
+ * id.
  */
 export const standardServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -1378,26 +2105,34 @@ export const standardServicePricesMock = (
   }
   const row = requestedStandardService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  const details = standardDetailsOf(row);
-  const answer: StandardServiceSelectedPrices = {
-    price: details.price,
-    vatRate: details.vatRate,
-    isPeriodPricingEnabled: details.isPeriodPricingEnabled,
-    periodPrices: details.periodPrices.filter(({ price }) => price !== null),
-    idSectors: details.idSectors,
-    isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
-  };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
+  return versionedAnswer(request, standardPricesOf(row));
 };
 
 /**
- * `GET /api/catalog/get-standard-service-booking-options?idStandardService=…`: the Prenotazioni tab
- * of the edit panel, the array of the booking options (empty when there are none). 401 without a
- * valid access token; 404 `resource.not_found` for an unknown id.
+ * What `GET /api/catalog/services/get-standard-service-prices` answers besides the version: the version
+ * covers it.
+ */
+function standardPricesOf(row: StandardServiceRow): Omit<StandardServiceSelectedPrices, 'version'> {
+  const details = standardDetailsOf(row);
+  return {
+    price: details.price,
+    vatRate: details.vatRate,
+    isPeriodPricingEnabled: details.isPeriodPricingEnabled,
+    periodPrices: details.periodPrices.filter(
+      ({ idPeriod, price }) => price !== null && isPeriodOfSeason(idPeriod),
+    ),
+    idSectors: details.idSectors,
+    isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
+  };
+}
+
+/**
+ * `GET /api/catalog/services/get-standard-service-booking-options?idStandardService=…`: the Prenotazioni tab
+ * of the edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there
+ * are none) and the version of the tab. 401 without a valid access token; 404 `service.not_found`
+ * for an unknown id.
  */
 export const standardServiceBookingOptionsMock = (
   request: HttpRequest<unknown>,
@@ -1407,24 +2142,28 @@ export const standardServiceBookingOptionsMock = (
   }
   const row = requestedStandardService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  return of(
-    new HttpResponse({
-      status: 200,
-      url: request.url,
-      body: structuredClone(standardDetailsOf(row).bookingOptions),
-    }),
-  ).pipe(delay(300));
+  return versionedAnswer(request, standardBookingOptionsOf(row));
 };
 
-type CreateStandardServiceBody = Partial<StandardServiceAddItemRequest> & { idProperty?: unknown };
+/**
+ * What `GET /api/catalog/services/get-standard-service-booking-options` answers besides the version: the
+ * version covers it.
+ */
+function standardBookingOptionsOf(
+  row: StandardServiceRow,
+): Omit<StandardServiceSelectedBookingOptions, 'version'> {
+  return { bookingOptions: standardDetailsOf(row).bookingOptions };
+}
+
+type CreateStandardServiceBody = Partial<StandardServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-standard-service` with `StandardServiceAddItemRequest` and `idProperty`:
- * the new service goes into the list, with the name in the language of `Accept-Language`. 204 without
- * a body; 401 without a valid access token; 403 for an unknown property; 400 with one error per wrong
- * field (see `standardGeneralErrors` and `priceErrors`).
+ * `POST /api/catalog/services/create-standard-service` with `StandardServiceAddItemRequest`: the new service
+ * goes into the list. 201 with its id alone; 401 without a valid access token; 400 with one error per
+ * wrong field (see `translationErrors` and `servicePriceErrors`); 422 and 404 of its references
+ * (`referenceProblem`).
  */
 export const createStandardServiceMock = (
   request: HttpRequest<unknown>,
@@ -1433,16 +2172,23 @@ export const createStandardServiceMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateStandardServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
-  const errors = [...standardGeneralErrors(body, language), ...priceErrors(body)];
+  const errors = [
+    ...translationErrors(body.translations, language),
+    ...iconErrors(body.icon, Object.values(StandardServiceIcon)),
+    ...servicePriceErrors(body),
+    ...bookingOptionErrors(body.bookingOptions),
+  ];
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
   }
-  const main = body.translations?.find((translation) => translation.language === language);
+  const missing = referenceProblem(request, body);
+  if (missing) {
+    return missing;
+  }
   const idStandardService = crypto.randomUUID();
   STANDARD_SERVICE_DETAILS.set(
     idStandardService,
@@ -1453,83 +2199,78 @@ export const createStandardServiceMock = (
   STANDARD_SERVICES.push({
     propertyId: property.id,
     idStandardService,
-    serviceName: main?.serviceName?.trim() ?? null,
+    serviceName: nameToSave(body.translations ?? [], language),
     price: body.price ?? null,
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return of(new HttpResponse({ status: 201, url: request.url, body: idStandardService })).pipe(
+    delay(600),
+  );
 };
-
-/**
- * Name and description in the language of the request (the user's), as the panel requires; the
- * icon, when given, among the values of its enum. Also for the hourly services, which have the same
- * icons.
- */
-function standardGeneralErrors(
-  body: { translations?: ServiceTranslation[]; icon?: StandardServiceIcon | null },
-  language: string,
-): MockFieldError[] {
-  const errors: MockFieldError[] = [];
-  const translations = Array.isArray(body.translations) ? body.translations : [];
-  const index = translations.findIndex((translation) => translation.language === language);
-  const main = translations[index];
-  const at = `translations[${Math.max(index, 0)}]`;
-  if (typeof main?.serviceName !== 'string' || !main.serviceName.trim()) {
-    errors.push({ field: `${at}.serviceName`, code: 'validation.required' });
-  }
-  if (typeof main?.description !== 'string' || !main.description.trim()) {
-    errors.push({ field: `${at}.description`, code: 'validation.required' });
-  }
-  if (body.icon != null && !Object.values(StandardServiceIcon).includes(body.icon)) {
-    errors.push({ field: 'icon', code: 'validation.invalid' });
-  }
-  return errors;
-}
 
 type UpdateStandardServiceBody = CreateStandardServiceBody & { idStandardService?: unknown };
 
 /**
- * The common part of the three updates of the edit panel: 401 without a valid access token; 403 for
- * an unknown property; 404 `resource.not_found` for an `idStandardService` that is not one of its
- * services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab and the
- * answer is 204 without a body.
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 400 with
+ * one error per wrong field; 404 `service.not_found` for an `idStandardService` that is not one of
+ * its services; 400 for what depends on
+ * the saved service (`savedErrorsOf`); 422 and 404 of its references (`referenceProblem`); 409
+ * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their new
+ * version in its `ETag`.
  */
 function updateStandardService(
   request: HttpRequest<unknown>,
+  dataOf: (row: StandardServiceRow) => unknown,
   errorsOf: (body: UpdateStandardServiceBody) => MockFieldError[],
   apply: (
     details: StandardServiceAddItemRequest,
     body: UpdateStandardServiceBody,
     row: StandardServiceRow,
   ) => void,
+  savedErrorsOf: (
+    body: UpdateStandardServiceBody,
+    details: StandardServiceAddItemRequest,
+  ) => MockFieldError[] = () => [],
 ): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateStandardServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
+  const property = DEMO_PROPERTY;
+  const errors = errorsOf(body);
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
   }
   const row = STANDARD_SERVICES.find(
     (item) => item.idStandardService === body.idStandardService && item.propertyId === property.id,
   );
   if (!row?.idStandardService) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  const errors = errorsOf(body);
-  if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  const savedErrors = savedErrorsOf(body, standardDetailsOf(row));
+  if (savedErrors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
+  }
+  const missing = referenceProblem(request, body, standardDetailsOf(row).periodPrices);
+  if (missing) {
+    return missing;
+  }
+  const conflict = versionConflict(request, dataOf(row));
+  if (conflict) {
+    return conflict;
   }
   const details = structuredClone(standardDetailsOf(row));
   apply(details, structuredClone(body), row);
   STANDARD_SERVICE_DETAILS.set(row.idStandardService, details);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, dataOf(row));
 }
 
 /**
- * `POST /api/catalog/update-standard-service-general` with `StandardServiceUpdateGeneralRequest` and
- * `idProperty`: names, descriptions, icon and Metti in evidenza; the list shows the new name (language
- * of `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
+ * `POST /api/catalog/services/update-standard-service-general` with `StandardServiceUpdateGeneralRequest`:
+ * names, descriptions, icon and Metti in evidenza; the list shows the new name (language of
+ * `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
  */
 export const updateStandardServiceGeneralMock = (
   request: HttpRequest<unknown>,
@@ -1537,25 +2278,29 @@ export const updateStandardServiceGeneralMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   return updateStandardService(
     request,
-    (body) => standardGeneralErrors(body, language),
+    standardGeneralInfoOf,
+    (body) => translationErrors(body.translations, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.icon = body.icon ?? null;
       details.isHighlighted = body.isHighlighted === true;
-      const main = details.translations.find((translation) => translation.language === language);
-      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+      row.serviceName = nameToSave(details.translations, language) ?? row.serviceName;
+      if (details.icon !== null) {
+        SERVICE_IMAGES.delete(row.idStandardService ?? '');
+      }
     },
+    (body, details) => iconErrors(body.icon, Object.values(StandardServiceIcon), details.icon),
   );
 };
 
 /**
- * `POST /api/catalog/update-standard-service-prices` with `StandardServiceUpdatePricesRequest` and
- * `idProperty`: the Prezzi tab; the list shows the new price. 400 for a price below 0.
+ * `POST /api/catalog/services/update-standard-service-prices` with `StandardServiceUpdatePricesRequest`: the
+ * Prezzi tab; the list shows the new price. Errors as the creation (see `servicePriceErrors`).
  */
 export const updateStandardServicePricesMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
-  updateStandardService(request, priceErrors, (details, body, row) => {
+  updateStandardService(request, standardPricesOf, servicePriceErrors, (details, body, row) => {
     details.price = body.price ?? null;
     details.vatRate = body.vatRate ?? null;
     details.isPeriodPricingEnabled = body.isPeriodPricingEnabled === true;
@@ -1566,21 +2311,33 @@ export const updateStandardServicePricesMock = (
   });
 
 /**
- * `POST /api/catalog/update-standard-service-booking` with `StandardServiceUpdateBookingRequest` and
- * `idProperty`: the booking options of the Prenotazioni tab, all of them.
+ * `POST /api/catalog/services/update-standard-service-booking` with `StandardServiceUpdateBookingRequest`:
+ * the booking options of the Prenotazioni tab, all of them.
  */
 export const updateStandardServiceBookingMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
   updateStandardService(
     request,
-    () => [],
+    standardBookingOptionsOf,
+    (body) => bookingOptionErrors(body.bookingOptions),
     (details, body) => {
       details.bookingOptions = body.bookingOptions ?? [];
     },
   );
 
 type HourlyServiceRow = HourlyServiceItem & { propertyId: number };
+
+/** As `ContentRules.MaxHourlyOptions` and `SaveServiceRequestValidator`. */
+const MAX_AVAILABILITY_QUANTITY = 20;
+const MAX_PERIOD_QUANTITY = 50;
+const TIME_SLOTS: readonly (string | null)[] = Object.values(ServiceTimeSlot);
+/** The durations of the backend that the frontend does not show. */
+const OTHER_TIME_SLOTS: readonly (string | null)[] = ['FourHours', 'FiveHours', 'SixHours'];
+
+function isOtherTimeSlot(timeSlot: string | null): boolean {
+  return OTHER_TIME_SLOTS.includes(timeSlot);
+}
 
 const HOURLY_SERVICES: HourlyServiceRow[] = (
   [
@@ -1597,45 +2354,15 @@ const HOURLY_SERVICES: HourlyServiceRow[] = (
 
 const HOURLY_SERVICE_SORT_FIELDS = ['serviceName'] as const;
 
-/**
- * `POST /api/catalog/hourly-service-list`: one page of the hourly services of the requested
- * property, searched in the name. 401 without a valid access token; 403 for a missing or unknown
- * property.
- */
+/** `POST /api/catalog/services/hourly-service-list`: one page of the hourly services (see `serviceListAnswer`). */
 export const hourlyServiceListMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = HOURLY_SERVICES.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.serviceName?.toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(HourlyServiceItem, row));
-  const field = HOURLY_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
-  }
-  const answer: Page<HourlyServiceItem> = {
-    total: found.length,
-    rows: found.slice((page - 1) * pageSize, page * pageSize),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
-};
+): Observable<HttpEvent<unknown>> =>
+  serviceListAnswer(request, HOURLY_SERVICE_TABLE, HourlyServiceItem, HOURLY_SERVICE_SORT_FIELDS);
 
 /** An availability of the examples: every day from 9 to 19, four time slots and a custom one. */
 function exampleAvailability(): ServiceAvailabilityOption {
-  const prices: Partial<Record<ServiceTimeSlot, number>> = {
+  const prices: Readonly<Record<string, number | undefined>> = {
     [ServiceTimeSlot.TenMinutes]: 3,
     [ServiceTimeSlot.ThirtyMinutes]: 8,
     [ServiceTimeSlot.OneHour]: 15,
@@ -1679,25 +2406,71 @@ const HOURLY_SERVICE_DETAILS = new Map<string, HourlyServiceAddItemRequest>([
         },
       ],
       icon: StandardServiceIcon.Surfing,
+      price: 15,
+      vatRate: 22,
       isPeriodPricingEnabled: true,
       periodAvailabilities: [
         {
-          idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01',
+          idPeriod: 0,
           availabilityOptions: [exampleAvailability()],
         },
       ],
-      idSectors: ['7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01'],
+      idSectors: ['5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01'],
       isOnlinePurchaseEnabled: true,
       bookingOptions: [
-        {
+        Object.assign(new HourlyServiceBookingOption(), {
           dateFrom: '2026-06-01T00:00:00.000Z',
           dateTo: '2026-09-15T00:00:00.000Z',
           availabilityOption: exampleAvailability(),
-        },
+        }),
       ],
     }),
   ],
 ]);
+
+/**
+ * The services of the property with prices (bar and standard) or availabilities (hourly) for the
+ * period `key` of the current season, each name once: what the backend checks before deleting a
+ * period.
+ */
+export function servicesUsingPeriod(key: number): string[] {
+  const hasPrice = (prices: readonly ServicePeriodPrice[]): boolean =>
+    prices.some(({ idPeriod, price }) => idPeriod === key && price !== null);
+  const hasOptions = (availabilities: readonly ServicePeriodAvailability[]): boolean =>
+    availabilities.some(
+      ({ idPeriod, availabilityOptions }) => idPeriod === key && availabilityOptions.length > 0,
+    );
+  const names = [
+    ...BAR_SERVICES.filter((row) => {
+      const details = detailsOf(row);
+      return details.isPeriodPricingEnabled && hasPrice(details.periodPrices);
+    }).map(({ serviceName }) => serviceName),
+    ...STANDARD_SERVICES.filter((row) => {
+      const details = standardDetailsOf(row);
+      return details.isPeriodPricingEnabled && hasPrice(details.periodPrices);
+    }).map(({ serviceName }) => serviceName),
+    ...HOURLY_SERVICES.filter((row) => {
+      const details = hourlyDetailsOf(row);
+      return details.isPeriodPricingEnabled && hasOptions(details.periodAvailabilities);
+    }).map(({ serviceName }) => serviceName),
+  ];
+  return [...new Set(names.filter((name): name is string => !!name))];
+}
+
+/** How many services (bar, standard and hourly) and automatic prices are limited to a sector. */
+export function sectorLimits(idSector: string): { services: number; automaticPrices: number } {
+  const limits: { idSectors: string[] }[] = [
+    ...BAR_SERVICES.map(detailsOf),
+    ...STANDARD_SERVICES.map(standardDetailsOf),
+    ...HOURLY_SERVICES.map(hourlyDetailsOf),
+  ];
+  const countOf = (items: readonly { idSectors: string[] }[]): number =>
+    items.filter(({ idSectors }) => idSectors.includes(idSector)).length;
+  return {
+    services: countOf(limits),
+    automaticPrices: countOf(AUTOMATIC_PRICES.map(automaticDetailsOf)),
+  };
+}
 
 function hourlyDetailsOf(row: HourlyServiceRow): HourlyServiceAddItemRequest {
   return (
@@ -1710,9 +2483,28 @@ function hourlyDetailsOf(row: HourlyServiceRow): HourlyServiceAddItemRequest {
           description: 'Servizio a ore offerto dallo stabilimento.',
         },
       ],
+      price: 10,
+      vatRate: 22,
+      availabilityOptions: [exampleAvailability()],
     })
   );
 }
+
+const HOURLY_SERVICE_TABLE = {
+  rows: HOURLY_SERVICES,
+  idField: 'idHourlyService' as const,
+  details: HOURLY_SERVICE_DETAILS,
+  detailsOf: hourlyDetailsOf,
+  notFoundCode: ApiErrorCode.ServiceNotFound,
+  copyMore: copyImage,
+  deleteMore: leaveAutomaticPrices,
+  copyError: (details: HourlyServiceAddItemRequest) =>
+    copyError(
+      [details.vatRate, ...availabilitiesOf(details).map(({ vatRate }) => vatRate)],
+      details.idSectors,
+      details.periodAvailabilities.map(({ idPeriod }) => idPeriod),
+    ),
+};
 
 /** The hourly service of the `idHourlyService` of the query string, if it exists. */
 function requestedHourlyService(request: HttpRequest<unknown>): HourlyServiceRow | undefined {
@@ -1721,9 +2513,9 @@ function requestedHourlyService(request: HttpRequest<unknown>): HourlyServiceRow
 }
 
 /**
- * `GET /api/catalog/get-hourly-service-general-info?idHourlyService=…`: the Info Generali tab of the
- * edit panel. 200 with `HourlyServiceSelectedGeneralInfo`, only the languages written; 401 without a
- * valid access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/services/get-hourly-service-general-info?idHourlyService=…`: the Info Generali tab of
+ * the edit panel. 200 with `HourlyServiceSelectedGeneralInfo` and the version of the tab, only the
+ * languages written; 401 without a valid access token; 404 `service.not_found` for an unknown id.
  */
 export const hourlyServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -1733,10 +2525,23 @@ export const hourlyServiceGeneralInfoMock = (
   }
   const row = requestedHourlyService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
+  const imageUrl = SERVICE_IMAGES.get(row.idHourlyService ?? '');
+  return versionedAnswer(request, hourlyGeneralInfoOf(row), {
+    imageUrl: imageUrl ? completeLink(imageUrl) : null,
+  });
+};
+
+/**
+ * What `GET /api/catalog/services/get-hourly-service-general-info` answers besides the version: the version
+ * covers it.
+ */
+function hourlyGeneralInfoOf(
+  row: HourlyServiceRow,
+): Omit<HourlyServiceSelectedGeneralInfo, 'imageUrl' | 'version'> {
   const details = hourlyDetailsOf(row);
-  const answer: HourlyServiceSelectedGeneralInfo = {
+  return {
     idHourlyService: row.idHourlyService,
     translations: details.translations.filter(
       ({ serviceName, description }) => serviceName || description,
@@ -1744,15 +2549,13 @@ export const hourlyServiceGeneralInfoMock = (
     icon: details.icon,
     isHighlighted: details.isHighlighted,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
- * `GET /api/catalog/get-hourly-service-prices?idHourlyService=…`: the Prezzi tab of the edit panel.
- * 200 with `HourlyServiceSelectedPrices`, the availability only of the periods that have it; 401
- * without a valid access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/services/get-hourly-service-prices?idHourlyService=…`: the Prezzi tab of the edit panel.
+ * 200 with `HourlyServiceSelectedPrices` and the version of the tab, the availabilities of the whole
+ * season or only of the periods that have them; 401 without a valid access token; 404
+ * `service.not_found` for an unknown id.
  */
 export const hourlyServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -1762,26 +2565,36 @@ export const hourlyServicePricesMock = (
   }
   const row = requestedHourlyService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
+  return versionedAnswer(request, hourlyPricesOf(row));
+};
+
+/**
+ * What `GET /api/catalog/services/get-hourly-service-prices` answers besides the version: the version covers
+ * it.
+ */
+function hourlyPricesOf(row: HourlyServiceRow): Omit<HourlyServiceSelectedPrices, 'version'> {
   const details = hourlyDetailsOf(row);
-  const answer: HourlyServiceSelectedPrices = {
+  return {
+    price: details.price,
+    vatRate: details.vatRate,
     isPeriodPricingEnabled: details.isPeriodPricingEnabled,
+    availabilityOptions: details.availabilityOptions,
     periodAvailabilities: details.periodAvailabilities.filter(
-      ({ availabilityOptions }) => availabilityOptions.length > 0,
+      ({ idPeriod, availabilityOptions }) =>
+        availabilityOptions.length > 0 && isPeriodOfSeason(idPeriod),
     ),
     idSectors: details.idSectors,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
- * `GET /api/catalog/get-hourly-service-booking-options?idHourlyService=…`: the Prenotazioni tab of
- * the edit panel, the array of the booking options (empty when there are none). 401 without a valid
- * access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/services/get-hourly-service-booking-options?idHourlyService=…`: the Prenotazioni tab of
+ * the edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there are
+ * none) and the version of the tab. 401 without a valid access token; 404 `service.not_found` for
+ * an unknown id.
  */
 export const hourlyServiceBookingOptionsMock = (
   request: HttpRequest<unknown>,
@@ -1791,24 +2604,28 @@ export const hourlyServiceBookingOptionsMock = (
   }
   const row = requestedHourlyService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  return of(
-    new HttpResponse({
-      status: 200,
-      url: request.url,
-      body: structuredClone(hourlyDetailsOf(row).bookingOptions),
-    }),
-  ).pipe(delay(300));
+  return versionedAnswer(request, hourlyBookingOptionsOf(row));
 };
 
-type CreateHourlyServiceBody = Partial<HourlyServiceAddItemRequest> & { idProperty?: unknown };
+/**
+ * What `GET /api/catalog/services/get-hourly-service-booking-options` answers besides the version: the
+ * version covers it.
+ */
+function hourlyBookingOptionsOf(
+  row: HourlyServiceRow,
+): Omit<HourlyServiceSelectedBookingOptions, 'version'> {
+  return { bookingOptions: hourlyDetailsOf(row).bookingOptions };
+}
+
+type CreateHourlyServiceBody = Partial<HourlyServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-hourly-service` with `HourlyServiceAddItemRequest` and `idProperty`: the
- * new hourly service goes into the list, with the name in the language of `Accept-Language`. 204
- * without a body; 401 without a valid access token; 403 for an unknown property; 400 with one error
- * per wrong field (see `standardGeneralErrors` and `hourlyPriceErrors`).
+ * `POST /api/catalog/services/create-hourly-service` with `HourlyServiceAddItemRequest`: the new hourly
+ * service goes into the list. 201 with its id alone; 401 without a valid access token; 400 with one
+ * error per wrong field (see `translationErrors`, `hourlyPriceErrors`, `missingVatErrors` and
+ * `hourlyBookingErrors`); 422 and 404 of its references (`hourlyReferenceProblem`).
  */
 export const createHourlyServiceMock = (
   request: HttpRequest<unknown>,
@@ -1817,106 +2634,277 @@ export const createHourlyServiceMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateHourlyServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
-  const errors = [...standardGeneralErrors(body, language), ...hourlyPriceErrors(body)];
+  const errors = [
+    ...translationErrors(body.translations, language),
+    ...iconErrors(body.icon, Object.values(StandardServiceIcon)),
+    ...hourlyPriceErrors(body),
+    ...missingVatErrors(body, availabilitiesOf(body)),
+    ...hourlyBookingErrors(body),
+  ];
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
   }
-  const main = body.translations?.find((translation) => translation.language === language);
+  const missing = hourlyReferenceProblem(request, body);
+  if (missing) {
+    return missing;
+  }
   const idHourlyService = crypto.randomUUID();
   HOURLY_SERVICE_DETAILS.set(
     idHourlyService,
-    structuredClone(onlyFieldsOf(HourlyServiceAddItemRequest, body as HourlyServiceAddItemRequest)),
+    structuredClone({
+      ...onlyFieldsOf(HourlyServiceAddItemRequest, body as HourlyServiceAddItemRequest),
+      vatRate: hourlyVatRate(body),
+    }),
   );
   HOURLY_SERVICES.push({
     propertyId: property.id,
     idHourlyService,
-    serviceName: main?.serviceName?.trim() ?? null,
+    serviceName: nameToSave(body.translations ?? [], language),
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return of(new HttpResponse({ status: 201, url: request.url, body: idHourlyService })).pipe(
+    delay(600),
+  );
 };
 
-/** Every price of the time slots, of the periods and of the booking options, when given, not below 0. */
-function hourlyPriceErrors(body: {
-  periodAvailabilities?: ServicePeriodAvailability[];
-  bookingOptions?: HourlyServiceBookingOption[];
-}): MockFieldError[] {
-  const errorsOf = (option: ServiceAvailabilityOption, at: string): MockFieldError[] => [
-    ...option.timeSlotPrices.flatMap(({ price }, index) =>
-      priceErrors({ price }).map((): MockFieldError => ({
-        field: `${at}.timeSlotPrices[${index}].price`,
-        code: 'validation.invalid',
-      })),
-    ),
-    ...priceErrors({ price: option.customTimeSlotPrice }).map((): MockFieldError => ({
-      field: `${at}.customTimeSlotPrice`,
-      code: 'validation.invalid',
-    })),
-  ];
+/** The availabilities in force and those of the booking options. */
+function availabilitiesOf(body: CreateHourlyServiceBody): ServiceAvailabilityOption[] {
   return [
-    ...(body.periodAvailabilities ?? []).flatMap((periodAvailability, periodIndex) =>
-      periodAvailability.availabilityOptions.flatMap((option, optionIndex) =>
-        errorsOf(
+    ...(body.isPeriodPricingEnabled
+      ? (body.periodAvailabilities ?? []).flatMap((period) => period.availabilityOptions)
+      : (body.availabilityOptions ?? [])),
+    ...(body.bookingOptions ?? []).flatMap(({ availabilityOption }) => availabilityOption ?? []),
+  ];
+}
+
+/** Without a VAT of the service, that of its first availability. */
+function hourlyVatRate(body: CreateHourlyServiceBody): number | null {
+  return (
+    body.vatRate ?? availabilitiesOf(body).find(({ vatRate }) => vatRate !== null)?.vatRate ?? null
+  );
+}
+
+/** As `referenceProblem`, for the availabilities by period. */
+function hourlyReferenceProblem(
+  request: HttpRequest<unknown>,
+  body: CreateHourlyServiceBody,
+  saved: readonly ServicePeriodAvailability[] = [],
+): Observable<never> | null {
+  return (
+    hourlyVatRateNotAllowed(request, body) ??
+    missingPeriod(
+      request,
+      (body.periodAvailabilities ?? []).map(({ idPeriod }) => idPeriod),
+      saved.map(({ idPeriod }) => idPeriod),
+    ) ??
+    missingSector(request, body.idSectors)
+  );
+}
+
+function hourlyVatRateNotAllowed(
+  request: HttpRequest<unknown>,
+  body: CreateHourlyServiceBody,
+): Observable<never> | null {
+  const notAllowed = [body.vatRate, ...availabilitiesOf(body).map(({ vatRate }) => vatRate)].find(
+    (vatRate) => vatRateNotAllowed(request, vatRate),
+  );
+  return vatRateNotAllowed(request, notAllowed);
+}
+
+/** The VAT of the service or of all its availabilities, not for a service already without it. */
+function missingVatErrors(
+  body: CreateHourlyServiceBody,
+  availabilities: readonly ServiceAvailabilityOption[],
+  canLackVat = false,
+): MockFieldError[] {
+  return body.vatRate == null &&
+    !canLackVat &&
+    !(availabilities.length && availabilities.every(({ vatRate }) => vatRate !== null))
+    ? [{ field: 'vatRate', code: ApiErrorCode.ValidationInvalid }]
+    : [];
+}
+
+/** The Prezzi tab: the price, the VAT, the availabilities of the kind in force only. */
+function hourlyPriceErrors(body: CreateHourlyServiceBody): MockFieldError[] {
+  const errors = [...requiredPriceErrors('price', body.price), ...sectorErrors(body.idSectors)];
+  if (isVatOutOfRange(body.vatRate)) {
+    errors.push({ field: 'vatRate', code: ApiErrorCode.ValidationInvalid });
+  }
+  const periods = body.periodAvailabilities ?? [];
+  if ((body.availabilityOptions?.length ?? 0) > MAX_AVAILABILITY_QUANTITY) {
+    errors.push({ field: 'availabilityOptions', code: ApiErrorCode.ValidationInvalid });
+  }
+  if (
+    periods.length > MAX_PERIOD_QUANTITY ||
+    new Set(periods.map(({ idPeriod }) => idPeriod)).size !== periods.length ||
+    periods.some(
+      ({ availabilityOptions }) => availabilityOptions.length > MAX_AVAILABILITY_QUANTITY,
+    )
+  ) {
+    errors.push({ field: 'periodAvailabilities', code: ApiErrorCode.ValidationInvalid });
+  }
+  const notInForce = body.isPeriodPricingEnabled ? 'availabilityOptions' : 'periodAvailabilities';
+  if (body[notInForce]?.length) {
+    errors.push({ field: notInForce, code: ApiErrorCode.ValidationInvalid });
+  }
+  return [
+    ...errors,
+    ...(body.availabilityOptions ?? []).flatMap((option, index) =>
+      availabilityErrors(option, `availabilityOptions[${index}]`),
+    ),
+    ...(body.periodAvailabilities ?? []).flatMap((period, periodIndex) =>
+      period.availabilityOptions.flatMap((option, index) =>
+        availabilityErrors(
           option,
-          `periodAvailabilities[${periodIndex}].availabilityOptions[${optionIndex}]`,
+          `periodAvailabilities[${periodIndex}].availabilityOptions[${index}]`,
         ),
       ),
     ),
-    ...(body.bookingOptions ?? []).flatMap((bookingOption, index) =>
-      errorsOf(bookingOption.availabilityOption, `bookingOptions[${index}].availabilityOption`),
+  ];
+}
+
+function hourlyBookingErrors(body: CreateHourlyServiceBody): MockFieldError[] {
+  return [
+    ...bookingOptionErrors(body.bookingOptions),
+    ...(body.bookingOptions ?? []).flatMap(({ availabilityOption }, index) =>
+      availabilityOption
+        ? availabilityErrors(availabilityOption, `bookingOptions[${index}].availabilityOption`)
+        : [],
     ),
   ];
+}
+
+function availabilityErrors(option: ServiceAvailabilityOption, at: string): MockFieldError[] {
+  const errors: MockFieldError[] = [];
+  if (isNotLater(option.endTime, option.startTime)) {
+    errors.push({ field: `${at}.endTime`, code: ApiErrorCode.ValidationInvalid });
+  }
+  if (!option.daysOfWeek.every((day) => isBetween(day, 1, DAYS_OF_WEEK.length))) {
+    errors.push({ field: `${at}.daysOfWeek`, code: ApiErrorCode.ValidationInvalid });
+  }
+  const timeSlots = option.timeSlotPrices.map(({ timeSlot }) => timeSlot);
+  if (
+    new Set(timeSlots).size !== timeSlots.length ||
+    !timeSlots.every((timeSlot) => TIME_SLOTS.includes(timeSlot) || isOtherTimeSlot(timeSlot))
+  ) {
+    errors.push({ field: `${at}.timeSlotPrices`, code: ApiErrorCode.ValidationInvalid });
+  }
+  option.timeSlotPrices.forEach(({ timeSlot, isEnabled, price }, index) => {
+    // The durations the frontend does not show are accepted as they are.
+    if (price !== null || (isEnabled && !isOtherTimeSlot(timeSlot))) {
+      errors.push(...requiredPriceErrors(`${at}.timeSlotPrices[${index}].price`, price));
+    }
+  });
+  const minutes = option.customTimeSlotMinuteQuantity;
+  if (minutes === null) {
+    if (option.isCustomTimeSlotEnabled || option.customTimeSlotPrice !== null) {
+      errors.push({
+        field: `${at}.customTimeSlotMinuteQuantity`,
+        code: ApiErrorCode.ValidationRequired,
+      });
+    }
+  } else if (minutes < 1 || minutes > MAX_CUSTOM_TIME_SLOT_MINUTES) {
+    errors.push({
+      field: `${at}.customTimeSlotMinuteQuantity`,
+      code: ApiErrorCode.ValidationOutOfRange,
+      args: { from: 1, to: MAX_CUSTOM_TIME_SLOT_MINUTES },
+    });
+  }
+  if (option.isCustomTimeSlotEnabled || option.customTimeSlotPrice !== null) {
+    errors.push(...requiredPriceErrors(`${at}.customTimeSlotPrice`, option.customTimeSlotPrice));
+  }
+  if (isVatOutOfRange(option.vatRate)) {
+    errors.push({
+      field: `${at}.vatRate`,
+      code: ApiErrorCode.ValidationOutOfRange,
+      args: { from: 0, to: 100 },
+    });
+  }
+  if (
+    option.maxBookingPerTimeSlotQuantity !== null &&
+    (option.maxBookingPerTimeSlotQuantity < 1 ||
+      option.maxBookingPerTimeSlotQuantity > MAX_SERVICE_BOOKING_QUANTITY)
+  ) {
+    errors.push({
+      field: `${at}.maxBookingPerTimeSlotQuantity`,
+      code: ApiErrorCode.ValidationOutOfRange,
+      args: { from: 1, to: MAX_SERVICE_BOOKING_QUANTITY },
+    });
+  }
+  return errors;
+}
+
+function isVatOutOfRange(vatRate: number | null | undefined): boolean {
+  return vatRate != null && (vatRate <= 0 || vatRate >= 100);
 }
 
 type UpdateHourlyServiceBody = CreateHourlyServiceBody & { idHourlyService?: unknown };
 
 /**
- * The common part of the three updates of the edit panel: 401 without a valid access token; 403 for
- * an unknown property; 404 `resource.not_found` for an `idHourlyService` that is not one of its
- * hourly services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab
- * and the answer is 204 without a body.
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 400 with
+ * one error per wrong field; 404 `service.not_found` for an `idHourlyService` that is not one of
+ * its hourly services; 400 for what depends on
+ * the saved service (`savedErrorsOf`); 422 and 404 of its references (`hourlyReferenceProblem`); 409
+ * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their new
+ * version in its `ETag`.
  */
 function updateHourlyService(
   request: HttpRequest<unknown>,
+  dataOf: (row: HourlyServiceRow) => unknown,
   errorsOf: (body: UpdateHourlyServiceBody) => MockFieldError[],
   apply: (
     details: HourlyServiceAddItemRequest,
     body: UpdateHourlyServiceBody,
     row: HourlyServiceRow,
   ) => void,
+  savedErrorsOf: (
+    body: UpdateHourlyServiceBody,
+    details: HourlyServiceAddItemRequest,
+  ) => MockFieldError[] = () => [],
 ): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateHourlyServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
+  const property = DEMO_PROPERTY;
+  const errors = errorsOf(body);
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
   }
   const row = HOURLY_SERVICES.find(
     (item) => item.idHourlyService === body.idHourlyService && item.propertyId === property.id,
   );
   if (!row?.idHourlyService) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  const errors = errorsOf(body);
-  if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  const savedErrors = savedErrorsOf(body, hourlyDetailsOf(row));
+  if (savedErrors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
+  }
+  const missing = hourlyReferenceProblem(request, body, hourlyDetailsOf(row).periodAvailabilities);
+  if (missing) {
+    return missing;
+  }
+  const conflict = versionConflict(request, dataOf(row));
+  if (conflict) {
+    return conflict;
   }
   const details = structuredClone(hourlyDetailsOf(row));
   apply(details, structuredClone(body), row);
   HOURLY_SERVICE_DETAILS.set(row.idHourlyService, details);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, dataOf(row));
 }
 
 /**
- * `POST /api/catalog/update-hourly-service-general` with `HourlyServiceUpdateGeneralRequest` and
- * `idProperty`: names, descriptions, icon and Metti in evidenza; the list shows the new name
- * (language of `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
+ * `POST /api/catalog/services/update-hourly-service-general` with `HourlyServiceUpdateGeneralRequest`:
+ * names, descriptions, icon and Metti in evidenza; the list shows the new name (language of
+ * `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
  */
 export const updateHourlyServiceGeneralMock = (
   request: HttpRequest<unknown>,
@@ -1924,49 +2912,61 @@ export const updateHourlyServiceGeneralMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   return updateHourlyService(
     request,
-    (body) => standardGeneralErrors(body, language),
+    hourlyGeneralInfoOf,
+    (body) => translationErrors(body.translations, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.icon = body.icon ?? null;
       details.isHighlighted = body.isHighlighted === true;
-      const main = details.translations.find((translation) => translation.language === language);
-      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+      row.serviceName = nameToSave(details.translations, language) ?? row.serviceName;
+      if (details.icon !== null) {
+        SERVICE_IMAGES.delete(row.idHourlyService ?? '');
+      }
     },
+    (body, details) => iconErrors(body.icon, Object.values(StandardServiceIcon), details.icon),
   );
 };
 
 /**
- * `POST /api/catalog/update-hourly-service-prices` with `HourlyServiceUpdatePricesRequest` and
- * `idProperty`: the Prezzi tab. 400 for a price below 0.
+ * `POST /api/catalog/services/update-hourly-service-prices` with `HourlyServiceUpdatePricesRequest`: the
+ * Prezzi tab (see `hourlyPriceErrors`). A service already without VAT can stay so.
  */
 export const updateHourlyServicePricesMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
   updateHourlyService(
     request,
-    (body) => hourlyPriceErrors({ periodAvailabilities: body.periodAvailabilities }),
+    hourlyPricesOf,
+    hourlyPriceErrors,
     (details, body) => {
+      details.price = body.price ?? null;
+      if (details.vatRate !== null || body.vatRate != null) {
+        details.vatRate = hourlyVatRate({ ...body, bookingOptions: details.bookingOptions });
+      }
       details.isPeriodPricingEnabled = body.isPeriodPricingEnabled === true;
+      details.availabilityOptions = body.availabilityOptions ?? [];
       details.periodAvailabilities = body.periodAvailabilities ?? [];
       details.idSectors = body.idSectors ?? [];
       details.isOnlinePurchaseEnabled = body.isOnlinePurchaseEnabled === true;
     },
+    (body, details) =>
+      missingVatErrors(
+        body,
+        availabilitiesOf({ ...body, bookingOptions: details.bookingOptions }),
+        details.vatRate === null,
+      ),
   );
 
 /**
- * `POST /api/catalog/update-hourly-service-booking` with `HourlyServiceUpdateBookingRequest` and
- * `idProperty`: the booking options of the Prenotazioni tab, all of them. 400 for a price below 0.
+ * `POST /api/catalog/services/update-hourly-service-booking` with `HourlyServiceUpdateBookingRequest`: the
+ * booking options of the Prenotazioni tab, all of them (see `hourlyBookingErrors`).
  */
 export const updateHourlyServiceBookingMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
-  updateHourlyService(
-    request,
-    (body) => hourlyPriceErrors({ bookingOptions: body.bookingOptions }),
-    (details, body) => {
-      details.bookingOptions = body.bookingOptions ?? [];
-    },
-  );
+  updateHourlyService(request, hourlyBookingOptionsOf, hourlyBookingErrors, (details, body) => {
+    details.bookingOptions = body.bookingOptions ?? [];
+  });
 
 type AutomaticPriceRow = AutomaticPriceItem & { propertyId: number };
 
@@ -1977,8 +2977,16 @@ const AUTOMATIC_PRICES: AutomaticPriceRow[] = [
     serviceName: 'Coperto',
     price: 2,
   },
+  {
+    propertyId: 1,
+    idAutomaticPrice: '7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d02',
+    serviceName: 'Servizio in spiaggia',
+    price: 1.5,
+  },
 ];
 
+/** Of a period, as `SaveAutomaticPriceRequestValidator`. */
+const MAX_TIME_SLOT_QUANTITY = 20;
 const AUTOMATIC_PRICE_SORT_FIELDS = ['serviceName', 'price'] as const;
 
 /**
@@ -2023,20 +3031,36 @@ const AUTOMATIC_PRICE_DETAILS = new Map<string, AutomaticPriceAddItemRequest>([
       idStandardServices: ['9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01'],
       idHourlyServices: ['4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01'],
       isPricePerServiceEnabled: true,
-      idSectors: ['7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01'],
+      idSectors: ['5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01'],
     }),
   ],
 ]);
 
-/** The services of a property as `{ id, value }`, with the name. */
-function serviceItemsOf<Row extends { propertyId: number; serviceName: string | null }>(
-  rows: readonly Row[],
-  propertyId: number,
-  idOf: (row: Row) => string | null,
-): ComboboxItem[] {
-  return rows
-    .filter((row) => row.propertyId === propertyId)
-    .map((row) => ({ id: idOf(row) ?? '', value: row.serviceName ?? '' }));
+/** As `ServiceItemsService.RemoveAsync`: a deleted service is not in the automatic prices any more. */
+function leaveAutomaticPrices(idService: string): void {
+  const without = (ids: readonly string[]): string[] => ids.filter((id) => id !== idService);
+  for (const [idAutomaticPrice, details] of AUTOMATIC_PRICE_DETAILS) {
+    AUTOMATIC_PRICE_DETAILS.set(idAutomaticPrice, {
+      ...details,
+      idBarServices: without(details.idBarServices),
+      idStandardServices: without(details.idStandardServices),
+      idHourlyServices: without(details.idHourlyServices),
+    });
+  }
+}
+
+/** The services of a tab as `{ id, value }`, with the name and the order of its table. */
+function serviceItemsOf<
+  Row extends { propertyId: number; serviceName: string | null },
+  Details extends { translations: ServiceTranslation[] },
+>(request: HttpRequest<unknown>, table: ServiceTable<Row, Details>): ComboboxItem[] {
+  return table.rows
+    .filter((row) => row.propertyId === DEMO_PROPERTY.id)
+    .map((row) => ({
+      id: String(row[table.idField]),
+      value: shownName(table, row, languageOf(request)) ?? '',
+    }))
+    .sort((first, second) => naturalOrder(first.value, second.value));
 }
 
 /** Every id, when the list is given, of a service of the property. */
@@ -2053,9 +3077,9 @@ function areServicesOf<Row extends { propertyId: number }>(
 }
 
 /**
- * `GET /api/catalog/get-automatic-price-services?idProperty=…`: the bar, standard and hourly services
- * of the property, as `{ id, value }` with the name, for "Validità sui servizi". 401 without a valid
- * access token; 403 for a missing or unknown property.
+ * `GET /api/catalog/automatic-prices/get-automatic-price-services`: the bar, standard and hourly services of the
+ * property, as `{ id, value }` with the name, for "Validità sui servizi". 401 without a valid
+ * access token.
  */
 export const automaticPriceServicesMock = (
   request: HttpRequest<unknown>,
@@ -2063,31 +3087,22 @@ export const automaticPriceServicesMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf(request.params.get('idProperty'));
-  if (!property) {
-    return forbidden(request);
-  }
   const answer: AutomaticPriceServices = {
-    barServices: serviceItemsOf(BAR_SERVICES, property.id, (row) => row.idBarService),
-    standardServices: serviceItemsOf(
-      STANDARD_SERVICES,
-      property.id,
-      (row) => row.idStandardService,
-    ),
-    hourlyServices: serviceItemsOf(HOURLY_SERVICES, property.id, (row) => row.idHourlyService),
+    barServices: serviceItemsOf(request, BAR_SERVICE_TABLE),
+    standardServices: serviceItemsOf(request, STANDARD_SERVICE_TABLE),
+    hourlyServices: serviceItemsOf(request, HOURLY_SERVICE_TABLE),
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
 };
 
-type CreateAutomaticPriceBody = Partial<AutomaticPriceAddItemRequest> & { idProperty?: unknown };
+type CreateAutomaticPriceBody = Partial<AutomaticPriceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-automatic-price` with `AutomaticPriceAddItemRequest` and `idProperty`: the
- * new automatic price goes into the list, with the name in the language of `Accept-Language`. 204
- * without a body; 401 without a valid access token; 403 for an unknown property; 404
- * `resource.not_found` for a service that is not one of the property; 400 with one error per wrong
- * field (name and description in the language of the request, icon of one of the two lists, price
- * not below 0).
+ * `POST /api/catalog/automatic-prices/create-automatic-price` with `AutomaticPriceAddItemRequest`: the new automatic
+ * price goes into the list. 201 with its id alone; 401 without a valid access token; 400 with one
+ * error per wrong field (see `automaticGeneralErrors` and `automaticPriceErrors`); 422
+ * `catalog.vat_rate_not_allowed`; 404 `service.not_found` and `catalog.sector_not_found` for a
+ * service or a sector that is not one of the property.
  */
 export const createAutomaticPriceMock = (
   request: HttpRequest<unknown>,
@@ -2096,23 +3111,25 @@ export const createAutomaticPriceMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateAutomaticPriceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
+  const property = DEMO_PROPERTY;
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  const errors = [...automaticGeneralErrors(body, language), ...automaticPriceErrors(body)];
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
+  }
+  const vatProblem = vatRateNotAllowed(request, body.vatRate);
+  if (vatProblem) {
+    return vatProblem;
   }
   if (!areAutomaticServicesOf(body, property.id)) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  const language = request.headers.get('Accept-Language') ?? 'it';
-  const errors = [
-    ...standardGeneralErrors({ translations: body.translations }, language),
-    ...automaticIconErrors(body.icon ?? null),
-    ...priceErrors(body),
-  ];
-  if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  const missing = missingSector(request, body.idSectors);
+  if (missing) {
+    return missing;
   }
-  const main = body.translations?.find((translation) => translation.language === language);
   const idAutomaticPrice = crypto.randomUUID();
   AUTOMATIC_PRICE_DETAILS.set(
     idAutomaticPrice,
@@ -2123,11 +3140,58 @@ export const createAutomaticPriceMock = (
   AUTOMATIC_PRICES.push({
     propertyId: property.id,
     idAutomaticPrice,
-    serviceName: main?.serviceName?.trim() ?? null,
+    serviceName: nameToSave(body.translations ?? [], language),
     price: body.price ?? null,
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return of(new HttpResponse({ status: 201, url: request.url, body: idAutomaticPrice })).pipe(
+    delay(600),
+  );
 };
+
+/**
+ * `POST /api/catalog/automatic-prices/{id}/image` with the image in the multipart field `file`: it
+ * replaces the icon or the image of the automatic price, as for the services
+ * (`uploadServiceImageMock`). 404 `service.automatic_price_not_found` for an unknown id.
+ */
+export const uploadAutomaticPriceImageMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  withImage(request, (image) => {
+    const row = automaticPriceOfImage(request);
+    if (!row?.idAutomaticPrice) {
+      return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
+    }
+    AUTOMATIC_PRICE_DETAILS.set(row.idAutomaticPrice, {
+      ...structuredClone(automaticDetailsOf(row)),
+      icon: null,
+    });
+    SERVICE_IMAGES.set(row.idAutomaticPrice, URL.createObjectURL(image));
+    return of(new HttpResponse({ status: 200, url: request.url, body: {} })).pipe(delay(600));
+  });
+
+/**
+ * `DELETE /api/catalog/automatic-prices/{id}/image`: the automatic price has no image any more, as
+ * for the services (`deleteServiceImageMock`).
+ */
+export const deleteAutomaticPriceImageMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = automaticPriceOfImage(request);
+  if (!row?.idAutomaticPrice) {
+    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
+  }
+  SERVICE_IMAGES.delete(row.idAutomaticPrice);
+  return of(new HttpResponse({ status: 200, url: request.url, body: {} })).pipe(delay(600));
+};
+
+/** The automatic price of the id before `/image`, if it exists. */
+function automaticPriceOfImage(request: HttpRequest<unknown>): AutomaticPriceRow | undefined {
+  const idAutomaticPrice = decodeURIComponent(request.url.split('/').at(-2) ?? '');
+  return AUTOMATIC_PRICES.find((row) => row.idAutomaticPrice === idAutomaticPrice);
+}
 
 /** The data of the add panel of an automatic price: the saved one, or a minimal one from the list. */
 function automaticDetailsOf(row: AutomaticPriceRow): AutomaticPriceAddItemRequest {
@@ -2143,6 +3207,7 @@ function automaticDetailsOf(row: AutomaticPriceRow): AutomaticPriceAddItemReques
       ],
       price: row.price,
       vatRate: 10,
+      isAllServicesEnabled: true,
     })
   );
 }
@@ -2154,9 +3219,10 @@ function requestedAutomaticPrice(request: HttpRequest<unknown>): AutomaticPriceR
 }
 
 /**
- * `GET /api/catalog/get-automatic-price-general-info?idAutomaticPrice=…`: the Info Generali tab of the
- * edit panel. 200 with `AutomaticPriceSelectedGeneralInfo`, only the languages written; 401 without a
- * valid access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/automatic-prices/get-automatic-price-general-info?idAutomaticPrice=…`: the Info Generali tab of
+ * the edit panel. 200 with `AutomaticPriceSelectedGeneralInfo` and the version of the tab, only the
+ * languages written and the uploaded image, which the version does not cover; 401 without a valid
+ * access token; 404 `service.automatic_price_not_found` for an unknown id.
  */
 export const automaticPriceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -2166,25 +3232,35 @@ export const automaticPriceGeneralInfoMock = (
   }
   const row = requestedAutomaticPrice(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
   }
+  const imageUrl = SERVICE_IMAGES.get(row.idAutomaticPrice ?? '');
+  return versionedAnswer(request, automaticGeneralInfoOf(row), {
+    imageUrl: imageUrl ? completeLink(imageUrl) : null,
+  });
+};
+
+/**
+ * What `GET /api/catalog/automatic-prices/get-automatic-price-general-info` answers besides the version: the version
+ * covers it.
+ */
+function automaticGeneralInfoOf(
+  row: AutomaticPriceRow,
+): Omit<AutomaticPriceSelectedGeneralInfo, 'imageUrl' | 'version'> {
   const details = automaticDetailsOf(row);
-  const answer: AutomaticPriceSelectedGeneralInfo = {
+  return {
     idAutomaticPrice: row.idAutomaticPrice,
     translations: details.translations.filter(
       ({ serviceName, description }) => serviceName || description,
     ),
     icon: details.icon,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
- * `GET /api/catalog/get-automatic-price-prices-validity?idAutomaticPrice=…`: the Prezzi e Validità
- * tab of the edit panel. 200 with `AutomaticPriceSelectedPricesValidity`; 401 without a valid access
- * token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/automatic-prices/get-automatic-price-prices-validity?idAutomaticPrice=…`: the Prezzi e Validità
+ * tab of the edit panel. 200 with `AutomaticPriceSelectedPricesValidity` and the version of the
+ * tab; 401 without a valid access token; 404 `service.automatic_price_not_found` for an unknown id.
  */
 export const automaticPricePricesValidityMock = (
   request: HttpRequest<unknown>,
@@ -2194,70 +3270,105 @@ export const automaticPricePricesValidityMock = (
   }
   const row = requestedAutomaticPrice(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
   }
+  return versionedAnswer(request, automaticPricesValidityOf(row));
+};
+
+/**
+ * What `GET /api/catalog/automatic-prices/get-automatic-price-prices-validity` answers besides the version: the
+ * version covers it.
+ */
+function automaticPricesValidityOf(
+  row: AutomaticPriceRow,
+): Omit<AutomaticPriceSelectedPricesValidity, 'version'> {
   const details = automaticDetailsOf(row);
-  const answer: AutomaticPriceSelectedPricesValidity = {
+  return {
     price: details.price,
     vatRate: details.vatRate,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
     validityPeriods: details.validityPeriods,
+    isAllServicesEnabled: details.isAllServicesEnabled,
     idBarServices: details.idBarServices,
     idStandardServices: details.idStandardServices,
     idHourlyServices: details.idHourlyServices,
     isPricePerServiceEnabled: details.isPricePerServiceEnabled,
     idSectors: details.idSectors,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 type UpdateAutomaticPriceBody = CreateAutomaticPriceBody & { idAutomaticPrice?: unknown };
 
 /**
- * The common part of the two updates of the edit panel: 401 without a valid access token; 403 for an
- * unknown property; 404 `resource.not_found` for an `idAutomaticPrice` that is not one of its
- * automatic prices (or for a service that is not one of the property); 400 with one error per wrong
- * field; otherwise `apply` changes the data of its tab and the answer is 204 without a body.
+ * The common part of the two updates of the edit panel: 401 without a valid access token; 400 with
+ * one error per wrong field; 404 `service.automatic_price_not_found` for an `idAutomaticPrice` that is not one of
+ * its automatic prices; 400 for what depends on
+ * the saved one (`savedErrorsOf`); 422 `catalog.vat_rate_not_allowed`; 409
+ * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * 404 `service.not_found` and `catalog.sector_not_found` for a service or a sector that is not one of
+ * the property; otherwise `apply` changes the data of its tab and the answer is 204 without a body,
+ * with their new version in its `ETag`.
  */
 function updateAutomaticPrice(
   request: HttpRequest<unknown>,
-  errorsOf: (body: UpdateAutomaticPriceBody, propertyId: number) => MockFieldError[] | null,
+  dataOf: (row: AutomaticPriceRow) => unknown,
+  errorsOf: (body: UpdateAutomaticPriceBody) => MockFieldError[],
   apply: (
     details: AutomaticPriceAddItemRequest,
     body: UpdateAutomaticPriceBody,
     row: AutomaticPriceRow,
   ) => void,
+  savedErrorsOf: (
+    body: UpdateAutomaticPriceBody,
+    details: AutomaticPriceAddItemRequest,
+  ) => MockFieldError[] = () => [],
 ): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateAutomaticPriceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
+  const property = DEMO_PROPERTY;
+  const errors = errorsOf(body);
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
   }
   const row = AUTOMATIC_PRICES.find(
     (item) => item.idAutomaticPrice === body.idAutomaticPrice && item.propertyId === property.id,
   );
-  const errors = row ? errorsOf(body, property.id) : null;
-  if (!row?.idAutomaticPrice || !errors) {
-    return resourceNotFound(request);
+  if (!row?.idAutomaticPrice) {
+    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
   }
-  if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  const savedErrors = savedErrorsOf(body, automaticDetailsOf(row));
+  if (savedErrors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
+  }
+  const vatProblem = vatRateNotAllowed(request, body.vatRate);
+  if (vatProblem) {
+    return vatProblem;
+  }
+  const conflict = versionConflict(request, dataOf(row));
+  if (conflict) {
+    return conflict;
+  }
+  if (!areAutomaticServicesOf(body, property.id)) {
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
+  }
+  const missing = missingSector(request, body.idSectors);
+  if (missing) {
+    return missing;
   }
   const details = structuredClone(automaticDetailsOf(row));
   apply(details, structuredClone(body), row);
   AUTOMATIC_PRICE_DETAILS.set(row.idAutomaticPrice, details);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, dataOf(row));
 }
 
 /**
- * `POST /api/catalog/update-automatic-price-general` with `AutomaticPriceUpdateGeneralRequest` and
- * `idProperty`: names, descriptions and icon; the list shows the new name (language of
- * `Accept-Language`). Errors as the creation.
+ * `POST /api/catalog/automatic-prices/update-automatic-price-general` with `AutomaticPriceUpdateGeneralRequest`:
+ * names, descriptions and icon; the list shows the new name (language of `Accept-Language`). Errors
+ * as the creation.
  */
 export const updateAutomaticPriceGeneralMock = (
   request: HttpRequest<unknown>,
@@ -2265,35 +3376,38 @@ export const updateAutomaticPriceGeneralMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   return updateAutomaticPrice(
     request,
-    (body) => [
-      ...standardGeneralErrors({ translations: body.translations }, language),
-      ...automaticIconErrors(body.icon ?? null),
-    ],
+    automaticGeneralInfoOf,
+    (body) => translationErrors(body.translations, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.icon = body.icon ?? null;
-      const main = details.translations.find((translation) => translation.language === language);
-      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+      row.serviceName = nameToSave(details.translations, language) ?? row.serviceName;
+      if (details.icon !== null) {
+        SERVICE_IMAGES.delete(row.idAutomaticPrice ?? '');
+      }
     },
+    (body, details) => iconErrors(body.icon, AUTOMATIC_PRICE_ICONS, details.icon),
   );
 };
 
 /**
- * `POST /api/catalog/update-automatic-price-prices-validity` with
- * `AutomaticPriceUpdatePricesValidityRequest` and `idProperty`: the Prezzi e Validità tab; the list
- * shows the new price. 400 for a price below 0; 404 for a service that is not one of the property.
+ * `POST /api/catalog/automatic-prices/update-automatic-price-prices-validity` with
+ * `AutomaticPriceUpdatePricesValidityRequest`: the Prezzi e Validità tab; the list shows the new
+ * price. Errors as the creation.
  */
 export const updateAutomaticPricePricesValidityMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
   updateAutomaticPrice(
     request,
-    (body, propertyId) => (areAutomaticServicesOf(body, propertyId) ? priceErrors(body) : null),
+    automaticPricesValidityOf,
+    automaticPriceErrors,
     (details, body, row) => {
       details.price = body.price ?? null;
       details.vatRate = body.vatRate ?? null;
       details.isOnlinePurchaseEnabled = body.isOnlinePurchaseEnabled === true;
       details.validityPeriods = body.validityPeriods ?? [];
+      details.isAllServicesEnabled = body.isAllServicesEnabled === true;
       details.idBarServices = body.idBarServices ?? [];
       details.idStandardServices = body.idStandardServices ?? [];
       details.idHourlyServices = body.idHourlyServices ?? [];
@@ -2317,50 +3431,99 @@ function areAutomaticServicesOf(body: CreateAutomaticPriceBody, propertyId: numb
   );
 }
 
-/** The icon, when given, of the bar services or of the other services. */
-function automaticIconErrors(icon: string | null): MockFieldError[] {
-  return icon === null ||
-    Object.values<string>(BarServiceIcon).includes(icon) ||
-    Object.values<string>(StandardServiceIcon).includes(icon)
-    ? []
-    : [{ field: 'icon', code: 'validation.invalid' }];
+function automaticGeneralErrors(
+  body: CreateAutomaticPriceBody,
+  language: string,
+): MockFieldError[] {
+  return [
+    ...translationErrors(body.translations, language),
+    ...iconErrors(body.icon, AUTOMATIC_PRICE_ICONS),
+  ];
 }
 
 /**
- * `POST /api/catalog/automatic-price-list`: one page of the automatic prices of the requested
- * property, searched in the name. 401 without a valid access token; 403 for a missing or unknown
- * property.
+ * The price always, the VAT when given, the days and the time slots of every period in their order;
+ * a service at least without `isAllServicesEnabled`, none with it.
  */
+function automaticPriceErrors(body: CreateAutomaticPriceBody): MockFieldError[] {
+  const hasServices = [body.idBarServices, body.idStandardServices, body.idHourlyServices].some(
+    (ids) => ids?.length,
+  );
+  return [
+    ...(hasServices === (body.isAllServicesEnabled === true)
+      ? [
+          {
+            field: 'isAllServicesEnabled',
+            code: hasServices ? ApiErrorCode.ValidationInvalid : ApiErrorCode.ValidationRequired,
+          },
+        ]
+      : []),
+    ...requiredPriceErrors('price', body.price),
+    ...((body.validityPeriods?.length ?? 0) > MAX_PERIOD_QUANTITY
+      ? [{ field: 'validityPeriods', code: ApiErrorCode.ValidationInvalid }]
+      : []),
+    ...(isVatOutOfRange(body.vatRate)
+      ? [{ field: 'vatRate', code: ApiErrorCode.ValidationInvalid }]
+      : []),
+    ...(body.validityPeriods ?? []).flatMap(
+      ({ dateFrom, dateTo, daysOfWeek, timeSlots }, index): MockFieldError[] => [
+        ...(dateFrom && dateTo && dateTo < dateFrom
+          ? [
+              {
+                field: `validityPeriods[${index}].dateTo`,
+                code: ApiErrorCode.ValidationEndBeforeStart,
+              },
+            ]
+          : []),
+        ...(daysOfWeek.every((day) => isBetween(day, 1, DAYS_OF_WEEK.length))
+          ? []
+          : [
+              {
+                field: `validityPeriods[${index}].daysOfWeek`,
+                code: ApiErrorCode.ValidationInvalid,
+              },
+            ]),
+        ...(timeSlots.length <= MAX_TIME_SLOT_QUANTITY &&
+        timeSlots.every(({ startTime, endTime }) => startTime && endTime && endTime > startTime)
+          ? []
+          : [
+              {
+                field: `validityPeriods[${index}].timeSlots`,
+                code: ApiErrorCode.ValidationInvalid,
+              },
+            ]),
+      ],
+    ),
+  ];
+}
+
+/** The icons of the bar services and of the other services. */
+const AUTOMATIC_PRICE_ICONS: readonly string[] = [
+  ...Object.values(BarServiceIcon),
+  ...Object.values(StandardServiceIcon),
+];
+
+const AUTOMATIC_PRICE_TABLE = {
+  rows: AUTOMATIC_PRICES,
+  idField: 'idAutomaticPrice' as const,
+  details: AUTOMATIC_PRICE_DETAILS,
+  detailsOf: automaticDetailsOf,
+  notFoundCode: ApiErrorCode.ServiceAutomaticPriceNotFound,
+  copyMore: copyImage,
+  copyError: ({ vatRate, idSectors }: AutomaticPriceAddItemRequest) =>
+    copyError([vatRate], idSectors),
+};
+
+/** `POST /api/catalog/automatic-prices/automatic-price-list`: one page of the automatic prices (see `serviceListAnswer`). */
 export const automaticPriceListMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = AUTOMATIC_PRICES.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.serviceName?.toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(AutomaticPriceItem, row));
-  const field = AUTOMATIC_PRICE_SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
-  }
-  const answer: Page<AutomaticPriceItem> = {
-    total: found.length,
-    rows: found.slice((page - 1) * pageSize, page * pageSize),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
-};
+): Observable<HttpEvent<unknown>> =>
+  serviceListAnswer(
+    request,
+    AUTOMATIC_PRICE_TABLE,
+    AutomaticPriceItem,
+    AUTOMATIC_PRICE_SORT_FIELDS,
+  );
 
 type TableServiceRow = TableServiceItem & { propertyId: number };
 
@@ -2376,6 +3539,7 @@ const TABLE_SERVICES: TableServiceRow[] = (
   serviceName,
 }));
 
+const MAX_DAY_TIME_SLOT_QUANTITY = 50;
 const TABLE_SERVICE_SORT_FIELDS = ['serviceName'] as const;
 
 /**
@@ -2403,15 +3567,15 @@ const TABLE_SERVICE_DETAILS = new Map<string, TableServiceAddItemRequest>([
         {
           dateFrom: '2026-06-01T00:00:00.000Z',
           dateTo: '2026-09-30T00:00:00.000Z',
-          isSameTimeForAllDays: true,
-          startTime: '12:00',
-          endTime: '15:00',
-          days: [1, 2, 3, 4, 5, 6, 7].map((dayOfWeek) => ({
-            dayOfWeek,
-            isEnabled: dayOfWeek !== 1,
-            startTime: '12:00',
-            endTime: '15:00',
-          })),
+          days: [2, 3, 4, 5, 6, 7].map((dayOfWeek) =>
+            Object.assign(new TableServiceAvailabilityDay(), {
+              dayOfWeek,
+              isEnabled: true,
+              startTime: '12:00',
+              endTime: '15:00',
+              otherTimeSlots: dayOfWeek > 5 ? [{ startTime: '19:00', endTime: '22:00' }] : [],
+            }),
+          ),
         },
       ],
       availabilityMode: TableServiceAvailabilityMode.Tables,
@@ -2420,7 +3584,7 @@ const TABLE_SERVICE_DETAILS = new Map<string, TableServiceAddItemRequest>([
         { tableQuantity: 8, seatPerTableQuantity: 4 },
         { tableQuantity: 6, seatPerTableQuantity: 5 },
       ],
-      averageMealDuration: TableServiceMealDuration.OneHourThirtyMinutes,
+      averageMealMinutes: 90,
       maxBookingPerTimeSlotQuantity: 8,
       bookingPayment: TableServiceBookingPayment.Deposit,
       depositMode: TableServiceDepositMode.Total,
@@ -2430,372 +3594,74 @@ const TABLE_SERVICE_DETAILS = new Map<string, TableServiceAddItemRequest>([
   ],
 ]);
 
-/**
- * `POST /api/catalog/table-service-list`: one page of the table services (e.g. lunch, dinner) of the
- * requested property, searched in the name. 401 without a valid access token; 403 for a missing or
- * unknown property.
- */
+const TABLE_SERVICE_TABLE = {
+  rows: TABLE_SERVICES,
+  idField: 'idTableService' as const,
+  details: TABLE_SERVICE_DETAILS,
+  detailsOf: tableDetailsOf,
+  notFoundCode: ApiErrorCode.ServiceTableServiceNotFound,
+};
+
+/** `POST /api/catalog/table-services/table-service-list`: one page of the table services (e.g. lunch, dinner) (see `serviceListAnswer`). */
 export const tableServiceListMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = TABLE_SERVICES.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.serviceName?.toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(TableServiceItem, row));
-  const field = TABLE_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
-  }
-  const answer: Page<TableServiceItem> = {
-    total: found.length,
-    rows: found.slice((page - 1) * pageSize, page * pageSize),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
-};
+): Observable<HttpEvent<unknown>> =>
+  serviceListAnswer(request, TABLE_SERVICE_TABLE, TableServiceItem, TABLE_SERVICE_SORT_FIELDS);
 
-/**
- * `POST /api/catalog/delete-standard-service-item` with `DeleteStandardServiceItemsRequest`: all or
- * nothing. If one id is not a service of the property nothing is deleted (404
- * `resource.not_found`). Repeated ids count once. 204 without a body; 401 without a valid access
- * token; 403 for an unknown property.
- */
+/** `POST /api/catalog/services/delete-standard-service-item` with `{ idStandardServices }` (see `deleteServicesAnswer`). */
 export const deleteStandardServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<DeleteStandardServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const standardServices = standardServicesOf(property.id, body.idStandardServices);
-  if (!standardServices) {
-    return resourceNotFound(request);
-  }
-  for (const standardService of standardServices) {
-    STANDARD_SERVICES.splice(STANDARD_SERVICES.indexOf(standardService), 1);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  deleteServicesAnswer(request, STANDARD_SERVICE_TABLE, 'idStandardServices');
 
-/**
- * `POST /api/catalog/duplicate-standard-service-item` with `DuplicateStandardServiceItemsRequest`:
- * all or nothing, like the delete. Each copy keeps the price; the name is chosen by the backend:
- * the mock invents "Doccia calda (copia)", then "Doccia calda (copia 2)" and so on.
- */
+/** `POST /api/catalog/services/duplicate-standard-service-item` with `{ idStandardServices }` (see `duplicateServicesAnswer`). */
 export const duplicateStandardServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<DuplicateStandardServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const standardServices = standardServicesOf(property.id, body.idStandardServices);
-  if (!standardServices) {
-    return resourceNotFound(request);
-  }
-  for (const standardService of standardServices) {
-    STANDARD_SERVICES.push({
-      ...standardService,
-      idStandardService: crypto.randomUUID(),
-      serviceName: standardServiceCopyName(standardService),
-    });
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  duplicateServicesAnswer(request, STANDARD_SERVICE_TABLE, 'idStandardServices');
 
-/**
- * The services of the property for `idStandardServices` (repeated ids once); null when one id is not
- * one of them, or there are none: the whole request is cancelled.
- */
-function standardServicesOf(
-  propertyId: number,
-  idStandardServices: unknown,
-): StandardServiceRow[] | null {
-  const ids = Array.isArray(idStandardServices) ? [...new Set(idStandardServices)] : [];
-  const standardServices = ids
-    .map((id) =>
-      STANDARD_SERVICES.find(
-        (row) => row.idStandardService === id && row.propertyId === propertyId,
-      ),
-    )
-    .filter(
-      (standardService): standardService is StandardServiceRow => standardService !== undefined,
-    );
-  return ids.length && standardServices.length === ids.length ? standardServices : null;
-}
-
-function standardServiceCopyName(standardService: StandardServiceRow): string {
-  const taken = new Set(
-    STANDARD_SERVICES.filter((row) => row.propertyId === standardService.propertyId).map(
-      (row) => row.serviceName,
-    ),
-  );
-  let copy = `${standardService.serviceName} (copia)`;
-  for (let number = 2; taken.has(copy); number++) {
-    copy = `${standardService.serviceName} (copia ${number})`;
-  }
-  return copy;
-}
-
-/**
- * `POST /api/catalog/delete-hourly-service-item` with `DeleteHourlyServiceItemsRequest`: all or
- * nothing. If one id is not an hourly service of the property nothing is deleted (404
- * `resource.not_found`). Repeated ids count once. 204 without a body; 401 without a valid access
- * token; 403 for an unknown property.
- */
+/** `POST /api/catalog/services/delete-hourly-service-item` with `{ idHourlyServices }` (see `deleteServicesAnswer`). */
 export const deleteHourlyServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<DeleteHourlyServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const hourlyServices = hourlyServicesOf(property.id, body.idHourlyServices);
-  if (!hourlyServices) {
-    return resourceNotFound(request);
-  }
-  for (const hourlyService of hourlyServices) {
-    HOURLY_SERVICES.splice(HOURLY_SERVICES.indexOf(hourlyService), 1);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  deleteServicesAnswer(request, HOURLY_SERVICE_TABLE, 'idHourlyServices');
 
-/**
- * `POST /api/catalog/duplicate-hourly-service-item` with `DuplicateHourlyServiceItemsRequest`: all
- * or nothing, like the delete. The name of each copy is chosen by the backend: the mock invents
- * "Sup (copia)", then "Sup (copia 2)" and so on.
- */
+/** `POST /api/catalog/services/duplicate-hourly-service-item` with `{ idHourlyServices }` (see `duplicateServicesAnswer`). */
 export const duplicateHourlyServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<DuplicateHourlyServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const hourlyServices = hourlyServicesOf(property.id, body.idHourlyServices);
-  if (!hourlyServices) {
-    return resourceNotFound(request);
-  }
-  for (const hourlyService of hourlyServices) {
-    HOURLY_SERVICES.push({
-      ...hourlyService,
-      idHourlyService: crypto.randomUUID(),
-      serviceName: hourlyServiceCopyName(hourlyService),
-    });
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  duplicateServicesAnswer(request, HOURLY_SERVICE_TABLE, 'idHourlyServices');
 
-/**
- * The hourly services of the property for `idHourlyServices` (repeated ids once); null when one id is not
- * one of them, or there are none: the whole request is cancelled.
- */
-function hourlyServicesOf(
-  propertyId: number,
-  idHourlyServices: unknown,
-): HourlyServiceRow[] | null {
-  const ids = Array.isArray(idHourlyServices) ? [...new Set(idHourlyServices)] : [];
-  const hourlyServices = ids
-    .map((id) =>
-      HOURLY_SERVICES.find((row) => row.idHourlyService === id && row.propertyId === propertyId),
-    )
-    .filter((hourlyService): hourlyService is HourlyServiceRow => hourlyService !== undefined);
-  return ids.length && hourlyServices.length === ids.length ? hourlyServices : null;
-}
-
-function hourlyServiceCopyName(hourlyService: HourlyServiceRow): string {
-  const taken = new Set(
-    HOURLY_SERVICES.filter((row) => row.propertyId === hourlyService.propertyId).map(
-      (row) => row.serviceName,
-    ),
-  );
-  let copy = `${hourlyService.serviceName} (copia)`;
-  for (let number = 2; taken.has(copy); number++) {
-    copy = `${hourlyService.serviceName} (copia ${number})`;
-  }
-  return copy;
-}
-
-/**
- * `POST /api/catalog/delete-automatic-price-item` with `DeleteAutomaticPriceItemsRequest`: all or
- * nothing. If one id is not an automatic price of the property nothing is deleted (404
- * `resource.not_found`). Repeated ids count once. 204 without a body; 401 without a valid access
- * token; 403 for an unknown property.
- */
+/** `POST /api/catalog/automatic-prices/delete-automatic-price-item` with `{ idAutomaticPrices }` (see `deleteServicesAnswer`). */
 export const deleteAutomaticPriceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<DeleteAutomaticPriceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const automaticPrices = automaticPricesOf(property.id, body.idAutomaticPrices);
-  if (!automaticPrices) {
-    return resourceNotFound(request);
-  }
-  for (const automaticPrice of automaticPrices) {
-    AUTOMATIC_PRICES.splice(AUTOMATIC_PRICES.indexOf(automaticPrice), 1);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  deleteServicesAnswer(request, AUTOMATIC_PRICE_TABLE, 'idAutomaticPrices');
 
-/**
- * `POST /api/catalog/duplicate-automatic-price-item` with `DuplicateAutomaticPriceItemsRequest`:
- * all or nothing, like the delete. Each copy keeps the price; the name is chosen by the backend:
- * the mock invents "Coperto (copia)", then "Coperto (copia 2)" and so on.
- */
+/** `POST /api/catalog/automatic-prices/duplicate-automatic-price-item` with `{ idAutomaticPrices }` (see `duplicateServicesAnswer`). */
 export const duplicateAutomaticPriceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<DuplicateAutomaticPriceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const automaticPrices = automaticPricesOf(property.id, body.idAutomaticPrices);
-  if (!automaticPrices) {
-    return resourceNotFound(request);
-  }
-  for (const automaticPrice of automaticPrices) {
-    AUTOMATIC_PRICES.push({
-      ...automaticPrice,
-      idAutomaticPrice: crypto.randomUUID(),
-      serviceName: automaticPriceCopyName(automaticPrice),
-    });
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  duplicateServicesAnswer(request, AUTOMATIC_PRICE_TABLE, 'idAutomaticPrices');
 
-/**
- * The automatic prices of the property for `idAutomaticPrices` (repeated ids once); null when one id is not
- * one of them, or there are none: the whole request is cancelled.
- */
-function automaticPricesOf(
-  propertyId: number,
-  idAutomaticPrices: unknown,
-): AutomaticPriceRow[] | null {
-  const ids = Array.isArray(idAutomaticPrices) ? [...new Set(idAutomaticPrices)] : [];
-  const automaticPrices = ids
-    .map((id) =>
-      AUTOMATIC_PRICES.find((row) => row.idAutomaticPrice === id && row.propertyId === propertyId),
-    )
-    .filter((automaticPrice): automaticPrice is AutomaticPriceRow => automaticPrice !== undefined);
-  return ids.length && automaticPrices.length === ids.length ? automaticPrices : null;
-}
-
-function automaticPriceCopyName(automaticPrice: AutomaticPriceRow): string {
-  const taken = new Set(
-    AUTOMATIC_PRICES.filter((row) => row.propertyId === automaticPrice.propertyId).map(
-      (row) => row.serviceName,
-    ),
-  );
-  let copy = `${automaticPrice.serviceName} (copia)`;
-  for (let number = 2; taken.has(copy); number++) {
-    copy = `${automaticPrice.serviceName} (copia ${number})`;
-  }
-  return copy;
-}
-
-/**
- * `POST /api/catalog/delete-table-service-item` with `DeleteTableServiceItemsRequest`: all or
- * nothing. If one id is not a table service of the property nothing is deleted (404
- * `resource.not_found`). Repeated ids count once. 204 without a body; 401 without a valid access
- * token; 403 for an unknown property.
- */
+/** `POST /api/catalog/table-services/delete-table-service-item` with `{ idTableServices }` (see `deleteServicesAnswer`). */
 export const deleteTableServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<DeleteTableServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const tableServices = tableServicesOf(property.id, body.idTableServices);
-  if (!tableServices) {
-    return resourceNotFound(request);
-  }
-  for (const tableService of tableServices) {
-    TABLE_SERVICES.splice(TABLE_SERVICES.indexOf(tableService), 1);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  deleteServicesAnswer(request, TABLE_SERVICE_TABLE, 'idTableServices');
 
-/**
- * `POST /api/catalog/duplicate-table-service-item` with `DuplicateTableServiceItemsRequest`: all or
- * nothing, like the delete. The name of each copy is chosen by the backend: the mock invents
- * "Pranzo (copia)", then "Pranzo (copia 2)" and so on.
- */
+/** `POST /api/catalog/table-services/duplicate-table-service-item` with `{ idTableServices }` (see `duplicateServicesAnswer`). */
 export const duplicateTableServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<DuplicateTableServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const tableServices = tableServicesOf(property.id, body.idTableServices);
-  if (!tableServices) {
-    return resourceNotFound(request);
-  }
-  for (const tableService of tableServices) {
-    TABLE_SERVICES.push({
-      ...tableService,
-      idTableService: crypto.randomUUID(),
-      serviceName: tableServiceCopyName(tableService),
-    });
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  duplicateServicesAnswer(request, TABLE_SERVICE_TABLE, 'idTableServices');
 
-type CreateTableServiceBody = Partial<TableServiceAddItemRequest> & { idProperty?: unknown };
+type CreateTableServiceBody = Partial<TableServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-table-service` with `TableServiceAddItemRequest` and `idProperty`: the new
- * table service goes into the list, with the name in the language of `Accept-Language`. 204 without a
- * body; 401 without a valid access token; 403 for an unknown property; 400 with one error per wrong
- * field (name and description in the language of the request, choices among the values of their
- * enums, quantities whole and above 0, deposit from 0 to 100).
+ * `POST /api/catalog/table-services/create-table-service` with `TableServiceAddItemRequest`: the new table service
+ * goes into the list. 204 without a body; 401 without a valid access token; 400 with one error per
+ * wrong field (see `translationErrors` and `tableServiceErrors`).
  */
 export const createTableServiceMock = (
   request: HttpRequest<unknown>,
@@ -2804,19 +3670,14 @@ export const createTableServiceMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateTableServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
-  const errors = [
-    ...standardGeneralErrors({ translations: body.translations }, language),
-    ...tableServiceErrors(body),
-  ];
+  const errors = [...translationErrors(body.translations, language), ...tableServiceErrors(body)];
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
   }
-  const main = body.translations?.find((translation) => translation.language === language);
   const idTableService = crypto.randomUUID();
   TABLE_SERVICE_DETAILS.set(
     idTableService,
@@ -2825,7 +3686,7 @@ export const createTableServiceMock = (
   TABLE_SERVICES.push({
     propertyId: property.id,
     idTableService,
-    serviceName: main?.serviceName?.trim() ?? null,
+    serviceName: nameToSave(body.translations ?? [], language),
   });
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
@@ -2842,6 +3703,7 @@ function tableDetailsOf(row: TableServiceRow): TableServiceAddItemRequest {
           description: 'Servizio tavoli dello stabilimento.',
         },
       ],
+      tableGroups: [{ tableQuantity: 5, seatPerTableQuantity: 4 }],
     })
   );
 }
@@ -2853,9 +3715,9 @@ function requestedTableService(request: HttpRequest<unknown>): TableServiceRow |
 }
 
 /**
- * `GET /api/catalog/get-table-service-general-info?idTableService=…`: the Info Generali tab of the
- * edit panel. 200 with `TableServiceSelectedGeneralInfo`, only the languages written; 401 without a
- * valid access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/table-services/get-table-service-general-info?idTableService=…`: the Info Generali tab of the
+ * edit panel. 200 with `TableServiceSelectedGeneralInfo` and the version of the tab, only the
+ * languages written; 401 without a valid access token; 404 `service.table_service_not_found` for an unknown id.
  */
 export const tableServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -2865,25 +3727,32 @@ export const tableServiceGeneralInfoMock = (
   }
   const row = requestedTableService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
   }
+  return versionedAnswer(request, tableGeneralInfoOf(row));
+};
+
+/**
+ * What `GET /api/catalog/table-services/get-table-service-general-info` answers besides the version: the version
+ * covers it.
+ */
+function tableGeneralInfoOf(
+  row: TableServiceRow,
+): Omit<TableServiceSelectedGeneralInfo, 'version'> {
   const details = tableDetailsOf(row);
-  const answer: TableServiceSelectedGeneralInfo = {
+  return {
     idTableService: row.idTableService,
     translations: details.translations.filter(
       ({ serviceName, description }) => serviceName || description,
     ),
     isHighlighted: details.isHighlighted,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
- * `GET /api/catalog/get-table-service-availability-bookings?idTableService=…`: the Disponibilità e
- * Prenotazioni tab of the edit panel. 200 with `TableServiceSelectedAvailabilityBookings`; 401
- * without a valid access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/table-services/get-table-service-availability-bookings?idTableService=…`: the Disponibilità e
+ * Prenotazioni tab of the edit panel. 200 with `TableServiceSelectedAvailabilityBookings` and the
+ * version of the tab; 401 without a valid access token; 404 `service.table_service_not_found` for an unknown id.
  */
 export const tableServiceAvailabilityBookingsMock = (
   request: HttpRequest<unknown>,
@@ -2893,36 +3762,49 @@ export const tableServiceAvailabilityBookingsMock = (
   }
   const row = requestedTableService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
   }
+  return versionedAnswer(request, tableAvailabilityBookingsOf(row));
+};
+
+/**
+ * What `GET /api/catalog/table-services/get-table-service-availability-bookings` answers besides the version: the
+ * version covers it.
+ */
+function tableAvailabilityBookingsOf(
+  row: TableServiceRow,
+): Omit<TableServiceSelectedAvailabilityBookings, 'version'> {
   const details = tableDetailsOf(row);
-  const answer: TableServiceSelectedAvailabilityBookings = {
+  return {
     availabilities: details.availabilities,
     availabilityMode: details.availabilityMode,
     tableGroups: details.tableGroups,
     totalSeatQuantity: details.totalSeatQuantity,
-    averageMealDuration: details.averageMealDuration,
+    averageMealMinutes: details.averageMealMinutes,
     maxBookingPerTimeSlotQuantity: details.maxBookingPerTimeSlotQuantity,
+    minSeatPerBookingQuantity: details.minSeatPerBookingQuantity,
+    maxSeatPerBookingQuantity: details.maxSeatPerBookingQuantity,
     bookingPayment: details.bookingPayment,
     depositMode: details.depositMode,
     depositPercentage: details.depositPercentage,
+    depositAmount: details.depositAmount,
     isOnlineBookingEnabled: details.isOnlineBookingEnabled,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 type UpdateTableServiceBody = CreateTableServiceBody & { idTableService?: unknown };
 
 /**
- * The common part of the two updates of the edit panel: 401 without a valid access token; 403 for an
- * unknown property; 404 `resource.not_found` for an `idTableService` that is not one of its table
- * services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab and
- * the answer is 204 without a body.
+ * The common part of the two updates of the edit panel: 401 without a valid access token; 400 with
+ * one error per wrong field; 404 `service.table_service_not_found` for an `idTableService` that is not one of
+ * its table services; 409
+ * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their new
+ * version in its `ETag`.
  */
 function updateTableService(
   request: HttpRequest<unknown>,
+  dataOf: (row: TableServiceRow) => unknown,
   errorsOf: (body: UpdateTableServiceBody) => MockFieldError[],
   apply: (
     details: TableServiceAddItemRequest,
@@ -2934,30 +3816,33 @@ function updateTableService(
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateTableServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
+  const property = DEMO_PROPERTY;
+  const errors = errorsOf(body);
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
   }
   const row = TABLE_SERVICES.find(
     (item) => item.idTableService === body.idTableService && item.propertyId === property.id,
   );
   if (!row?.idTableService) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
   }
-  const errors = errorsOf(body);
-  if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  const conflict = versionConflict(request, dataOf(row));
+  if (conflict) {
+    return conflict;
   }
   const details = structuredClone(tableDetailsOf(row));
   apply(details, structuredClone(body), row);
   TABLE_SERVICE_DETAILS.set(row.idTableService, details);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, dataOf(row));
 }
 
 /**
- * `POST /api/catalog/update-table-service-general` with `TableServiceUpdateGeneralRequest` and
- * `idProperty`: names, descriptions and Metti in evidenza; the list shows the new name (language of
- * `Accept-Language`). Errors as the creation.
+ * `POST /api/catalog/table-services/update-table-service-general` with `TableServiceUpdateGeneralRequest`: names,
+ * descriptions and Metti in evidenza; the list shows the new name (language of `Accept-Language`).
+ * Errors as the creation.
  */
 export const updateTableServiceGeneralMock = (
   request: HttpRequest<unknown>,
@@ -2965,125 +3850,164 @@ export const updateTableServiceGeneralMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   return updateTableService(
     request,
-    (body) => standardGeneralErrors({ translations: body.translations }, language),
+    tableGeneralInfoOf,
+    (body) => translationErrors(body.translations, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.isHighlighted = body.isHighlighted === true;
-      const main = details.translations.find((translation) => translation.language === language);
-      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+      row.serviceName = nameToSave(details.translations, language) ?? row.serviceName;
     },
   );
 };
 
 /**
- * `POST /api/catalog/update-table-service-availability-bookings` with
- * `TableServiceUpdateAvailabilityBookingsRequest` and `idProperty`: the Disponibilità e Prenotazioni
- * tab. Errors as the creation (see `tableServiceErrors`).
+ * `POST /api/catalog/table-services/update-table-service-availability-bookings` with
+ * `TableServiceUpdateAvailabilityBookingsRequest`: the Disponibilità e Prenotazioni tab. Errors as
+ * the creation (see `tableServiceErrors`).
  */
 export const updateTableServiceAvailabilityBookingsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
-  updateTableService(request, tableServiceErrors, (details, body) => {
-    details.availabilities = body.availabilities ?? [];
+  updateTableService(request, tableAvailabilityBookingsOf, tableServiceErrors, (details, body) => {
+    details.availabilities = (body.availabilities ?? []).map((availability) => ({
+      ...availability,
+      days: availability.days.map(withTimeSlotsInOrder),
+    }));
     details.availabilityMode = body.availabilityMode ?? TableServiceAvailabilityMode.Tables;
     details.tableGroups = body.tableGroups ?? [];
     details.totalSeatQuantity = body.totalSeatQuantity ?? null;
-    details.averageMealDuration = body.averageMealDuration ?? null;
+    details.averageMealMinutes = body.averageMealMinutes ?? null;
     details.maxBookingPerTimeSlotQuantity = body.maxBookingPerTimeSlotQuantity ?? null;
+    details.minSeatPerBookingQuantity = body.minSeatPerBookingQuantity ?? null;
+    details.maxSeatPerBookingQuantity = body.maxSeatPerBookingQuantity ?? null;
     details.bookingPayment = body.bookingPayment ?? TableServiceBookingPayment.None;
     details.depositMode = body.depositMode ?? TableServiceDepositMode.Total;
     details.depositPercentage = body.depositPercentage ?? null;
+    details.depositAmount = body.depositAmount ?? null;
     details.isOnlineBookingEnabled = body.isOnlineBookingEnabled === true;
   });
 
+/** The first time slot of a day is the one of the form, the others follow; none without the day. */
+function withTimeSlotsInOrder(day: TableServiceAvailabilityDay): TableServiceAvailabilityDay {
+  if (!day.isEnabled) {
+    return { ...day, startTime: null, endTime: null, otherTimeSlots: [] };
+  }
+  const [first, ...otherTimeSlots] = [
+    { startTime: day.startTime, endTime: day.endTime },
+    ...day.otherTimeSlots,
+  ].sort((one, other) => (one.startTime ?? '').localeCompare(other.startTime ?? ''));
+  return { ...day, ...first, otherTimeSlots };
+}
+
+/**
+ * The choices among the values of their enums; the tables or the seats, as chosen; the quantities in
+ * their limits; with a deposit, its percentage or its amount; the availabilities with their days.
+ */
 function tableServiceErrors(body: CreateTableServiceBody): MockFieldError[] {
   const errors: MockFieldError[] = [];
-  const invalid = (field: string): void => {
-    errors.push({ field, code: 'validation.invalid' });
+  const add = (field: string, code: ApiErrorCode): void => {
+    errors.push({ field, code });
+  };
+  const checkRange = (field: string, value: unknown, from: number, to: number): void => {
+    if (value != null && !isBetween(value, from, to)) {
+      errors.push({ field, code: ApiErrorCode.ValidationOutOfRange, args: { from, to } });
+    }
   };
   if (!isValueOf(TableServiceAvailabilityMode, body.availabilityMode)) {
-    invalid('availabilityMode');
+    add('availabilityMode', ApiErrorCode.ValidationInvalid);
   }
   if (!isValueOf(TableServiceBookingPayment, body.bookingPayment)) {
-    invalid('bookingPayment');
+    add('bookingPayment', ApiErrorCode.ValidationInvalid);
   }
   if (!isValueOf(TableServiceDepositMode, body.depositMode)) {
-    invalid('depositMode');
+    add('depositMode', ApiErrorCode.ValidationInvalid);
   }
-  if (
-    body.averageMealDuration != null &&
-    !isValueOf(TableServiceMealDuration, body.averageMealDuration)
-  ) {
-    invalid('averageMealDuration');
-  }
-  const tableGroups = Array.isArray(body.tableGroups) ? body.tableGroups : [];
-  tableGroups.forEach((tableGroup, index) => {
-    if (!isQuantity(tableGroup.tableQuantity)) {
-      invalid(`tableGroups[${index}].tableQuantity`);
+  const tableGroups = body.tableGroups ?? [];
+  if (body.availabilityMode === TableServiceAvailabilityMode.Tables) {
+    const seats = tableGroups.map(({ seatPerTableQuantity }) => seatPerTableQuantity);
+    if (!tableGroups.length) {
+      add('tableGroups', ApiErrorCode.ValidationRequired);
+    } else if (
+      new Set(seats).size !== seats.length ||
+      !tableGroups.every(
+        ({ tableQuantity, seatPerTableQuantity }) =>
+          isBetween(tableQuantity, 1, MAX_TABLE_QUANTITY) &&
+          isBetween(seatPerTableQuantity, 1, MAX_SEAT_PER_TABLE_QUANTITY),
+      )
+    ) {
+      add('tableGroups', ApiErrorCode.ValidationInvalid);
     }
-    if (!isQuantity(tableGroup.seatPerTableQuantity)) {
-      invalid(`tableGroups[${index}].seatPerTableQuantity`);
+  } else if (body.totalSeatQuantity == null) {
+    add('totalSeatQuantity', ApiErrorCode.ValidationRequired);
+  }
+  checkRange('totalSeatQuantity', body.totalSeatQuantity, 1, MAX_TOTAL_SEAT_QUANTITY);
+  checkRange('averageMealMinutes', body.averageMealMinutes, 10, 600);
+  checkRange(
+    'maxBookingPerTimeSlotQuantity',
+    body.maxBookingPerTimeSlotQuantity,
+    1,
+    MAX_SERVICE_BOOKING_QUANTITY,
+  );
+  const { minSeatPerBookingQuantity: minSeats, maxSeatPerBookingQuantity: maxSeats } = body;
+  if (minSeats != null && minSeats < 1) {
+    add('minSeatPerBookingQuantity', ApiErrorCode.ValidationOutOfRange);
+  }
+  if (maxSeats != null && maxSeats < (minSeats ?? 1)) {
+    add('maxSeatPerBookingQuantity', ApiErrorCode.ValidationOutOfRange);
+  }
+  if ((body.availabilities?.length ?? 0) > MAX_AVAILABILITY_QUANTITY) {
+    add('availabilities', ApiErrorCode.ValidationInvalid);
+  }
+  if (body.bookingPayment === TableServiceBookingPayment.Deposit) {
+    const deposit = body.depositPercentage;
+    if (body.depositAmount != null && deposit != null) {
+      add('depositAmount', ApiErrorCode.ValidationInvalid);
+    } else if (body.depositAmount != null && body.depositAmount <= 0) {
+      add('depositAmount', ApiErrorCode.ValidationOutOfRange);
+    }
+    if (deposit == null && body.depositAmount == null) {
+      add('depositPercentage', ApiErrorCode.ValidationRequired);
+    } else if (deposit != null && !(deposit > 0 && deposit <= 100)) {
+      errors.push({
+        field: 'depositPercentage',
+        code: ApiErrorCode.ValidationOutOfRange,
+        args: { from: 0, to: 100 },
+      });
+    }
+  }
+  (body.availabilities ?? []).forEach(({ dateFrom, dateTo, days }, index) => {
+    const at = `availabilities[${index}]`;
+    if (!dateFrom) {
+      add(`${at}.dateFrom`, ApiErrorCode.ValidationRequired);
+    }
+    if (!dateTo) {
+      add(`${at}.dateTo`, ApiErrorCode.ValidationRequired);
+    } else if (dateFrom && dateTo < dateFrom) {
+      add(`${at}.dateTo`, ApiErrorCode.ValidationEndBeforeStart);
+    }
+    const enabled = days.filter(({ isEnabled }) => isEnabled);
+    const daysOfWeek = days.map(({ dayOfWeek }) => dayOfWeek);
+    if (!enabled.length) {
+      add(`${at}.days`, ApiErrorCode.ValidationRequired);
+    } else if (
+      new Set(daysOfWeek).size !== daysOfWeek.length ||
+      !daysOfWeek.every((day) => isBetween(day, 1, DAYS_OF_WEEK.length)) ||
+      enabled.some(({ otherTimeSlots }) => otherTimeSlots.length >= MAX_DAY_TIME_SLOT_QUANTITY) ||
+      !enabled
+        .flatMap((day) => [day, ...day.otherTimeSlots])
+        .every(({ startTime, endTime }) => startTime && endTime && endTime > startTime)
+    ) {
+      add(`${at}.days`, ApiErrorCode.ValidationInvalid);
     }
   });
-  if (!isQuantity(body.totalSeatQuantity)) {
-    invalid('totalSeatQuantity');
-  }
-  if (!isQuantity(body.maxBookingPerTimeSlotQuantity)) {
-    invalid('maxBookingPerTimeSlotQuantity');
-  }
-  const deposit = body.depositPercentage;
-  if (deposit != null && !(typeof deposit === 'number' && deposit >= 0 && deposit <= 100)) {
-    invalid('depositPercentage');
-  }
   return errors;
+}
+
+/** A whole number from `from` to `to`. */
+function isBetween(value: unknown, from: number, to: number): boolean {
+  return Number.isInteger(value) && (value as number) >= from && (value as number) <= to;
 }
 
 function isValueOf(choices: Record<string, string>, value: unknown): boolean {
   return Object.values(choices).some((choice) => choice === value);
-}
-
-/** Empty, or a whole number above 0. */
-function isQuantity(value: unknown): boolean {
-  return value == null || (Number.isInteger(value) && (value as number) > 0);
-}
-
-/**
- * The table services of the property for `idTableServices` (repeated ids once); null when one id is not
- * one of them, or there are none: the whole request is cancelled.
- */
-function tableServicesOf(propertyId: number, idTableServices: unknown): TableServiceRow[] | null {
-  const ids = Array.isArray(idTableServices) ? [...new Set(idTableServices)] : [];
-  const tableServices = ids
-    .map((id) =>
-      TABLE_SERVICES.find((row) => row.idTableService === id && row.propertyId === propertyId),
-    )
-    .filter((tableService): tableService is TableServiceRow => tableService !== undefined);
-  return ids.length && tableServices.length === ids.length ? tableServices : null;
-}
-
-function tableServiceCopyName(tableService: TableServiceRow): string {
-  const taken = new Set(
-    TABLE_SERVICES.filter((row) => row.propertyId === tableService.propertyId).map(
-      (row) => row.serviceName,
-    ),
-  );
-  let copy = `${tableService.serviceName} (copia)`;
-  for (let number = 2; taken.has(copy); number++) {
-    copy = `${tableService.serviceName} (copia ${number})`;
-  }
-  return copy;
-}
-
-/** Numbers by value, texts alphabetically; a missing value first ascending, last descending. */
-function compare(first: string | number | null, second: string | number | null): number {
-  if (first === null || second === null) {
-    return first === second ? 0 : first === null ? -1 : 1;
-  }
-  return typeof first === 'number' && typeof second === 'number'
-    ? first - second
-    : String(first).localeCompare(String(second), 'it', { sensitivity: 'base' });
-}
-
-function positiveInteger(value: unknown, fallback: number): number {
-  return Number.isInteger(value) && (value as number) >= 1 ? (value as number) : fallback;
 }

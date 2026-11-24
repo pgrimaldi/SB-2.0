@@ -2,8 +2,10 @@ import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, from, of, switchMap } from 'rxjs';
 import { AuthSession, AuthUser, LoginRequest } from '../../../entities/auth/credentials';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
+import { UserRole } from '../../../entities/enums/user-role';
 import { problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 
 // Test account of the mock. Only the SHA-256 of the password is kept: the readable password
 // never appears in the repository nor in the published JavaScript.
@@ -11,9 +13,16 @@ const MOCK_ACCOUNT = {
   id: '0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c',
   username: 'summertest465@gmail.com',
   propertyId: DEMO_PROPERTY.publicId,
-  role: 'manager',
+  role: UserRole.Admin,
   passwordSha256: '42862e8e5e2e0915ad980297cc224059dcc424323ea325a9754839c79bca93f5',
 };
+
+/** The test account as a user of its property, e.g. a row of the users mock. */
+export const MOCK_SIGNED_IN_USER = {
+  id: MOCK_ACCOUNT.id,
+  email: MOCK_ACCOUNT.username,
+  role: MOCK_ACCOUNT.role,
+} as const;
 
 /** As in the backend configuration (`Auth:*`). */
 const ACCESS_TOKEN_SECONDS = 10080 * 60;
@@ -45,10 +54,10 @@ export const loginMock = (request: HttpRequest<unknown>): Observable<HttpEvent<u
     delay(400),
     switchMap((passwordSha256) => {
       const valid =
-        username?.trim().toLowerCase() === MOCK_ACCOUNT.username &&
+        sameTextIgnoringCase(username, MOCK_ACCOUNT.username) &&
         passwordSha256 === MOCK_ACCOUNT.passwordSha256;
       if (!valid) {
-        return unauthorized(request, 'auth.invalid_credentials', 'Invalid credentials');
+        return unauthorized(request, ApiErrorCode.AuthInvalidCredentials);
       }
       writeCookie(remember);
       return ok(request, newSession());
@@ -61,17 +70,17 @@ export const refreshMock = (request: HttpRequest<unknown>): Observable<HttpEvent
   const cookie = readCookie();
   if (!cookie || cookie.expiresAt <= Date.now()) {
     removeCookie();
-    return unauthorized(request, 'auth.session_expired', 'No valid session');
+    return unauthorized(request, ApiErrorCode.AuthSessionExpired);
   }
   writeCookie(cookie.remember);
   return ok(request, newSession());
 };
 
-/** `POST /api/identity/auth/logout`: revokes the session of the refresh cookie; 401 when there is none. */
+/**
+ * `POST /api/identity/auth/logout`: revokes the session of the refresh cookie, if there is one, and
+ * clears the cookie; always 204, also when the session was already closed, as the backend.
+ */
 export const logoutMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
-  if (!readCookie()) {
-    return unauthorized(request, 'auth.session_expired', 'No valid session');
-  }
   removeCookie();
   accessTokens.clear(); // the one test account: its access tokens stop working with the session
   return of(new HttpResponse<void>({ status: 204, url: request.url })).pipe(delay(150));
@@ -84,10 +93,9 @@ export function isAuthorized(request: HttpRequest<unknown>): boolean {
 
 export function unauthorized(
   request: HttpRequest<unknown>,
-  code: UnauthorizedCode = 'auth.unauthenticated',
-  title = 'Invalid or expired access token',
+  code: UnauthorizedCode = ApiErrorCode.AuthUnauthenticated,
 ): Observable<never> {
-  return problem(request, 401, code, { title });
+  return problem(request, 401, code);
 }
 
 type UnauthorizedCode = Extract<ApiErrorCode, `auth.${string}`>;

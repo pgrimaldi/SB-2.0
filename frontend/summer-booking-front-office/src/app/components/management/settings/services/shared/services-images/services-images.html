@@ -21,12 +21,32 @@
 <span class="services__images__label">
   {{ 'management.settings.services.form.image.upload' | translate }}
 </span>
-<app-file-drop-zone
-  class="services__images__drop"
-  accept="image/*"
-  [disabled]="isReadonly()"
-  [text]="'management.settings.services.form.image.drop' | translate"
-  [pathIcon]="addImageIcon"
-  [previewUrl]="imagePreviewUrl()"
-  (filesSelected)="chooseImage($event)"
-/>
+<div class="services__images__image">
+  <app-file-drop-zone
+    class="services__images__drop"
+    [accept]="imageTypes"
+    [disabled]="isReadonly()"
+    [text]="'management.settings.services.form.image.drop' | translate"
+    [pathIcon]="addImageIcon"
+    [previewUrl]="imagePreviewUrl()"
+    (filesSelected)="chooseImage($event)"
+  />
+  @if (isImageRemovable() && imagePreviewUrl()) {
+    <app-icon-button
+      class="services__images__remove"
+      [label]="'table.actions.delete' | translate"
+      [pathIcon]="removeIcon"
+      [disabled]="isReadonly()"
+      (click)="imageRemoveRequest.emit()"
+    />
+  }
+</div>
+@if (isImageTooLarge()) {
+  <p class="services__images__error">
+    {{ 'invalidate.max_file_size' | translate: { max: maxImageMegabytes } }}
+  </p>
+} @else if (invalidImageText(); as invalidImageText) {
+  <p class="services__images__error">{{ invalidImageText }}</p>
+} @else if (error(); as error) {
+  <p class="services__images__error">{{ error }}</p>
+}

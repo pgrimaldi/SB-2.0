@@ -1,0 +1,49 @@
+<app-form-row>
+  <span appFormRowLabel>
+    {{ 'management.settings.vouchers.form.options.applies_to' | translate }}
+  </span>
+  <app-filled-select
+    class="voucher__scope__field"
+    [options]="scopeOptions()"
+    [formField]="scope()"
+    [error]="validationText.text(scope())"
+  />
+</app-form-row>
+
+@if (isLimited()) {
+  <app-form-row>
+    <span appFormRowLabel>
+      {{ 'management.settings.vouchers.form.options.categories' | translate }}
+    </span>
+    <app-filled-multi-select
+      class="voucher__scope__field"
+      [placeholder]="'management.settings.vouchers.form.options.choose' | translate"
+      [options]="categoryOptions()"
+      [formField]="categories()"
+      [error]="
+        validationText.text(
+          categories(),
+          'management.settings.vouchers.form.field_names.scope_choice'
+        )
+      "
+    />
+  </app-form-row>
+
+  <app-form-row>
+    <span appFormRowLabel>
+      {{ 'management.settings.vouchers.form.options.sectors' | translate }}
+    </span>
+    <app-filled-multi-select
+      class="voucher__scope__field"
+      [placeholder]="
+        sectorList.loadError()
+          ? ''
+          : ('management.settings.vouchers.form.options.choose' | translate)
+      "
+      [options]="sectorOptions()"
+      [formField]="sectors()"
+      [error]="sectorList.loadError()"
+      (openRequest)="sectorList.retry()"
+    />
+  </app-form-row>
+}

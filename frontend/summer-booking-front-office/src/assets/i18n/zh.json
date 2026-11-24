@@ -46,7 +46,8 @@
       "range": "{{start}} – {{end}}，共 {{total}}"
     },
     "search": {
-      "placeholder": "搜索..."
+      "placeholder": "搜索...",
+      "max_length": "最多 {{max}} 个字符"
     },
     "load_error": {
       "title": "错误",
@@ -105,12 +106,75 @@
       "password_too_common": "此密码过于常见：请选择更安全的密码。"
     },
     "resource": {
-      "not_found": "该项目已不存在。"
+      "not_found": "该项目已不存在。",
+      "version_conflict": "其他用户已同时修改了这些数据：数据已重新加载。请重新进行修改。"
     },
     "account": {
       "email_taken": "已存在使用此电子邮件的账户。",
+      "not_found": "该用户已不存在：可能已被删除。",
       "cannot_modify_self": "您不能在此删除或修改自己的账户。",
-      "role_not_assignable": "无法在面板中管理此账户。"
+      "role_not_assignable": "无法在面板中管理此账户。",
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
+    },
+    "audit": {
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
+      "export_too_large": "要导出的记录有 {total, number, integer} 条，但最多只能导出 {max, number, integer} 条：请缩小时间范围或筛选条件后重试。"
+    },
+    "map": {
+      "spot_not_found": "地图区域已不存在：可能已被删除。",
+      "spots_outside_grid": "有位置超出这些尺寸：至少需要 {{rows}} 排，每排 {{columns}} 个物品。",
+      "invalid_image": "图片必须是 PNG、JPEG 或 WebP 格式，且不超过 5 MB。"
+    },
+    "catalog": {
+      "sector_in_use": "区域/排 {{sectorName}} 正在使用，无法删除：地图上的位置 {{mapSpots}}，价目表 {{priceLists}}，停留限制 {{stayLimits}}，折扣 {{discounts}}，服务 {{services}}，自动价格 {{automaticPrices}}。",
+      "sector_name_taken": "已存在同名的区域/排。",
+      "invalid_image": "图片必须是 PNG、JPEG 或 WebP 格式，且不超过 5 MB。",
+      "invalid_pdf": "文件必须是 PDF，且不超过 10 MB。",
+      "gallery_full": "图库已满：最多可以上传 {{max}} 张图片。",
+      "photo_not_found": "图片已不存在：可能已被删除。",
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
+      "property_not_found": "未找到您账户所属的浴场。请退出后重新登录；如果仍然出现，请联系支持。",
+      "country_not_found": "所选国家已不可用：请选择其他国家。",
+      "sector_not_found": "区域/排已不存在：可能已被删除。",
+      "vat_rate_not_allowed": "不允许使用此税率。有效税率：{{rates}}。"
+    },
+    "pricing": {
+      "season_required": "请先设置季节日期。",
+      "next_season_required": "请先设置下一季节的日期。",
+      "period_not_found": "时段已不存在：可能已被删除。",
+      "period_name_taken": "已存在同名的时段。",
+      "period_outside_season": "时段日期必须在季节范围内。",
+      "period_range_not_found": "日期区间已不存在：可能已被删除。",
+      "period_ranges_required": "时段至少需要一个日期区间。如要完全删除，请使用其名称旁的垃圾桶。",
+      "period_in_use": "该时段在价目表 {{priceLists}} 中有价格：请先从这些价目表中删除其价格，然后再删除该时段。",
+      "period_in_use_by_services": "该时段被服务 {{services}} 使用：请先从这些服务中删除其价格，然后再删除该时段。",
+      "period_overlap": "日期与时段 {{periodName}} 重叠：请选择不在其他时段中的日期。",
+      "calculation_method_not_found": "该价格计算方式已不可用：请选择其他方式。",
+      "price_list_not_found": "价目表项目已不存在：可能已被删除。",
+      "price_list_in_use": "无法删除 {{priceListName}}：附加物品/服务 {{additionalItems}} 将不再关联任何套餐，并会适用于所有套餐。请先将它们关联到其他套餐，或将其删除。",
+      "package_not_found": "所选套餐已不存在：可能已被删除。",
+      "discount_not_found": "折扣已不存在：可能已被删除。",
+      "discount_code_taken": "代码 {{code}} 已被其他折扣使用。",
+      "discount_max_uses_below_used": "该折扣已使用 {{usedCount}} 次：最大次数不能更低。",
+      "duplicate_vat_rate_not_allowed": "无法复制 {{priceListName}}：其增值税率不在允许的税率之内（{{rates}}）。请修改后重试。",
+      "duplicate_period_not_found": "无法复制 {{priceListName}}：其中有已删除时段的价格。请打开并编辑、保存后重试。",
+      "duplicate_area_not_found": "无法复制 {{priceListName}}：其中包含已删除的地图区域。请打开并从启用的区域中移除，保存后重试。",
+      "duplicate_sector_not_found": "无法复制 {{priceListName}}：其中包含已删除的区域/排的数据。请打开并编辑、保存后重试。"
+    },
+    "inventory": {
+      "item_not_found": "物品已不存在：可能已被删除。",
+      "name_taken": "已有其他物品使用此名称。",
+      "item_in_use": "物品 {{articleName}} 用于价目表 {{usedIn}}，无法删除：请先从这些价目表中移除它。"
+    },
+    "service": {
+      "not_found": "服务已不存在：可能已被删除。",
+      "automatic_price_not_found": "自动价格已不存在：可能已被删除。",
+      "table_service_not_found": "餐桌服务已不存在：可能已被删除。",
+      "icon_not_found": "所选图标已不可用：请选择其他图标。",
+      "duplicate_vat_rate_not_allowed": "无法复制 {{serviceName}}：其增值税率不在允许的税率之内（{{rates}}）。请修改后重试。",
+      "duplicate_period_not_found": "无法复制 {{serviceName}}：其中有已删除时段的价格。请编辑并保存其“价格”标签页后重试。",
+      "duplicate_icon_not_found": "无法复制 {{serviceName}}：其图标已不可用。请选择其他图标后重试。",
+      "duplicate_sector_not_found": "无法复制 {{serviceName}}：它仅限于已删除的区域/排。请检查其区域/排，保存后重试。"
     }
   },
   "alert": {
@@ -248,12 +312,14 @@
           "cancellation": "取消政策",
           "cancellation_policies": {
             "free_until_48_hours": "提前48小时免费取消",
-            "free_until_24_hours": "提前24小时免费取消"
+            "free_until_24_hours": "提前24小时免费取消",
+            "none": "无"
           },
           "pets": "宠物",
           "pets_options": {
             "allowed": "允许",
-            "not_allowed": "不允许"
+            "not_allowed": "不允许",
+            "on_request": "需申请"
           },
           "regulation": "规章制度",
           "edit": "编辑",
@@ -284,7 +350,13 @@
             "main": "主图",
             "main_hint": "将主图拖到此处或点击上传",
             "gallery": "图片库",
-            "add": "添加图片"
+            "add": "添加图片",
+            "delete": {
+              "title": "删除图片",
+              "text": "确定要删除这张图片吗？",
+              "cancel": "取消",
+              "confirm": "删除"
+            }
           },
           "virtual_tour": {
             "title": "虚拟游览链接",
@@ -296,7 +368,13 @@
             "menu": "菜单",
             "no_file": "未选择文件",
             "open": "打开文档",
-            "upload": "上传"
+            "upload": "上传",
+            "delete": {
+              "title": "删除文档",
+              "text": "确定要删除这个文档吗？",
+              "cancel": "取消",
+              "confirm": "删除"
+            }
           }
         }
       },
@@ -460,7 +538,7 @@
           "add": "添加",
           "save": "保存",
           "field_names": {
-            "total": "总数"
+            "quantity": "数量"
           }
         },
         "delete": {
@@ -775,8 +853,8 @@
         "create": "添加折扣/代金券",
         "table": {
           "voucher_name": "折扣",
-          "valid_from": "有效期自",
-          "valid_to": "至",
+          "valid_from": "有效期开始",
+          "valid_to": "有效期截止",
           "discount_type": "折扣类型",
           "discount_value": "数值"
         },
@@ -809,10 +887,12 @@
           }
         },
         "form": {
-          "title": "添加新折扣/优惠券",
+          "title": "添加新折扣/代金券",
+          "edit_title": "编辑折扣/代金券",
           "cancel": "取消",
           "save": "保存",
           "name": "折扣名称",
+          "code": "折扣代码",
           "periods": {
             "title": "有效期",
             "add": "添加有效期",
@@ -838,23 +918,26 @@
           },
           "field_names": {
             "validity_period": "有效期",
-            "day_of_week": "星期"
+            "discount_value": "折扣",
+            "scope_choice": "类别或区域",
+            "day_of_week": "日期"
           },
           "options": {
             "title": "选项",
-            "type": "折扣/优惠券类型",
-            "types": {
-              "percentage": "百分比",
-              "fixed": "金额"
-            },
-            "value": "折扣/优惠券值",
-            "applies_to": "折扣/优惠券适用于",
+            "type": "折扣/代金券类型",
+            "value": "折扣/代金券值",
+            "applies_to": "折扣/代金券适用于",
             "scopes": {
               "all": "全部",
-              "services": "服务"
+              "custom": "仅部分选项",
+              "without_custom": "除部分选项外的全部"
             },
+            "categories": "类别",
+            "sectors": "区域和排",
+            "choose": "请选择",
+            "missing_sector": "排/区域已不可用",
             "max_uses": "最大使用次数",
-            "enabled": "启用折扣/优惠券"
+            "enabled": "启用折扣/代金券"
           }
         }
       },
@@ -897,13 +980,120 @@
           },
           "table": {
             "booking_number": "预订编号",
-            "user_number": "用户编号",
             "full_name": "全名",
             "spot": "位置",
             "action": "操作",
             "occurred_at": "日期和时间"
           },
           "actions": {
+            "identity": {
+              "login_succeeded": "已登录",
+              "login_failed": "登录失败",
+              "login_locked": "尝试次数过多，登录已锁定",
+              "login_app_denied": "已拒绝登录此应用",
+              "second_factor_requested": "已请求验证码",
+              "second_factor_failed": "验证码错误",
+              "refresh_reuse_detected": "因可疑访问，会话已关闭",
+              "logout": "已退出登录",
+              "password_reset_requested": "已请求重置密码",
+              "password_reset_completed": "已重置密码",
+              "password_changed": "已修改密码",
+              "account_registered": "已注册账户",
+              "account_deleted": "已删除账户",
+              "session_revoked": "已关闭会话",
+              "user_created": "已添加用户",
+              "user_updated": "已修改用户",
+              "user_deleted": "已删除用户",
+              "security_settings_changed": "已修改安全设置",
+              "external_token_issued": "已授权外部访问",
+              "external_token_denied": "已拒绝外部访问",
+              "customer_created": "已添加客户",
+              "customer_updated": "已修改客户资料",
+              "customer_deleted": "已删除客户",
+              "customers_exported": "已导出客户",
+              "contract_acceptance_changed": "已修改合同接受状态"
+            },
+            "catalog": {
+              "inventory_item_created": "已添加仓库物品",
+              "inventory_item_updated": "已修改仓库物品",
+              "inventory_item_deleted": "已删除仓库物品",
+              "season_updated": "已修改季节日期",
+              "tariff_period_created": "已添加时段",
+              "tariff_period_updated": "已修改时段",
+              "tariff_period_deleted": "已删除时段",
+              "sector_created": "已添加区域/排",
+              "sector_updated": "已修改区域/排",
+              "sector_deleted": "已删除区域/排",
+              "map_settings_updated": "已修改地图设置",
+              "map_background_updated": "已修改地图背景",
+              "map_icons_updated": "已修改地图图标",
+              "map_spots_created": "已向地图添加位置",
+              "map_spot_updated": "已修改地图位置",
+              "map_spots_deleted": "已从地图删除位置",
+              "map_grid_changed": "已修改地图网格",
+              "map_reset": "已重置地图",
+              "property_info_updated": "已修改场所信息",
+              "property_amenities_updated": "已修改场所服务",
+              "property_photos_updated": "已修改场所照片",
+              "property_documents_updated": "已修改场所文件",
+              "online_settings_updated": "已修改在线预订设置",
+              "service_online_settings_updated": "已修改服务的在线选项",
+              "stay_limits_updated": "已修改停留限制",
+              "online_legend_updated": "已修改在线预订图例",
+              "service_created": "已添加服务",
+              "service_updated": "已修改服务",
+              "service_deleted": "已删除服务",
+              "automatic_price_created": "已添加自动价格",
+              "automatic_price_updated": "已修改自动价格",
+              "automatic_price_deleted": "已删除自动价格",
+              "table_service_created": "已添加餐桌服务",
+              "table_service_updated": "已修改餐桌服务",
+              "table_service_deleted": "已删除餐桌服务",
+              "price_list_created": "已添加套餐或附加项目",
+              "price_list_updated": "已修改套餐或附加项目",
+              "price_list_deleted": "已删除套餐或附加项目",
+              "price_list_duplicated": "已复制套餐或附加项目",
+              "price_lists_imported": "已导入套餐和附加项目",
+              "reduced_season_created": "已添加季节优惠价",
+              "reduced_season_updated": "已修改季节优惠价",
+              "reduced_season_deleted": "已删除季节优惠价",
+              "discount_created": "已添加折扣/代金券",
+              "discount_updated": "已修改折扣/代金券",
+              "discount_deleted": "已删除折扣/代金券",
+              "agreement_partner_created": "已添加协议",
+              "agreement_partner_updated": "已修改协议",
+              "agreement_partner_deleted": "已删除协议",
+              "agreement_partner_duplicated": "已复制协议",
+              "agreement_price_list_created": "已添加协议价目表",
+              "agreement_price_list_updated": "已修改协议价目表",
+              "agreement_price_list_deleted": "已删除协议价目表",
+              "agreement_report_cancelled": "已取消协议报告",
+              "revenue_settings_updated": "已修改收益设置",
+              "suggested_prices_computed": "已计算建议价格",
+              "suggested_prices_applied": "已应用建议价格",
+              "revenue_weights_updated": "已修改收益权重",
+              "revenue_standard_periods_updated": "已修改收益标准时段",
+              "platform_property_status_changed": "平台已修改场所状态",
+              "platform_property_trashed": "平台已将场所移至回收站",
+              "platform_property_restored": "平台已恢复场所",
+              "platform_property_purged": "平台已永久删除场所",
+              "platform_property_showcase_updated": "平台已修改场所展示",
+              "platform_map_icon_saved": "平台已保存地图图标",
+              "platform_map_icon_deleted": "平台已删除地图图标",
+              "platform_beach_element_saved": "平台已保存海滩元素",
+              "platform_beach_element_deleted": "平台已删除海滩元素",
+              "platform_badge_saved": "平台已保存徽章",
+              "platform_badge_deleted": "平台已删除徽章",
+              "platform_region_saved": "平台已保存地区",
+              "platform_region_deleted": "平台已删除地区",
+              "platform_showcase_updated": "平台已修改展示",
+              "service_duplicated": "已复制服务",
+              "automatic_price_duplicated": "已复制自动价格",
+              "table_service_duplicated": "已复制餐桌服务"
+            },
+            "audit": {
+              "entries_exported": "已导出日志"
+            },
             "booking": {
               "checked_in": "入住",
               "checked_out": "退房",
@@ -920,9 +1110,6 @@
               "renewed": "预订已续订",
               "cancelled": "预订已取消"
             },
-            "customer": {
-              "updated": "已修改客户资料"
-            },
             "payment": {
               "deposit_added": "已添加定金",
               "balance_added": "已添加尾款",
@@ -930,13 +1117,6 @@
               "discount_code_applied": "已使用折扣码",
               "discount_applied": "已应用折扣",
               "increase_added": "已添加附加费"
-            },
-            "property": {
-              "info_updated": "已修改场所信息"
-            },
-            "identity": {
-              "user_created": "已添加用户",
-              "user_deleted": "已删除用户"
             },
             "cash": {
               "pre_bill_printed": "已打印预结单",
@@ -955,35 +1135,8 @@
             "order": {
               "marked_done": "订单已标记为完成",
               "marked_not_done": "订单已标记为未完成"
-            },
-            "price_list": {
-              "package_updated": "已修改价目表套餐",
-              "extra_item_updated": "已修改价目表附加项目",
-              "package_created": "已添加价目表套餐",
-              "extra_item_created": "已添加价目表附加项目",
-              "package_deleted": "已删除价目表套餐",
-              "extra_item_deleted": "已删除价目表附加项目",
-              "package_duplicated": "已复制价目表套餐",
-              "extra_item_duplicated": "已复制价目表附加项目"
-            },
-            "warehouse": {
-              "item_updated": "已修改仓库物品",
-              "item_created": "已添加仓库物品",
-              "item_deleted": "已删除仓库物品"
-            },
-            "season": {
-              "dates_updated": "已修改季节日期",
-              "period_updated": "已修改时段",
-              "period_created": "已添加时段",
-              "period_deleted": "已删除时段"
-            },
-            "map": {
-              "sector_updated": "已修改区域/排",
-              "sector_created": "已添加区域/排",
-              "sector_deleted": "已删除区域/排"
             }
           },
-          "not_implemented": "该服务尚未实现",
           "clear_filters": "清除筛选",
           "filters_popup": {
             "title": "筛选",
@@ -1004,6 +1157,7 @@
           "email": "电子邮件",
           "password": "密码",
           "phone": "手机",
+          "phone_prefix": "区号",
           "account_type": "账户类型",
           "choose": "请选择",
           "enable": "启用",
@@ -1025,7 +1179,7 @@
           }
         },
         "log": "日志",
-        "owner_not_editable": "无法修改所有者"
+        "user_not_editable": "无法在此处修改该用户"
       },
       "seasons": {
         "season_dates": {
@@ -1052,7 +1206,8 @@
           "date_to": "结束日期",
           "empty": "尚未添加时段",
           "clear_selection": "取消选择",
-          "delete_selected": "删除所选"
+          "delete_selected": "删除所选",
+          "period_full": "一个时段最多可以有 {{max}} 个日期区间。如要再添加，请先删除一个。"
         },
         "add_popup": {
           "title": "设置时段",
@@ -1109,7 +1264,9 @@
           "many": {
             "title": "删除日期区间",
             "text": "要删除选中的 {{count}} 个日期区间吗？"
-          }
+          },
+          "period_left_empty": "时段至少需要一个日期区间。如要完全删除，请使用其名称旁的垃圾桶。",
+          "too_many": "每次最多可以删除 {{max}} 个日期区间。请从选择中移除多余的区间。"
         }
       },
       "services": {
@@ -1155,11 +1312,18 @@
           "add_title": "添加新的酒吧服务",
           "edit_title": "编辑酒吧服务",
           "categories": {
-            "cafeteria": "咖啡",
-            "drinks": "饮料",
-            "snacks_and_sandwiches": "小吃和三明治",
-            "ice_creams": "冰淇淋",
-            "desserts": "甜点"
+            "bar": "酒吧",
+            "pizzeria": "披萨店",
+            "restaurant": "餐厅",
+            "fry_shop": "炸物店",
+            "sandwich_shop": "三明治店",
+            "appetizers": "开胃菜",
+            "first_courses": "第一道菜",
+            "second_courses": "第二道菜",
+            "desserts": "甜点",
+            "fruit": "水果",
+            "ice_cream_shop": "冰淇淋店",
+            "drinks": "饮料"
           }
         },
         "standard_services": {
@@ -1318,7 +1482,15 @@
             "title": "服务图片",
             "choose_icon": "选择图标",
             "upload": "或上传图片",
-            "drop": "将图片拖到此处或点击上传"
+            "drop": "将图片拖到此处或点击上传",
+            "upload_failed_title": "图片未上传",
+            "upload_failed_text": "服务已保存，但图片未保存。{{reason}}",
+            "delete": {
+              "title": "删除图片",
+              "text": "确定要删除这张图片吗？",
+              "cancel": "取消",
+              "confirm": "删除"
+            }
           },
           "highlighted": "设为推荐",
           "highlighted_info": "**启用**此选项后，客户预订海滩服务时，可以看到此服务并直接将其添加到预订中。",
@@ -1328,7 +1500,8 @@
             "variants": {
               "title": "规格",
               "add": "添加规格",
-              "name": "规格名称"
+              "name": "规格名称",
+              "surcharge": "加价"
             },
             "online_purchase": "启用在线购买",
             "period_pricing": {
@@ -1339,7 +1512,8 @@
             "limits": {
               "title": "限制",
               "sectors": "可购买此服务的排/区域",
-              "all_sectors": "所有排/区域"
+              "all_sectors": "所有排/区域",
+              "missing_sector": "排/区域已不可用"
             }
           },
           "bookings": {
@@ -1359,6 +1533,7 @@
             "min_items_per_booking": "每次预订最少物品数",
             "max_items_per_booking": "每次预订最多物品数",
             "time_intervals": {
+              "none": "无间隔",
               "fifteen_minutes": "15分钟",
               "thirty_minutes": "30分钟",
               "forty_five_minutes": "45分钟",
@@ -1369,6 +1544,7 @@
           "availability": {
             "title": "可用选项",
             "hours": "可用时间",
+            "period_info": "**启用**此选项后，赛季内的每个时段都有各自的可用时间和价格。\n\n**未启用**此选项时，下方填写的可用时间适用于整个赛季。",
             "days_title": "可用日期",
             "days": {
               "monday": "周一",
@@ -1393,7 +1569,10 @@
             "custom": "自定义",
             "minutes": "分钟",
             "max_bookings_per_time_slot": "每个时段最多预订数",
-            "fixed_time_slots": "固定时段"
+            "fixed_time_slots": "固定时段",
+            "field_names": {
+              "day_of_week": "日期"
+            }
           },
           "validity": {
             "periods_title": "有效期",
@@ -1402,19 +1581,24 @@
             "time_slots": "时段",
             "add_time_slot": "添加时段",
             "services_title": "适用服务",
+            "all_services": "所有服务",
             "bar_services": "酒吧服务",
             "standard_services": "服务",
             "hourly_services": "按小时服务",
             "select_all": "全选",
             "no_services": "没有此类服务。",
             "price_per_service": "为每项服务启用自动价格",
-            "price_per_service_info": "如果**启用**此选项，添加到预订中的每项服务都会自动应用并加入自动价格。\n\n如果**未启用**此选项，每个订单只会自动应用并加入一次自动价格。"
+            "price_per_service_info": "如果**启用**此选项，添加到预订中的每项服务都会自动应用并加入自动价格。\n\n如果**未启用**此选项，每个订单只会自动应用并加入一次自动价格。",
+            "field_names": {
+              "service": "服务"
+            }
           },
           "tables": {
             "availability_title": "可用性",
             "add_availability": "添加可用时间",
             "days_hours": "日期与时段",
             "same_hours": "所有日期使用相同时间",
+            "other_time_slots": "其他时段：",
             "days": {
               "monday": "星期一",
               "tuesday": "星期二",
@@ -1444,6 +1628,7 @@
             "seats_hint": "设置可用座位总数。",
             "meal_duration": "平均用餐时长",
             "meal_durations": {
+              "none": "无时长",
               "thirty_minutes": "30分钟",
               "forty_five_minutes": "45分钟",
               "one_hour": "1小时",
@@ -1473,7 +1658,322 @@
             },
             "deposit_amount": "定金金额",
             "deposit_info": "**1. 总计**\n餐桌服务预订的确认定金仅按所有预订人数/座位总计收取一次。\n\n**2. 按人**\n餐桌服务预订的确认定金按每位预订人/每个座位收取。",
-            "online_booking": "启用在线预订"
+            "online_booking": "启用在线预订",
+            "field_names": {
+              "table": "餐桌"
+            }
+          }
+        }
+      },
+      "map_configuration": {
+        "background": {
+          "title": "设置背景",
+          "templates": "地图背景",
+          "custom": "自定义背景",
+          "drop": "将图片拖到此处或点击上传",
+          "delete": {
+            "title": "删除背景",
+            "text": "确定要删除自定义背景吗？",
+            "cancel": "取消",
+            "confirm": "删除"
+          }
+        },
+        "grid": {
+          "title": "设置网格",
+          "rows": "排数",
+          "row_items": "每排最多物品数",
+          "tilt": "地图倾斜度 (°)",
+          "icons": {
+            "title": "元素图标",
+            "free": "空闲",
+            "occupied": "已占用",
+            "umbrella": "遮阳伞",
+            "custom_article": "自定义物品 {{number}}",
+            "select": "选择图标",
+            "invalid": {
+              "umbrella": "遮阳伞图标无效：请选择其他图标后重新保存。",
+              "custom_articles": "自定义物品图标无效：请选择其他图标后重新保存。"
+            }
+          }
+        },
+        "edit": "编辑",
+        "cancel": "取消",
+        "save": "保存",
+        "reset": "重置地图",
+        "reset_popup": {
+          "title": "重置地图",
+          "text": "您正在重置整个地图。\n\n地图上放置的物品将被删除，需要重新设置网格。背景、图标和倾斜度保持不变。此操作无法撤销。",
+          "cancel": "取消并保留已配置的地图",
+          "confirm": "继续并删除已配置的地图"
+        }
+      },
+      "rows_and_sectors": {
+        "title": "区域和排",
+        "create": "添加区域/排",
+        "table": {
+          "sector_name": "名称"
+        },
+        "delete": {
+          "cancel": "取消",
+          "confirm": "删除",
+          "one": {
+            "title": "删除区域/排",
+            "text": "要删除区域/排 {{name}} 吗？"
+          },
+          "many": {
+            "title": "删除区域/排",
+            "text": "要删除所选的 {{count}} 个区域/排吗？"
+          }
+        },
+        "duplicate": {
+          "cancel": "取消",
+          "confirm": "复制",
+          "one": {
+            "title": "复制区域/排",
+            "text": "要复制区域/排 {{name}} 吗？"
+          },
+          "many": {
+            "title": "复制区域/排",
+            "text": "要复制所选的 {{count}} 个区域/排吗？"
+          }
+        },
+        "add_popup": {
+          "title": "区域/排名称",
+          "placeholder": "第1排",
+          "cancel": "取消",
+          "save": "保存"
+        },
+        "edit_popup": {
+          "title": "区域/排名称",
+          "placeholder": "第1排",
+          "cancel": "取消",
+          "save": "保存"
+        }
+      },
+      "catalog": {
+        "tabs": {
+          "packages": "套餐",
+          "additional_items": "附加物品/服务"
+        },
+        "packages": {
+          "title": "套餐",
+          "create": "添加套餐",
+          "table": {
+            "package_name": "名称"
+          },
+          "delete": {
+            "cancel": "取消",
+            "confirm": "删除",
+            "one": {
+              "title": "删除套餐",
+              "text": "要删除套餐 {{name}} 吗？"
+            },
+            "many": {
+              "title": "删除套餐",
+              "text": "要删除所选的 {{count}} 个套餐吗？"
+            }
+          },
+          "duplicate": {
+            "cancel": "取消",
+            "confirm": "复制",
+            "one": {
+              "title": "复制套餐",
+              "text": "要复制套餐 {{name}} 吗？"
+            },
+            "many": {
+              "title": "复制套餐",
+              "text": "要复制所选的 {{count}} 个套餐吗？"
+            }
+          },
+          "form": {
+            "add_title": "添加新套餐",
+            "edit_title": "编辑套餐",
+            "cancel": "取消",
+            "save": "创建套餐",
+            "edit": "编辑",
+            "save_changes": "保存",
+            "tabs": {
+              "general_info": "基本信息",
+              "price_list": "价目表"
+            },
+            "name": "套餐名称",
+            "other_languages": "其他语言",
+            "translated_name": "{{language}}名称",
+            "choose": "选择",
+            "max_additional_items": "附加物品最大数量",
+            "max_people": "最多人数",
+            "no_limit": "不限",
+            "articles": {
+              "title": "套餐包含的物品",
+              "none": "无",
+              "unavailable": "库存中没有",
+              "unavailable_note": "灰色的物品在库存中没有。",
+              "names": {
+                "umbrella": "遮阳伞",
+                "sunbed": "躺椅",
+                "sunbed_xl": "加大躺椅",
+                "sunbed_maxi": "特大躺椅",
+                "deckchair": "沙滩椅",
+                "directors_chair": "导演椅",
+                "tent": "帐篷",
+                "gazebo": "凉亭",
+                "cabin": "更衣室",
+                "custom_cabin": "自定义更衣室",
+                "parking": "停车位",
+                "ticket": "门票",
+                "sunbed_area": "躺椅区",
+                "umbrella_area": "遮阳伞区",
+                "parking_area": "停车区",
+                "cabin_area": "更衣室区",
+                "custom_article": "自定义物品 {{number}}"
+              }
+            },
+            "included_services": "包含的服务（可选）",
+            "enabled_areas": "启用的区域",
+            "sectors": "区域和排",
+            "all_sectors": "所有区域和排",
+            "missing_sector": "排/区域已不可用",
+            "missing_area": "区域已不可用",
+            "is_default": "设为默认套餐",
+            "is_default_online": "设为在线默认套餐",
+            "online_enabled": "也用于在线预订",
+            "online_only": "仅用于在线预订",
+            "reduced_seasonal_price": "季节优惠价",
+            "reduced_seasonal": {
+              "date_from": "从",
+              "date_to": "至",
+              "name": "名称",
+              "add": "添加",
+              "save": "保存",
+              "section_title": "季节优惠价：{{name}}（{{dateFrom}} – {{dateTo}}）",
+              "overlap": "这些日期与另一个季节优惠价重叠",
+              "delete": {
+                "title": "删除季节优惠价",
+                "text": "确定要删除此部分及所有已输入的数据吗？",
+                "cancel": "取消",
+                "confirm": "删除"
+              }
+            }
+          }
+        },
+        "additional_items": {
+          "title": "附加物品/服务",
+          "create": "添加附加物品/服务",
+          "table": {
+            "additional_item_name": "名称"
+          },
+          "delete": {
+            "cancel": "取消",
+            "confirm": "删除",
+            "one": {
+              "title": "删除附加物品/服务",
+              "text": "要删除附加物品/服务 {{name}} 吗？"
+            },
+            "many": {
+              "title": "删除附加物品/服务",
+              "text": "要删除所选的 {{count}} 个附加物品/服务吗？"
+            }
+          },
+          "duplicate": {
+            "cancel": "取消",
+            "confirm": "复制",
+            "one": {
+              "title": "复制附加物品/服务",
+              "text": "要复制附加物品/服务 {{name}} 吗？"
+            },
+            "many": {
+              "title": "复制附加物品/服务",
+              "text": "要复制所选的 {{count}} 个附加物品/服务吗？"
+            }
+          },
+          "form": {
+            "add_title": "添加新的附加物品/服务",
+            "edit_title": "编辑附加物品/服务",
+            "cancel": "取消",
+            "save": "创建物品/服务",
+            "edit": "编辑",
+            "save_changes": "保存",
+            "article": "选择物品",
+            "choose": "选择",
+            "packages": "套餐",
+            "all_packages": "所有套餐",
+            "online_enabled": "在线预订",
+            "online_only": "仅限在线",
+            "map_assignable": "设为可在地图上分配的物品",
+            "missing_article": "物品已不可用",
+            "missing_package": "套餐已不可用",
+            "price_list": "价目表"
+          }
+        },
+        "price_list": {
+          "choose": "选择",
+          "seasonal_prices": "季节价",
+          "period_prices": "按时段定价",
+          "seasonal_half_day": "季节半天价",
+          "seasonal": "季节价",
+          "half_day": "半天价",
+          "daily": "日价",
+          "weekend": "周末价",
+          "half_day_weekend": "周末半天价",
+          "half_day_seven_days": "7天半天价",
+          "seven_days": "7天价",
+          "half_day_fourteen_days": "14天半天价",
+          "fourteen_days": "14天价",
+          "half_day_monthly": "月半天价",
+          "monthly": "月价",
+          "no_sectors": "没有区域或排：请在“区域和排”页面中添加。",
+          "no_periods": "按时段定价至少需要一个区域或排，以及本季的一个时段。",
+          "vat": "增值税 (%)",
+          "calculation_method": "价格计算",
+          "no_calculation": "无计算",
+          "no_setting": "无设置",
+          "calculation_methods": {
+            "proportional": "按比例价",
+            "daily": "日价",
+            "logarithmic": "对数价",
+            "daily_with_weekend": "含周末的日价"
+          },
+          "calculation_method_info": "## 1. 按比例价\n价格按使用天数线性计算。\n系统将日价乘以天数，并应用价目表中设定的系数（例如周、两周、月、季节系数）。\n\n**示例：**\n- 日价：20 €\n- 周系数（7天）：0.95\n- 计算：20 × 7 × 0.95 = 133 €\n采用此方法时，系统进行线性计算：取日价乘以天数，再应用价目表中设定的系数。系数用于设置“标准”折扣（例如周、月、季节折扣）。\n\n**建议用途：**希望计算简单一致，并已在价目表中设定按比例折扣时。\n\n## 2. 对数价\n随着天数增加，价格的增幅逐渐变小。\n前几天的单价较高，之后的天数会按对数曲线自动“打折”。\n\n**示例：**\n- 1天价格：20 €\n- 3天价格（非按比例）：系统计算为 55 €，而不是 60 €\n- 7天价格：系统计算为 110 €，而不是 140 €\n此方法不使用线性乘法。\n它应用对数曲线，即一种随天数增加而降低每日平均费用的数学公式。\n- 前几天费用较高。\n- 之后的天数在总价中“占比”较小。\n\n**建议用途：**希望以比按比例计算更大的折扣鼓励长期预订时。\n\n## 3. 日价\n每天价格相同，没有折扣或系数。\n总价就是所订天数的总和。\n**示例：**\n- 日价：25 €\n- 预订10天：25 × 10 = 250 €\n系统不应用任何折扣。\n无论天数多少，每天的费用完全相同，没有系数或减价。\n\n**建议用途：**不希望对较长时段减价、偏好固定统一的价目表时。\n\n## 4. 含周末的日价\n价格计算时会自动区分工作日与节假日或周末。\n系统对工作日使用工作日价格，对周六、周日及节假日使用周末价格。\n\n**示例：**\n- 工作日价格：22 €\n- 周末价格：30 €\n- 预订7天：\n  - 5个工作日 → 5 × 22 = 110 €\n  - 2个周末日 → 2 × 30 = 60 €\n- 总计：170 €\n系统读取预订的日历并自动区分：\n- 工作日\n- 周六\n- 周日\n- 节假日\n它对每一天应用正确的价格并将结果相加。不使用系数或折扣，只按日期类型计算。\n\n**建议用途：**浴场在周末或客流高峰日实行不同价格时。",
+          "cumulative": "累计价格",
+          "cumulative_info": "累计价格是一种计算方式，当预订跨越多个时段时，可得到更准确的最终价格。\n## 工作方式\n启用后，系统按各季节所占的天数，对不同季节的价格加权平均来计算总价。\n## 适用情况\n- **单一季节内的预订**：直接使用该季节价目表的价格，不做额外计算。\n- **跨多个季节的预订**：系统按淡季和旺季的天数比例，组合各季节价目表的价格。\n- **多个预订**：系统不再将各时段的价格相加，而是按总天数重新计算总价。",
+          "monthly_setting": "月份设置",
+          "monthly_settings": {
+            "effective_month_duration": "按月份实际天数（31天）",
+            "actual_month_duration": "当月真实天数",
+            "thirty_days": "30天"
+          },
+          "weekend_setting": "周末设置",
+          "weekend_settings": {
+            "saturday_sunday": "周末为周六和周日",
+            "sunday_only": "周末仅为周日"
+          },
+          "public_holidays": {
+            "title": "节假日",
+            "add": "添加节假日",
+            "date": "日期",
+            "hint": "点击日期即可选择或取消",
+            "cancel": "取消",
+            "confirm": "确认",
+            "disable": {
+              "title": "停用节假日",
+              "text": "停用此选项将丢失所有已选的节假日，确定吗？",
+              "cancel": "取消",
+              "confirm": "停用"
+            }
+          },
+          "intermediate_prices": {
+            "title": "修改中间价格",
+            "first_row": "第1排 {{period}}",
+            "other_rows": "其他排 {{period}}",
+            "name": "名称/物品",
+            "days": "天数",
+            "price": "价格",
+            "disable": {
+              "title": "停用中间价格",
+              "text": "停用此选项将丢失所有中间价格，确定吗？",
+              "cancel": "取消",
+              "confirm": "停用"
+            }
           }
         }
       }
@@ -1598,7 +2098,51 @@
     "missing_digit": "至少 1 个数字",
     "missing_uppercase": "至少 1 个大写字母",
     "missing_lowercase": "至少 1 个小写字母",
-    "overlap": "这些日期与本季节的另一个日期区间重叠"
+    "overlap": "这些日期与本季节的另一个日期区间重叠",
+    "max_file_size": "文件超过 {{max}} MB",
+    "unknown_icon": "图标不存在",
+    "web_link": "请输入以 http:// 或 https:// 开头的完整链接",
+    "email": "电子邮件无效",
+    "max_length": "最多 {{max}} 个字符",
+    "phone_digits": "只能输入数字和空格：区号请填在旁边的字段",
+    "phone_digits_without_prefix": "只能输入数字和空格，不含 +",
+    "phone_max_length": "号码最多 {{max}} 个字符（含空格）",
+    "time_before_end": "必须早于结束时间",
+    "time_after_start": "必须晚于开始时间",
+    "seasons": {
+      "period_name": {
+        "taken": "本季节已存在同名的时段。"
+      },
+      "ranges": {
+        "max": "一个时段最多可以有 {{max}} 个日期区间。",
+        "invalid": "日期区间无效：一个时段最多可以有 {{max}} 个，且区间之间不能有相同的日期。"
+      },
+      "season_required": "请先设置并保存当前季节的开始和结束日期。",
+      "next_season_required": "请先设置并保存下一季节的开始和结束日期。",
+      "next_season_too_early": "下一季必须在本季结束之后开始。"
+    },
+    "catalog": {
+      "price": {
+        "max": "有价格超过了允许的最高值 {max, number, currency}。"
+      },
+      "vat": {
+        "range": "增值税必须大于 0 且小于 100。"
+      },
+      "public_holidays": {
+        "max": "最多 {{max}} 个节假日。"
+      }
+    },
+    "services": {
+      "translation": {
+        "name_missing": "请同时填写该语言的名称"
+      },
+      "availability": {
+        "vat_missing": "请填写此可用时段的增值税，或在价格选项卡中填写服务的增值税"
+      },
+      "tables": {
+        "seats_taken": "座位数重复"
+      }
+    }
   },
   "unsaved_changes": {
     "title": "未保存的更改",

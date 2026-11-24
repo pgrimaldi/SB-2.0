@@ -34,6 +34,7 @@
   [idHourlyService]="idHourlyServiceToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
+  (failed)="reloadIfGone($event, table, [idHourlyServiceToEdit()]); reloadIfChanged($event, table)"
 />
 
 <app-delete-items-popup
@@ -44,6 +45,7 @@
   [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idHourlyServicesToDelete())"
 />
 <app-duplicate-items-popup
   [idItems]="idHourlyServicesToDuplicate()"
@@ -53,6 +55,7 @@
   [pathIcon]="alertIcons"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idHourlyServicesToDuplicate())"
 />
 
 <app-table-error-popup

@@ -1,7 +1,14 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
-import { greaterThan, passwordRules, requiredText } from './validators';
+import {
+  emailAddress,
+  greaterThan,
+  isTextTaken,
+  maxRichTextLength,
+  passwordRules,
+  requiredText,
+} from './validators';
 
 describe('greaterThan', () => {
   it('should accept only numbers above the limit, an empty field included in the errors', () => {
@@ -54,5 +61,52 @@ describe('passwordRules', () => {
     }
     model.set({ password: null });
     expect(passwordForm.password().valid()).toBe(true);
+  });
+});
+
+describe('isTextTaken', () => {
+  it('should find a name already used, not minding capitals and the spaces at the ends', () => {
+    const names = ['Bassa stagione', null, 'Alta stagione'];
+
+    expect(isTextTaken(' bassa STAGIONE ', names)).toBe(true);
+    expect(isTextTaken('Media stagione', names)).toBe(false);
+    expect(isTextTaken('   ', names)).toBe(false);
+    expect(isTextTaken(null, names)).toBe(false);
+  });
+});
+
+describe('emailAddress', () => {
+  it('should ask, like the backend, for one @ that is neither first nor last, leaving an empty field to requiredText', () => {
+    const model = signal<{ email: string | null }>({ email: null });
+    const emailForm = TestBed.runInInjectionContext(() =>
+      form(model, (path) => emailAddress(path.email)),
+    );
+
+    for (const email of [null, '', 'info@lido.it', 'a@b']) {
+      model.set({ email });
+      expect(emailForm.email().valid()).toBe(true);
+    }
+    for (const email of ['info.lido.it', '@lido.it', 'info@', 'info@lido@it']) {
+      model.set({ email });
+      expect(emailForm.email().errors()).toEqual([expect.objectContaining({ kind: 'email' })]);
+    }
+  });
+});
+
+describe('maxRichTextLength', () => {
+  it('should count only the text the user sees, not the formatting', () => {
+    const model = signal<{ description: string | null }>({ description: null });
+    const descriptionForm = TestBed.runInInjectionContext(() =>
+      form(model, (path) => maxRichTextLength(path.description, 5)),
+    );
+
+    for (const description of [null, '<p><strong>abc</strong></p><p>de</p>', '<p>a &amp; b</p>']) {
+      model.set({ description });
+      expect(descriptionForm.description().valid()).toBe(true);
+    }
+    model.set({ description: '<p>abc</p><p>def</p>' });
+    expect(descriptionForm.description().errors()).toEqual([
+      expect.objectContaining({ kind: 'max_length', max: 5 }),
+    ]);
   });
 });

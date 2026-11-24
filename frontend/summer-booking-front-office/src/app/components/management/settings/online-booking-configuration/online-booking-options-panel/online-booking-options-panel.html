@@ -72,6 +72,7 @@
               <app-filled-time-field
                 class="online__booking__options__panel__time"
                 [pathIcon]="clockIcon"
+                [error]="validationText.text(halfDay.start)"
                 [formField]="halfDay.start"
               />
             </div>
@@ -85,6 +86,7 @@
               <app-filled-time-field
                 class="online__booking__options__panel__time"
                 [pathIcon]="clockIcon"
+                [error]="validationText.text(halfDay.end)"
                 [formField]="halfDay.end"
               />
             </div>
@@ -263,10 +265,15 @@
               | translate
           "
           [placeholder]="
-            'management.settings.online_booking_configuration.booking_options.choose' | translate
+            sectors.loadError()
+              ? ''
+              : ('management.settings.online_booking_configuration.booking_options.choose'
+                | translate)
           "
-          [options]="sectorOptions"
+          [options]="sectorOptions()"
           [formField]="rule.idSector"
+          [error]="sectors.loadError()"
+          (openRequest)="sectors.retry()"
         />
         <div class="online__booking__options__panel__rule__dates">
           <app-filled-date-field

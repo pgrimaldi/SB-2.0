@@ -39,6 +39,13 @@ $gap: 0.5rem;
   padding-inline: 1.25rem 1.5625rem;
 }
 
+.services__booking__option__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
 // Without the grey circle.
 .services__booking__option__remove {
   --icon-button-background: transparent;
@@ -63,10 +70,11 @@ $gap: 0.5rem;
   @include info.info-button;
 }
 
-// A word and its field stay together; a pair that does not fit goes whole to the next line.
+// A word and its field stay together; a pair that does not fit goes whole to the next line. The
+// width does not come from the content: an error under a field wraps instead of widening the pair.
 .services__booking__option__pair {
   display: flex;
-  flex: var(--form-row-fill) 1 auto;
+  flex: var(--form-row-fill) 1 ($word-width + $gap + $field-width);
   align-items: flex-start;
   gap: $gap;
   min-width: 0;

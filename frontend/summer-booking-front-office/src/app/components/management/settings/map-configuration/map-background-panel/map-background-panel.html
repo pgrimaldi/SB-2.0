@@ -1,0 +1,130 @@
+<app-section-title
+  [text]="'management.settings.map_configuration.background.title' | translate"
+  [pathIcon]="titleIcon"
+/>
+
+<span class="map__background__panel__label">
+  {{ 'management.settings.map_configuration.background.templates' | translate }}
+</span>
+<div class="map__background__panel__slots">
+  @for (image of slots; track $index) {
+    <button
+      #origin="cdkOverlayOrigin"
+      class="map__background__panel__slot"
+      type="button"
+      cdkOverlayOrigin
+      [disabled]="!isEditing() || isBusy() || !image"
+      [class.map__background__panel__slot__chosen]="$index === chosenSlot()"
+      (click)="chooseSlot($index)"
+      (pointerenter)="showPreview($index, $event)"
+      (pointerleave)="previewedSlot.set(null)"
+    >
+      @if (image) {
+        <img class="map__background__panel__thumb" [src]="image" width="1256" height="614" alt="" />
+      }
+      @if ($index === chosenSlot()) {
+        <img [src]="chosenIcon" width="24" height="24" alt="" />
+      }
+    </button>
+    @if (image) {
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="origin"
+        [cdkConnectedOverlayOpen]="$index === previewedSlot()"
+        [cdkConnectedOverlayPositions]="previewPositions"
+        [cdkConnectedOverlayViewportMargin]="8"
+        [cdkConnectedOverlayPush]="true"
+      >
+        <img
+          class="map__background__panel__preview"
+          [src]="image"
+          width="1256"
+          height="614"
+          alt=""
+        />
+      </ng-template>
+    }
+  }
+</div>
+
+<span class="map__background__panel__label">
+  {{ 'management.settings.map_configuration.background.custom' | translate }}
+</span>
+<div class="map__background__panel__custom">
+  <app-file-drop-zone
+    class="map__background__panel__drop"
+    [accept]="imageTypes"
+    [text]="
+      hasCustomImage() ? '' : ('management.settings.map_configuration.background.drop' | translate)
+    "
+    [pathIcon]="hasCustomImage() ? imageIcon : uploadIcon"
+    [previewUrl]="imagePreviewUrl()"
+    [disabled]="!isEditing() || isBusy()"
+    (filesSelected)="chooseImage($event)"
+  />
+  @if (hasCustomImage()) {
+    <app-icon-button
+      class="map__background__panel__delete"
+      [pathIcon]="deleteIcon"
+      [disabled]="!isEditing() || isBusy()"
+      (click)="askDeletion()"
+    />
+  }
+  @if (isBusy() && !isSaving()) {
+    <app-spinner class="map__background__panel__spinner" [diameter]="32" />
+  }
+</div>
+@if (isImageTooLarge()) {
+  <p class="map__background__panel__error">
+    {{ 'invalidate.max_file_size' | translate: { max: maxImageMegabytes } }}
+  </p>
+} @else if (errorMessage(); as errorMessage) {
+  <p class="map__background__panel__error">{{ errorMessage }}</p>
+}
+
+@if (saveErrorMessage(); as saveErrorMessage) {
+  <p class="map__background__panel__error">{{ saveErrorMessage }}</p>
+}
+<div class="map__background__panel__actions">
+  @if (isEditing()) {
+    <app-button
+      [appearance]="ButtonAppearance.Light"
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [disabled]="isBusy()"
+      (clicked)="requestCancel()"
+    >
+      {{ 'management.settings.map_configuration.cancel' | translate }}
+    </app-button>
+    <app-button
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [disabled]="isBusy() && !isSaving()"
+      [isLoading]="isSaving()"
+      (clicked)="save()"
+    >
+      {{ 'management.settings.map_configuration.save' | translate }}
+    </app-button>
+  } @else {
+    <app-button
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [disabled]="!isLoaded()"
+      (clicked)="edit()"
+    >
+      {{ 'management.settings.map_configuration.edit' | translate }}
+    </app-button>
+  }
+</div>
+
+<app-confirm-popup
+  [pathIcon]="popupIcons"
+  [title]="'management.settings.map_configuration.background.delete.title' | translate"
+  [text]="'management.settings.map_configuration.background.delete.text' | translate"
+  [texts]="'management.settings.map_configuration.background.delete' | translate"
+  [danger]="true"
+  [open]="isDeletionAsked()"
+  (openChange)="closeDeletion($event)"
+  (confirmed)="confirmDeletion()"
+/>
+<app-version-conflict-popup [pathIcon]="popupIcons" [(open)]="isConflictShown" />

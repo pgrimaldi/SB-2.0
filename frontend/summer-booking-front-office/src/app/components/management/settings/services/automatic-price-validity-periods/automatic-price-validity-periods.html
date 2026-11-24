@@ -63,7 +63,13 @@
               {{ day.label }}
             </app-checkbox>
           }
-          @if (validationText.text(period.daysOfWeek); as error) {
+          @if (
+            validationText.text(
+              period.daysOfWeek,
+              'management.settings.services.form.availability.field_names.day_of_week'
+            );
+            as error
+          ) {
             <p class="automatic__price__validity__periods__error">{{ error }}</p>
           }
         </div>
@@ -119,5 +125,8 @@
         </div>
       </app-form-row>
     </div>
+  }
+  @if (validationText.text(form()); as error) {
+    <p class="automatic__price__validity__periods__error">{{ error }}</p>
   }
 </section>

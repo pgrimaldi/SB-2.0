@@ -1,0 +1,43 @@
+@use '@angular/material' as mat;
+@use '../../inputs/filled-field' as field;
+
+// Same look as app-filled-select; the options open in the shared `select__panel` of the theme.
+@include field.filled-field(filled__icon__select);
+
+:host {
+  @include mat.select-overrides(
+    (
+      trigger-text-size: var(--filled-field-text-size, 0.75rem),
+      trigger-text-line-height: var(--filled-field-line-height, 1.125rem),
+      trigger-text-tracking: normal,
+      trigger-text-weight: 500,
+      enabled-trigger-text-color: var(--color__main__theme__one),
+      placeholder-text-color: var(--color__main__theme__one),
+      enabled-arrow-color: var(--color__main__theme__one),
+      focused-arrow-color: var(--color__main__theme__one),
+      disabled-trigger-text-color: var(--color__layout__muted__strong),
+      disabled-arrow-color: color-mix(in srgb, var(--color__layout__muted__strong) 50%, transparent),
+    )
+  );
+  @include mat.form-field-overrides(
+    (
+      filled-disabled-container-color: var(--color__tertiary__theme),
+    )
+  );
+}
+
+.filled__icon__select__control ::ng-deep .mat-mdc-select-arrow-wrapper {
+  height: var(--filled-field-line-height, 1.125rem);
+}
+
+.filled__icon__select__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.filled__icon__select__icon {
+  flex: none;
+  border-radius: 0.125rem;
+  object-fit: cover;
+}

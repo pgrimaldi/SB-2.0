@@ -2,14 +2,14 @@
 :host {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: end;
+  align-items: start;
   gap: 1rem;
 }
 
-// A price and its "€", which sits beside the field, at its height.
+// A price and its "€", which sits beside the field: under its label, above its error.
 .services__price__vat__amount {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 0.25rem;
   min-width: 0;
 }
@@ -23,6 +23,7 @@
   color: var(--color__main__theme__one);
   font-size: 0.75rem;
   line-height: var(--filled-field-height, 1.625rem);
+  margin-top: 1.625rem;
 }
 
 @media (width < 48rem) {

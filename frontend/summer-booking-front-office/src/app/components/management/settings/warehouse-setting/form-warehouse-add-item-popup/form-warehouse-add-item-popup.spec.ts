@@ -6,7 +6,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { UnsavedChangesBehaviour } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
-import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
 import { FormWarehouseAddItemPopup } from './form-warehouse-add-item-popup';
 
@@ -25,7 +25,7 @@ class FormWarehouseAddItemPopupHost {
 
 describe('FormWarehouseAddItemPopup', () => {
   const setup = async () => {
-    const comboboxList = vi.fn(() =>
+    const articleCombobox = vi.fn(() =>
       of([
         { id: 'a1', value: 'Lettino' },
         { id: 'a2', value: 'Ombrellone' },
@@ -36,7 +36,7 @@ describe('FormWarehouseAddItemPopup', () => {
       providers: [
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
-        { provide: WarehouseService, useValue: { comboboxList, addWarehouseItem } },
+        { provide: WarehouseService, useValue: { articleCombobox, addWarehouseItem } },
         { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
@@ -56,14 +56,14 @@ describe('FormWarehouseAddItemPopup', () => {
       popup,
       trigger,
       openSelect,
-      comboboxList,
+      articleCombobox,
       addWarehouseItem,
     };
   };
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
 
-  it('should ask before the X drops what is typed, while Annulla drops it at once', async () => {
+  it('should ask before the X or Annulla drops what is typed', async () => {
     const { fixture, host, popup } = await setup();
     const unsaved = TestBed.inject(UnsavedChangesBehaviour);
     const closeX = () => document.querySelector<HTMLButtonElement>('.popup__frame__close')!;
@@ -95,14 +95,16 @@ describe('FormWarehouseAddItemPopup', () => {
 
     cancel().click();
     await fixture.whenStable();
-    expect(unsaved.asking()).toBe(false);
+    expect(unsaved.asking()).toBe(true);
+    unsaved.answer(true); // Esci senza salvare
+    await fixture.whenStable();
     expect(host.open()).toBe(false);
   });
 
   it('should offer the articles of the property in the select', async () => {
-    const { openSelect, comboboxList } = await setup();
+    const { openSelect, articleCombobox } = await setup();
 
-    expect(comboboxList).toHaveBeenCalledWith('p1');
+    expect(articleCombobox).toHaveBeenCalledWith();
     expect((await openSelect()).map((option) => option.textContent?.trim())).toEqual([
       'Lettino',
       'Ombrellone',
@@ -110,7 +112,7 @@ describe('FormWarehouseAddItemPopup', () => {
   });
 
   it('should start from an empty form, with the articles loaded again, every time it opens', async () => {
-    const { fixture, host, trigger, openSelect, comboboxList } = await setup();
+    const { fixture, host, trigger, openSelect, articleCombobox } = await setup();
 
     (await openSelect())[1].click();
     await fixture.whenStable();
@@ -122,20 +124,20 @@ describe('FormWarehouseAddItemPopup', () => {
     await fixture.whenStable();
 
     expect(trigger().textContent?.trim()).toBe('management.settings.warehouse.form.choose');
-    expect(comboboxList).toHaveBeenCalledTimes(2);
+    expect(articleCombobox).toHaveBeenCalledTimes(2);
   });
 
   it('should keep the articles of the last opening when an earlier answer arrives late', async () => {
-    const { fixture, host, openSelect, comboboxList } = await setup();
+    const { fixture, host, openSelect, articleCombobox } = await setup();
     const late = new Subject<{ id: string; value: string }[]>();
     host.open.set(false);
     await fixture.whenStable();
-    comboboxList.mockReturnValueOnce(late);
+    articleCombobox.mockReturnValueOnce(late);
     host.open.set(true);
     await fixture.whenStable();
     host.open.set(false);
     await fixture.whenStable();
-    comboboxList.mockReturnValueOnce(of([{ id: 'a3', value: 'Sdraio' }]));
+    articleCombobox.mockReturnValueOnce(of([{ id: 'a3', value: 'Sdraio' }]));
     host.open.set(true);
     await fixture.whenStable();
 
@@ -208,12 +210,11 @@ describe('FormWarehouseAddItemPopup', () => {
 
     add().click();
     await fixture.whenStable();
-    expect(addWarehouseItem).toHaveBeenCalledWith('p1', {
-      ...new WarehouseItem(),
+    expect(addWarehouseItem).toHaveBeenCalledWith({
       idArticle: 'a2',
       totalQuantity: 7,
-      thresholdQuantity: 2,
-      isThresholdWarningActive: true,
+      lowStockThreshold: 2,
+      lowStockAlertEnabled: true,
     });
     expect(popup()!.querySelector('mat-progress-spinner')).not.toBeNull();
     expect(
@@ -229,6 +230,52 @@ describe('FormWarehouseAddItemPopup', () => {
     expect(host.added).toBe(1);
   });
 
+  it('should leave threshold and alert as they are without a threshold, else send the alert shown', async () => {
+    const { fixture, popup, openSelect, addWarehouseItem } = await setup();
+    addWarehouseItem.mockReturnValue(of(undefined));
+    const [quantity] = popup()!.querySelectorAll<HTMLInputElement>('app-filled-number-field input');
+    const type = async (input: HTMLInputElement, text: string) => {
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+    };
+    const add = () =>
+      [...popup()!.querySelectorAll<HTMLButtonElement>('app-button button')].find((button) =>
+        button.textContent?.includes('add'),
+      )!;
+    (await openSelect())[0].click();
+    await fixture.whenStable();
+    await type(quantity, '4');
+
+    add().click();
+    await fixture.whenStable();
+    expect(addWarehouseItem).toHaveBeenLastCalledWith({
+      idArticle: 'a1',
+      totalQuantity: 4,
+      lowStockThreshold: null,
+      lowStockAlertEnabled: null,
+    });
+
+    // A threshold of 0: the alert is off and goes off, never left on with no threshold.
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    const [quantityAgain, thresholdAgain] = popup()!.querySelectorAll<HTMLInputElement>(
+      'app-filled-number-field input',
+    );
+    (await openSelect())[0].click();
+    await fixture.whenStable();
+    await type(quantityAgain, '4');
+    await type(thresholdAgain, '0');
+    add().click();
+    await fixture.whenStable();
+    expect(addWarehouseItem).toHaveBeenLastCalledWith({
+      idArticle: 'a1',
+      totalQuantity: 4,
+      lowStockThreshold: 0,
+      lowStockAlertEnabled: false,
+    });
+  });
+
   it('should show the error of the API and keep the form when the article is not added', async () => {
     const context = await setup();
     const { fixture, host, popup, trigger, addWarehouseItem } = context;
@@ -237,7 +284,7 @@ describe('FormWarehouseAddItemPopup', () => {
         () =>
           new HttpErrorResponse({
             status: 400,
-            error: { status: 400, code: 'validation.failed', title: 'Invalid request' },
+            error: { status: 400, code: ApiErrorCode.ValidationFailed, title: 'Invalid request' },
           }),
       ),
     );
@@ -255,15 +302,26 @@ describe('FormWarehouseAddItemPopup', () => {
     expect(trigger().textContent?.trim()).toBe('Ombrellone');
   });
 
-  it('should keep Aggiungi off with a quantity of 0', async () => {
+  it('should keep Aggiungi off with a quantity of 0 or over the backend limit, or a threshold over it', async () => {
     const context = await setup();
     const { fixture, popup } = context;
     const add = await fill(context);
-    const quantity = popup()!.querySelector<HTMLInputElement>('app-filled-number-field input')!;
+    const [quantity, threshold] = popup()!.querySelectorAll<HTMLInputElement>(
+      'app-filled-number-field input',
+    );
+    const type = async (input: HTMLInputElement, text: string) => {
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+    };
 
-    quantity.value = '0';
-    quantity.dispatchEvent(new Event('input'));
-    await fixture.whenStable();
+    await type(quantity, '0');
+    expect(add().disabled).toBe(true);
+    await type(quantity, '2147483648');
+    expect(add().disabled).toBe(true);
+    await type(quantity, '2147483647');
+    expect(add().disabled).toBe(false);
+    await type(threshold, '2147483648');
     expect(add().disabled).toBe(true);
   });
 
@@ -277,9 +335,9 @@ describe('FormWarehouseAddItemPopup', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.failed',
+              code: ApiErrorCode.ValidationFailed,
               title: 'Invalid request',
-              errors: [{ field: 'totalQuantity', code: 'validation.invalid' }],
+              errors: [{ field: 'totalQuantity', code: ApiErrorCode.ValidationInvalid }],
             },
           }),
       ),

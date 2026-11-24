@@ -3,6 +3,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
 import { debounceTime } from 'rxjs';
 import { BookingDayType } from '../../entities/enums/booking-day-type';
+import { FilterField } from '../../entities/enums/filter-field';
 import { PageFilter } from '../../entities/pagination/page';
 import { DateRange } from '../../entities/shared/date-range';
 import { utcDayEnd, utcDayStart } from '../dates/date-periods';
@@ -38,9 +39,9 @@ export class ManagementFiltersBehaviour {
   readonly filters = computed<PageFilter[]>(() => {
     const { start, end } = this.settledDates();
     return [
-      { field: 'datetimeFrom', value: [utcDayStart(start)] },
-      { field: 'datetimeTo', value: [utcDayEnd(end)] },
-      { field: 'bookingDayType', value: [this.period()] },
+      { field: FilterField.DatetimeFrom, value: [utcDayStart(start)] },
+      { field: FilterField.DatetimeTo, value: [utcDayEnd(end)] },
+      { field: FilterField.BookingDayType, value: [this.period()] },
     ];
   });
 }

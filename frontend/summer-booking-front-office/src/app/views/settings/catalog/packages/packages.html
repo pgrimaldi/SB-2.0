@@ -1,0 +1,63 @@
+<app-page-title
+  class="packages__title"
+  [text]="'management.settings.catalog.packages.title' | translate"
+/>
+<app-table
+  #table
+  [columns]="columns()"
+  [params]="params()"
+  [load]="load"
+  idField="idPackage"
+  [texts]="'table' | translate"
+  [isSearchable]="true"
+  [useAppTheme]="false"
+  [areMassiveActionsHidden]="false"
+  [isCreateButtonHidden]="false"
+  [createLabel]="'management.settings.catalog.packages.create' | translate"
+  [rowActions]="rowActions()"
+  [(selection)]="idSelectedPackages"
+  [pathIcon]="tableIcons"
+  (loadError)="loadFailed.set(true)"
+  (deleteSelected)="askDelete($event)"
+  (duplicateSelected)="askDuplicate($event)"
+  (create)="adding.set(true)"
+/>
+
+<app-package-add-item-panel [pathIcon]="closeIcon" [(open)]="adding" (created)="table.reload()" />
+<app-package-edit-item-panel
+  [pathIcon]="closeIcon"
+  [idPackage]="idPackageToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+  (failed)="reloadIfGone($event, table, [idPackageToEdit()]); reloadIfChanged($event, table)"
+/>
+
+<app-delete-items-popup
+  [idItems]="idPackagesToDelete()"
+  [itemName]="packageNameToDelete()"
+  translationKey="management.settings.catalog.packages.delete"
+  [action]="deletePackages"
+  [pathIcon]="alertIcons"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idPackagesToDelete())"
+/>
+<app-duplicate-items-popup
+  [idItems]="idPackagesToDuplicate()"
+  [itemName]="packageNameToDuplicate()"
+  translationKey="management.settings.catalog.packages.duplicate"
+  [action]="duplicatePackages"
+  [pathIcon]="alertIcons"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idPackagesToDuplicate())"
+/>
+
+<app-table-error-popup
+  [pathIcon]="closeIcon"
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

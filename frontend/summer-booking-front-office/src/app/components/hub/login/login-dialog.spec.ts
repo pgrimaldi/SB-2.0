@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { Observable, Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { LoginDialog } from './login-dialog';
 
 @Component({
@@ -86,7 +87,11 @@ describe('LoginDialog', () => {
         () =>
           new HttpErrorResponse({
             status: 401,
-            error: { status: 401, code: 'auth.invalid_credentials', title: 'Invalid credentials' },
+            error: {
+              status: 401,
+              code: ApiErrorCode.AuthInvalidCredentials,
+              title: 'Invalid credentials',
+            },
           }),
       );
 
@@ -101,9 +106,11 @@ describe('LoginDialog', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.failed',
-              title: 'validation.failed',
-              errors: [{ field: 'username', code: 'validation.max_length', args: { max: 255 } }],
+              code: ApiErrorCode.ValidationFailed,
+              title: ApiErrorCode.ValidationFailed,
+              errors: [
+                { field: 'username', code: ApiErrorCode.ValidationMaxLength, args: { max: 255 } },
+              ],
             },
           }),
       );

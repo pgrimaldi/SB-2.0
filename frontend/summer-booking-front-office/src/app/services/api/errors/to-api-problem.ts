@@ -10,6 +10,7 @@ const CODE = /^[a-z0-9_]+(\.[a-z0-9_]+)+$/;
 const MAX_CODE_LENGTH = 100;
 const ARG_NAME = /^[A-Za-z0-9_]{1,50}$/;
 const MAX_ARG_LENGTH = 200;
+const MAX_ARG_ITEMS = 20;
 const TRACE_ID = /^[A-Za-z0-9._:-]{1,128}$/;
 const MAX_TEXT_LENGTH = 300;
 const MAX_FIELD_ERRORS = 50;
@@ -68,13 +69,44 @@ function readArgs(value: unknown): ApiProblemArgs | undefined {
   if (!isRecord(value)) {
     return;
   }
-  const entries = Object.entries(value).filter(
-    ([name, arg]) =>
-      ARG_NAME.test(name) &&
-      ((typeof arg === 'string' && arg.length <= MAX_ARG_LENGTH) ||
-        (typeof arg === 'number' && Number.isFinite(arg))),
-  );
+  const entries = Object.entries(value)
+    .map(([name, arg]) => [name, readArg(arg)] as const)
+    .filter(
+      ([name, arg]) =>
+        ARG_NAME.test(name) &&
+        (typeof arg === 'string' || (typeof arg === 'number' && Number.isFinite(arg))),
+    );
   return entries.length ? (Object.fromEntries(entries) as ApiProblemArgs) : undefined;
+}
+
+function readArg(arg: unknown): unknown {
+  if (isPlainList(arg)) {
+    return listText(arg);
+  }
+  return typeof arg === 'string' ? cutText(arg) : arg;
+}
+
+/** A text too long for the message ends with …. */
+function cutText(text: string): string {
+  return text.length <= MAX_ARG_LENGTH ? text : `${text.slice(0, MAX_ARG_LENGTH - 1)}…`;
+}
+
+function isPlainList(value: unknown): value is readonly string[] | readonly number[] {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    (value.every((item) => typeof item === 'string') ||
+      value.every((item) => Number.isFinite(item)))
+  );
+}
+
+/**
+ * A list of names or numbers as one text for the message (`A, B, C`): the first 20, cut with … when
+ * too long.
+ */
+function listText(items: readonly string[] | readonly number[]): string {
+  const shown = items.slice(0, MAX_ARG_ITEMS).join(', ');
+  return cutText(items.length > MAX_ARG_ITEMS ? `${shown}, …` : shown);
 }
 
 function readFieldErrors(value: unknown): readonly ApiFieldError[] | undefined {

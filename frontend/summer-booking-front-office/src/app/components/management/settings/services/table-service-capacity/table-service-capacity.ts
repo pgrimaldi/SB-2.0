@@ -96,6 +96,7 @@ export class TableServiceCapacity {
   }
 
   protected removeTableGroup(index: number): void {
+    this.tableGroups()().markAsTouched({ skipDescendants: true });
     this.tableGroups()().value.update((tableGroups) =>
       tableGroups.filter((_, groupIndex) => groupIndex !== index),
     );

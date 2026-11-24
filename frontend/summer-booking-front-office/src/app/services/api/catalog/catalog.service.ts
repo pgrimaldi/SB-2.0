@@ -1,11 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { ComboboxItem } from '../../../entities/combobox/combobox-item';
+import { Country } from '../../../entities/shared/country';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { BathhouseDocument } from '../../../entities/enums/bathhouse-document';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
+import { BathhouseSelectedGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-selected-general-information';
+import { BathhouseSelectedMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-selected-media';
+import { BathhouseSelectedServices } from '../../../entities/settings/bathhouse-configuration/bathhouse-selected-services';
+import { BathhouseMediaRequest } from '../../../entities/settings/bathhouse-configuration/bathhouse-media-request';
+import { PropertyInfoMedia } from '../../../entities/settings/bathhouse-configuration/property-info-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceAddItemRequest } from '../../../entities/settings/services/automatic-price-add-item-request';
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
@@ -18,24 +24,16 @@ import { AutomaticPriceUpdatePricesValidityRequest } from '../../../entities/set
 import { AutomaticPriceValidityPeriod } from '../../../entities/settings/services/automatic-price-validity-period';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
+import { BarServiceSelectedBookingOptions } from '../../../entities/settings/services/bar-service-selected-booking-options';
 import { BarServiceSelectedGeneralInfo } from '../../../entities/settings/services/bar-service-selected-general-info';
 import { BarServiceSelectedPrices } from '../../../entities/settings/services/bar-service-selected-prices';
 import { BarServiceUpdateBookingRequest } from '../../../entities/settings/services/bar-service-update-booking-request';
 import { BarServiceUpdateGeneralRequest } from '../../../entities/settings/services/bar-service-update-general-request';
 import { BarServiceUpdatePricesRequest } from '../../../entities/settings/services/bar-service-update-prices-request';
-import { DeleteBarServiceItemsRequest } from '../../../entities/settings/services/delete-bar-service-items-request';
-import { DuplicateBarServiceItemsRequest } from '../../../entities/settings/services/duplicate-bar-service-items-request';
-import { DeleteStandardServiceItemsRequest } from '../../../entities/settings/services/delete-standard-service-items-request';
-import { DuplicateStandardServiceItemsRequest } from '../../../entities/settings/services/duplicate-standard-service-items-request';
-import { DeleteHourlyServiceItemsRequest } from '../../../entities/settings/services/delete-hourly-service-items-request';
-import { DuplicateHourlyServiceItemsRequest } from '../../../entities/settings/services/duplicate-hourly-service-items-request';
-import { DeleteAutomaticPriceItemsRequest } from '../../../entities/settings/services/delete-automatic-price-items-request';
-import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/services/duplicate-automatic-price-items-request';
-import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
-import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
 import { HourlyServiceAddItemRequest } from '../../../entities/settings/services/hourly-service-add-item-request';
 import { HourlyServiceBookingOption } from '../../../entities/settings/services/hourly-service-booking-option';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
+import { HourlyServiceSelectedBookingOptions } from '../../../entities/settings/services/hourly-service-selected-booking-options';
 import { HourlyServiceSelectedGeneralInfo } from '../../../entities/settings/services/hourly-service-selected-general-info';
 import { HourlyServiceSelectedPrices } from '../../../entities/settings/services/hourly-service-selected-prices';
 import { HourlyServiceUpdateBookingRequest } from '../../../entities/settings/services/hourly-service-update-booking-request';
@@ -50,6 +48,7 @@ import { ServiceTranslation } from '../../../entities/settings/services/service-
 import { ServiceVariant } from '../../../entities/settings/services/service-variant';
 import { StandardServiceAddItemRequest } from '../../../entities/settings/services/standard-service-add-item-request';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
+import { StandardServiceSelectedBookingOptions } from '../../../entities/settings/services/standard-service-selected-booking-options';
 import { StandardServiceSelectedGeneralInfo } from '../../../entities/settings/services/standard-service-selected-general-info';
 import { StandardServiceSelectedPrices } from '../../../entities/settings/services/standard-service-selected-prices';
 import { StandardServiceUpdateBookingRequest } from '../../../entities/settings/services/standard-service-update-booking-request';
@@ -62,139 +61,236 @@ import { TableServiceItem } from '../../../entities/settings/services/table-serv
 import { TableServiceSelectedAvailabilityBookings } from '../../../entities/settings/services/table-service-selected-availability-bookings';
 import { TableServiceSelectedGeneralInfo } from '../../../entities/settings/services/table-service-selected-general-info';
 import { TableServiceTableGroup } from '../../../entities/settings/services/table-service-table-group';
+import { TableServiceTimeSlot } from '../../../entities/settings/services/table-service-time-slot';
 import { TableServiceUpdateAvailabilityBookingsRequest } from '../../../entities/settings/services/table-service-update-availability-bookings-request';
 import { TableServiceUpdateGeneralRequest } from '../../../entities/settings/services/table-service-update-general-request';
 import { onlyFieldsOf } from '../only-fields-of';
+import { ifMatch, versionOf } from '../versions/version-headers';
 
 @Injectable({ providedIn: 'root' })
 export class CatalogService {
   private readonly httpClient = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/catalog`;
 
-  /** Names in the language of the request (Accept-Language); `id` is the ISO 3166-1 alpha-2 code. */
-  readonly countriesCombobox = (): Observable<ComboboxItem[]> =>
-    this.httpClient.get<ComboboxItem[]>(`${this.endpoint}/countries-combobox`);
+  /** The backend's list as it is, in its order: ISO 3166-1 alpha-2 code and name in the language of the request. */
+  readonly countries = (): Observable<Country[]> =>
+    this.httpClient
+      .get<Country[] | null>(`${this.endpoint}/lookups/countries`)
+      .pipe(
+        map((answer) =>
+          Array.isArray(answer) ? answer.map((country) => onlyFieldsOf(Country, country)) : [],
+        ),
+      );
 
-  readonly bathhouseConfigurationGeneral = (
-    idProperty: string,
-  ): Observable<BathhouseGeneralInformation> =>
-    this.httpClient.get<BathhouseGeneralInformation>(
-      `${this.endpoint}/bathhouse-configuration-general`,
-      { params: { idProperty } },
+  /** The property comes from the access token, as in the other calls of the page. */
+  readonly bathhouseConfigurationGeneral = (): Observable<BathhouseSelectedGeneralInformation> =>
+    this.httpClient.get<BathhouseSelectedGeneralInformation>(
+      `${this.endpoint}/property-info/bathhouse-configuration-general`,
     );
 
   /**
-   * Every service of the catalogue, with the name in the language of the request (Accept-Language)
-   * and whether the property offers it.
+   * The services of the catalogue the page shows (active, with a section), with the name in the
+   * language of the request (Accept-Language) and whether the property offers it.
    */
-  readonly bathhouseConfigurationServices = (
-    idProperty: string,
-  ): Observable<BathhouseServiceItem[]> =>
-    this.httpClient.get<BathhouseServiceItem[]>(
-      `${this.endpoint}/bathhouse-configuration-services`,
-      { params: { idProperty } },
+  readonly bathhouseConfigurationServices = (): Observable<BathhouseSelectedServices> =>
+    this.httpClient.get<BathhouseSelectedServices>(
+      `${this.endpoint}/property-info/bathhouse-configuration-services`,
     );
 
-  readonly bathhouseConfigurationMedia = (idProperty: string): Observable<BathhouseMedia> =>
-    this.httpClient.get<BathhouseMedia>(`${this.endpoint}/bathhouse-configuration-media`, {
-      params: { idProperty },
-    });
+  readonly bathhouseConfigurationMedia = (): Observable<BathhouseSelectedMedia> =>
+    this.httpClient.get<BathhouseSelectedMedia>(
+      `${this.endpoint}/property-info/bathhouse-configuration-media`,
+    );
 
-  /** Every field of the tab, changed or not. Answers 204 with no body. */
+  /**
+   * The calls of the photos and of the PDFs of the Media tab are the backend's own: each answers with
+   * the whole public card of the property, of which the tab reads only the media.
+   */
+  readonly uploadBathhouseMainPhoto = (image: File): Observable<BathhouseMedia> =>
+    this.httpClient
+      .post<PropertyInfoMedia>(`${this.endpoint}/property-info/main-photo`, formOf(image))
+      .pipe(map(bathhouseMediaOf));
+
+  readonly deleteBathhouseMainPhoto = (): Observable<BathhouseMedia> =>
+    this.httpClient
+      .delete<PropertyInfoMedia>(`${this.endpoint}/property-info/main-photo`)
+      .pipe(map(bathhouseMediaOf));
+
+  readonly addBathhousePhoto = (image: File): Observable<BathhouseMedia> =>
+    this.httpClient
+      .post<PropertyInfoMedia>(`${this.endpoint}/property-info/photos`, formOf(image))
+      .pipe(map(bathhouseMediaOf));
+
+  readonly deleteBathhousePhoto = (idPhoto: string): Observable<BathhouseMedia> =>
+    this.httpClient
+      .delete<PropertyInfoMedia>(
+        `${this.endpoint}/property-info/photos/${encodeURIComponent(idPhoto)}`,
+      )
+      .pipe(map(bathhouseMediaOf));
+
+  readonly uploadBathhouseDocument = (
+    document: BathhouseDocument,
+    pdf: File,
+  ): Observable<BathhouseMedia> =>
+    this.httpClient
+      .post<PropertyInfoMedia>(`${this.endpoint}/property-info/documents/${document}`, formOf(pdf))
+      .pipe(map(bathhouseMediaOf));
+
+  readonly deleteBathhouseDocument = (document: BathhouseDocument): Observable<BathhouseMedia> =>
+    this.httpClient
+      .delete<PropertyInfoMedia>(`${this.endpoint}/property-info/documents/${document}`)
+      .pipe(map(bathhouseMediaOf));
+
+  /**
+   * Every field of the tab, changed or not, with the version read. Answers 204 with no body and the
+   * new version in its `ETag`.
+   */
   readonly saveBathhouseConfigurationGeneral = (
-    idProperty: string,
     information: BathhouseGeneralInformation,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/save-bathhouse-configuration-general`, {
-      ...onlyFieldsOf(BathhouseGeneralInformation, information),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/property-info/save-bathhouse-configuration-general`,
+        onlyFieldsOf(BathhouseGeneralInformation, information),
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** Only the services the property offers. Answers 204 with no body. */
+  /**
+   * Every service read, each with `isSelected` as the user left it, with the version read. Answers
+   * 204 with no body and the new version in its `ETag`.
+   */
   readonly saveBathhouseConfigurationServices = (
-    idProperty: string,
     services: readonly BathhouseServiceItem[],
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/save-bathhouse-configuration-services`, {
-      services: services.map((service) => onlyFieldsOf(BathhouseServiceItem, service)),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/property-info/save-bathhouse-configuration-services`,
+        {
+          services: services.map((service) => onlyFieldsOf(BathhouseServiceItem, service)),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
+
+  /**
+   * The link of the virtual tour and the position on the map, with the version read. Answers 204
+   * with no body and the new version in its `ETag`.
+   */
+  readonly saveBathhouseConfigurationMedia = (
+    request: BathhouseMediaRequest,
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/property-info/save-bathhouse-configuration-media`,
+        onlyFieldsOf(BathhouseMediaRequest, request),
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
   readonly barServiceList = (request: PageRequest): Observable<Page<BarServiceItem>> =>
-    this.httpClient.post<Page<BarServiceItem>>(`${this.endpoint}/bar-service-list`, request);
+    this.httpClient.post<Page<BarServiceItem>>(
+      `${this.endpoint}/services/bar-service-list`,
+      request,
+    );
 
   /** The Info Generali tab of a bar service, for the edit panel. */
   readonly barServiceGeneralInfo = (
     idBarService: string,
   ): Observable<BarServiceSelectedGeneralInfo> =>
     this.httpClient.get<BarServiceSelectedGeneralInfo>(
-      `${this.endpoint}/get-bar-service-general-info`,
+      `${this.endpoint}/services/get-bar-service-general-info`,
       { params: { idBarService } },
     );
 
   /** The Prezzi tab of a bar service, for the edit panel. */
   readonly barServicePrices = (idBarService: string): Observable<BarServiceSelectedPrices> =>
-    this.httpClient.get<BarServiceSelectedPrices>(`${this.endpoint}/get-bar-service-prices`, {
-      params: { idBarService },
-    });
+    this.httpClient.get<BarServiceSelectedPrices>(
+      `${this.endpoint}/services/get-bar-service-prices`,
+      {
+        params: { idBarService },
+      },
+    );
 
   /** The Prenotazioni tab of a bar service, its booking options, for the edit panel. */
-  readonly barServiceBookingOptions = (idBarService: string): Observable<ServiceBookingOption[]> =>
-    this.httpClient.get<ServiceBookingOption[]>(
-      `${this.endpoint}/get-bar-service-booking-options`,
+  readonly barServiceBookingOptions = (
+    idBarService: string,
+  ): Observable<BarServiceSelectedBookingOptions> =>
+    this.httpClient.get<BarServiceSelectedBookingOptions>(
+      `${this.endpoint}/services/get-bar-service-booking-options`,
       { params: { idBarService } },
     );
 
-  /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Info Generali tab of the edit panel, with the version read. Answers 204 with no
+   * body and the new version in its `ETag`.
+   */
   readonly updateBarServiceGeneral = (
-    idProperty: string,
     request: BarServiceUpdateGeneralRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-bar-service-general`, {
-      ...onlyFieldsOf(BarServiceUpdateGeneralRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/services/update-bar-service-general`,
+        {
+          ...onlyFieldsOf(BarServiceUpdateGeneralRequest, request),
+          translations: request.translations.map(translationFields),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** Salva of the Prezzi tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Prezzi tab of the edit panel, with the version read. Answers 204 with no body and
+   * the new version in its `ETag`.
+   */
   readonly updateBarServicePrices = (
-    idProperty: string,
     request: BarServiceUpdatePricesRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-bar-service-prices`, {
-      ...onlyFieldsOf(BarServiceUpdatePricesRequest, request),
-      variants: request.variants.map((variant) => onlyFieldsOf(ServiceVariant, variant)),
-      periodPrices: request.periodPrices.map((periodPrice) =>
-        onlyFieldsOf(ServicePeriodPrice, periodPrice),
-      ),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/services/update-bar-service-prices`,
+        {
+          ...onlyFieldsOf(BarServiceUpdatePricesRequest, request),
+          variants: request.variants.map((variant) => onlyFieldsOf(ServiceVariant, variant)),
+          periodPrices: request.periodPrices.map((periodPrice) =>
+            onlyFieldsOf(ServicePeriodPrice, periodPrice),
+          ),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** Salva of the Prenotazioni tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Prenotazioni tab of the edit panel, with the version read. Answers 204 with no
+   * body and the new version in its `ETag`.
+   */
   readonly updateBarServiceBooking = (
-    idProperty: string,
     request: BarServiceUpdateBookingRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-bar-service-booking`, {
-      ...onlyFieldsOf(BarServiceUpdateBookingRequest, request),
-      bookingOptions: request.bookingOptions.map((bookingOption) =>
-        onlyFieldsOf(ServiceBookingOption, bookingOption),
-      ),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/services/update-bar-service-booking`,
+        {
+          ...onlyFieldsOf(BarServiceUpdateBookingRequest, request),
+          bookingOptions: request.bookingOptions.map((bookingOption) =>
+            onlyFieldsOf(ServiceBookingOption, bookingOption),
+          ),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** The data of the three tabs of the add panel. Answers 204 with no body. */
-  readonly createBarService = (
-    idProperty: string,
-    request: BarServiceAddItemRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/create-bar-service`, {
+  /** The data of the three tabs of the add panel. Answers the id of the new bar service. */
+  readonly createBarService = (request: BarServiceAddItemRequest): Observable<string> =>
+    this.httpClient.post<string>(`${this.endpoint}/services/create-bar-service`, {
       ...onlyFieldsOf(BarServiceAddItemRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
+      translations: request.translations.map(translationFields),
       variants: request.variants.map((variant) => onlyFieldsOf(ServiceVariant, variant)),
       periodPrices: request.periodPrices.map((periodPrice) =>
         onlyFieldsOf(ServicePeriodPrice, periodPrice),
@@ -202,22 +298,36 @@ export class CatalogService {
       bookingOptions: request.bookingOptions.map((bookingOption) =>
         onlyFieldsOf(ServiceBookingOption, bookingOption),
       ),
-      idProperty,
     });
+
+  /** The image of a service of any kind, instead of an icon. The answer, the service, is not read. */
+  readonly uploadServiceImage = (idService: string, image: File): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/services/${encodeURIComponent(idService)}/image`,
+      formOf(image),
+    );
+
+  /** The uploaded image of a service of any kind. The answer, the service, is not read. */
+  readonly deleteServiceImage = (idService: string): Observable<void> =>
+    this.httpClient.delete<void>(
+      `${this.endpoint}/services/${encodeURIComponent(idService)}/image`,
+    );
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteBarServiceItems = (request: DeleteBarServiceItemsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-bar-service-item`, request);
+  readonly deleteBarServiceItems = (idBarServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/services/delete-bar-service-item`, {
+      idBarServices,
+    });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateBarServiceItems = (
-    request: DuplicateBarServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-bar-service-item`, request);
+  readonly duplicateBarServiceItems = (idBarServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/services/duplicate-bar-service-item`, {
+      idBarServices,
+    });
 
   readonly standardServiceList = (request: PageRequest): Observable<Page<StandardServiceItem>> =>
     this.httpClient.post<Page<StandardServiceItem>>(
-      `${this.endpoint}/standard-service-list`,
+      `${this.endpoint}/services/standard-service-list`,
       request,
     );
 
@@ -226,7 +336,7 @@ export class CatalogService {
     idStandardService: string,
   ): Observable<StandardServiceSelectedGeneralInfo> =>
     this.httpClient.get<StandardServiceSelectedGeneralInfo>(
-      `${this.endpoint}/get-standard-service-general-info`,
+      `${this.endpoint}/services/get-standard-service-general-info`,
       { params: { idStandardService } },
     );
 
@@ -235,88 +345,104 @@ export class CatalogService {
     idStandardService: string,
   ): Observable<StandardServiceSelectedPrices> =>
     this.httpClient.get<StandardServiceSelectedPrices>(
-      `${this.endpoint}/get-standard-service-prices`,
+      `${this.endpoint}/services/get-standard-service-prices`,
       { params: { idStandardService } },
     );
 
   /** The Prenotazioni tab of a service, its booking options, for the edit panel. */
   readonly standardServiceBookingOptions = (
     idStandardService: string,
-  ): Observable<ServiceBookingOption[]> =>
-    this.httpClient.get<ServiceBookingOption[]>(
-      `${this.endpoint}/get-standard-service-booking-options`,
+  ): Observable<StandardServiceSelectedBookingOptions> =>
+    this.httpClient.get<StandardServiceSelectedBookingOptions>(
+      `${this.endpoint}/services/get-standard-service-booking-options`,
       { params: { idStandardService } },
     );
 
-  /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Info Generali tab of the edit panel, with the version read. Answers 204 with no
+   * body and the new version in its `ETag`.
+   */
   readonly updateStandardServiceGeneral = (
-    idProperty: string,
     request: StandardServiceUpdateGeneralRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-standard-service-general`, {
-      ...onlyFieldsOf(StandardServiceUpdateGeneralRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/services/update-standard-service-general`,
+        {
+          ...onlyFieldsOf(StandardServiceUpdateGeneralRequest, request),
+          translations: request.translations.map(translationFields),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** Salva of the Prezzi tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Prezzi tab of the edit panel, with the version read. Answers 204 with no body and
+   * the new version in its `ETag`.
+   */
   readonly updateStandardServicePrices = (
-    idProperty: string,
     request: StandardServiceUpdatePricesRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-standard-service-prices`, {
-      ...onlyFieldsOf(StandardServiceUpdatePricesRequest, request),
-      periodPrices: request.periodPrices.map((periodPrice) =>
-        onlyFieldsOf(ServicePeriodPrice, periodPrice),
-      ),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/services/update-standard-service-prices`,
+        {
+          ...onlyFieldsOf(StandardServiceUpdatePricesRequest, request),
+          periodPrices: request.periodPrices.map((periodPrice) =>
+            onlyFieldsOf(ServicePeriodPrice, periodPrice),
+          ),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** Salva of the Prenotazioni tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Prenotazioni tab of the edit panel, with the version read. Answers 204 with no
+   * body and the new version in its `ETag`.
+   */
   readonly updateStandardServiceBooking = (
-    idProperty: string,
     request: StandardServiceUpdateBookingRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-standard-service-booking`, {
-      ...onlyFieldsOf(StandardServiceUpdateBookingRequest, request),
-      bookingOptions: request.bookingOptions.map((bookingOption) =>
-        onlyFieldsOf(ServiceBookingOption, bookingOption),
-      ),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/services/update-standard-service-booking`,
+        {
+          ...onlyFieldsOf(StandardServiceUpdateBookingRequest, request),
+          bookingOptions: request.bookingOptions.map((bookingOption) =>
+            onlyFieldsOf(ServiceBookingOption, bookingOption),
+          ),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** The data of the three tabs of the add panel. Answers 204 with no body. */
-  readonly createStandardService = (
-    idProperty: string,
-    request: StandardServiceAddItemRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/create-standard-service`, {
+  /** The data of the three tabs of the add panel. Answers the id of the new service. */
+  readonly createStandardService = (request: StandardServiceAddItemRequest): Observable<string> =>
+    this.httpClient.post<string>(`${this.endpoint}/services/create-standard-service`, {
       ...onlyFieldsOf(StandardServiceAddItemRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
+      translations: request.translations.map(translationFields),
       periodPrices: request.periodPrices.map((periodPrice) =>
         onlyFieldsOf(ServicePeriodPrice, periodPrice),
       ),
       bookingOptions: request.bookingOptions.map((bookingOption) =>
         onlyFieldsOf(ServiceBookingOption, bookingOption),
       ),
-      idProperty,
     });
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteStandardServiceItems = (
-    request: DeleteStandardServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-standard-service-item`, request);
+  readonly deleteStandardServiceItems = (idStandardServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/services/delete-standard-service-item`, {
+      idStandardServices,
+    });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateStandardServiceItems = (
-    request: DuplicateStandardServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-standard-service-item`, request);
+  readonly duplicateStandardServiceItems = (idStandardServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/services/duplicate-standard-service-item`, {
+      idStandardServices,
+    });
 
   /**
    * An arrow property on purpose: the page hands it to `app-table` as its loader
@@ -324,26 +450,29 @@ export class CatalogService {
    * passed around on its own.
    */
   readonly hourlyServiceList = (request: PageRequest): Observable<Page<HourlyServiceItem>> =>
-    this.httpClient.post<Page<HourlyServiceItem>>(`${this.endpoint}/hourly-service-list`, request);
+    this.httpClient.post<Page<HourlyServiceItem>>(
+      `${this.endpoint}/services/hourly-service-list`,
+      request,
+    );
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteHourlyServiceItems = (
-    request: DeleteHourlyServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-hourly-service-item`, request);
+  readonly deleteHourlyServiceItems = (idHourlyServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/services/delete-hourly-service-item`, {
+      idHourlyServices,
+    });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateHourlyServiceItems = (
-    request: DuplicateHourlyServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-hourly-service-item`, request);
+  readonly duplicateHourlyServiceItems = (idHourlyServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/services/duplicate-hourly-service-item`, {
+      idHourlyServices,
+    });
 
   /** The Info Generali tab of an hourly service, for the edit panel. */
   readonly hourlyServiceGeneralInfo = (
     idHourlyService: string,
   ): Observable<HourlyServiceSelectedGeneralInfo> =>
     this.httpClient.get<HourlyServiceSelectedGeneralInfo>(
-      `${this.endpoint}/get-hourly-service-general-info`,
+      `${this.endpoint}/services/get-hourly-service-general-info`,
       { params: { idHourlyService } },
     );
 
@@ -351,101 +480,129 @@ export class CatalogService {
   readonly hourlyServicePrices = (
     idHourlyService: string,
   ): Observable<HourlyServiceSelectedPrices> =>
-    this.httpClient.get<HourlyServiceSelectedPrices>(`${this.endpoint}/get-hourly-service-prices`, {
-      params: { idHourlyService },
-    });
+    this.httpClient.get<HourlyServiceSelectedPrices>(
+      `${this.endpoint}/services/get-hourly-service-prices`,
+      {
+        params: { idHourlyService },
+      },
+    );
 
   /** The Prenotazioni tab of an hourly service, its booking options, for the edit panel. */
   readonly hourlyServiceBookingOptions = (
     idHourlyService: string,
-  ): Observable<HourlyServiceBookingOption[]> =>
-    this.httpClient.get<HourlyServiceBookingOption[]>(
-      `${this.endpoint}/get-hourly-service-booking-options`,
+  ): Observable<HourlyServiceSelectedBookingOptions> =>
+    this.httpClient.get<HourlyServiceSelectedBookingOptions>(
+      `${this.endpoint}/services/get-hourly-service-booking-options`,
       { params: { idHourlyService } },
     );
 
-  /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Info Generali tab of the edit panel, with the version read. Answers 204 with no
+   * body and the new version in its `ETag`.
+   */
   readonly updateHourlyServiceGeneral = (
-    idProperty: string,
     request: HourlyServiceUpdateGeneralRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-hourly-service-general`, {
-      ...onlyFieldsOf(HourlyServiceUpdateGeneralRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/services/update-hourly-service-general`,
+        {
+          ...onlyFieldsOf(HourlyServiceUpdateGeneralRequest, request),
+          translations: request.translations.map(translationFields),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** Salva of the Prezzi tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Prezzi tab of the edit panel, with the version read. Answers 204 with no body and
+   * the new version in its `ETag`.
+   */
   readonly updateHourlyServicePrices = (
-    idProperty: string,
     request: HourlyServiceUpdatePricesRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-hourly-service-prices`, {
-      ...onlyFieldsOf(HourlyServiceUpdatePricesRequest, request),
-      periodAvailabilities: request.periodAvailabilities.map(periodAvailabilityFields),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/services/update-hourly-service-prices`,
+        {
+          ...onlyFieldsOf(HourlyServiceUpdatePricesRequest, request),
+          availabilityOptions: request.availabilityOptions.map(availabilityOptionFields),
+          periodAvailabilities: request.periodAvailabilities.map(periodAvailabilityFields),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** Salva of the Prenotazioni tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Prenotazioni tab of the edit panel, with the version read. Answers 204 with no
+   * body and the new version in its `ETag`.
+   */
   readonly updateHourlyServiceBooking = (
-    idProperty: string,
     request: HourlyServiceUpdateBookingRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-hourly-service-booking`, {
-      ...onlyFieldsOf(HourlyServiceUpdateBookingRequest, request),
-      bookingOptions: request.bookingOptions.map(hourlyBookingOptionFields),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/services/update-hourly-service-booking`,
+        {
+          ...onlyFieldsOf(HourlyServiceUpdateBookingRequest, request),
+          bookingOptions: request.bookingOptions.map(hourlyBookingOptionFields),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** The data of the three tabs of the add panel. Answers 204 with no body. */
-  readonly createHourlyService = (
-    idProperty: string,
-    request: HourlyServiceAddItemRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/create-hourly-service`, {
+  /** The data of the three tabs of the add panel. Answers the id of the new hourly service. */
+  readonly createHourlyService = (request: HourlyServiceAddItemRequest): Observable<string> =>
+    this.httpClient.post<string>(`${this.endpoint}/services/create-hourly-service`, {
       ...onlyFieldsOf(HourlyServiceAddItemRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
+      translations: request.translations.map(translationFields),
+      availabilityOptions: request.availabilityOptions.map(availabilityOptionFields),
       periodAvailabilities: request.periodAvailabilities.map(periodAvailabilityFields),
       bookingOptions: request.bookingOptions.map(hourlyBookingOptionFields),
-      idProperty,
     });
 
   readonly automaticPriceList = (request: PageRequest): Observable<Page<AutomaticPriceItem>> =>
     this.httpClient.post<Page<AutomaticPriceItem>>(
-      `${this.endpoint}/automatic-price-list`,
+      `${this.endpoint}/automatic-prices/automatic-price-list`,
       request,
     );
 
   /** The bar, standard and hourly services of the property, for "Validità sui servizi". */
-  readonly automaticPriceServices = (idProperty: string): Observable<AutomaticPriceServices> =>
-    this.httpClient.get<AutomaticPriceServices>(`${this.endpoint}/get-automatic-price-services`, {
-      params: { idProperty },
+  readonly automaticPriceServices = (): Observable<AutomaticPriceServices> =>
+    this.httpClient.get<AutomaticPriceServices>(
+      `${this.endpoint}/automatic-prices/get-automatic-price-services`,
+    );
+
+  /** The data of the two tabs of the add panel. Answers the id of the new automatic price. */
+  readonly createAutomaticPrice = (request: AutomaticPriceAddItemRequest): Observable<string> =>
+    this.httpClient.post<string>(`${this.endpoint}/automatic-prices/create-automatic-price`, {
+      ...onlyFieldsOf(AutomaticPriceAddItemRequest, request),
+      translations: request.translations.map(translationFields),
+      validityPeriods: request.validityPeriods.map(validityPeriodFields),
     });
 
-  /** The data of the two tabs of the add panel. Answers 204 with no body. */
-  readonly createAutomaticPrice = (
-    idProperty: string,
-    request: AutomaticPriceAddItemRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/create-automatic-price`, {
-      ...onlyFieldsOf(AutomaticPriceAddItemRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
-      validityPeriods: request.validityPeriods.map(validityPeriodFields),
-      idProperty,
-    });
+  /** The image of an automatic price, instead of an icon. The answer, the price, is not read. */
+  readonly uploadAutomaticPriceImage = (idAutomaticPrice: string, image: File): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/automatic-prices/${encodeURIComponent(idAutomaticPrice)}/image`,
+      formOf(image),
+    );
+
+  /** The uploaded image of an automatic price. The answer is not read. */
+  readonly deleteAutomaticPriceImage = (idAutomaticPrice: string): Observable<void> =>
+    this.httpClient.delete<void>(
+      `${this.endpoint}/automatic-prices/${encodeURIComponent(idAutomaticPrice)}/image`,
+    );
 
   /** The Info Generali tab of an automatic price, for the edit panel. */
   readonly automaticPriceGeneralInfo = (
     idAutomaticPrice: string,
   ): Observable<AutomaticPriceSelectedGeneralInfo> =>
     this.httpClient.get<AutomaticPriceSelectedGeneralInfo>(
-      `${this.endpoint}/get-automatic-price-general-info`,
+      `${this.endpoint}/automatic-prices/get-automatic-price-general-info`,
       { params: { idAutomaticPrice } },
     );
 
@@ -454,45 +611,59 @@ export class CatalogService {
     idAutomaticPrice: string,
   ): Observable<AutomaticPriceSelectedPricesValidity> =>
     this.httpClient.get<AutomaticPriceSelectedPricesValidity>(
-      `${this.endpoint}/get-automatic-price-prices-validity`,
+      `${this.endpoint}/automatic-prices/get-automatic-price-prices-validity`,
       { params: { idAutomaticPrice } },
     );
 
-  /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Info Generali tab of the edit panel, with the version read. Answers 204 with no
+   * body and the new version in its `ETag`.
+   */
   readonly updateAutomaticPriceGeneral = (
-    idProperty: string,
     request: AutomaticPriceUpdateGeneralRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-automatic-price-general`, {
-      ...onlyFieldsOf(AutomaticPriceUpdateGeneralRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/automatic-prices/update-automatic-price-general`,
+        {
+          ...onlyFieldsOf(AutomaticPriceUpdateGeneralRequest, request),
+          translations: request.translations.map(translationFields),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** Salva of the Prezzi e Validità tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Prezzi e Validità tab of the edit panel, with the version read. Answers 204 with
+   * no body and the new version in its `ETag`.
+   */
   readonly updateAutomaticPricePricesValidity = (
-    idProperty: string,
     request: AutomaticPriceUpdatePricesValidityRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-automatic-price-prices-validity`, {
-      ...onlyFieldsOf(AutomaticPriceUpdatePricesValidityRequest, request),
-      validityPeriods: request.validityPeriods.map(validityPeriodFields),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/automatic-prices/update-automatic-price-prices-validity`,
+        {
+          ...onlyFieldsOf(AutomaticPriceUpdatePricesValidityRequest, request),
+          validityPeriods: request.validityPeriods.map(validityPeriodFields),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteAutomaticPriceItems = (
-    request: DeleteAutomaticPriceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-automatic-price-item`, request);
+  readonly deleteAutomaticPriceItems = (idAutomaticPrices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/automatic-prices/delete-automatic-price-item`, {
+      idAutomaticPrices,
+    });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateAutomaticPriceItems = (
-    request: DuplicateAutomaticPriceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-automatic-price-item`, request);
+  readonly duplicateAutomaticPriceItems = (idAutomaticPrices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/automatic-prices/duplicate-automatic-price-item`, {
+      idAutomaticPrices,
+    });
 
   /**
    * An arrow property on purpose: the page hands it to `app-table` as its loader
@@ -500,33 +671,32 @@ export class CatalogService {
    * passed around on its own.
    */
   readonly tableServiceList = (request: PageRequest): Observable<Page<TableServiceItem>> =>
-    this.httpClient.post<Page<TableServiceItem>>(`${this.endpoint}/table-service-list`, request);
+    this.httpClient.post<Page<TableServiceItem>>(
+      `${this.endpoint}/table-services/table-service-list`,
+      request,
+    );
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteTableServiceItems = (request: DeleteTableServiceItemsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-table-service-item`, request);
+  readonly deleteTableServiceItems = (idTableServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/table-services/delete-table-service-item`, {
+      idTableServices,
+    });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateTableServiceItems = (
-    request: DuplicateTableServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-table-service-item`, request);
+  readonly duplicateTableServiceItems = (idTableServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/table-services/duplicate-table-service-item`, {
+      idTableServices,
+    });
 
   /** The data of the two tabs of the add panel. Answers 204 with no body. */
-  readonly createTableService = (
-    idProperty: string,
-    request: TableServiceAddItemRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/create-table-service`, {
+  readonly createTableService = (request: TableServiceAddItemRequest): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/table-services/create-table-service`, {
       ...onlyFieldsOf(TableServiceAddItemRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
+      translations: request.translations.map(translationFields),
       availabilities: request.availabilities.map(tableAvailabilityFields),
       tableGroups: request.tableGroups.map((tableGroup) =>
         onlyFieldsOf(TableServiceTableGroup, tableGroup),
       ),
-      idProperty,
     });
 
   /** The Info Generali tab of a table service, for the edit panel. */
@@ -534,7 +704,7 @@ export class CatalogService {
     idTableService: string,
   ): Observable<TableServiceSelectedGeneralInfo> =>
     this.httpClient.get<TableServiceSelectedGeneralInfo>(
-      `${this.endpoint}/get-table-service-general-info`,
+      `${this.endpoint}/table-services/get-table-service-general-info`,
       { params: { idTableService } },
     );
 
@@ -543,36 +713,59 @@ export class CatalogService {
     idTableService: string,
   ): Observable<TableServiceSelectedAvailabilityBookings> =>
     this.httpClient.get<TableServiceSelectedAvailabilityBookings>(
-      `${this.endpoint}/get-table-service-availability-bookings`,
+      `${this.endpoint}/table-services/get-table-service-availability-bookings`,
       { params: { idTableService } },
     );
 
-  /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Info Generali tab of the edit panel, with the version read. Answers 204 with no
+   * body and the new version in its `ETag`.
+   */
   readonly updateTableServiceGeneral = (
-    idProperty: string,
     request: TableServiceUpdateGeneralRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-table-service-general`, {
-      ...onlyFieldsOf(TableServiceUpdateGeneralRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/table-services/update-table-service-general`,
+        {
+          ...onlyFieldsOf(TableServiceUpdateGeneralRequest, request),
+          translations: request.translations.map(translationFields),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** Salva of the Disponibilità e Prenotazioni tab of the edit panel. Answers 204 with no body. */
+  /**
+   * Salva of the Disponibilità e Prenotazioni tab of the edit panel, with the version read. Answers
+   * 204 with no body and the new version in its `ETag`.
+   */
   readonly updateTableServiceAvailabilityBookings = (
-    idProperty: string,
     request: TableServiceUpdateAvailabilityBookingsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-table-service-availability-bookings`, {
-      ...onlyFieldsOf(TableServiceUpdateAvailabilityBookingsRequest, request),
-      availabilities: request.availabilities.map(tableAvailabilityFields),
-      tableGroups: request.tableGroups.map((tableGroup) =>
-        onlyFieldsOf(TableServiceTableGroup, tableGroup),
-      ),
-      idProperty,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/table-services/update-table-service-availability-bookings`,
+        {
+          ...onlyFieldsOf(TableServiceUpdateAvailabilityBookingsRequest, request),
+          availabilities: request.availabilities.map(tableAvailabilityFields),
+          tableGroups: request.tableGroups.map((tableGroup) =>
+            onlyFieldsOf(TableServiceTableGroup, tableGroup),
+          ),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
+}
+
+/** A text made only of spaces is not a text. */
+function translationFields(translation: ServiceTranslation): ServiceTranslation {
+  return {
+    ...onlyFieldsOf(ServiceTranslation, translation),
+    serviceName: translation.serviceName?.trim() ? translation.serviceName : null,
+    description: translation.description?.trim() ? translation.description : null,
+  };
 }
 
 /** Only the fields of the contract, at every level: the time slots inside the option too. */
@@ -610,13 +803,44 @@ function hourlyBookingOptionFields(
 ): HourlyServiceBookingOption {
   return {
     ...onlyFieldsOf(HourlyServiceBookingOption, bookingOption),
-    availabilityOption: availabilityOptionFields(bookingOption.availabilityOption),
+    availabilityOption:
+      bookingOption.availabilityOption &&
+      availabilityOptionFields(bookingOption.availabilityOption),
   };
 }
 
 function tableAvailabilityFields(availability: TableServiceAvailability): TableServiceAvailability {
   return {
     ...onlyFieldsOf(TableServiceAvailability, availability),
-    days: availability.days.map((day) => onlyFieldsOf(TableServiceAvailabilityDay, day)),
+    days: availability.days.map((day) => ({
+      ...onlyFieldsOf(TableServiceAvailabilityDay, day),
+      otherTimeSlots: day.otherTimeSlots.map((timeSlot) =>
+        onlyFieldsOf(TableServiceTimeSlot, timeSlot),
+      ),
+    })),
+  };
+}
+
+/** The file goes as the `file` field of a multipart form. */
+function formOf(file: File): FormData {
+  const form = new FormData();
+  form.append('file', file);
+  return form;
+}
+
+/** The media of the public card as the tab has them: the gallery in its order, the PDFs as links. */
+function bathhouseMediaOf(info: PropertyInfoMedia): BathhouseMedia {
+  return {
+    mainPhotoUrl: info.mainPhotoUrl ?? null,
+    photos: [...(info.photos ?? [])]
+      .sort((first, second) => (first.sortOrder ?? 0) - (second.sortOrder ?? 0))
+      .map(({ id, url }) => ({ idPhoto: id, url })),
+    virtualTourUrl: info.virtualTourUrl ?? null,
+    latitude: info.latitude ?? null,
+    longitude: info.longitude ?? null,
+    priceListPdfUrl: info.priceListPdf?.url ?? null,
+    priceListPdfFileName: info.priceListPdf?.fileName ?? null,
+    menuPdfUrl: info.menuPdf?.url ?? null,
+    menuPdfFileName: info.menuPdf?.fileName ?? null,
   };
 }

@@ -2,7 +2,6 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { AuditEntryItem } from '../../../entities/settings/user-management/audit-entry-item';
 import { AuditLogFiltersRequest } from '../../../entities/settings/user-management/audit-log-filters-request';
@@ -15,10 +14,6 @@ export class AuditService {
 
   readonly entriesList = (request: PageRequest): Observable<Page<AuditEntryItem>> =>
     this.httpClient.post<Page<AuditEntryItem>>(`${this.endpoint}/entries-list`, request);
-
-  /** The users that can be chosen in the filters of the log: id and name. */
-  readonly userCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
-    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/get-user-combobox`, { idProperty });
 
   /** The log with the filters of the table, as a file: its name is in `Content-Disposition`. */
   readonly exportLog = (request: AuditLogFiltersRequest): Observable<HttpResponse<Blob>> =>

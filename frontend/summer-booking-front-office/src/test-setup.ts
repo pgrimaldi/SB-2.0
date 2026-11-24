@@ -3,6 +3,23 @@
 // never break a later test of another file (an error that would come and go with the file order).
 const { lang, dir } = document.documentElement;
 
+// jsdom has `<dialog>` without its methods (e.g. `app-page-spinner` opens a modal one): only `open` changes.
+if (!Reflect.has(HTMLDialogElement.prototype, 'showModal')) {
+  Object.assign(HTMLDialogElement.prototype, {
+    showModal(this: HTMLDialogElement) {
+      this.open = true;
+    },
+    close(this: HTMLDialogElement) {
+      this.open = false;
+    },
+  });
+}
+
+// jsdom has no layout: there is nothing to scroll to (e.g. `showFirstError`).
+if (!Reflect.has(Element.prototype, 'scrollIntoView')) {
+  Object.assign(Element.prototype, { scrollIntoView: () => undefined });
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();

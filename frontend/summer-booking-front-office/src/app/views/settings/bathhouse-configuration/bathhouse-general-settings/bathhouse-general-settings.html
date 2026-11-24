@@ -4,6 +4,7 @@
       [label]="
         'management.settings.bathhouse_configuration.general_information.bathhouse_name' | translate
       "
+      [isMandatory]="true"
       [error]="fieldErrors.bathhouseName()"
       [formField]="informationForm.bathhouseName"
     />
@@ -50,10 +51,13 @@
         'management.settings.bathhouse_configuration.general_information.country' | translate
       "
       [placeholder]="
-        'management.settings.bathhouse_configuration.general_information.choose' | translate
+        countries.loadError()
+          ? ''
+          : ('management.settings.bathhouse_configuration.general_information.choose' | translate)
       "
       [options]="countryOptions()"
-      [error]="fieldErrors.country()"
+      [error]="countries.loadError() ?? fieldErrors.country()"
+      (openRequest)="countries.retry()"
       [formField]="informationForm.country"
     />
   </div>
@@ -145,8 +149,10 @@
         'management.settings.bathhouse_configuration.general_information.choose' | translate
       "
       [options]="cancellationOptions()"
-      [error]="fieldErrors.cancellationPolicy()"
-      [formField]="informationForm.cancellationPolicy"
+      [error]="fieldErrors.isFreeCancellation() ?? fieldErrors.cancellationNoticeHours()"
+      [readonly]="informationForm.isFreeCancellation().readonly()"
+      [value]="cancellationPolicy()"
+      (valueChange)="setCancellationPolicy($event)"
     />
     <app-filled-select
       [label]="'management.settings.bathhouse_configuration.general_information.pets' | translate"
@@ -174,20 +180,26 @@
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
         [disabled]="isSaving()"
-        (clicked)="cancel()"
+        (clicked)="requestCancel()"
       >
         {{ 'management.settings.bathhouse_configuration.general_information.cancel' | translate }}
       </app-button>
       <app-button
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
+        [disabled]="informationForm().invalid()"
         [isLoading]="isSaving()"
         (clicked)="save()"
       >
         {{ 'management.settings.bathhouse_configuration.general_information.save' | translate }}
       </app-button>
     } @else {
-      <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="edit()">
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="!isLoaded()"
+        (clicked)="edit()"
+      >
         {{ 'management.settings.bathhouse_configuration.general_information.edit' | translate }}
       </app-button>
     }
@@ -196,3 +208,4 @@
     <p class="bathhouse__general__settings__error">{{ errorMessage }}</p>
   }
 </div>
+<app-version-conflict-popup [pathIcon]="popupIcons" [(open)]="isConflictShown" />

@@ -13,11 +13,13 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  MAX_LENGTH,
   TreeValidationResult,
   applyEach,
   applyWhen,
   disabled,
   form,
+  metadata,
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -29,7 +31,11 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldErrorsOrGeneral,
+  clearApiFieldErrors,
+} from '../../../../../behaviours/validation/api-field-errors';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
@@ -41,17 +47,34 @@ import { AutomaticPriceTimeSlot } from '../../../../../entities/settings/service
 import { AutomaticPriceUpdateGeneralRequest } from '../../../../../entities/settings/services/automatic-price-update-general-request';
 import { AutomaticPriceUpdatePricesValidityRequest } from '../../../../../entities/settings/services/automatic-price-update-prices-validity-request';
 import { AutomaticPriceValidityPeriod } from '../../../../../entities/settings/services/automatic-price-validity-period';
-import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import {
+  MAX_SERVICE_DESCRIPTION_LENGTH,
+  MAX_SERVICE_NAME_LENGTH,
+  ServiceTranslation,
+} from '../../../../../entities/settings/services/service-translation';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
+import { ConfirmPopup } from '../../../../shared/ui/dialogs/confirm-popup/confirm-popup';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { SidePanelButtons } from '../../../../shared/ui/dialogs/side-panel/side-panel-buttons';
+import { PageSpinner } from '../../../../shared/ui/spinners/page-spinner/page-spinner';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { AutomaticPriceGeneralInfoTab } from '../automatic-price-general-info-tab/automatic-price-general-info-tab';
 import { AutomaticPricePricesValidityTab } from '../automatic-price-prices-validity-tab/automatic-price-prices-validity-tab';
+import { HIDDEN_AUTOMATIC_PRICE_FIELDS, serviceFieldError } from '../service-field-errors';
+import {
+  automaticPriceRules,
+  comparableAutomaticPrice,
+  otherTranslationRules,
+  withExistingServices,
+  withServicesInForce,
+} from '../service-form-rules';
+import { ServiceImageErrorPopup } from '../service-image-error-popup/service-image-error-popup';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 interface ServiceFormTexts {
   tabs: {
@@ -74,6 +97,7 @@ const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof AutomaticPriceAddIte
     'vatRate',
     'isOnlinePurchaseEnabled',
     'validityPeriods',
+    'isAllServicesEnabled',
     'idBarServices',
     'idStandardServices',
     'idHourlyServices',
@@ -82,16 +106,26 @@ const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof AutomaticPriceAddIte
   ],
 };
 
+const ICONS: readonly (BarServiceIcon | StandardServiceIcon)[] = [
+  ...Object.values(BarServiceIcon),
+  ...Object.values(StandardServiceIcon),
+];
+
 @Component({
   selector: 'app-automatic-price-edit-item-panel',
   imports: [
     AutomaticPriceGeneralInfoTab,
     AutomaticPricePricesValidityTab,
     Button,
+    ConfirmPopup,
+    PageSpinner,
+    ReadErrorPopup,
+    ServiceImageErrorPopup,
     SidePanel,
     SidePanelButtons,
     TabGroup,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './automatic-price-edit-item-panel.html',
   styleUrl: './automatic-price-edit-item-panel.scss',
@@ -103,6 +137,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly updated = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly catalog = inject(CatalogService);
@@ -121,7 +156,11 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Modifica pressed: the fields of the tab can be changed, until Annulla or Salva. */
   protected readonly isEditing = signal(false);
   protected readonly isSaving = signal(false);
-  protected readonly isLocked = computed(() => !this.isEditing() || this.isSaving());
+  protected readonly isRemovingImage = signal(false);
+  protected readonly isImageDeletionAsked = signal(false);
+  protected readonly isLocked = computed(
+    () => !this.isEditing() || this.isSaving() || this.isRemovingImage(),
+  );
   private readonly texts = toSignal(
     this.translateService.stream(
       'management.settings.services.form',
@@ -136,6 +175,8 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly draftForm = form(this.draft, (path) => {
     disabled(path, () => this.isLocked());
     applyEach(path.translations, (translation) => {
+      metadata(translation.serviceName, MAX_LENGTH, () => MAX_SERVICE_NAME_LENGTH);
+      metadata(translation.description, MAX_LENGTH, () => MAX_SERVICE_DESCRIPTION_LENGTH);
       applyWhen(
         translation,
         ({ valueOf }) =>
@@ -146,27 +187,65 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
           requiredText(main.description);
         },
       );
+      applyWhen(
+        translation,
+        ({ valueOf }) =>
+          this.selectedTab() === PanelTab.GeneralInfo &&
+          valueOf(translation.language) !== this.mainLanguage(),
+        otherTranslationRules,
+      );
     });
+    applyWhen(path, () => this.selectedTab() === PanelTab.PricesValidity, automaticPriceRules);
   });
   /** The values as the APIs gave them, tab by tab: the form is compared with them. */
   private readonly pristine = signal(newDraft());
   /** The services of the property for "Validità sui servizi"; null until they are read. */
   protected readonly services = signal<AutomaticPriceServices | null>(null);
+  protected readonly sectorsVersion = signal(0);
   /** The tabs read (or being read) since the panel opened: changing tab keeps their data. */
   private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
   /** The tabs whose data are being read: their fields cannot be used meanwhile. */
   private readonly loadingTabs = signal<ReadonlySet<PanelTab>>(new Set());
+  /** The version of each tab read: its save sends it back. */
+  private readonly versions = new Map<PanelTab, string | null>();
   protected readonly isEditDisabled = computed(() => {
     const tab = this.selectedTab() as PanelTab;
     return this.loadingTabs().has(tab) || !this.loadedTabs().has(tab);
   });
   protected readonly isSaveDisabled = computed(
-    () => this.loadingTabs().has(this.selectedTab()) || this.draftForm().invalid(),
+    () =>
+      this.loadingTabs().has(this.selectedTab()) ||
+      !this.loadedTabs().has(this.selectedTab()) ||
+      this.draftForm().invalid(),
   );
   /** The image chosen from the computer, instead of an icon of the list. */
   private readonly image = signal<File | null>(null);
-  protected readonly imagePreviewUrl = signal<string | null>(null);
+  private readonly chosenImageUrl = signal<string | null>(null);
+  /** The icon read when it is not one of the list: sent back as read until another is chosen. */
+  private readonly otherIcon = signal<string | null>(null);
+  /** The image the automatic price has, until an icon or another image is chosen. */
+  private readonly savedImageUrl = signal<string | null>(null);
+  protected readonly imagePreviewUrl = computed(
+    () => this.chosenImageUrl() ?? (this.draft().icon === null ? this.savedImageUrl() : null),
+  );
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly imageError = signal<ApiProblem | null>(null);
+  private readonly imageRemovalError = signal<ApiProblem | null>(null);
+  protected readonly imageRemovalMessage = toSignal(
+    toObservable(this.imageRemovalError).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
+  protected readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
+  private readonly tabErrors = signal<ReadonlyMap<PanelTab, ApiProblem>>(new Map());
+  protected readonly tabErrorMessage = toSignal(
+    toObservable(computed(() => this.tabErrors().get(this.selectedTab() as PanelTab) ?? null)).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -174,12 +253,17 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     { initialValue: null },
   );
   private readonly loadings = new Map<PanelTab, Subscription>();
+  /** Changed by someone else: the user is told once the tab has been read again. */
+  private isConflictPending = false;
+  private imageRemoval?: Subscription;
 
   constructor() {
     this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
         untracked(() => this.reset());
+      } else {
+        untracked(() => this.stopLoadings());
       }
     });
   }
@@ -187,7 +271,8 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.open() &&
-      (this.image() !== null || JSON.stringify(this.draft()) !== JSON.stringify(this.pristine()))
+      (this.image() !== null ||
+        comparableAutomaticPrice(this.draft()) !== comparableAutomaticPrice(this.pristine()))
     );
   }
 
@@ -197,27 +282,76 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   protected chooseIcon(icon: BarServiceIcon | StandardServiceIcon): void {
     this.draftForm.icon().value.set(icon);
+    this.imageRemovalError.set(null);
     this.setImage(null);
   }
 
   protected chooseImage(image: File): void {
     this.draftForm.icon().value.set(null);
+    this.imageRemovalError.set(null);
     this.setImage(image);
   }
 
+  /** The X of the image: one not saved yet just goes away, the saved one once confirmed. */
+  protected removeImage(): void {
+    if (this.isLocked()) {
+      return;
+    }
+    if (this.image()) {
+      this.setImage(null);
+      this.draftForm.icon().value.set(this.pristine().icon);
+    } else {
+      this.isImageDeletionAsked.set(true);
+    }
+  }
+
+  protected confirmImageDeletion(): void {
+    this.isImageDeletionAsked.set(false);
+    const idAutomaticPrice = this.idAutomaticPrice();
+    if (this.isLocked() || !idAutomaticPrice) {
+      return;
+    }
+    this.imageRemovalError.set(null);
+    this.isRemovingImage.set(true);
+    this.imageRemoval = this.catalog
+      .deleteAutomaticPriceImage(idAutomaticPrice)
+      .pipe(finalize(() => this.isRemovingImage.set(false)))
+      .subscribe({
+        next: () => this.savedImageUrl.set(null),
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          this.imageRemovalError.set(problem);
+          this.failed.emit(problem);
+        },
+      });
+  }
+
   protected startEdit(): void {
+    if (this.isEditDisabled()) {
+      return;
+    }
     this.error.set(null);
     this.isEditing.set(true);
+    // What was read already wrong shows at once: it keeps Salva off.
+    this.draftForm().markAsTouched();
   }
 
   /** Annulla: the tab goes back to the values read, only to look at. */
+  protected async requestCancel(): Promise<void> {
+    if (await this.unsaved.confirmDiscard(this)) {
+      this.cancelEdit();
+    }
+  }
+
   protected cancelEdit(): void {
     const tab = this.selectedTab() as PanelTab;
     const pristine = structuredClone(this.pristine());
     this.draft.update((draft) => ({ ...draft, ...pick(pristine, tab) }));
     if (tab === PanelTab.GeneralInfo) {
       this.setImage(null);
+      this.imageRemovalError.set(null);
     }
+    clearApiFieldErrors(this.draftForm);
     this.draftForm().reset();
     this.error.set(null);
     this.isEditing.set(false);
@@ -246,9 +380,13 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Salva: only the tab being edited, with its API. */
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idAutomaticPrice = this.idAutomaticPrice();
-    if (this.isSaving() || !idProperty || !idAutomaticPrice) {
+    if (
+      this.isSaving() ||
+      this.isSaveDisabled() ||
+      !this.auth.user()?.propertyId ||
+      !idAutomaticPrice
+    ) {
       return;
     }
     const tab = this.selectedTab() as PanelTab;
@@ -256,13 +394,34 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.update(tab, idProperty, idAutomaticPrice));
+        await firstValueFrom(this.update(tab, idAutomaticPrice));
+        const imageError = await this.uploadImage(idAutomaticPrice);
         this.isSaving.set(false);
         this.open.set(false);
         this.updated.emit();
+        this.imageError.set(imageError);
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictPending = true;
+          this.reloadTab(tab);
+          return undefined;
+        }
+        if (problem.code === ApiErrorCode.CatalogSectorNotFound) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.ServiceNotFound) {
+          this.refreshServices();
+        }
+        return (
+          serviceFieldError(problem, this.draftForm) ??
+          apiFieldErrorsOrGeneral(
+            problem,
+            this.draftForm,
+            (general) => this.error.set(general),
+            HIDDEN_AUTOMATIC_PRICE_FIELDS,
+          )
         );
       } finally {
         this.isSaving.set(false);
@@ -279,12 +438,16 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** The data of a tab, read from its API the first time the tab is opened. */
   private loadTab(tab: PanelTab): void {
     const idAutomaticPrice = this.idAutomaticPrice();
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idAutomaticPrice || !idProperty || this.loadedTabs().has(tab)) {
+    if (!idAutomaticPrice || !this.auth.user()?.propertyId || this.loadedTabs().has(tab)) {
       return;
     }
     this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
     this.error.set(null);
+    this.tabErrors.update((errors) => {
+      const next = new Map(errors);
+      next.delete(tab);
+      return next;
+    });
     this.setLoading(tab, true);
     if (tab === PanelTab.GeneralInfo) {
       this.loadings.set(
@@ -302,7 +465,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
         tab,
         forkJoin({
           values: this.catalog.automaticPricePricesValidity(idAutomaticPrice),
-          services: this.catalog.automaticPriceServices(idProperty),
+          services: this.catalog.automaticPriceServices(),
         })
           .pipe(finalize(() => this.setLoading(tab, false)))
           .subscribe({
@@ -313,40 +476,94 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
   }
 
-  /** The tab is read again the next time it is opened. */
+  /**
+   * At the opening (no tab read yet) the panel closes for the read-error popup; later the error stays
+   * in the tab, with Riprova.
+   */
   private loadFailed(tab: PanelTab, error: unknown): void {
     this.loadedTabs.update((tabs) => {
       const next = new Set(tabs);
       next.delete(tab);
       return next;
     });
-    this.error.set(toApiProblem(error));
+    this.isConflictPending = false;
+    const problem = toApiProblem(error);
+    this.failed.emit(problem);
+    if (this.loadedTabs().size === 0) {
+      this.readError.set(problem);
+      this.open.set(false);
+      return;
+    }
+    this.tabErrors.update((errors) => new Map(errors).set(tab, problem));
   }
 
-  /** The update API of the tab, with the fields of that tab only. */
-  private update(tab: PanelTab, idProperty: string, idAutomaticPrice: string): Observable<void> {
+  private reloadTab(tab: PanelTab): void {
+    this.cancelEdit();
+    this.loadedTabs.update((tabs) => {
+      const next = new Set(tabs);
+      next.delete(tab);
+      return next;
+    });
+    this.loadTab(tab);
+  }
+
+  /** The update API of the tab, with the fields of that tab only, and the version read. */
+  private update(tab: PanelTab, idAutomaticPrice: string): Observable<string | null> {
     const draft = this.draft();
+    const version = this.versions.get(tab) ?? null;
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateAutomaticPriceGeneral(
-        idProperty,
         Object.assign(new AutomaticPriceUpdateGeneralRequest(), {
           idAutomaticPrice,
           ...pick(draft, tab),
+          // The upload itself takes the icon away: without it, the icon stays.
+          icon: draft.icon ?? (this.image() ? this.pristine().icon : null) ?? this.otherIcon(),
         }),
+        version,
       );
     }
     return this.catalog.updateAutomaticPricePricesValidity(
-      idProperty,
       Object.assign(new AutomaticPriceUpdatePricesValidityRequest(), {
         idAutomaticPrice,
-        ...pick(draft, tab),
+        ...pick(withServicesInForce(draft), tab),
       }),
+      version,
     );
   }
 
-  private reset(): void {
+  /** The image goes after the data of its tab, which stay saved also without it. */
+  private async uploadImage(idAutomaticPrice: string): Promise<ApiProblem | null> {
+    const image = this.image();
+    if (!image) {
+      return null;
+    }
+    try {
+      await firstValueFrom(this.catalog.uploadAutomaticPriceImage(idAutomaticPrice, image));
+      return null;
+    } catch (error: unknown) {
+      return toApiProblem(error);
+    }
+  }
+
+  protected retryRead(): void {
+    this.open.set(true);
+  }
+
+  protected retryTab(): void {
+    this.loadTab(this.selectedTab());
+  }
+
+  /** Closed while a tab is being read: its answer, or its error, is not wanted any more. */
+  private stopLoadings(): void {
     this.loadings.forEach((loading) => loading.unsubscribe());
     this.loadings.clear();
+  }
+
+  private reset(): void {
+    this.tabErrors.set(new Map());
+    this.stopLoadings();
+    this.isConflictPending = false;
+    this.versions.clear();
     this.loadedTabs.set(new Set());
     this.loadingTabs.set(new Set());
     this.error.set(null);
@@ -357,6 +574,11 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     this.draftForm().reset();
     this.services.set(null);
     this.setImage(null);
+    this.savedImageUrl.set(null);
+    this.otherIcon.set(null);
+    this.imageRemoval?.unsubscribe();
+    this.imageRemovalError.set(null);
+    this.isImageDeletionAsked.set(false);
     this.selectedTab.set(PanelTab.GeneralInfo);
     this.tabIndex.set(PanelTab.GeneralInfo);
     this.loadTab(PanelTab.GeneralInfo);
@@ -364,6 +586,10 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Name and description in every language, also those the API leaves out (empty). */
   private setGeneralInfo(info: AutomaticPriceSelectedGeneralInfo): void {
+    this.versions.set(PanelTab.GeneralInfo, info.version);
+    this.savedImageUrl.set(info.imageUrl);
+    const icon = ICONS.find((value) => value === info.icon) ?? null;
+    this.otherIcon.set(icon ? null : info.icon);
     this.applyLoaded({
       translations: SERVICE_LANGUAGES.map((language) => {
         const translation = info.translations.find((item) => item.language === language);
@@ -373,14 +599,33 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
           description: translation?.description ?? null,
         });
       }),
-      icon: info.icon,
+      icon,
     });
+  }
+
+  /** A service chosen is no longer there: the services are read again, and it is not chosen any more. */
+  private refreshServices(): void {
+    this.setLoading(PanelTab.PricesValidity, true);
+    this.loadings.set(
+      PanelTab.PricesValidity,
+      this.catalog
+        .automaticPriceServices()
+        .pipe(finalize(() => this.setLoading(PanelTab.PricesValidity, false)))
+        .subscribe({
+          next: (services) => {
+            this.services.set(services);
+            this.draft.update((draft) => withExistingServices(draft, services));
+          },
+          error: (error: unknown) => this.error.set(toApiProblem(error)),
+        }),
+    );
   }
 
   private setPricesValidity(
     values: AutomaticPriceSelectedPricesValidity,
     services: AutomaticPriceServices,
   ): void {
+    this.versions.set(PanelTab.PricesValidity, values.version);
     this.services.set(services);
     this.applyLoaded({
       price: values.price,
@@ -388,12 +633,16 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
       isOnlinePurchaseEnabled: values.isOnlinePurchaseEnabled ?? false,
       validityPeriods: values.validityPeriods.map((period) =>
         Object.assign(new AutomaticPriceValidityPeriod(), period, {
-          daysOfWeek: [...period.daysOfWeek],
+          // Without days it is of every day.
+          daysOfWeek: period.daysOfWeek.length
+            ? [...period.daysOfWeek]
+            : new AutomaticPriceValidityPeriod().daysOfWeek,
           timeSlots: period.timeSlots.map((timeSlot) =>
             Object.assign(new AutomaticPriceTimeSlot(), timeSlot),
           ),
         }),
       ),
+      isAllServicesEnabled: values.isAllServicesEnabled ?? false,
       idBarServices: [...values.idBarServices],
       idStandardServices: [...values.idStandardServices],
       idHourlyServices: [...values.idHourlyServices],
@@ -406,6 +655,10 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   private applyLoaded(values: Partial<AutomaticPriceAddItemRequest>): void {
     this.draft.update((draft) => ({ ...draft, ...values }));
     this.pristine.update((pristine) => ({ ...pristine, ...structuredClone(values) }));
+    if (this.isConflictPending) {
+      this.isConflictPending = false;
+      this.isConflictShown.set(true);
+    }
   }
 
   private setLoading(tab: PanelTab, isLoading: boolean): void {
@@ -421,17 +674,18 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   private setImage(image: File | null): void {
-    const previewUrl = this.imagePreviewUrl();
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
+    const chosenImageUrl = this.chosenImageUrl();
+    if (chosenImageUrl) {
+      URL.revokeObjectURL(chosenImageUrl);
     }
     this.image.set(image);
-    this.imagePreviewUrl.set(image ? URL.createObjectURL(image) : null);
+    this.chosenImageUrl.set(image ? URL.createObjectURL(image) : null);
   }
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
-    this.loadings.forEach((loading) => loading.unsubscribe());
+    this.stopLoadings();
+    this.imageRemoval?.unsubscribe();
     this.setImage(null);
   }
 }

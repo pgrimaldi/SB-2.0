@@ -1,7 +1,6 @@
 import { SmtpSecurity } from './email-configuration-data';
 
 export class EmailConfigurationRequest {
-  idProperty: string | null = null;
   senderMailAddress: string | null = null;
   senderName: string | null = null;
   smtpServerAddress: string | null = null;

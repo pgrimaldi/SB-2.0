@@ -54,12 +54,11 @@ export class OnlineBookingConfiguration {
 
   constructor() {
     effect((onCleanup) => {
-      const idProperty = this.auth.user()?.propertyId;
-      if (!idProperty) {
+      if (!this.auth.user()?.propertyId) {
         return;
       }
       const subscription = untracked(() =>
-        this.system.stripeInformation(idProperty).subscribe({
+        this.system.stripeInformation().subscribe({
           next: (stripeAccountId) => this.stripeAccountId.set(stripeAccountId),
           error: () => this.stripeAccountId.set(null),
         }),

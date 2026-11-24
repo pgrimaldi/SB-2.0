@@ -1,0 +1,8 @@
+<svg width="29" height="31" viewBox="0 0 29 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="seat" x1="1" y1="0" x2="27" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#F86464"/><stop offset="0.5" stop-color="#C13030"/><stop offset="1" stop-color="#8E0000"/></linearGradient><linearGradient id="back" x1="3.5" y1="0" x2="25.5" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#F66262"/><stop offset="0.48" stop-color="#C43232"/><stop offset="1" stop-color="#920303"/></linearGradient><linearGradient id="shade" x1="0" y1="6.8" x2="0" y2="14" gradientUnits="userSpaceOnUse"><stop stop-opacity="0.28"/><stop offset="0.38" stop-opacity="0.28"/><stop offset="1" stop-opacity="0"/></linearGradient></defs>
+<rect x="1" y="0" width="1.6" height="30.5" fill="#C4C4C4"/>
+<rect x="25.4" y="0" width="1.6" height="30.5" fill="#B8B8B8"/>
+<rect x="1" y="3.5" width="26" height="22.5" fill="url(#seat)"/>
+<rect x="3.5" y="2" width="22" height="4.8" fill="url(#back)"/>
+<rect x="1" y="6.8" width="26" height="7.2" fill="url(#shade)"/>
+</svg>

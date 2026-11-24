@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { BarServiceCategory } from '../../../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { BarServiceAddItemRequest } from '../../../../../entities/settings/services/bar-service-add-item-request';
@@ -14,21 +15,35 @@ import { ServicesImages, ServicesImagesIcon } from '../shared/services-images/se
 import { ServicesTranslations } from '../shared/services-translations/services-translations';
 
 interface BarServiceCategoryTexts {
-  cafeteria: string;
-  drinks: string;
-  snacks_and_sandwiches: string;
-  ice_creams: string;
+  bar: string;
+  pizzeria: string;
+  restaurant: string;
+  fry_shop: string;
+  sandwich_shop: string;
+  appetizers: string;
+  first_courses: string;
+  second_courses: string;
   desserts: string;
+  fruit: string;
+  ice_cream_shop: string;
+  drinks: string;
 }
 
 const BAR_SERVICE_CATEGORY_KEYS: Readonly<
   Record<BarServiceCategory, keyof BarServiceCategoryTexts>
 > = {
-  [BarServiceCategory.Cafeteria]: 'cafeteria',
-  [BarServiceCategory.Drinks]: 'drinks',
-  [BarServiceCategory.SnacksAndSandwiches]: 'snacks_and_sandwiches',
-  [BarServiceCategory.IceCreams]: 'ice_creams',
+  [BarServiceCategory.Bar]: 'bar',
+  [BarServiceCategory.Pizzeria]: 'pizzeria',
+  [BarServiceCategory.Restaurant]: 'restaurant',
+  [BarServiceCategory.FryShop]: 'fry_shop',
+  [BarServiceCategory.SandwichShop]: 'sandwich_shop',
+  [BarServiceCategory.Appetizers]: 'appetizers',
+  [BarServiceCategory.FirstCourses]: 'first_courses',
+  [BarServiceCategory.SecondCourses]: 'second_courses',
   [BarServiceCategory.Desserts]: 'desserts',
+  [BarServiceCategory.Fruit]: 'fruit',
+  [BarServiceCategory.IceCreamShop]: 'ice_cream_shop',
+  [BarServiceCategory.Drinks]: 'drinks',
 };
 
 @Component({
@@ -52,10 +67,13 @@ export class ServiceGeneralInfoTab {
   /** Only to look at: the buttons that change the data (icons, image, add, remove) are off. */
   readonly isReadonly = input(false);
   readonly imagePreviewUrl = input<string | null>(null);
+  readonly imageError = input<string | null>(null);
   readonly iconChosen = output<BarServiceIcon>();
   readonly imageChosen = output<File>();
+  readonly imageRemoveRequest = output<void>();
 
   private readonly translateService = inject(TranslateService);
+  protected readonly validationText = inject(ValidationTextBehaviour);
 
   /** Every icon a bar service can have, as shown in the grid. */
   protected readonly icons: readonly ServicesImagesIcon<BarServiceIcon>[] = Object.values(

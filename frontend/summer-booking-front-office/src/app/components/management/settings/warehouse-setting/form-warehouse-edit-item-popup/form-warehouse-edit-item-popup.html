@@ -8,7 +8,7 @@
       <app-filled-select
         [label]="'management.settings.warehouse.form.name' | translate"
         [options]="articleOptions()"
-        [value]="draft().idArticle"
+        [value]="item()?.idArticle ?? null"
         [disabled]="true"
       />
       <app-filled-number-field
@@ -19,12 +19,12 @@
       />
       <app-filled-number-field
         [label]="'management.settings.warehouse.form.threshold' | translate"
-        [formField]="draftForm.thresholdQuantity"
-        [error]="thresholdQuantityError()"
+        [formField]="draftForm.lowStockThreshold"
+        [error]="lowStockThresholdError()"
       />
       <app-toggle
-        [formField]="draftForm.isThresholdWarningActive"
-        [error]="isThresholdWarningActiveError()"
+        [formField]="draftForm.lowStockAlertEnabled"
+        [error]="lowStockAlertEnabledError()"
       >
         {{ 'management.settings.warehouse.form.threshold_alert' | translate }}
       </app-toggle>
@@ -40,7 +40,7 @@
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
         [disabled]="isLoading()"
-        (clicked)="close()"
+        (clicked)="leave()"
       >
         {{ 'management.settings.warehouse.form.cancel' | translate }}
       </app-button>
@@ -56,3 +56,5 @@
     </div>
   </div>
 </ng-template>
+<app-read-error-popup [pathIcon]="pathIcon()" [(problem)]="readError" (retry)="retryRead()" />
+<app-version-conflict-popup [pathIcon]="pathIcon()" [(open)]="isConflictShown" />

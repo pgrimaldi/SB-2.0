@@ -1,0 +1,466 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { MATERIAL_ANIMATIONS, provideNativeDateAdapter } from '@angular/material/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
+import { Observable, Subject, of, throwError } from 'rxjs';
+import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
+import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
+import { Weekday } from '../../../../../entities/enums/weekday';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
+import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
+import { BarServiceSelectedGeneralInfo } from '../../../../../entities/settings/services/bar-service-selected-general-info';
+import { BarServiceSelectedPrices } from '../../../../../entities/settings/services/bar-service-selected-prices';
+import { BarServiceUpdateBookingRequest } from '../../../../../entities/settings/services/bar-service-update-booking-request';
+import { BarServiceUpdateGeneralRequest } from '../../../../../entities/settings/services/bar-service-update-general-request';
+import { BarServiceUpdatePricesRequest } from '../../../../../entities/settings/services/bar-service-update-prices-request';
+import { ServiceBookingOption } from '../../../../../entities/settings/services/service-booking-option';
+import { Language } from '../../../../../entities/shared/language';
+import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
+import { SectorService } from '../../../../../services/api/catalog/sector.service';
+import { SeasonService } from '../../../../../services/api/seasons/season.service';
+import { BarServiceEditItemPanel } from './bar-service-edit-item-panel';
+
+const IMAGE = new File(['image'], 'pizza.png', { type: 'image/png' });
+const SAVED_IMAGE_URL = 'https://files.example.test/pizza.webp';
+const BOOKING_OPTION = Object.assign(new ServiceBookingOption(), {
+  managementStartTime: '09:00',
+  managementEndTime: '12:00',
+  weekdays: [Weekday.Saturday, Weekday.Sunday],
+  maxPerSlot: 5,
+  intervalMinutes: 20,
+});
+
+describe('BarServiceEditItemPanel', () => {
+  const setup = async ({
+    uploadServiceImage = vi.fn((): Observable<void> => of(undefined)),
+    deleteServiceImage = vi.fn((): Observable<void> => of(undefined)),
+    generalInfo = {} as Partial<BarServiceSelectedGeneralInfo>,
+    prices = vi.fn((): Observable<BarServiceSelectedPrices> =>
+      of(Object.assign(new BarServiceSelectedPrices(), { price: 3, vatRate: 22, version: 'v1' })),
+    ),
+  } = {}) => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:image');
+    vi.spyOn(URL, 'revokeObjectURL').mockReturnValue();
+    // jsdom has no matchMedia.
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => ({
+        matches: false,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+        addListener: () => undefined,
+        removeListener: () => undefined,
+      })),
+    );
+    const updateBarServiceGeneral = vi.fn(
+      (request: BarServiceUpdateGeneralRequest): Observable<string | null> =>
+        of(request ? 'v2' : null),
+    );
+    const updateBarServicePrices = vi.fn(
+      (request: BarServiceUpdatePricesRequest): Observable<string | null> =>
+        of(request ? 'v2' : null),
+    );
+    const updateBarServiceBooking = vi.fn(
+      (request: BarServiceUpdateBookingRequest): Observable<string | null> =>
+        of(request ? 'v2' : null),
+    );
+    TestBed.configureTestingModule({
+      providers: [
+        provideNativeDateAdapter(),
+        provideTranslateService(),
+        { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
+        { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
+        {
+          provide: CatalogService,
+          useValue: {
+            uploadServiceImage,
+            deleteServiceImage,
+            updateBarServiceGeneral,
+            updateBarServiceBooking,
+            barServiceBookingOptions: () => of({ bookingOptions: [BOOKING_OPTION], version: 'v1' }),
+            barServiceGeneralInfo: () =>
+              of(
+                Object.assign(new BarServiceSelectedGeneralInfo(), {
+                  idBarService: 'b5',
+                  translations: [
+                    { language: Language.It, serviceName: 'Pizza', description: 'Al taglio' },
+                  ],
+                  imageUrl: SAVED_IMAGE_URL,
+                  version: 'v1',
+                  ...generalInfo,
+                }),
+              ),
+            barServicePrices: prices,
+            updateBarServicePrices,
+          },
+        },
+        { provide: LanguageBehaviour, useValue: { current: signal(Language.It) } },
+        { provide: SeasonService, useValue: { periodList: () => of([]) } },
+        { provide: SectorService, useValue: { sectorCombobox: () => of([]) } },
+      ],
+    });
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('it', {
+      management: {
+        settings: {
+          services: {
+            form: {
+              tabs: { general_info: 'Info Generali', prices: 'Prezzi', bookings: 'Prenotazioni' },
+              bookings: { time_intervals: {} },
+            },
+            bar_services: { categories: {} },
+          },
+        },
+      },
+    });
+    translate.use('it');
+    const fixture = TestBed.createComponent(BarServiceEditItemPanel);
+    const panel = fixture.componentInstance;
+    let updated = 0;
+    panel.updated.subscribe(() => updated++);
+    fixture.componentRef.setInput('idBarService', 'b5');
+    fixture.componentRef.setInput('open', true);
+    await fixture.whenStable();
+    const save = async () => {
+      panel['save']();
+      await new Promise((resolve) => setTimeout(resolve));
+      await fixture.whenStable();
+    };
+    return {
+      fixture,
+      panel,
+      save,
+      updateBarServiceGeneral,
+      updateBarServicePrices,
+      updateBarServiceBooking,
+      updated: () => updated,
+    };
+  };
+
+  afterEach(() =>
+    document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove()),
+  );
+
+  it('should show the image of the service until an icon or another image is chosen', async () => {
+    const { panel } = await setup();
+
+    expect(panel['imagePreviewUrl']()).toBe(SAVED_IMAGE_URL);
+    panel['startEdit']();
+    panel['chooseIcon'](BarServiceIcon.Coffee);
+    expect(panel['imagePreviewUrl']()).toBeNull();
+    panel['chooseImage'](IMAGE);
+    expect(panel['imagePreviewUrl']()).toBe('blob:image');
+    panel['cancelEdit']();
+    expect(panel['imagePreviewUrl']()).toBe(SAVED_IMAGE_URL);
+  });
+
+  it('should keep the icon in the data when an image is chosen: its upload takes it away', async () => {
+    const { panel, save, updateBarServiceGeneral } = await setup({
+      generalInfo: { icon: BarServiceIcon.Coffee, imageUrl: null },
+    });
+
+    panel['startEdit']();
+    panel['chooseImage'](IMAGE);
+    expect(panel['draftForm'].icon().value()).toBeNull();
+    await save();
+    expect(updateBarServiceGeneral.mock.calls[0][0].icon).toBe(BarServiceIcon.Coffee);
+  });
+
+  it('should take away an image not saved yet without asking, back to the icon read', async () => {
+    const deleteServiceImage = vi.fn((): Observable<void> => of(undefined));
+    const { panel } = await setup({
+      deleteServiceImage,
+      generalInfo: { icon: BarServiceIcon.Coffee, imageUrl: null },
+    });
+
+    panel['startEdit']();
+    panel['chooseImage'](IMAGE);
+    panel['removeImage']();
+    expect(panel['imagePreviewUrl']()).toBeNull();
+    expect(panel['draftForm'].icon().value()).toBe(BarServiceIcon.Coffee);
+    expect(panel.hasUnsavedChanges()).toBe(false);
+    expect(panel['isImageDeletionAsked']()).toBe(false);
+    expect(deleteServiceImage).not.toHaveBeenCalled();
+  });
+
+  it('should delete the saved image only once confirmed, only in Modifica', async () => {
+    const deleteServiceImage = vi.fn((): Observable<void> => of(undefined));
+    const { panel } = await setup({ deleteServiceImage });
+
+    panel['removeImage']();
+    expect(panel['isImageDeletionAsked']()).toBe(false);
+    panel['startEdit']();
+    panel['removeImage']();
+    expect(panel['isImageDeletionAsked']()).toBe(true);
+    expect(deleteServiceImage).not.toHaveBeenCalled();
+
+    panel['confirmImageDeletion']();
+    expect(deleteServiceImage).toHaveBeenCalledExactlyOnceWith('b5');
+    expect(panel['imagePreviewUrl']()).toBeNull();
+    expect(panel['isEditing']()).toBe(true);
+  });
+
+  it('should keep the image and say why when it cannot be deleted', async () => {
+    const { fixture, panel } = await setup({
+      deleteServiceImage: vi.fn(() =>
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 404,
+              error: { status: 404, code: ApiErrorCode.ServiceNotFound },
+            }),
+        ),
+      ),
+    });
+    const failures: string[] = [];
+    panel.failed.subscribe(({ code }) => failures.push(code));
+
+    panel['startEdit']();
+    panel['removeImage']();
+    panel['confirmImageDeletion']();
+    await fixture.whenStable();
+    expect(panel['imagePreviewUrl']()).toBe(SAVED_IMAGE_URL);
+    expect(panel['imageRemovalMessage']()).toBe('error.unknown');
+    expect(failures).toEqual([ApiErrorCode.ServiceNotFound]);
+  });
+
+  it('should upload the image chosen after the data of its tab', async () => {
+    const uploadServiceImage = vi.fn((): Observable<void> => of(undefined));
+    const { panel, save, updateBarServiceGeneral, updated } = await setup({ uploadServiceImage });
+
+    panel['startEdit']();
+    panel['chooseImage'](IMAGE);
+    await save();
+
+    expect(updateBarServiceGeneral).toHaveBeenCalledTimes(1);
+    expect(uploadServiceImage).toHaveBeenCalledExactlyOnceWith('b5', IMAGE);
+    expect(updateBarServiceGeneral.mock.invocationCallOrder[0]).toBeLessThan(
+      uploadServiceImage.mock.invocationCallOrder[0],
+    );
+    expect(panel.open()).toBe(false);
+    expect(updated()).toBe(1);
+  });
+
+  it('should close and say it when the data are saved but the image is refused', async () => {
+    const { panel, save, updated } = await setup({
+      uploadServiceImage: vi.fn(() =>
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 422,
+              error: { status: 422, code: ApiErrorCode.CatalogInvalidImage },
+            }),
+        ),
+      ),
+    });
+
+    panel['startEdit']();
+    panel['chooseImage'](IMAGE);
+    await save();
+
+    expect(panel.open()).toBe(false);
+    expect(updated()).toBe(1);
+    expect(panel['imageError']()?.code).toBe(ApiErrorCode.CatalogInvalidImage);
+  });
+
+  it('should send back an icon that is not one of the list, until one is chosen', async () => {
+    const { panel, save, updateBarServiceGeneral } = await setup({
+      generalInfo: { icon: 'Watermelon', imageUrl: null },
+    });
+
+    expect(panel['draftForm'].icon().value()).toBeNull();
+    panel['startEdit']();
+    await save();
+    expect(updateBarServiceGeneral.mock.calls[0][0].icon).toBe('Watermelon');
+
+    panel.open.set(true);
+    await new Promise((resolve) => setTimeout(resolve));
+    panel['startEdit']();
+    panel['chooseIcon'](BarServiceIcon.Cake);
+    await save();
+    expect(updateBarServiceGeneral.mock.calls[1][0].icon).toBe(BarServiceIcon.Cake);
+  });
+
+  it('should send back what the booking options have and the form has not', async () => {
+    const { fixture, panel, save, updateBarServiceBooking } = await setup();
+
+    await panel['requestTab'](2);
+    await fixture.whenStable();
+    panel['startEdit']();
+    panel['draftForm'].bookingOptions[0].maxBookingPerHourQuantity().value.set(25);
+    await save();
+
+    expect(updateBarServiceBooking.mock.calls[0][0].bookingOptions).toMatchObject([
+      { ...BOOKING_OPTION, maxBookingPerHourQuantity: 25 },
+    ]);
+  });
+
+  it('should read again a tab that could not be read, without its error', async () => {
+    const prices = vi.fn((): Observable<BarServiceSelectedPrices> =>
+      throwError(() => new HttpErrorResponse({ status: 500, error: null })),
+    );
+    const { fixture, panel } = await setup({ prices });
+
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    expect(panel['tabErrorMessage']()).not.toBeNull();
+    expect(panel['isEditDisabled']()).toBe(true);
+    await panel['requestTab'](0);
+    prices.mockReturnValue(of(Object.assign(new BarServiceSelectedPrices(), { price: 3 })));
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    expect(panel['tabErrorMessage']()).toBeNull();
+    expect(panel['isEditDisabled']()).toBe(false);
+    expect(panel.open()).toBe(true);
+  });
+
+  it('should forget a read still running when the panel is closed', async () => {
+    const { fixture, panel } = await setup();
+    const answer = new Subject<BarServiceSelectedGeneralInfo>();
+    vi.spyOn(panel['catalog'], 'barServiceGeneralInfo').mockReturnValue(answer);
+
+    panel.open.set(false);
+    await fixture.whenStable();
+    panel.open.set(true);
+    await fixture.whenStable();
+    panel.open.set(false);
+    await fixture.whenStable();
+    answer.error(new HttpErrorResponse({ status: 500, error: null }));
+    expect(panel['readError']()).toBeNull();
+  });
+
+  it('should tell of a version conflict once the tab is read again, or only that it cannot be', async () => {
+    const { fixture, panel, save, updateBarServiceGeneral } = await setup();
+    const read = vi.spyOn(panel['catalog'], 'barServiceGeneralInfo');
+    let failed = 0;
+    panel.failed.subscribe(({ code }) => {
+      failed += code === ApiErrorCode.ResourceVersionConflict ? 1 : 0;
+    });
+    updateBarServiceGeneral.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { status: 409, code: ApiErrorCode.ResourceVersionConflict },
+          }),
+      ),
+    );
+
+    panel['startEdit']();
+    panel['draftForm'].isHighlighted().value.set(true);
+    await save();
+    expect(panel['isConflictShown']()).toBe(true);
+    expect(panel['isEditing']()).toBe(false);
+    expect(panel['draft']().isHighlighted).toBe(false);
+    expect(failed).toBe(1);
+
+    panel['isConflictShown'].set(false);
+    read.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500, error: null })));
+    panel['startEdit']();
+    panel['draftForm'].isHighlighted().value.set(true);
+    await save();
+    await fixture.whenStable();
+    expect(panel['isConflictShown']()).toBe(false);
+    expect(panel['readError']()).not.toBeNull();
+    expect(panel.open()).toBe(false);
+  });
+
+  it('should read again the sectors or the periods that are no longer there', async () => {
+    const { fixture, panel, save, updateBarServicePrices } = await setup({
+      prices: vi.fn(() =>
+        of(
+          Object.assign(new BarServiceSelectedPrices(), {
+            price: 3,
+            idSectors: ['s2', 's1'],
+            isPeriodPricingEnabled: true,
+            periodPrices: [{ idPeriod: 1, price: 4 }],
+          }),
+        ),
+      ),
+    });
+    const periodsOf = (keys: number[]) =>
+      of(keys.map((key) => Object.assign(new SeasonPeriodItem(), { key })));
+    const readPeriods = vi.spyOn(panel['seasons'], 'periodList').mockReturnValue(periodsOf([1, 2]));
+    const readSectors = vi.spyOn(TestBed.inject(SectorService), 'sectorCombobox');
+    const refuse = (status: number, code: ApiErrorCode) =>
+      updateBarServicePrices.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status, error: { status, code } })),
+      );
+
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    panel['startEdit']();
+    panel['draftForm'].idSectors().value.set(['s1', 's2']);
+    expect(panel.hasUnsavedChanges()).toBe(false);
+    panel['draftForm'].periodPrices[1].price().value.set(5);
+
+    refuse(404, ApiErrorCode.CatalogSectorNotFound);
+    const sectorReads = readSectors.mock.calls.length;
+    await save();
+    expect(readSectors.mock.calls).toHaveLength(sectorReads + 1);
+    expect(panel['draft']().idSectors).toEqual(['s1', 's2']);
+
+    refuse(422, ApiErrorCode.PricingPeriodNotFound);
+    readPeriods.mockReturnValue(periodsOf([2, 3]));
+    await save();
+    expect(panel['error']()?.code).toBe(ApiErrorCode.PricingPeriodNotFound);
+    expect(panel['draft']().periodPrices).toMatchObject([
+      { idPeriod: 2, price: 5 },
+      { idPeriod: 3, price: null },
+    ]);
+    updateBarServicePrices.mockReturnValue(of('v2'));
+    await save();
+    expect(updateBarServicePrices.mock.lastCall?.[0].periodPrices).toMatchObject([
+      { idPeriod: 2, price: 5 },
+      { idPeriod: 3, price: null },
+      { idPeriod: 1, price: 4 },
+    ]);
+  });
+
+  it('should forget with Annulla the error of the backend on a field not changed', async () => {
+    const { fixture, panel, save, updateBarServicePrices } = await setup();
+    updateBarServicePrices.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 422,
+            error: {
+              status: 422,
+              code: ApiErrorCode.CatalogVatRateNotAllowed,
+              args: { rates: [10] },
+            },
+          }),
+      ),
+    );
+
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    panel['startEdit']();
+    panel['draftForm'].price().value.set(4);
+    await save();
+    expect(panel['draftForm'].vatRate().errors()).toHaveLength(1);
+    expect(panel['isSaveDisabled']()).toBe(true);
+    panel['cancelEdit']();
+    panel['startEdit']();
+    expect(panel['draftForm'].vatRate().errors()).toHaveLength(0);
+    expect(panel['isSaveDisabled']()).toBe(false);
+    expect(panel['draft']()).toMatchObject({ price: 3, vatRate: 22 });
+    expect(panel.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('should keep Salva off without a price, only in the Prezzi tab', async () => {
+    const { fixture, panel } = await setup();
+
+    panel['startEdit']();
+    expect(panel['isSaveDisabled']()).toBe(false);
+    panel['cancelEdit']();
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    panel['startEdit']();
+    expect(panel['isSaveDisabled']()).toBe(false);
+    panel['draftForm'].price().value.set(null);
+    expect(panel['isSaveDisabled']()).toBe(true);
+  });
+});

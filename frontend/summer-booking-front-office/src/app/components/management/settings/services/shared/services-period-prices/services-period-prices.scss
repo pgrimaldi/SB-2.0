@@ -95,6 +95,13 @@
   font-size: 0.75rem;
 }
 
+.services__period__prices__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
 @media (width < 48rem) {
   :host {
     padding-inline: 0.75rem;

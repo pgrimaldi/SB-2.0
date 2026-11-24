@@ -1,0 +1,80 @@
+<app-expansion-panel
+  class="public__holidays__section"
+  [title]="'management.settings.catalog.price_list.public_holidays.title' | translate"
+  [pathIcon]="sectionIcons"
+  [disabled]="!isIncludedValue()"
+  [(isExpanded)]="isExpanded"
+>
+  <app-checkbox
+    appExpansionPanelStart
+    [checked]="isChecked()"
+    [disabled]="isCheckboxLocked()"
+    (checkedChange)="toggle($event)"
+  />
+  <div class="public__holidays__content">
+    <app-button
+      class="public__holidays__add"
+      [appearance]="ButtonAppearance.Light"
+      [size]="ButtonSize.Small"
+      [pathIcon]="addIcon"
+      [disabled]="isLocked()"
+      (clicked)="isAdding.set(true)"
+    >
+      {{ 'management.settings.catalog.price_list.public_holidays.add' | translate }}
+    </app-button>
+    @if (dates()().value().length) {
+      <div class="public__holidays__grid">
+        <table class="public__holidays__table">
+          <thead>
+            <tr>
+              <th scope="col">
+                {{ 'management.settings.catalog.price_list.public_holidays.date' | translate }}
+              </th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (date of dates()().value(); track date) {
+              <tr>
+                <th scope="row">{{ day(date) }}</th>
+                <td>
+                  <app-icon-button
+                    class="public__holidays__delete"
+                    [label]="'table.actions.delete' | translate"
+                    [pathIcon]="deleteIcon"
+                    [disabled]="isLocked()"
+                    (click)="remove(date)"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</app-expansion-panel>
+@if (validationText.text(isIncluded()); as error) {
+  <p class="public__holidays__error">{{ error }}</p>
+}
+@if (validationText.text(dates()); as error) {
+  <p class="public__holidays__error">{{ error }}</p>
+}
+
+<app-confirm-popup
+  [pathIcon]="popupIcons"
+  [title]="'management.settings.catalog.price_list.public_holidays.disable.title' | translate"
+  [text]="'management.settings.catalog.price_list.public_holidays.disable.text' | translate"
+  [texts]="'management.settings.catalog.price_list.public_holidays.disable' | translate"
+  [danger]="true"
+  [open]="isAskingOff()"
+  (openChange)="closeOff($event)"
+  (confirmed)="confirmOff()"
+/>
+
+<app-public-holiday-add-popup
+  [pathIcon]="popupIcons"
+  [takenDates]="dates()().value()"
+  [(open)]="isAdding"
+  (confirmed)="add($event)"
+/>

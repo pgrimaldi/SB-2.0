@@ -1,4 +1,4 @@
 export class ServicePeriodPrice {
-  idPeriod: string | null = null;
+  idPeriod: number | null = null;
   price: number | null = null;
 }

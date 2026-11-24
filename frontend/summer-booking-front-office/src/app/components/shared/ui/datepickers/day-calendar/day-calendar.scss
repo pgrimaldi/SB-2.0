@@ -1,0 +1,92 @@
+@use '@angular/material' as mat;
+
+// A page can change the box with --day-calendar-background and the calendar's width with
+// --day-calendar-width (28rem).
+app-day-calendar {
+  display: block;
+}
+
+.day__calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 1rem;
+  border-radius: 0.3125rem;
+  background: var(--day-calendar-background, var(--color__layout__highlight));
+}
+
+.day__calendar__calendar {
+  @include mat.datepicker-overrides(
+    (
+      calendar-container-background-color: transparent,
+      calendar-text-size: 0.75rem,
+      calendar-body-label-text-size: 0.75rem,
+      calendar-header-text-size: 0.75rem,
+      calendar-header-text-weight: 600,
+      calendar-header-text-color: var(--color__main__theme__one),
+      calendar-header-divider-color: transparent,
+      calendar-date-text-color: var(--color__main__theme__one),
+      calendar-date-hover-state-background-color: var(--color__layout__surface),
+      calendar-date-focus-state-background-color: var(--color__layout__surface),
+      calendar-date-today-outline-color: transparent,
+    )
+  );
+
+  width: min(100%, var(--day-calendar-width, 28rem));
+  align-self: center;
+
+  .mat-calendar-content {
+    padding: 0 0.25rem;
+  }
+
+  .mat-calendar-table-header-divider {
+    display: none;
+  }
+
+  // Rows lower than wide.
+  .mat-calendar-body-cell-container {
+    padding-top: 8% !important;
+    padding-bottom: 0 !important;
+  }
+
+  // Round days, as tall as their row.
+  .mat-calendar-body-cell-content {
+    left: 50%;
+    width: auto;
+    aspect-ratio: 1;
+    translate: -50%;
+  }
+
+  // No month name inside the grid: the header already says it. Its row as low as the others.
+  .mat-calendar-body-label {
+    visibility: hidden;
+    padding: 0 !important;
+  }
+
+  tr:has(> .mat-calendar-body-label:only-child) {
+    display: none;
+  }
+}
+
+// The chosen days: dark blue circles, also under the mouse.
+.day__calendar__chosen {
+  @include mat.datepicker-overrides(
+    (
+      calendar-date-text-color: var(--color__layout__on__main),
+      calendar-date-hover-state-background-color: var(--color__main__theme__one),
+      calendar-date-focus-state-background-color: var(--color__main__theme__one),
+    )
+  );
+
+  > .mat-calendar-body-cell-content {
+    background: var(--color__main__theme__one);
+  }
+}
+
+.day__calendar__hint {
+  margin: 0;
+  color: var(--color__layout__text__soft);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  text-align: center;
+}

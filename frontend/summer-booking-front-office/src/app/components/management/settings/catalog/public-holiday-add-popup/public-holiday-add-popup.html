@@ -1,0 +1,33 @@
+<ng-template #content>
+  <div class="public__holiday__add__popup">
+    <h2 class="public__holiday__add__popup__title">
+      {{ 'management.settings.catalog.price_list.public_holidays.add' | translate }}
+    </h2>
+
+    <app-day-calendar
+      [texts]="'management.settings.catalog.price_list.public_holidays' | translate"
+      [pathIcon]="calendarIcons"
+      [disabledDates]="takenDates()"
+      [(value)]="dates"
+    />
+
+    <div class="public__holiday__add__popup__buttons">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        (clicked)="leave()"
+      >
+        {{ 'management.settings.catalog.price_list.public_holidays.cancel' | translate }}
+      </app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="!dates().length"
+        (clicked)="confirm()"
+      >
+        {{ 'management.settings.catalog.price_list.public_holidays.confirm' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

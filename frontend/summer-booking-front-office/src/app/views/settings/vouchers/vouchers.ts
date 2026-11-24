@@ -21,6 +21,8 @@ import {
   TableRowId,
 } from '../../../components/shared/ui/tables/table/table';
 import { DiscountType } from '../../../entities/enums/discount-type';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../entities/errors/api-problem';
 import { VoucherService } from '../../../services/api/vouchers/voucher.service';
 
 interface VouchersTexts {
@@ -84,10 +86,9 @@ export class Vouchers {
   protected readonly duplicating = signal(false);
   protected readonly idVouchersToDuplicate = signal<readonly string[]>([]);
   protected readonly voucherNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/Vouchers_Title.svg'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -131,7 +132,7 @@ export class Vouchers {
     edit: ({ idVoucher }) => idVoucher && this.openEdit(idVoucher),
   });
 
-  protected readonly load: TableLoad<{ idProperty: string }, VoucherRow> = (request) =>
+  protected readonly load: TableLoad<object, VoucherRow> = (request) =>
     this.vouchers.voucherList(request).pipe(
       switchMap((page) =>
         (
@@ -147,12 +148,12 @@ export class Vouchers {
               style: 'percent',
               maximumFractionDigits: 2,
             });
-            const amount = new Intl.NumberFormat(locale, {
-              style: 'currency',
-              currency: 'EUR',
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 2,
-            });
+            const amount = (value: number) =>
+              new Intl.NumberFormat(locale, {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+              }).format(value);
             return {
               total: page.total,
               rows: page.rows.map((item): VoucherRow => ({
@@ -167,7 +168,7 @@ export class Vouchers {
                     ? null
                     : item.discountType === DiscountType.Percentage
                       ? percentage.format(item.discountValue / 100)
-                      : amount.format(item.discountValue),
+                      : amount(item.discountValue),
               })),
             };
           }),
@@ -175,10 +176,10 @@ export class Vouchers {
       ),
     );
 
-  protected readonly deleteVouchers = (idProperty: string, idVouchers: string[]) =>
-    this.vouchers.deleteVoucherItems({ idProperty, idVouchers });
-  protected readonly duplicateVouchers = (idProperty: string, idVouchers: string[]) =>
-    this.vouchers.duplicateVoucherItems({ idProperty, idVouchers });
+  protected readonly deleteVouchers = (idVouchers: string[]) =>
+    this.vouchers.deleteVoucherItems(idVouchers);
+  protected readonly duplicateVouchers = (idVouchers: string[]) =>
+    this.vouchers.duplicateVoucherItems(idVouchers);
 
   protected askDelete(idVouchers: readonly TableRowId[], voucherName: string | null = null): void {
     this.idVouchersToDelete.set(idVouchers.map(String));
@@ -200,16 +201,32 @@ export class Vouchers {
     this.editing.set(true);
   }
 
-  /** Only after "Duplica selezione" (no name): the chosen rows are done with. */
   protected afterDuplicate(): void {
     if (this.voucherNameToDuplicate() === null) {
       this.idSelectedVouchers.set([]);
     }
   }
 
-  protected forgetDeleted(idVouchers: readonly string[]): void {
+  protected forgetDeleted(idVouchers: readonly (string | null)[]): void {
     this.idSelectedVouchers.update((idSelected) =>
       idSelected.filter((idSelectedVoucher) => !idVouchers.includes(String(idSelectedVoucher))),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idVouchers: readonly (string | null)[],
+  ): void {
+    if (problem.code === ApiErrorCode.PricingDiscountNotFound) {
+      this.forgetDeleted(idVouchers);
+      table.reload();
+    }
+  }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+      table.reload();
+    }
   }
 }

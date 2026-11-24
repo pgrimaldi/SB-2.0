@@ -1,26 +1,24 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ContactSupportRequest } from '../../../entities/settings/contact-support/contact-support-request';
 import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { EmailConfigurationData } from '../../../entities/settings/email-configuration/email-configuration-data';
 import { EmailConfigurationRequest } from '../../../entities/settings/email-configuration/email-configuration-request';
 import { onlyFieldsOf } from '../only-fields-of';
+import { ifMatch, versionOf } from '../versions/version-headers';
 
 @Injectable({ providedIn: 'root' })
 export class SystemService {
   private readonly httpClient = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/system`;
 
-  readonly supportInfo = (idProperty: string): Observable<SupportInfo> =>
-    this.httpClient.post<SupportInfo>(`${this.endpoint}/info-support`, { idProperty });
+  readonly supportInfo = (): Observable<SupportInfo> =>
+    this.httpClient.post<SupportInfo>(`${this.endpoint}/info-support`, null);
 
-  /** GET: the property travels in the query string (`?idProperty=…`). */
-  readonly emailConfiguration = (idProperty: string): Observable<EmailConfigurationData> =>
-    this.httpClient.get<EmailConfigurationData>(`${this.endpoint}/email-configuration`, {
-      params: { idProperty },
-    });
+  readonly emailConfiguration = (): Observable<EmailConfigurationData> =>
+    this.httpClient.get<EmailConfigurationData>(`${this.endpoint}/email-configuration`);
 
   /** The backend sends a test email with these settings. Answers 204 with no body. */
   readonly sendTestEmail = (request: EmailConfigurationRequest): Observable<void> =>
@@ -29,18 +27,22 @@ export class SystemService {
       onlyFieldsOf(EmailConfigurationRequest, request),
     );
 
-  /** Answers 204 with no body. */
-  readonly saveEmailConfiguration = (request: EmailConfigurationRequest): Observable<void> =>
-    this.httpClient.post<void>(
-      `${this.endpoint}/save-email-configuration`,
-      onlyFieldsOf(EmailConfigurationRequest, request),
-    );
+  /** Answers 204 with no body and the new version. */
+  readonly saveEmailConfiguration = (
+    request: EmailConfigurationRequest,
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/save-email-configuration`,
+        onlyFieldsOf(EmailConfigurationRequest, request),
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
   /** The id of the Stripe account connected to the property; null while none is connected. */
-  readonly stripeInformation = (idProperty: string): Observable<string | null> =>
-    this.httpClient.get<string | null>(`${this.endpoint}/get-stripe-information`, {
-      params: { idProperty },
-    });
+  readonly stripeInformation = (): Observable<string | null> =>
+    this.httpClient.get<string | null>(`${this.endpoint}/get-stripe-information`);
 
   /** The backend sends the message to the support team. Answers 204 with no body. */
   readonly contactSupport = (request: ContactSupportRequest): Observable<void> =>

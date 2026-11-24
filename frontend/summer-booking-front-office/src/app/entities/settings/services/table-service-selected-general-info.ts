@@ -4,4 +4,5 @@ export class TableServiceSelectedGeneralInfo {
   idTableService: string | null = null;
   translations: ServiceTranslation[] = [];
   isHighlighted: boolean | null = null;
+  version: string | null = null;
 }

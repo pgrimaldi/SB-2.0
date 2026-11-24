@@ -6,6 +6,8 @@ import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { GeneralServiceAddItemPanel } from '../../../../components/management/settings/services/general-service-add-item-panel/general-service-add-item-panel';
 import { GeneralServiceEditItemPanel } from '../../../../components/management/settings/services/general-service-edit-item-panel/general-service-edit-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
@@ -63,10 +65,9 @@ export class ServicesGeneral {
   protected readonly duplicating = signal(false);
   protected readonly idStandardServicesToDuplicate = signal<readonly string[]>([]);
   protected readonly standardServiceNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/Services_StandardTitle.png'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -100,7 +101,7 @@ export class ServicesGeneral {
     edit: ({ idStandardService }) => idStandardService && this.openEdit(idStandardService),
   });
 
-  protected readonly load: TableLoad<{ idProperty: string }, StandardServiceRow> = (request) =>
+  protected readonly load: TableLoad<object, StandardServiceRow> = (request) =>
     this.catalog.standardServiceList(request).pipe(
       map((page) => {
         const amount = new Intl.NumberFormat(this.dateLanguage.locale(), {
@@ -117,12 +118,10 @@ export class ServicesGeneral {
       }),
     );
 
-  protected readonly deleteStandardServices = (idProperty: string, idStandardServices: string[]) =>
-    this.catalog.deleteStandardServiceItems({ idProperty, idStandardServices });
-  protected readonly duplicateStandardServices = (
-    idProperty: string,
-    idStandardServices: string[],
-  ) => this.catalog.duplicateStandardServiceItems({ idProperty, idStandardServices });
+  protected readonly deleteStandardServices = (idStandardServices: string[]) =>
+    this.catalog.deleteStandardServiceItems(idStandardServices);
+  protected readonly duplicateStandardServices = (idStandardServices: string[]) =>
+    this.catalog.duplicateStandardServiceItems(idStandardServices);
 
   protected openEdit(idStandardService: string): void {
     this.idStandardServiceToEdit.set(idStandardService);
@@ -154,12 +153,29 @@ export class ServicesGeneral {
     }
   }
 
-  protected forgetDeleted(idStandardServices: readonly string[]): void {
+  protected forgetDeleted(idStandardServices: readonly (string | null)[]): void {
     this.idSelectedStandardServices.update((idSelected) =>
       idSelected.filter(
         (idSelectedStandardService) =>
           !idStandardServices.includes(String(idSelectedStandardService)),
       ),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idStandardServices: readonly (string | null)[],
+  ): void {
+    if (problem.code === ApiErrorCode.ServiceNotFound) {
+      this.forgetDeleted(idStandardServices);
+      table.reload();
+    }
+  }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+      table.reload();
+    }
   }
 }

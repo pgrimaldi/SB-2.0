@@ -7,4 +7,5 @@ export class StandardServiceSelectedPrices {
   periodPrices: ServicePeriodPrice[] = [];
   idSectors: string[] = [];
   isOnlinePurchaseEnabled: boolean | null = null;
+  version: string | null = null;
 }

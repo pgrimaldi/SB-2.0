@@ -9,21 +9,21 @@
         [label]="'management.settings.seasons.add_interval_popup.date_from' | translate"
         [isMandatory]="true"
         [pathIcon]="dateIcon"
-        [minDate]="season()?.dateFrom ?? null"
-        [maxDate]="season()?.dateTo ?? null"
+        [minDate]="season()?.startsOn ?? null"
+        [maxDate]="season()?.endsOn ?? null"
         [disabledPeriods]="seasonIntervals()"
-        [formField]="draftForm.dateFrom"
-        [error]="dateFromError()"
+        [formField]="draftForm.startsOn"
+        [error]="startsOnError()"
       />
       <app-filled-date-field
         [label]="'management.settings.seasons.add_interval_popup.date_to' | translate"
         [isMandatory]="true"
         [pathIcon]="dateIcon"
-        [minDate]="dateToMin()"
-        [maxDate]="dateToMax()"
+        [minDate]="endsOnMin()"
+        [maxDate]="endsOnMax()"
         [disabledPeriods]="seasonIntervals()"
-        [formField]="draftForm.dateTo"
-        [error]="dateToError()"
+        [formField]="draftForm.endsOn"
+        [error]="endsOnError()"
       />
     </div>
 
@@ -57,3 +57,4 @@
     </div>
   </div>
 </ng-template>
+<app-version-conflict-popup [pathIcon]="pathIcon()" [(open)]="isConflictShown" />

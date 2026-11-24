@@ -1,4 +1,8 @@
-<app-services-price-vat [price]="form().price" [vatRate]="form().vatRate" />
+<app-services-price-vat
+  [price]="form().price"
+  [vatRate]="form().vatRate"
+  [isPriceMandatory]="true"
+/>
 
 <app-services-popup-alternatives [form]="form().variants" [isReadonly]="isReadonly()" />
 
@@ -8,8 +12,11 @@
   [periods]="periods()"
 />
 
-<app-services-limits [form]="form().idSectors" />
+<app-services-limits [form]="form().idSectors" [sectorsVersion]="sectorsVersion()" />
 
-<app-toggle [formField]="form().isOnlinePurchaseEnabled">
+<app-toggle
+  [formField]="form().isOnlinePurchaseEnabled"
+  [error]="validationText.text(form().isOnlinePurchaseEnabled)"
+>
   {{ 'management.settings.services.form.prices.online_purchase' | translate }}
 </app-toggle>

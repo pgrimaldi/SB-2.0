@@ -1,0 +1,67 @@
+<app-page-title
+  class="additional__items__title"
+  [text]="'management.settings.catalog.additional_items.title' | translate"
+/>
+<app-table
+  #table
+  [columns]="columns()"
+  [params]="params()"
+  [load]="load"
+  idField="idAdditionalItem"
+  [texts]="'table' | translate"
+  [isSearchable]="true"
+  [useAppTheme]="false"
+  [areMassiveActionsHidden]="false"
+  [isCreateButtonHidden]="false"
+  [createLabel]="'management.settings.catalog.additional_items.create' | translate"
+  [rowActions]="rowActions()"
+  [(selection)]="idSelectedAdditionalItems"
+  [pathIcon]="tableIcons"
+  (loadError)="loadFailed.set(true)"
+  (deleteSelected)="askDelete($event)"
+  (duplicateSelected)="askDuplicate($event)"
+  (create)="adding.set(true)"
+/>
+
+<app-additional-item-add-item-panel
+  [pathIcon]="closeIcon"
+  [(open)]="adding"
+  (created)="table.reload()"
+/>
+<app-additional-item-edit-item-panel
+  [pathIcon]="closeIcon"
+  [idAdditionalItem]="idAdditionalItemToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+  (failed)="reloadIfGone($event, table, [idAdditionalItemToEdit()]); reloadIfChanged($event, table)"
+/>
+
+<app-delete-items-popup
+  [idItems]="idAdditionalItemsToDelete()"
+  [itemName]="additionalItemNameToDelete()"
+  translationKey="management.settings.catalog.additional_items.delete"
+  [action]="deleteAdditionalItems"
+  [pathIcon]="alertIcons"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idAdditionalItemsToDelete())"
+/>
+<app-duplicate-items-popup
+  [idItems]="idAdditionalItemsToDuplicate()"
+  [itemName]="additionalItemNameToDuplicate()"
+  translationKey="management.settings.catalog.additional_items.duplicate"
+  [action]="duplicateAdditionalItems"
+  [pathIcon]="alertIcons"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idAdditionalItemsToDuplicate())"
+/>
+
+<app-table-error-popup
+  [pathIcon]="closeIcon"
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

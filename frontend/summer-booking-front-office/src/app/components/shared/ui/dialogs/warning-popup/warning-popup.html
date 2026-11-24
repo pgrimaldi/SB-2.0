@@ -1,0 +1,38 @@
+<ng-template #content>
+  <div class="warning__popup">
+    <h2 class="warning__popup__title">
+      @if (icons().list[1]; as icon) {
+        @if (icons().material) {
+          <mat-icon class="warning__popup__icon">{{ icon }}</mat-icon>
+        } @else {
+          <img class="warning__popup__icon" [src]="icon" width="24" height="24" alt="" />
+        }
+      }
+      {{ title() }}
+    </h2>
+    @if (text()) {
+      <p class="warning__popup__text">{{ text() }}</p>
+    }
+    @if (error(); as error) {
+      <p class="warning__popup__error">{{ error }}</p>
+    }
+    <div class="warning__popup__actions">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [isFullWidth]="true"
+        [disabled]="isLoading()"
+        (clicked)="close()"
+      >
+        {{ texts()?.cancel }}
+      </app-button>
+      <app-button
+        class="warning__popup__confirm"
+        [isFullWidth]="true"
+        [isLoading]="isLoading()"
+        (clicked)="confirmed.emit()"
+      >
+        {{ texts()?.confirm }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

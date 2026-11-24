@@ -15,6 +15,8 @@ import {
   TableRowId,
 } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { HourlyServiceItem } from '../../../../entities/settings/services/hourly-service-item';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 
@@ -54,10 +56,9 @@ export class ServicesHourly {
   protected readonly duplicating = signal(false);
   protected readonly idHourlyServicesToDuplicate = signal<readonly string[]>([]);
   protected readonly hourlyServiceNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/Services_HourlyTitle.png'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -90,10 +91,10 @@ export class ServicesHourly {
     edit: ({ idHourlyService }) => idHourlyService && this.openEdit(idHourlyService),
   });
 
-  protected readonly deleteHourlyServices = (idProperty: string, idHourlyServices: string[]) =>
-    this.catalog.deleteHourlyServiceItems({ idProperty, idHourlyServices });
-  protected readonly duplicateHourlyServices = (idProperty: string, idHourlyServices: string[]) =>
-    this.catalog.duplicateHourlyServiceItems({ idProperty, idHourlyServices });
+  protected readonly deleteHourlyServices = (idHourlyServices: string[]) =>
+    this.catalog.deleteHourlyServiceItems(idHourlyServices);
+  protected readonly duplicateHourlyServices = (idHourlyServices: string[]) =>
+    this.catalog.duplicateHourlyServiceItems(idHourlyServices);
 
   protected openEdit(idHourlyService: string): void {
     this.idHourlyServiceToEdit.set(idHourlyService);
@@ -125,11 +126,28 @@ export class ServicesHourly {
     }
   }
 
-  protected forgetDeleted(idHourlyServices: readonly string[]): void {
+  protected forgetDeleted(idHourlyServices: readonly (string | null)[]): void {
     this.idSelectedHourlyServices.update((idSelected) =>
       idSelected.filter(
         (idSelectedHourlyService) => !idHourlyServices.includes(String(idSelectedHourlyService)),
       ),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idHourlyServices: readonly (string | null)[],
+  ): void {
+    if (problem.code === ApiErrorCode.ServiceNotFound) {
+      this.forgetDeleted(idHourlyServices);
+      table.reload();
+    }
+  }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+      table.reload();
+    }
   }
 }

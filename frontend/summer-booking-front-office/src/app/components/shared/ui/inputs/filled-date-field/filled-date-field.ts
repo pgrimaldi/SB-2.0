@@ -20,8 +20,8 @@ let nextId = 0;
 
 /** First and last day of a period, each at midnight UTC as an ISO string. */
 export interface FilledDateFieldPeriod {
-  dateFrom: string | null;
-  dateTo: string | null;
+  startsOn: string | null;
+  endsOn: string | null;
 }
 
 /**
@@ -66,9 +66,9 @@ export class FilledDateField {
   protected readonly maxDay = computed(() => localDay(this.maxDate()));
   protected readonly isLocked = computed(() => this.readonly() || this.disabled());
   protected readonly dateFilter = computed(() => {
-    const disabled = this.disabledPeriods().flatMap(({ dateFrom, dateTo }) => {
-      const start = localDay(dateFrom);
-      const end = localDay(dateTo);
+    const disabled = this.disabledPeriods().flatMap(({ startsOn, endsOn }) => {
+      const start = localDay(startsOn);
+      const end = localDay(endsOn);
       return start && end ? [{ start, end }] : [];
     });
     return (date: Date | null): boolean =>

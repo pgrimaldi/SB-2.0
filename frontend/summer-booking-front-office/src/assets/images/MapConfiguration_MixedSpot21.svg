@@ -1,0 +1,18 @@
+<svg width="65" height="65" viewBox="0 0 65 65" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs><radialGradient id="disc" cx="34.5" cy="32.5" r="22.8" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#BCA982"/><stop offset="0.06" stop-color="#B9A57E"/><stop offset="0.13" stop-color="#AF9A71"/><stop offset="0.19" stop-color="#A48E64"/><stop offset="0.26" stop-color="#988256"/><stop offset="0.32" stop-color="#8D7648"/><stop offset="0.35" stop-color="#846C41"/><stop offset="0.39" stop-color="#856D46"/><stop offset="0.45" stop-color="#90794D"/><stop offset="0.52" stop-color="#8C7447"/><stop offset="0.58" stop-color="#80673F"/><stop offset="0.61" stop-color="#866E45"/><stop offset="0.68" stop-color="#90794C"/><stop offset="0.74" stop-color="#8C7447"/><stop offset="0.81" stop-color="#876F42"/><stop offset="0.84" stop-color="#7D643A"/><stop offset="0.87" stop-color="#7E663C"/><stop offset="0.94" stop-color="#897144"/><stop offset="1" stop-color="#836B3E"/></radialGradient><filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="0.8"/></filter></defs>
+<rect x="2.5" y="2.5" width="60" height="60" stroke="#957B5F" stroke-width="1.1"/>
+<circle cx="2.5" cy="2.5" r="2.4" fill="#957B5F"/>
+<circle cx="2.5" cy="22.5" r="2.4" fill="#957B5F"/>
+<circle cx="2.5" cy="42.5" r="2.4" fill="#957B5F"/>
+<circle cx="2.5" cy="62.5" r="2.4" fill="#957B5F"/>
+<circle cx="22.5" cy="2.5" r="2.4" fill="#957B5F"/>
+<circle cx="22.5" cy="62.5" r="2.4" fill="#957B5F"/>
+<circle cx="42.5" cy="2.5" r="2.4" fill="#957B5F"/>
+<circle cx="42.5" cy="62.5" r="2.4" fill="#957B5F"/>
+<circle cx="62.5" cy="2.5" r="2.4" fill="#957B5F"/>
+<circle cx="62.5" cy="22.5" r="2.4" fill="#957B5F"/>
+<circle cx="62.5" cy="42.5" r="2.4" fill="#957B5F"/>
+<circle cx="62.5" cy="62.5" r="2.4" fill="#957B5F"/>
+<circle cx="34.5" cy="32.5" r="23.26" fill="#381700" opacity="0.35" filter="url(#soft)"/>
+<circle cx="34.5" cy="32.5" r="22.8" fill="url(#disc)"/>
+</svg>

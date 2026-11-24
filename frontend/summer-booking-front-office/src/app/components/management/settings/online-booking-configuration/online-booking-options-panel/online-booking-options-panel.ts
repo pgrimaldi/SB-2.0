@@ -13,7 +13,10 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormField, applyWhen, form, max } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
+import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
@@ -25,7 +28,8 @@ import { SupplementType } from '../../../../../entities/enums/supplement-type';
 import { BookingLimitRule } from '../../../../../entities/settings/online-booking-configuration/booking-limit-rule';
 import { LegendItem } from '../../../../../entities/settings/online-booking-configuration/legend-item';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
-import { greaterThan } from '../../../../shared/forms/validators';
+import { SectorService } from '../../../../../services/api/catalog/sector.service';
+import { greaterThan, timeRange } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
@@ -42,6 +46,7 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface BookingOptionsTexts {
   supplement_types: Record<'none' | 'percentage' | 'fixed', string>;
@@ -109,8 +114,11 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   readonly pathIcon = input<readonly string[] | null>();
 
   private readonly translateService = inject(TranslateService);
+  private readonly auth = inject(AuthBehaviour);
+  private readonly sectorService = inject(SectorService);
+  private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
-  private readonly validationText = inject(ValidationTextBehaviour);
+  protected readonly validationText = inject(ValidationTextBehaviour);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
@@ -133,12 +141,13 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     '/assets/images/GeneralIcon_OrderedList.svg',
     '/assets/images/GeneralIcon_TextLink.svg',
   ] as const;
-  /** Example rows until an API gives the rows and sectors of the property. */
-  protected readonly sectorOptions: readonly SelectOption[] = [
-    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01', label: 'Fila 1' },
-    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e02', label: 'Fila 2' },
-    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e03', label: 'Fila 3' },
-  ];
+  protected readonly sectors = new DropdownList(
+    () => (this.auth.user()?.propertyId ? this.sectorService.sectorCombobox() : EMPTY),
+    this.errorText,
+  );
+  protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
+    this.sectors.items().map(({ id, value }) => ({ value: id, label: value })),
+  );
 
   private readonly draft = signal(new OnlineBookingOptions());
   protected readonly draftForm = form(this.draft, (path) => {
@@ -150,6 +159,8 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     max(path.supplementValue, ({ valueOf }) =>
       valueOf(path.supplementType) === SupplementType.Percentage ? 100 : undefined,
     );
+    timeRange(path.morningStartTime, path.morningEndTime);
+    timeRange(path.afternoonStartTime, path.afternoonEndTime);
   });
   protected readonly halfDays = [
     {
@@ -218,7 +229,10 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
-        untracked(() => this.reset());
+        untracked(() => {
+          this.reset();
+          this.sectors.load();
+        });
       }
     });
     effect(() => {
@@ -253,7 +267,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
 
   hasUnsavedChanges(): boolean {
     return (
-      this.open() && JSON.stringify(this.draft()) !== JSON.stringify(new OnlineBookingOptions())
+      this.open() && comparableJson(this.draft()) !== comparableJson(new OnlineBookingOptions())
     );
   }
 
@@ -290,9 +304,11 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   private reset(): void {
     this.draft.set(new OnlineBookingOptions());
     this.draftForm().reset();
+    this.sectors.clear();
   }
 
   ngOnDestroy(): void {
+    this.sectors.destroy();
     this.unsaved.unwatch(this);
   }
 }

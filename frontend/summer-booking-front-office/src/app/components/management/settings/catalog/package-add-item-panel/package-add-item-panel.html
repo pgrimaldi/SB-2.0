@@ -1,0 +1,45 @@
+<app-side-panel
+  [title]="'management.settings.catalog.packages.form.add_title' | translate"
+  [texts]="'management.settings.catalog.packages.form' | translate"
+  [pathIcon]="pathIcon()"
+  [isLoading]="isSaving()"
+  [isSaveDisabled]="isSaveDisabled()"
+  [(open)]="open"
+  (closeRequest)="leave()"
+  (save)="save()"
+>
+  <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
+    @if (selectedTab() === PanelTab.GeneralInfo) {
+      <app-package-general-info-tab
+        [attr.inert]="isFetchingArticles() ? '' : null"
+        [form]="draftForm"
+        [mainLanguage]="mainLanguage()"
+        [sectors]="sectorList"
+        [sectorAreas]="sectorAreaList"
+        [isPanelOpen]="open()"
+        [articles]="articles()"
+      />
+    } @else if (selectedTab() === PanelTab.PriceList) {
+      <app-price-list-tab
+        [attr.inert]="isFetching() ? '' : null"
+        [form]="draftForm"
+        [sectors]="sectors()"
+        [periods]="periods()"
+        [isLoaded]="isPriceListLoaded()"
+        [isIntermediatePricesEnabled]="!!packageName()"
+        [itemName]="packageName()"
+      >
+        <app-package-reduced-price
+          [reducedSeasonalPrices]="draftForm.reducedSeasonalPrices"
+          [draftForm]="reducedSeasonalPriceForm"
+          [(editedIndex)]="reducedSeasonalPriceIndex"
+          [sectors]="sectors()"
+          [isLoaded]="isPriceListLoaded()"
+        />
+      </app-price-list-tab>
+    }
+    @if (errorMessage(); as errorMessage) {
+      <p class="package__add__item__panel__error">{{ errorMessage }}</p>
+    }
+  </app-tab-group>
+</app-side-panel>

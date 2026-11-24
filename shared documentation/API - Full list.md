@@ -112,7 +112,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -149,7 +148,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -176,15 +174,11 @@ Nessun corpo (204).
 
 ## Informazioni stabilimento
 
-### GET `/api/catalog/bathhouse-configuration-general?idProperty={idProperty}`
+### GET `/api/catalog/property-info/bathhouse-configuration-general`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -206,99 +200,101 @@ Nessun corpo (204).
   "description": "string (HTML) | null",
   "openingTime": "string (HH:mm) | null",
   "closingTime": "string (HH:mm) | null",
-  "cancellationPolicy": "string (enum CancellationPolicy) | null",
-  "petPolicy": "string (enum PetPolicy) | null",
+  "isFreeCancellation": "boolean",
+  "cancellationNoticeHours": "number (intero) | null",
+  "petPolicy": "string (enum PetPolicy)",
+  "regulation": "string (HTML) | null",
+  "version": "string"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `bathhouseName` | string \| null |
+| `address` | string \| null |
+| `postalCode` | string \| null |
+| `city` | string \| null |
+| `province` | string \| null |
+| `region` | string \| null |
+| `country` | string (ISO 3166-1 alpha-2) \| null |
+| `phone` | string \| null |
+| `whatsapp` | string \| null |
+| `email` | string \| null |
+| `website` | string \| null |
+| `facebook` | string \| null |
+| `instagram` | string \| null |
+| `description` | string (HTML) \| null |
+| `openingTime` | string (HH:mm) \| null |
+| `closingTime` | string (HH:mm) \| null |
+| `isFreeCancellation` | boolean |
+| `cancellationNoticeHours` | number (intero) \| null |
+| `petPolicy` | string (enum PetPolicy) |
+| `regulation` | string (HTML) \| null |
+| `version` | string |
+
+### GET `/api/catalog/lookups/countries`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "code": "string (ISO 3166-1 alpha-2)",
+    "name": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].code` | string (ISO 3166-1 alpha-2) |
+| `[].name` | string |
+
+### POST `/api/catalog/property-info/save-bathhouse-configuration-general`
+
+**Payload JSON**
+
+```json
+{
+  "bathhouseName": "string | null",
+  "address": "string | null",
+  "postalCode": "string | null",
+  "city": "string | null",
+  "province": "string | null",
+  "region": "string | null",
+  "country": "string (ISO 3166-1 alpha-2) | null",
+  "phone": "string | null",
+  "whatsapp": "string | null",
+  "email": "string | null",
+  "website": "string | null",
+  "facebook": "string | null",
+  "instagram": "string | null",
+  "description": "string (HTML) | null",
+  "openingTime": "string (HH:mm) | null",
+  "closingTime": "string (HH:mm) | null",
+  "isFreeCancellation": "boolean",
+  "cancellationNoticeHours": "number (intero) | null",
+  "petPolicy": "string (enum PetPolicy)",
   "regulation": "string (HTML) | null"
 }
 ```
 
-**Payload tabella** (query string)
-
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
-
-**Response tabella**
-
-| Campo | Tipo |
-|---|---|
-| `bathhouseName` | string \| null |
-| `address` | string \| null |
-| `postalCode` | string \| null |
-| `city` | string \| null |
-| `province` | string \| null |
-| `region` | string \| null |
-| `country` | string (ISO 3166-1 alpha-2) \| null |
-| `phone` | string \| null |
-| `whatsapp` | string \| null |
-| `email` | string \| null |
-| `website` | string \| null |
-| `facebook` | string \| null |
-| `instagram` | string \| null |
-| `description` | string (HTML) \| null |
-| `openingTime` | string (HH:mm) \| null |
-| `closingTime` | string (HH:mm) \| null |
-| `cancellationPolicy` | string (enum CancellationPolicy) \| null |
-| `petPolicy` | string (enum PetPolicy) \| null |
-| `regulation` | string (HTML) \| null |
-
-### GET `/api/catalog/countries-combobox`
-
-**Payload JSON**
-
-Nessun payload.
-
-**Response JSON**
-
-```json
-[
-  {
-    "id": "string (ISO 3166-1 alpha-2)",
-    "value": "string"
-  }
-]
-```
-
-**Payload tabella**
-
-Nessun payload.
-
-**Response tabella**
-
-| Campo | Tipo |
-|---|---|
-| `[].id` | string (ISO 3166-1 alpha-2) |
-| `[].value` | string |
-
-### POST `/api/catalog/save-bathhouse-configuration-general`
-
-**Payload JSON**
-
-```json
-{
-  "bathhouseName": "string | null",
-  "address": "string | null",
-  "postalCode": "string | null",
-  "city": "string | null",
-  "province": "string | null",
-  "region": "string | null",
-  "country": "string (ISO 3166-1 alpha-2) | null",
-  "phone": "string | null",
-  "whatsapp": "string | null",
-  "email": "string | null",
-  "website": "string | null",
-  "facebook": "string | null",
-  "instagram": "string | null",
-  "description": "string (HTML) | null",
-  "openingTime": "string (HH:mm) | null",
-  "closingTime": "string (HH:mm) | null",
-  "cancellationPolicy": "string (enum CancellationPolicy) | null",
-  "petPolicy": "string (enum PetPolicy) | null",
-  "regulation": "string (HTML) | null",
-  "idProperty": "string (UUID)"
-}
-```
-
 **Response JSON**
 
 Nessun corpo (204).
@@ -323,56 +319,55 @@ Nessun corpo (204).
 | `description` | string (HTML) \| null |
 | `openingTime` | string (HH:mm) \| null |
 | `closingTime` | string (HH:mm) \| null |
-| `cancellationPolicy` | string (enum CancellationPolicy) \| null |
-| `petPolicy` | string (enum PetPolicy) \| null |
+| `isFreeCancellation` | boolean |
+| `cancellationNoticeHours` | number (intero) \| null |
+| `petPolicy` | string (enum PetPolicy) |
 | `regulation` | string (HTML) \| null |
-| `idProperty` | string (UUID) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### GET `/api/catalog/bathhouse-configuration-services?idProperty={idProperty}`
+### GET `/api/catalog/property-info/bathhouse-configuration-services`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
 ```json
-[
-  {
-    "idService": "number (intero)",
-    "name": "string",
-    "categoryCode": "string",
-    "iconUrl": "string | null",
-    "isSelected": "boolean"
-  }
-]
+{
+  "services": [
+    {
+      "idService": "number (intero)",
+      "name": "string",
+      "categoryCode": "string (enum BathhouseServiceGroup)",
+      "iconUrl": "string | null",
+      "isSelected": "boolean"
+    }
+  ],
+  "version": "string"
+}
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
 | Campo | Tipo |
 |---|---|
-| `[].idService` | number (intero) |
-| `[].name` | string |
-| `[].categoryCode` | string |
-| `[].iconUrl` | string \| null |
-| `[].isSelected` | boolean |
+| `services[]` | BathhouseServiceItem[] (array di oggetti) |
+| `services[].idService` | number (intero) |
+| `services[].name` | string |
+| `services[].categoryCode` | string (enum BathhouseServiceGroup) |
+| `services[].iconUrl` | string \| null |
+| `services[].isSelected` | boolean |
+| `version` | string |
 
-### POST `/api/catalog/save-bathhouse-configuration-services`
+### POST `/api/catalog/property-info/save-bathhouse-configuration-services`
 
 **Payload JSON**
 
@@ -382,12 +377,11 @@ Nessun corpo (204).
     {
       "idService": "number (intero)",
       "name": "string",
-      "categoryCode": "string",
+      "categoryCode": "string (enum BathhouseServiceGroup)",
       "iconUrl": "string | null",
       "isSelected": "boolean"
     }
-  ],
-  "idProperty": "string (UUID)"
+  ]
 }
 ```
 
@@ -402,22 +396,98 @@ Nessun corpo (204).
 | `services[]` | BathhouseServiceItem[] (array di oggetti) |
 | `services[].idService` | number (intero) |
 | `services[].name` | string |
-| `services[].categoryCode` | string |
+| `services[].categoryCode` | string (enum BathhouseServiceGroup) |
 | `services[].iconUrl` | string \| null |
 | `services[].isSelected` | boolean |
-| `idProperty` | string (UUID) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### GET `/api/catalog/bathhouse-configuration-media?idProperty={idProperty}`
+### GET `/api/catalog/property-info/bathhouse-configuration-media`
 
-**Payload JSON** (query string)
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)"
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "idPhoto": "string (UUID)",
+      "url": "string"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number (decimale, 6 cifre) | null",
+  "longitude": "number (decimale, 6 cifre) | null",
+  "priceListPdfUrl": "string | null",
+  "priceListPdfFileName": "string | null",
+  "menuPdfUrl": "string | null",
+  "menuPdfFileName": "string | null",
+  "version": "string"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | BathhousePhoto[] (array di oggetti) |
+| `photos[].idPhoto` | string (UUID) |
+| `photos[].url` | string |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number (decimale, 6 cifre) \| null |
+| `longitude` | number (decimale, 6 cifre) \| null |
+| `priceListPdfUrl` | string \| null |
+| `priceListPdfFileName` | string \| null |
+| `menuPdfUrl` | string \| null |
+| `menuPdfFileName` | string \| null |
+| `version` | string |
+
+### POST `/api/catalog/property-info/save-bathhouse-configuration-media`
+
+**Payload JSON**
+
+```json
+{
+  "virtualTourUrl": "string | null",
+  "latitude": "number (decimale, 6 cifre) | null",
+  "longitude": "number (decimale, 6 cifre) | null"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `virtualTourUrl` | string \| null |
+| `latitude` | number (decimale, 6 cifre) \| null |
+| `longitude` | number (decimale, 6 cifre) \| null |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/property-info/main-photo`
+
+**Payload JSON**
+
+```json
+{
+  "file": "file (multipart/form-data)"
 }
 ```
 
@@ -425,36 +495,339 @@ Nessun corpo (204).
 
 ```json
 {
+  "mainPhotoUrl": "string | null",
   "photos": [
     {
-      "idPhoto": "number (intero)",
-      "url": "string",
-      "isMain": "boolean"
+      "id": "string (UUID)",
+      "url": "string | null",
+      "sortOrder": "number (intero)"
     }
   ],
   "virtualTourUrl": "string | null",
-  "priceListPdfUrl": "string | null",
-  "menuPdfUrl": "string | null"
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
+| `file` | file (multipart/form-data) |
 
 **Response tabella**
 
 | Campo | Tipo |
 |---|---|
-| `photos[]` | BathhousePhoto[] (array di oggetti) |
-| `photos[].idPhoto` | number (intero) |
-| `photos[].url` | string |
-| `photos[].isMain` | boolean |
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
+| `photos[].url` | string \| null |
+| `photos[].sortOrder` | number (intero) |
 | `virtualTourUrl` | string \| null |
-| `priceListPdfUrl` | string \| null |
-| `menuPdfUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
+
+### DELETE `/api/catalog/property-info/main-photo`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "id": "string (UUID)",
+      "url": "string | null",
+      "sortOrder": "number (intero)"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
+| `photos[].url` | string \| null |
+| `photos[].sortOrder` | number (intero) |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
+
+### POST `/api/catalog/property-info/photos`
+
+**Payload JSON**
+
+```json
+{
+  "file": "file (multipart/form-data)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "id": "string (UUID)",
+      "url": "string | null",
+      "sortOrder": "number (intero)"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `file` | file (multipart/form-data) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
+| `photos[].url` | string \| null |
+| `photos[].sortOrder` | number (intero) |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
+
+### DELETE `/api/catalog/property-info/photos/{id}`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "id": "string (UUID)",
+      "url": "string | null",
+      "sortOrder": "number (intero)"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
+| `photos[].url` | string \| null |
+| `photos[].sortOrder` | number (intero) |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
+
+### POST `/api/catalog/property-info/documents/{document}`
+
+**Payload JSON**
+
+```json
+{
+  "file": "file (multipart/form-data)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "id": "string (UUID)",
+      "url": "string | null",
+      "sortOrder": "number (intero)"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `file` | file (multipart/form-data) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
+| `photos[].url` | string \| null |
+| `photos[].sortOrder` | number (intero) |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
+
+### DELETE `/api/catalog/property-info/documents/{document}`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "id": "string (UUID)",
+      "url": "string | null",
+      "sortOrder": "number (intero)"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
+| `photos[].url` | string \| null |
+| `photos[].sortOrder` | number (intero) |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
 
 ## Gestione utenti
 
@@ -464,7 +837,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -487,10 +859,10 @@ Nessun corpo (204).
   "rows": [
     {
       "idUser": "string (UUID)",
-      "email": "string | null",
+      "email": "string",
       "phoneCountryCode": "string | null",
       "phone": "string | null",
-      "role": "string (enum UserRole) | null"
+      "role": "string (enum UserRole)"
     }
   ]
 }
@@ -500,7 +872,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -517,10 +888,10 @@ Nessun corpo (204).
 | `total` | number (intero) |
 | `rows[]` | UserItem[] (array di oggetti) |
 | `rows[].idUser` | string (UUID) |
-| `rows[].email` | string \| null |
+| `rows[].email` | string |
 | `rows[].phoneCountryCode` | string \| null |
 | `rows[].phone` | string \| null |
-| `rows[].role` | string (enum UserRole) \| null |
+| `rows[].role` | string (enum UserRole) |
 
 ### POST `/api/identity/create-user`
 
@@ -529,34 +900,54 @@ Nessun corpo (204).
 ```json
 {
   "email": "string",
-  "isEmailActive": "boolean",
+  "emailIsContact": "boolean",
   "password": "string",
+  "phoneCountryCode": "string | null",
   "phone": "string | null",
-  "isPhoneActive": "boolean",
-  "role": "string (enum UserRole) | null",
-  "idProperty": "string (UUID)"
+  "phoneIsContact": "boolean",
+  "role": "string (enum UserRole)"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "idUser": "string (UUID)",
+  "email": "string",
+  "emailIsContact": "boolean",
+  "phoneCountryCode": "string | null",
+  "phone": "string | null",
+  "phoneIsContact": "boolean",
+  "role": "string (enum UserRole)",
+  "version": "string"
+}
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
 | `email` | string |
-| `isEmailActive` | boolean |
+| `emailIsContact` | boolean |
 | `password` | string |
+| `phoneCountryCode` | string \| null |
 | `phone` | string \| null |
-| `isPhoneActive` | boolean |
-| `role` | string (enum UserRole) \| null |
-| `idProperty` | string (UUID) |
+| `phoneIsContact` | boolean |
+| `role` | string (enum UserRole) |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `idUser` | string (UUID) |
+| `email` | string |
+| `emailIsContact` | boolean |
+| `phoneCountryCode` | string \| null |
+| `phone` | string \| null |
+| `phoneIsContact` | boolean |
+| `role` | string (enum UserRole) |
+| `version` | string |
 
 ### GET `/api/identity/get-selected-user?idUser={idUser}`
 
@@ -574,10 +965,12 @@ Nessun corpo (204).
 {
   "idUser": "string (UUID)",
   "email": "string",
-  "isEmailActive": "boolean",
+  "emailIsContact": "boolean",
+  "phoneCountryCode": "string | null",
   "phone": "string | null",
-  "isPhoneActive": "boolean",
-  "role": "string (enum UserRole) | null"
+  "phoneIsContact": "boolean",
+  "role": "string (enum UserRole)",
+  "version": "string"
 }
 ```
 
@@ -593,10 +986,12 @@ Nessun corpo (204).
 |---|---|
 | `idUser` | string (UUID) |
 | `email` | string |
-| `isEmailActive` | boolean |
+| `emailIsContact` | boolean |
+| `phoneCountryCode` | string \| null |
 | `phone` | string \| null |
-| `isPhoneActive` | boolean |
-| `role` | string (enum UserRole) \| null |
+| `phoneIsContact` | boolean |
+| `role` | string (enum UserRole) |
+| `version` | string |
 
 ### POST `/api/identity/update-user`
 
@@ -606,18 +1001,29 @@ Nessun corpo (204).
 {
   "idUser": "string (UUID)",
   "email": "string",
-  "isEmailActive": "boolean",
+  "emailIsContact": "boolean",
   "password": "string | null",
+  "phoneCountryCode": "string | null",
   "phone": "string | null",
-  "isPhoneActive": "boolean",
-  "role": "string (enum UserRole) | null",
-  "idProperty": "string (UUID)"
+  "phoneIsContact": "boolean",
+  "role": "string (enum UserRole)"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "idUser": "string (UUID)",
+  "email": "string",
+  "emailIsContact": "boolean",
+  "phoneCountryCode": "string | null",
+  "phone": "string | null",
+  "phoneIsContact": "boolean",
+  "role": "string (enum UserRole)",
+  "version": "string"
+}
+```
 
 **Payload tabella**
 
@@ -625,27 +1031,31 @@ Nessun corpo (204).
 |---|---|
 | `idUser` | string (UUID) |
 | `email` | string |
-| `isEmailActive` | boolean |
+| `emailIsContact` | boolean |
 | `password` | string \| null |
+| `phoneCountryCode` | string \| null |
 | `phone` | string \| null |
-| `isPhoneActive` | boolean |
-| `role` | string (enum UserRole) \| null |
-| `idProperty` | string (UUID) |
+| `phoneIsContact` | boolean |
+| `role` | string (enum UserRole) |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `idUser` | string (UUID) |
+| `email` | string |
+| `emailIsContact` | boolean |
+| `phoneCountryCode` | string \| null |
+| `phone` | string \| null |
+| `phoneIsContact` | boolean |
+| `role` | string (enum UserRole) |
+| `version` | string |
 
-### POST `/api/identity/delete-user`
+### DELETE `/api/identity/property-users/{id}`
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)",
-  "idUser": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -653,10 +1063,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
-| `idUser` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -668,7 +1075,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -690,13 +1096,12 @@ Nessun corpo (204).
   "total": "number (intero)",
   "rows": [
     {
-      "idAuditEntry": "string (UUID)",
+      "idAuditEntry": "string",
       "bookingNumber": "string | null",
-      "userNumber": "string | null",
       "actorName": "string | null",
       "spotLabel": "string | null",
-      "actionCode": "string | null",
-      "occurredAt": "string (data e ora ISO 8601 UTC) | null"
+      "actionCode": "string",
+      "occurredAt": "string (data e ora ISO 8601 UTC)"
     }
   ]
 }
@@ -706,7 +1111,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -722,23 +1126,18 @@ Nessun corpo (204).
 |---|---|
 | `total` | number (intero) |
 | `rows[]` | AuditEntryItem[] (array di oggetti) |
-| `rows[].idAuditEntry` | string (UUID) |
+| `rows[].idAuditEntry` | string |
 | `rows[].bookingNumber` | string \| null |
-| `rows[].userNumber` | string \| null |
 | `rows[].actorName` | string \| null |
 | `rows[].spotLabel` | string \| null |
-| `rows[].actionCode` | string \| null |
-| `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null |
+| `rows[].actionCode` | string |
+| `rows[].occurredAt` | string (data e ora ISO 8601 UTC) |
 
-### POST `/api/audit/get-user-combobox`
+### POST `/api/identity/user-combobox`
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -753,9 +1152,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -770,7 +1167,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "search": "string",
   "filters": [
     {
@@ -791,7 +1187,6 @@ File (binario), non JSON.
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `search` | string |
 | `filters[]` | PageFilter[] (array di oggetti) |
 | `filters[].field` | string |
@@ -809,7 +1204,6 @@ File (binario), non JSON.
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "search": "string",
   "filters": [
     {
@@ -830,7 +1224,6 @@ File (binario), non JSON.
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `search` | string |
 | `filters[]` | PageFilter[] (array di oggetti) |
 | `filters[].field` | string |
@@ -844,13 +1237,48 @@ File (binario), non JSON.
 
 ## Stagioni e periodi
 
-### GET `/api/seasons/season-dates?idProperty={idProperty}`
+### GET `/api/catalog/season`
 
-**Payload JSON** (query string)
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)"
+  "startsOn": "string (data, AAAA-MM-GG)",
+  "endsOn": "string (data, AAAA-MM-GG)",
+  "nextStartsOn": "string (data, AAAA-MM-GG) | null",
+  "nextEndsOn": "string (data, AAAA-MM-GG) | null",
+  "version": "string"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `startsOn` | string (data, AAAA-MM-GG) |
+| `endsOn` | string (data, AAAA-MM-GG) |
+| `nextStartsOn` | string (data, AAAA-MM-GG) \| null |
+| `nextEndsOn` | string (data, AAAA-MM-GG) \| null |
+| `version` | string |
+
+### PUT `/api/catalog/season`
+
+**Payload JSON**
+
+```json
+{
+  "startsOn": "string (data, AAAA-MM-GG)",
+  "endsOn": "string (data, AAAA-MM-GG)",
+  "nextStartsOn": "string (data, AAAA-MM-GG)",
+  "nextEndsOn": "string (data, AAAA-MM-GG)"
 }
 ```
 
@@ -858,41 +1286,220 @@ File (binario), non JSON.
 
 ```json
 {
-  "currentSeasonDateFrom": "string (ISO 8601, UTC)",
-  "currentSeasonDateTo": "string (ISO 8601, UTC)",
-  "nextSeasonDateFrom": "string (ISO 8601, UTC) | null",
-  "nextSeasonDateTo": "string (ISO 8601, UTC) | null"
+  "startsOn": "string (data, AAAA-MM-GG)",
+  "endsOn": "string (data, AAAA-MM-GG)",
+  "nextStartsOn": "string (data, AAAA-MM-GG) | null",
+  "nextEndsOn": "string (data, AAAA-MM-GG) | null",
+  "version": "string"
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
+| `startsOn` | string (data, AAAA-MM-GG) |
+| `endsOn` | string (data, AAAA-MM-GG) |
+| `nextStartsOn` | string (data, AAAA-MM-GG) |
+| `nextEndsOn` | string (data, AAAA-MM-GG) |
 
 **Response tabella**
 
 | Campo | Tipo |
 |---|---|
-| `currentSeasonDateFrom` | string (ISO 8601, UTC) |
-| `currentSeasonDateTo` | string (ISO 8601, UTC) |
-| `nextSeasonDateFrom` | string (ISO 8601, UTC) \| null |
-| `nextSeasonDateTo` | string (ISO 8601, UTC) \| null |
+| `startsOn` | string (data, AAAA-MM-GG) |
+| `endsOn` | string (data, AAAA-MM-GG) |
+| `nextStartsOn` | string (data, AAAA-MM-GG) \| null |
+| `nextEndsOn` | string (data, AAAA-MM-GG) \| null |
+| `version` | string |
 
-### POST `/api/seasons/save-season-dates`
+### GET `/api/catalog/tariff-periods`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "key": "number (intero)",
+    "name": "string",
+    "ranges": [
+      {
+        "startsOn": "string (data, AAAA-MM-GG)",
+        "endsOn": "string (data, AAAA-MM-GG)"
+      }
+    ],
+    "version": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].key` | number (intero) |
+| `[].name` | string |
+| `[].ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `[].ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `[].ranges[].endsOn` | string (data, AAAA-MM-GG) |
+| `[].version` | string |
+
+### GET `/api/catalog/next-season/tariff-periods`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "key": "number (intero)",
+    "name": "string",
+    "ranges": [
+      {
+        "startsOn": "string (data, AAAA-MM-GG)",
+        "endsOn": "string (data, AAAA-MM-GG)"
+      }
+    ],
+    "version": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].key` | number (intero) |
+| `[].name` | string |
+| `[].ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `[].ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `[].ranges[].endsOn` | string (data, AAAA-MM-GG) |
+| `[].version` | string |
+
+### POST `/api/catalog/tariff-periods`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
-  "currentSeasonDateFrom": "string (ISO 8601, UTC)",
-  "currentSeasonDateTo": "string (ISO 8601, UTC)",
-  "nextSeasonDateFrom": "string (ISO 8601, UTC)",
-  "nextSeasonDateTo": "string (ISO 8601, UTC)"
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
 }
 ```
+
+**Response JSON**
+
+```json
+{
+  "key": "number (intero)",
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ],
+  "version": "string"
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `key` | number (intero) |
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+| `version` | string |
+
+### POST `/api/catalog/next-season/tariff-periods`
+
+**Payload JSON**
+
+```json
+{
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "key": "number (intero)",
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ],
+  "version": "string"
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `key` | number (intero) |
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+| `version` | string |
+
+### DELETE `/api/catalog/tariff-periods/{key}`
+
+**Payload JSON**
+
+Nessun payload.
 
 **Response JSON**
 
@@ -900,78 +1507,145 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
-| `currentSeasonDateFrom` | string (ISO 8601, UTC) |
-| `currentSeasonDateTo` | string (ISO 8601, UTC) |
-| `nextSeasonDateFrom` | string (ISO 8601, UTC) |
-| `nextSeasonDateTo` | string (ISO 8601, UTC) |
+Nessun payload.
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### GET `/api/seasons/period-list?idProperty={idProperty}&isNextSeason={isNextSeason}`
+### DELETE `/api/catalog/next-season/tariff-periods/{key}`
 
-**Payload JSON** (query string)
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### PUT `/api/catalog/tariff-periods/{key}`
+
+**Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
-  "isNextSeason": "boolean"
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
 }
 ```
 
 **Response JSON**
 
 ```json
-[
-  {
-    "idPeriod": "string (UUID)",
-    "periodName": "string",
-    "intervals": [
-      {
-        "idInterval": "string (UUID)",
-        "dateFrom": "string (ISO 8601, UTC)",
-        "dateTo": "string (ISO 8601, UTC)"
-      }
-    ]
-  }
-]
+{
+  "key": "number (intero)",
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ],
+  "version": "string"
+}
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
-| `isNextSeason` | boolean |
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
 
 **Response tabella**
 
 | Campo | Tipo |
 |---|---|
-| `[].idPeriod` | string (UUID) |
-| `[].periodName` | string |
-| `[].intervals[]` | SeasonPeriodIntervalItem[] (array di oggetti) |
-| `[].intervals[].idInterval` | string (UUID) |
-| `[].intervals[].dateFrom` | string (ISO 8601, UTC) |
-| `[].intervals[].dateTo` | string (ISO 8601, UTC) |
+| `key` | number (intero) |
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+| `version` | string |
 
-### POST `/api/seasons/add-period`
+### PUT `/api/catalog/next-season/tariff-periods/{key}`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
-  "isNextSeason": "boolean",
-  "periodName": "string",
-  "intervals": [
+  "name": "string",
+  "ranges": [
     {
-      "dateFrom": "string (ISO 8601, UTC)",
-      "dateTo": "string (ISO 8601, UTC)"
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "key": "number (intero)",
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ],
+  "version": "string"
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `key` | number (intero) |
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+| `version` | string |
+
+### POST `/api/catalog/tariff-periods/bulk-delete-ranges`
+
+**Payload JSON**
+
+```json
+{
+  "ranges": [
+    {
+      "key": "number (intero)",
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
     }
   ]
 }
@@ -985,25 +1659,28 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
-| `isNextSeason` | boolean |
-| `periodName` | string |
-| `intervals[]` | SeasonPeriodInterval[] (array di oggetti) |
-| `intervals[].dateFrom` | string (ISO 8601, UTC) |
-| `intervals[].dateTo` | string (ISO 8601, UTC) |
+| `ranges[]` | SeasonPeriodIntervalItem[] (array di oggetti, da 1 a 300) |
+| `ranges[].key` | number (intero) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/seasons/delete-period`
+### POST `/api/catalog/next-season/tariff-periods/bulk-delete-ranges`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
-  "idPeriod": "string (UUID)"
+  "ranges": [
+    {
+      "key": "number (intero)",
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
 }
 ```
 
@@ -1015,22 +1692,150 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
-| `idPeriod` | string (UUID) |
+| `ranges[]` | SeasonPeriodIntervalItem[] (array di oggetti, da 1 a 300) |
+| `ranges[].key` | number (intero) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/seasons/update-period`
+## Settori e file
+
+### POST `/api/catalog/sectors-list`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
-  "idPeriod": "string (UUID)",
-  "periodName": "string"
+  "page": "number (intero, da 1)",
+  "pageSize": "number (intero)",
+  "search": "string",
+  "filters": [
+    {
+      "field": "string",
+      "value": "string[] (array di stringhe, almeno una)"
+    }
+  ],
+  "sortField": "string",
+  "sortDirection": "string (enum SortDirection)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "total": "number (intero)",
+  "rows": [
+    {
+      "idSector": "string (UUID)",
+      "sectorName": "string | null",
+      "version": "string"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `page` | number (intero, da 1) |
+| `pageSize` | number (intero) |
+| `search` | string |
+| `filters[]` | PageFilter[] (array di oggetti) |
+| `filters[].field` | string |
+| `filters[].value` | string[] (array di stringhe, almeno una) |
+| `sortField` | string |
+| `sortDirection` | string (enum SortDirection) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `total` | number (intero) |
+| `rows[]` | SectorItem[] (array di oggetti) |
+| `rows[].idSector` | string (UUID) |
+| `rows[].sectorName` | string \| null |
+| `rows[].version` | string |
+
+### POST `/api/catalog/sectors`
+
+**Payload JSON**
+
+```json
+{
+  "name": "string"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "id": "string (UUID)",
+  "name": "string",
+  "sortOrder": "number (intero)"
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `name` | string |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `id` | string (UUID) |
+| `name` | string |
+| `sortOrder` | number (intero) |
+
+### PUT `/api/catalog/sectors/{id}`
+
+**Payload JSON**
+
+```json
+{
+  "name": "string"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "id": "string (UUID)",
+  "name": "string",
+  "sortOrder": "number (intero)"
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `name` | string |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `id` | string (UUID) |
+| `name` | string |
+| `sortOrder` | number (intero) |
+
+### POST `/api/catalog/sectors/bulk-delete`
+
+**Payload JSON**
+
+```json
+{
+  "idSectors": "string[] (UUID, almeno uno)"
 }
 ```
 
@@ -1042,24 +1847,19 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
-| `idPeriod` | string (UUID) |
-| `periodName` | string |
+| `idSectors` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/seasons/add-interval`
+### POST `/api/catalog/sectors/bulk-duplicate`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
-  "idPeriod": "string (UUID)",
-  "dateFrom": "string (ISO 8601, UTC)",
-  "dateTo": "string (ISO 8601, UTC)"
+  "idSectors": "string[] (UUID, almeno uno)"
 }
 ```
 
@@ -1071,25 +1871,128 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
-| `idPeriod` | string (UUID) |
-| `dateFrom` | string (ISO 8601, UTC) |
-| `dateTo` | string (ISO 8601, UTC) |
+| `idSectors` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/seasons/update-interval`
+## Configura mappa
+
+### GET `/api/catalog/map/settings`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "rows": "number (intero)",
+  "columns": "number (intero)",
+  "tiltDegrees": "number (intero)",
+  "backgroundColor": "string (#RRGGBB) | null",
+  "background": {
+    "iconId": "string (UUID) | null",
+    "name": "string | null",
+    "url": "string (URL) | null",
+    "isCustom": "boolean"
+  },
+  "icons": {
+    "umbrella": {
+      "free": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      },
+      "occupied": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      }
+    },
+    "customArticles": [
+      {
+        "variant": "number (intero)",
+        "icons": {
+          "free": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          },
+          "occupied": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  "resetDeletesBookings": "boolean",
+  "backgroundVersion": "string",
+  "configurationVersion": "string"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `rows` | number (intero) |
+| `columns` | number (intero) |
+| `tiltDegrees` | number (intero) |
+| `backgroundColor` | string (#RRGGBB) \| null |
+| `background` | MapBackground \| null |
+| `background.iconId` | string (UUID) \| null |
+| `background.name` | string \| null |
+| `background.url` | string (URL) \| null |
+| `background.isCustom` | boolean |
+| `icons` | MapIcons |
+| `icons.umbrella` | MapIconPair |
+| `icons.umbrella.free` | MapIcon |
+| `icons.umbrella.free.iconId` | string (UUID) \| null |
+| `icons.umbrella.free.name` | string \| null |
+| `icons.umbrella.free.url` | string (URL) \| null |
+| `icons.umbrella.free.isDefault` | boolean |
+| `icons.umbrella.occupied` | MapIcon |
+| `icons.umbrella.occupied.iconId` | string (UUID) \| null |
+| `icons.umbrella.occupied.name` | string \| null |
+| `icons.umbrella.occupied.url` | string (URL) \| null |
+| `icons.umbrella.occupied.isDefault` | boolean |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) |
+| `icons.customArticles[].variant` | number (intero) |
+| `icons.customArticles[].icons` | MapIconPair |
+| `icons.customArticles[].icons.free` | MapIcon |
+| `icons.customArticles[].icons.free.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.free.name` | string \| null |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null |
+| `icons.customArticles[].icons.free.isDefault` | boolean |
+| `icons.customArticles[].icons.occupied` | MapIcon |
+| `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.occupied.name` | string \| null |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null |
+| `icons.customArticles[].icons.occupied.isDefault` | boolean |
+| `resetDeletesBookings` | boolean |
+| `backgroundVersion` | string |
+| `configurationVersion` | string |
+
+### PUT `/api/catalog/map/update-background`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
-  "idInterval": "string (UUID)",
-  "dateFrom": "string (ISO 8601, UTC)",
-  "dateTo": "string (ISO 8601, UTC)"
+  "backgroundName": "string"
 }
 ```
 
@@ -1101,23 +2004,32 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
-| `idInterval` | string (UUID) |
-| `dateFrom` | string (ISO 8601, UTC) |
-| `dateTo` | string (ISO 8601, UTC) |
+| `backgroundName` | string |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/seasons/delete-intervals`
+### PUT `/api/catalog/map/update-configuration`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
-  "idIntervals": "string[] (UUID)"
+  "rowQuantity": "number (intero)",
+  "maxRowItemQuantity": "number (intero)",
+  "tiltDegrees": "number (intero)",
+  "umbrellaIcons": {
+    "freeIcon": "string | null",
+    "occupiedIcon": "string | null"
+  },
+  "customArticleIcons": [
+    {
+      "variant": "number (intero)",
+      "freeIcon": "string | null",
+      "occupiedIcon": "string | null"
+    }
+  ]
 }
 ```
 
@@ -1129,22 +2041,365 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
-| `idIntervals` | string[] (UUID) |
+| `rowQuantity` | number (intero) |
+| `maxRowItemQuantity` | number (intero) |
+| `tiltDegrees` | number (intero) |
+| `umbrellaIcons` | MapElementIcons |
+| `umbrellaIcons.freeIcon` | string \| null |
+| `umbrellaIcons.occupiedIcon` | string \| null |
+| `customArticleIcons[]` | MapArticleIcons[] (array di oggetti) |
+| `customArticleIcons[].variant` | number (intero) |
+| `customArticleIcons[].freeIcon` | string \| null |
+| `customArticleIcons[].occupiedIcon` | string \| null |
 
 **Response tabella**
 
 Nessun corpo (204).
+
+### POST `/api/catalog/map/background`
+
+**Payload JSON**
+
+```json
+{
+  "file": "file (multipart/form-data)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "rows": "number (intero)",
+  "columns": "number (intero)",
+  "tiltDegrees": "number (intero)",
+  "backgroundColor": "string (#RRGGBB) | null",
+  "background": {
+    "iconId": "string (UUID) | null",
+    "name": "string | null",
+    "url": "string (URL) | null",
+    "isCustom": "boolean"
+  },
+  "icons": {
+    "umbrella": {
+      "free": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      },
+      "occupied": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      }
+    },
+    "customArticles": [
+      {
+        "variant": "number (intero)",
+        "icons": {
+          "free": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          },
+          "occupied": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  "resetDeletesBookings": "boolean",
+  "backgroundVersion": "string",
+  "configurationVersion": "string"
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `file` | file (multipart/form-data) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `rows` | number (intero) |
+| `columns` | number (intero) |
+| `tiltDegrees` | number (intero) |
+| `backgroundColor` | string (#RRGGBB) \| null |
+| `background` | MapBackground \| null |
+| `background.iconId` | string (UUID) \| null |
+| `background.name` | string \| null |
+| `background.url` | string (URL) \| null |
+| `background.isCustom` | boolean |
+| `icons` | MapIcons |
+| `icons.umbrella` | MapIconPair |
+| `icons.umbrella.free` | MapIcon |
+| `icons.umbrella.free.iconId` | string (UUID) \| null |
+| `icons.umbrella.free.name` | string \| null |
+| `icons.umbrella.free.url` | string (URL) \| null |
+| `icons.umbrella.free.isDefault` | boolean |
+| `icons.umbrella.occupied` | MapIcon |
+| `icons.umbrella.occupied.iconId` | string (UUID) \| null |
+| `icons.umbrella.occupied.name` | string \| null |
+| `icons.umbrella.occupied.url` | string (URL) \| null |
+| `icons.umbrella.occupied.isDefault` | boolean |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) |
+| `icons.customArticles[].variant` | number (intero) |
+| `icons.customArticles[].icons` | MapIconPair |
+| `icons.customArticles[].icons.free` | MapIcon |
+| `icons.customArticles[].icons.free.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.free.name` | string \| null |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null |
+| `icons.customArticles[].icons.free.isDefault` | boolean |
+| `icons.customArticles[].icons.occupied` | MapIcon |
+| `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.occupied.name` | string \| null |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null |
+| `icons.customArticles[].icons.occupied.isDefault` | boolean |
+| `resetDeletesBookings` | boolean |
+| `backgroundVersion` | string |
+| `configurationVersion` | string |
+
+### DELETE `/api/catalog/map/background`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "rows": "number (intero)",
+  "columns": "number (intero)",
+  "tiltDegrees": "number (intero)",
+  "backgroundColor": "string (#RRGGBB) | null",
+  "background": {
+    "iconId": "string (UUID) | null",
+    "name": "string | null",
+    "url": "string (URL) | null",
+    "isCustom": "boolean"
+  },
+  "icons": {
+    "umbrella": {
+      "free": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      },
+      "occupied": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      }
+    },
+    "customArticles": [
+      {
+        "variant": "number (intero)",
+        "icons": {
+          "free": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          },
+          "occupied": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  "resetDeletesBookings": "boolean",
+  "backgroundVersion": "string",
+  "configurationVersion": "string"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `rows` | number (intero) |
+| `columns` | number (intero) |
+| `tiltDegrees` | number (intero) |
+| `backgroundColor` | string (#RRGGBB) \| null |
+| `background` | MapBackground \| null |
+| `background.iconId` | string (UUID) \| null |
+| `background.name` | string \| null |
+| `background.url` | string (URL) \| null |
+| `background.isCustom` | boolean |
+| `icons` | MapIcons |
+| `icons.umbrella` | MapIconPair |
+| `icons.umbrella.free` | MapIcon |
+| `icons.umbrella.free.iconId` | string (UUID) \| null |
+| `icons.umbrella.free.name` | string \| null |
+| `icons.umbrella.free.url` | string (URL) \| null |
+| `icons.umbrella.free.isDefault` | boolean |
+| `icons.umbrella.occupied` | MapIcon |
+| `icons.umbrella.occupied.iconId` | string (UUID) \| null |
+| `icons.umbrella.occupied.name` | string \| null |
+| `icons.umbrella.occupied.url` | string (URL) \| null |
+| `icons.umbrella.occupied.isDefault` | boolean |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) |
+| `icons.customArticles[].variant` | number (intero) |
+| `icons.customArticles[].icons` | MapIconPair |
+| `icons.customArticles[].icons.free` | MapIcon |
+| `icons.customArticles[].icons.free.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.free.name` | string \| null |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null |
+| `icons.customArticles[].icons.free.isDefault` | boolean |
+| `icons.customArticles[].icons.occupied` | MapIcon |
+| `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.occupied.name` | string \| null |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null |
+| `icons.customArticles[].icons.occupied.isDefault` | boolean |
+| `resetDeletesBookings` | boolean |
+| `backgroundVersion` | string |
+| `configurationVersion` | string |
+
+### POST `/api/catalog/map/reset`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "settings": {
+    "rows": "number (intero)",
+    "columns": "number (intero)",
+    "tiltDegrees": "number (intero)",
+    "backgroundColor": "string (#RRGGBB) | null",
+    "background": {
+      "iconId": "string (UUID) | null",
+      "name": "string | null",
+      "url": "string (URL) | null",
+      "isCustom": "boolean"
+    },
+    "icons": {
+      "umbrella": {
+        "free": {
+          "iconId": "string (UUID) | null",
+          "name": "string | null",
+          "url": "string (URL) | null",
+          "isDefault": "boolean"
+        },
+        "occupied": {
+          "iconId": "string (UUID) | null",
+          "name": "string | null",
+          "url": "string (URL) | null",
+          "isDefault": "boolean"
+        }
+      },
+      "customArticles": [
+        {
+          "variant": "number (intero)",
+          "icons": {
+            "free": {
+              "iconId": "string (UUID) | null",
+              "name": "string | null",
+              "url": "string (URL) | null",
+              "isDefault": "boolean"
+            },
+            "occupied": {
+              "iconId": "string (UUID) | null",
+              "name": "string | null",
+              "url": "string (URL) | null",
+              "isDefault": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "resetDeletesBookings": "boolean",
+    "backgroundVersion": "string",
+    "configurationVersion": "string"
+  },
+  "spots": "array di oggetti",
+  "sectors": "array di oggetti",
+  "beachElements": "array di oggetti"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `settings` | MapSettings |
+| `settings.rows` | number (intero) |
+| `settings.columns` | number (intero) |
+| `settings.tiltDegrees` | number (intero) |
+| `settings.backgroundColor` | string (#RRGGBB) \| null |
+| `settings.background` | MapBackground \| null |
+| `settings.background.iconId` | string (UUID) \| null |
+| `settings.background.name` | string \| null |
+| `settings.background.url` | string (URL) \| null |
+| `settings.background.isCustom` | boolean |
+| `settings.icons` | MapIcons |
+| `settings.icons.umbrella` | MapIconPair |
+| `settings.icons.umbrella.free` | MapIcon |
+| `settings.icons.umbrella.free.iconId` | string (UUID) \| null |
+| `settings.icons.umbrella.free.name` | string \| null |
+| `settings.icons.umbrella.free.url` | string (URL) \| null |
+| `settings.icons.umbrella.free.isDefault` | boolean |
+| `settings.icons.umbrella.occupied` | MapIcon |
+| `settings.icons.umbrella.occupied.iconId` | string (UUID) \| null |
+| `settings.icons.umbrella.occupied.name` | string \| null |
+| `settings.icons.umbrella.occupied.url` | string (URL) \| null |
+| `settings.icons.umbrella.occupied.isDefault` | boolean |
+| `settings.icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) |
+| `settings.icons.customArticles[].variant` | number (intero) |
+| `settings.icons.customArticles[].icons` | MapIconPair |
+| `settings.icons.customArticles[].icons.free` | MapIcon |
+| `settings.icons.customArticles[].icons.free.iconId` | string (UUID) \| null |
+| `settings.icons.customArticles[].icons.free.name` | string \| null |
+| `settings.icons.customArticles[].icons.free.url` | string (URL) \| null |
+| `settings.icons.customArticles[].icons.free.isDefault` | boolean |
+| `settings.icons.customArticles[].icons.occupied` | MapIcon |
+| `settings.icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null |
+| `settings.icons.customArticles[].icons.occupied.name` | string \| null |
+| `settings.icons.customArticles[].icons.occupied.url` | string (URL) \| null |
+| `settings.icons.customArticles[].icons.occupied.isDefault` | boolean |
+| `settings.resetDeletesBookings` | boolean |
+| `settings.backgroundVersion` | string |
+| `settings.configurationVersion` | string |
+| `spots` | array di oggetti |
+| `sectors` | array di oggetti |
+| `beachElements` | array di oggetti |
 
 ## Impostazioni magazzino
 
-### POST `/api/warehouse/list`
+### POST `/api/catalog/inventory-items-list`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -1169,9 +2424,7 @@ Nessun corpo (204).
       "idArticle": "string (UUID)",
       "name": "string",
       "totalQuantity": "number (intero)",
-      "availableQuantity": "number (intero)",
-      "thresholdQuantity": "number (intero) | null",
-      "isThresholdWarningActive": "boolean"
+      "lowStockThreshold": "number (intero) | null"
     }
   ]
 }
@@ -1181,7 +2434,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -1196,23 +2448,17 @@ Nessun corpo (204).
 | Campo | Tipo |
 |---|---|
 | `total` | number (intero) |
-| `rows[]` | WarehouseItem[] (array di oggetti) |
+| `rows[]` | WarehouseSettingItem[] (array di oggetti) |
 | `rows[].idArticle` | string (UUID) |
 | `rows[].name` | string |
 | `rows[].totalQuantity` | number (intero) |
-| `rows[].availableQuantity` | number (intero) |
-| `rows[].thresholdQuantity` | number (intero) \| null |
-| `rows[].isThresholdWarningActive` | boolean |
+| `rows[].lowStockThreshold` | number (intero) \| null |
 
-### POST `/api/warehouse/combobox-list`
+### POST `/api/catalog/article-combobox`
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -1227,9 +2473,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -1238,19 +2482,16 @@ Nessun corpo (204).
 | `[].id` | string (UUID) |
 | `[].value` | string |
 
-### POST `/api/warehouse/add-warehouse-item`
+### POST `/api/catalog/add-warehouse-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idArticle": "string (UUID)",
-  "name": "string | null",
   "totalQuantity": "number (intero > 0)",
-  "availableQuantity": "number (intero) | null",
-  "thresholdQuantity": "number (intero ≥ 0) | null",
-  "isThresholdWarningActive": "boolean"
+  "lowStockThreshold": "number (intero ≥ 0) | null",
+  "lowStockAlertEnabled": "boolean | null"
 }
 ```
 
@@ -1262,61 +2503,111 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idArticle` | string (UUID) |
-| `name` | string \| null |
 | `totalQuantity` | number (intero > 0) |
-| `availableQuantity` | number (intero) \| null |
-| `thresholdQuantity` | number (intero ≥ 0) \| null |
-| `isThresholdWarningActive` | boolean |
+| `lowStockThreshold` | number (intero ≥ 0) \| null |
+| `lowStockAlertEnabled` | boolean \| null |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/warehouse/edit-warehouse-item`
+### GET `/api/catalog/inventory-items/{id}`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "id": "string (UUID)",
+  "articleCode": "string | null",
+  "name": "string",
+  "totalQuantity": "number (intero)",
+  "lowStockThreshold": "number (intero) | null",
+  "lowStockAlertEnabled": "boolean",
+  "mapPlaceable": "boolean",
+  "version": "string"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `id` | string (UUID) |
+| `articleCode` | string \| null |
+| `name` | string |
+| `totalQuantity` | number (intero) |
+| `lowStockThreshold` | number (intero) \| null |
+| `lowStockAlertEnabled` | boolean |
+| `mapPlaceable` | boolean |
+| `version` | string |
+
+### PUT `/api/catalog/edit-warehouse-item/{id}`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
-  "idArticle": "string (UUID)",
-  "name": "string | null",
-  "totalQuantity": "number (intero > 0)",
-  "availableQuantity": "number (intero) | null",
-  "thresholdQuantity": "number (intero ≥ 0) | null",
-  "isThresholdWarningActive": "boolean"
+  "articleCode": "string | null",
+  "name": "string",
+  "totalQuantity": "number (intero ≥ 0)",
+  "lowStockThreshold": "number (intero ≥ 0) | null",
+  "lowStockAlertEnabled": "boolean"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "id": "string (UUID)",
+  "articleCode": "string | null",
+  "name": "string",
+  "totalQuantity": "number (intero)",
+  "lowStockThreshold": "number (intero) | null",
+  "lowStockAlertEnabled": "boolean",
+  "mapPlaceable": "boolean",
+  "version": "string"
+}
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
-| `idArticle` | string (UUID) |
-| `name` | string \| null |
-| `totalQuantity` | number (intero > 0) |
-| `availableQuantity` | number (intero) \| null |
-| `thresholdQuantity` | number (intero ≥ 0) \| null |
-| `isThresholdWarningActive` | boolean |
+| `articleCode` | string \| null |
+| `name` | string |
+| `totalQuantity` | number (intero ≥ 0) |
+| `lowStockThreshold` | number (intero ≥ 0) \| null |
+| `lowStockAlertEnabled` | boolean |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `id` | string (UUID) |
+| `articleCode` | string \| null |
+| `name` | string |
+| `totalQuantity` | number (intero) |
+| `lowStockThreshold` | number (intero) \| null |
+| `lowStockAlertEnabled` | boolean |
+| `mapPlaceable` | boolean |
+| `version` | string |
 
-### POST `/api/warehouse/delete-warehouse-item`
+### POST `/api/catalog/delete-warehouse-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idItems": "string[] (UUID, almeno uno)"
 }
 ```
@@ -1329,20 +2620,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idItems` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/warehouse/duplicate-warehouse-item`
+### POST `/api/catalog/duplicate-warehouse-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idItems": "string[] (UUID, almeno uno)"
 }
 ```
@@ -1355,22 +2644,1192 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idItems` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
+
+## Listino
+
+### POST `/api/catalog/price-lists/packages-list`
+
+**Payload JSON**
+
+```json
+{
+  "page": "number (intero, da 1)",
+  "pageSize": "number (intero)",
+  "search": "string",
+  "filters": [
+    {
+      "field": "string",
+      "value": "string[] (array di stringhe, almeno una)"
+    }
+  ],
+  "sortField": "string",
+  "sortDirection": "string (enum SortDirection)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "total": "number (intero)",
+  "rows": [
+    {
+      "idPackage": "string (UUID)",
+      "packageName": "string | null"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `page` | number (intero, da 1) |
+| `pageSize` | number (intero) |
+| `search` | string |
+| `filters[]` | PageFilter[] (array di oggetti) |
+| `filters[].field` | string |
+| `filters[].value` | string[] (array di stringhe, almeno una) |
+| `sortField` | string |
+| `sortDirection` | string (enum SortDirection) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `total` | number (intero) |
+| `rows[]` | PackageItem[] (array di oggetti) |
+| `rows[].idPackage` | string (UUID) |
+| `rows[].packageName` | string \| null |
+
+### POST `/api/catalog/price-lists/delete-package-item`
+
+**Payload JSON**
+
+```json
+{
+  "idPackages": "string[] (UUID, almeno uno)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idPackages` | string[] (UUID, almeno uno) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/price-lists/duplicate-package-item`
+
+**Payload JSON**
+
+```json
+{
+  "idPackages": "string[] (UUID, almeno uno)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idPackages` | string[] (UUID, almeno uno) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/price-lists/additional-services-articles-list`
+
+**Payload JSON**
+
+```json
+{
+  "page": "number (intero, da 1)",
+  "pageSize": "number (intero)",
+  "search": "string",
+  "filters": [
+    {
+      "field": "string",
+      "value": "string[] (array di stringhe, almeno una)"
+    }
+  ],
+  "sortField": "string",
+  "sortDirection": "string (enum SortDirection)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "total": "number (intero)",
+  "rows": [
+    {
+      "idAdditionalItem": "string (UUID)",
+      "additionalItemName": "string | null"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `page` | number (intero, da 1) |
+| `pageSize` | number (intero) |
+| `search` | string |
+| `filters[]` | PageFilter[] (array di oggetti) |
+| `filters[].field` | string |
+| `filters[].value` | string[] (array di stringhe, almeno una) |
+| `sortField` | string |
+| `sortDirection` | string (enum SortDirection) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `total` | number (intero) |
+| `rows[]` | AdditionalItem[] (array di oggetti) |
+| `rows[].idAdditionalItem` | string (UUID) |
+| `rows[].additionalItemName` | string \| null |
+
+### POST `/api/catalog/price-lists/delete-additional-services-article-item`
+
+**Payload JSON**
+
+```json
+{
+  "idAdditionalItems": "string[] (UUID, almeno uno)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idAdditionalItems` | string[] (UUID, almeno uno) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/price-lists/duplicate-additional-services-article-item`
+
+**Payload JSON**
+
+```json
+{
+  "idAdditionalItems": "string[] (UUID, almeno uno)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idAdditionalItems` | string[] (UUID, almeno uno) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/price-lists/create-additional-services-article-item`
+
+**Payload JSON**
+
+```json
+{
+  "idArticle": "string (UUID)",
+  "idPackages": "string[] (UUID)",
+  "isOnlineEnabled": "boolean",
+  "isOnlineOnly": "boolean",
+  "isMapAssignable": "boolean",
+  "sectorPrices": [
+    {
+      "idSector": "string (UUID)",
+      "seasonalHalfDayPrice": "number (decimale, €) | null",
+      "seasonalPrice": "number (decimale, €) | null"
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
+      "halfDayPrice": "number (decimale, €) | null",
+      "dailyPrice": "number (decimale, €) | null",
+      "weekendPrice": "number (decimale, €) | null",
+      "halfDayWeekendPrice": "number (decimale, €) | null",
+      "halfDaySevenDaysPrice": "number (decimale, €) | null",
+      "sevenDaysPrice": "number (decimale, €) | null",
+      "halfDayFourteenDaysPrice": "number (decimale, €) | null",
+      "fourteenDaysPrice": "number (decimale, €) | null",
+      "halfDayMonthlyPrice": "number (decimale, €) | null",
+      "monthlyPrice": "number (decimale, €) | null"
+    }
+  ],
+  "vatRate": "number | null",
+  "calculationMethod": "string (enum PriceCalculationMethod) | null",
+  "isCumulative": "boolean",
+  "monthlySetting": "string (enum PriceMonthlySetting) | null",
+  "weekendSetting": "string (enum PriceWeekendSetting) | null",
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "number (intero)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idArticle` | string (UUID) |
+| `idPackages` | string[] (UUID) |
+| `isOnlineEnabled` | boolean |
+| `isOnlineOnly` | boolean |
+| `isMapAssignable` | boolean |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `sectorPrices[].idSector` | string (UUID) |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null |
+| `isCumulative` | boolean |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null |
+| `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | number (intero) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### GET `/api/catalog/price-lists/get-additional-services-article-item?idAdditionalItem={idAdditionalItem}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idAdditionalItem": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "idAdditionalItem": "string (UUID)",
+  "idArticle": "string (UUID) | null",
+  "idPackages": "string[] (UUID)",
+  "isOnlineEnabled": "boolean",
+  "isOnlineOnly": "boolean",
+  "isMapAssignable": "boolean",
+  "sectorPrices": [
+    {
+      "idSector": "string (UUID)",
+      "seasonalHalfDayPrice": "number (decimale, €) | null",
+      "seasonalPrice": "number (decimale, €) | null"
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
+      "halfDayPrice": "number (decimale, €) | null",
+      "dailyPrice": "number (decimale, €) | null",
+      "weekendPrice": "number (decimale, €) | null",
+      "halfDayWeekendPrice": "number (decimale, €) | null",
+      "halfDaySevenDaysPrice": "number (decimale, €) | null",
+      "sevenDaysPrice": "number (decimale, €) | null",
+      "halfDayFourteenDaysPrice": "number (decimale, €) | null",
+      "fourteenDaysPrice": "number (decimale, €) | null",
+      "halfDayMonthlyPrice": "number (decimale, €) | null",
+      "monthlyPrice": "number (decimale, €) | null"
+    }
+  ],
+  "vatRate": "number | null",
+  "calculationMethod": "string (enum PriceCalculationMethod) | null",
+  "isCumulative": "boolean",
+  "monthlySetting": "string (enum PriceMonthlySetting) | null",
+  "weekendSetting": "string (enum PriceWeekendSetting) | null",
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "number (intero)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ],
+  "version": "string"
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idAdditionalItem` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idAdditionalItem` | string (UUID) |
+| `idArticle` | string (UUID) \| null |
+| `idPackages` | string[] (UUID) |
+| `isOnlineEnabled` | boolean |
+| `isOnlineOnly` | boolean |
+| `isMapAssignable` | boolean |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `sectorPrices[].idSector` | string (UUID) |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null |
+| `isCumulative` | boolean |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null |
+| `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | number (intero) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
+| `version` | string |
+
+### POST `/api/catalog/price-lists/update-additional-services-article-item`
+
+**Payload JSON**
+
+```json
+{
+  "idAdditionalItem": "string (UUID)",
+  "idArticle": "string (UUID)",
+  "idPackages": "string[] (UUID)",
+  "isOnlineEnabled": "boolean",
+  "isOnlineOnly": "boolean",
+  "isMapAssignable": "boolean",
+  "sectorPrices": [
+    {
+      "idSector": "string (UUID)",
+      "seasonalHalfDayPrice": "number (decimale, €) | null",
+      "seasonalPrice": "number (decimale, €) | null"
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
+      "halfDayPrice": "number (decimale, €) | null",
+      "dailyPrice": "number (decimale, €) | null",
+      "weekendPrice": "number (decimale, €) | null",
+      "halfDayWeekendPrice": "number (decimale, €) | null",
+      "halfDaySevenDaysPrice": "number (decimale, €) | null",
+      "sevenDaysPrice": "number (decimale, €) | null",
+      "halfDayFourteenDaysPrice": "number (decimale, €) | null",
+      "fourteenDaysPrice": "number (decimale, €) | null",
+      "halfDayMonthlyPrice": "number (decimale, €) | null",
+      "monthlyPrice": "number (decimale, €) | null"
+    }
+  ],
+  "vatRate": "number | null",
+  "calculationMethod": "string (enum PriceCalculationMethod) | null",
+  "isCumulative": "boolean",
+  "monthlySetting": "string (enum PriceMonthlySetting) | null",
+  "weekendSetting": "string (enum PriceWeekendSetting) | null",
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "number (intero)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idAdditionalItem` | string (UUID) |
+| `idArticle` | string (UUID) |
+| `idPackages` | string[] (UUID) |
+| `isOnlineEnabled` | boolean |
+| `isOnlineOnly` | boolean |
+| `isMapAssignable` | boolean |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `sectorPrices[].idSector` | string (UUID) |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null |
+| `isCumulative` | boolean |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null |
+| `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | number (intero) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/price-lists/package-combobox`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "value": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].value` | string |
+
+### POST `/api/catalog/article-combobox`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "value": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].value` | string |
+
+### POST `/api/catalog/price-lists/create-package`
+
+**Payload JSON**
+
+```json
+{
+  "translations": [
+    {
+      "language": "string",
+      "packageName": "string | null"
+    }
+  ],
+  "maxAdditionalItemQuantity": "number (intero) | null",
+  "maxPeopleQuantity": "number (intero) | null",
+  "items": [
+    {
+      "idInventoryItem": "string (UUID)",
+      "quantity": "number (intero)"
+    }
+  ],
+  "includedServices": "string | null",
+  "idSectorAreas": "string[] (UUID)",
+  "idSectors": "string[] (UUID)",
+  "isDefault": "boolean",
+  "isDefaultOnline": "boolean",
+  "isOnlineEnabled": "boolean",
+  "isOnlineOnly": "boolean",
+  "reducedSeasonalPrices": [
+    {
+      "startsOn": "string (ISO 8601, mezzanotte UTC)",
+      "endsOn": "string (ISO 8601, mezzanotte UTC)",
+      "reducedSeasonalPriceName": "string",
+      "sectorPrices": [
+        {
+          "idSector": "string (UUID)",
+          "seasonalHalfDayPrice": "number (decimale, €) | null",
+          "seasonalPrice": "number (decimale, €) | null"
+        }
+      ]
+    }
+  ],
+  "sectorPrices": [
+    {
+      "idSector": "string (UUID)",
+      "seasonalHalfDayPrice": "number (decimale, €) | null",
+      "seasonalPrice": "number (decimale, €) | null"
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
+      "halfDayPrice": "number (decimale, €) | null",
+      "dailyPrice": "number (decimale, €) | null",
+      "weekendPrice": "number (decimale, €) | null",
+      "halfDayWeekendPrice": "number (decimale, €) | null",
+      "halfDaySevenDaysPrice": "number (decimale, €) | null",
+      "sevenDaysPrice": "number (decimale, €) | null",
+      "halfDayFourteenDaysPrice": "number (decimale, €) | null",
+      "fourteenDaysPrice": "number (decimale, €) | null",
+      "halfDayMonthlyPrice": "number (decimale, €) | null",
+      "monthlyPrice": "number (decimale, €) | null"
+    }
+  ],
+  "vatRate": "number | null",
+  "calculationMethod": "string (enum PriceCalculationMethod) | null",
+  "isCumulative": "boolean",
+  "monthlySetting": "string (enum PriceMonthlySetting) | null",
+  "weekendSetting": "string (enum PriceWeekendSetting) | null",
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "number (intero)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `translations[]` | PackageTranslation[] (array di oggetti, una per lingua) |
+| `translations[].language` | string |
+| `translations[].packageName` | string \| null |
+| `maxAdditionalItemQuantity` | number (intero) \| null |
+| `maxPeopleQuantity` | number (intero) \| null |
+| `items[]` | PackageItemQuantity[] (array di oggetti) |
+| `items[].idInventoryItem` | string (UUID) |
+| `items[].quantity` | number (intero) |
+| `includedServices` | string \| null |
+| `idSectorAreas` | string[] (UUID) |
+| `idSectors` | string[] (UUID) |
+| `isDefault` | boolean |
+| `isDefaultOnline` | boolean |
+| `isOnlineEnabled` | boolean |
+| `isOnlineOnly` | boolean |
+| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].startsOn` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].endsOn` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].reducedSeasonalPriceName` | string |
+| `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `sectorPrices[].idSector` | string (UUID) |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null |
+| `isCumulative` | boolean |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null |
+| `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | number (intero) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### GET `/api/catalog/price-lists/get-package-articles`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "article": "string (enum InventoryArticle)",
+    "items": [
+      {
+        "idInventoryItem": "string (UUID)",
+        "itemName": "string",
+        "totalQuantity": "number (intero)"
+      }
+    ]
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].article` | string (enum InventoryArticle) |
+| `[].items[]` | PackageArticleItem[] (array di oggetti) |
+| `[].items[].idInventoryItem` | string (UUID) |
+| `[].items[].itemName` | string |
+| `[].items[].totalQuantity` | number (intero) |
+
+### GET `/api/catalog/price-lists/get-package?idPackage={idPackage}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idPackage": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "idPackage": "string (UUID)",
+  "translations": [
+    {
+      "language": "string",
+      "packageName": "string | null"
+    }
+  ],
+  "maxAdditionalItemQuantity": "number (intero) | null",
+  "maxPeopleQuantity": "number (intero) | null",
+  "items": [
+    {
+      "idInventoryItem": "string (UUID)",
+      "quantity": "number (intero)"
+    }
+  ],
+  "includedServices": "string | null",
+  "idSectorAreas": "string[] (UUID)",
+  "idSectors": "string[] (UUID)",
+  "isDefault": "boolean",
+  "isDefaultOnline": "boolean",
+  "isOnlineEnabled": "boolean",
+  "isOnlineOnly": "boolean",
+  "reducedSeasonalPrices": [
+    {
+      "startsOn": "string (ISO 8601, mezzanotte UTC)",
+      "endsOn": "string (ISO 8601, mezzanotte UTC)",
+      "reducedSeasonalPriceName": "string",
+      "sectorPrices": [
+        {
+          "idSector": "string (UUID)",
+          "seasonalHalfDayPrice": "number (decimale, €) | null",
+          "seasonalPrice": "number (decimale, €) | null"
+        }
+      ]
+    }
+  ],
+  "sectorPrices": [
+    {
+      "idSector": "string (UUID)",
+      "seasonalHalfDayPrice": "number (decimale, €) | null",
+      "seasonalPrice": "number (decimale, €) | null"
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
+      "halfDayPrice": "number (decimale, €) | null",
+      "dailyPrice": "number (decimale, €) | null",
+      "weekendPrice": "number (decimale, €) | null",
+      "halfDayWeekendPrice": "number (decimale, €) | null",
+      "halfDaySevenDaysPrice": "number (decimale, €) | null",
+      "sevenDaysPrice": "number (decimale, €) | null",
+      "halfDayFourteenDaysPrice": "number (decimale, €) | null",
+      "fourteenDaysPrice": "number (decimale, €) | null",
+      "halfDayMonthlyPrice": "number (decimale, €) | null",
+      "monthlyPrice": "number (decimale, €) | null"
+    }
+  ],
+  "vatRate": "number | null",
+  "calculationMethod": "string (enum PriceCalculationMethod) | null",
+  "isCumulative": "boolean",
+  "monthlySetting": "string (enum PriceMonthlySetting) | null",
+  "weekendSetting": "string (enum PriceWeekendSetting) | null",
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "number (intero)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ],
+  "version": "string"
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idPackage` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idPackage` | string (UUID) |
+| `translations[]` | PackageTranslation[] (array di oggetti, una per lingua) |
+| `translations[].language` | string |
+| `translations[].packageName` | string \| null |
+| `maxAdditionalItemQuantity` | number (intero) \| null |
+| `maxPeopleQuantity` | number (intero) \| null |
+| `items[]` | PackageItemQuantity[] (array di oggetti) |
+| `items[].idInventoryItem` | string (UUID) |
+| `items[].quantity` | number (intero) |
+| `includedServices` | string \| null |
+| `idSectorAreas` | string[] (UUID) |
+| `idSectors` | string[] (UUID) |
+| `isDefault` | boolean |
+| `isDefaultOnline` | boolean |
+| `isOnlineEnabled` | boolean |
+| `isOnlineOnly` | boolean |
+| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].startsOn` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].endsOn` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].reducedSeasonalPriceName` | string |
+| `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `sectorPrices[].idSector` | string (UUID) |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null |
+| `isCumulative` | boolean |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null |
+| `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | number (intero) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
+| `version` | string |
+
+### POST `/api/catalog/price-lists/update-package`
+
+**Payload JSON**
+
+```json
+{
+  "idPackage": "string (UUID)",
+  "translations": [
+    {
+      "language": "string",
+      "packageName": "string | null"
+    }
+  ],
+  "maxAdditionalItemQuantity": "number (intero) | null",
+  "maxPeopleQuantity": "number (intero) | null",
+  "items": [
+    {
+      "idInventoryItem": "string (UUID)",
+      "quantity": "number (intero)"
+    }
+  ],
+  "includedServices": "string | null",
+  "idSectorAreas": "string[] (UUID)",
+  "idSectors": "string[] (UUID)",
+  "isDefault": "boolean",
+  "isDefaultOnline": "boolean",
+  "isOnlineEnabled": "boolean",
+  "isOnlineOnly": "boolean",
+  "reducedSeasonalPrices": [
+    {
+      "startsOn": "string (ISO 8601, mezzanotte UTC)",
+      "endsOn": "string (ISO 8601, mezzanotte UTC)",
+      "reducedSeasonalPriceName": "string",
+      "sectorPrices": [
+        {
+          "idSector": "string (UUID)",
+          "seasonalHalfDayPrice": "number (decimale, €) | null",
+          "seasonalPrice": "number (decimale, €) | null"
+        }
+      ]
+    }
+  ],
+  "sectorPrices": [
+    {
+      "idSector": "string (UUID)",
+      "seasonalHalfDayPrice": "number (decimale, €) | null",
+      "seasonalPrice": "number (decimale, €) | null"
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
+      "halfDayPrice": "number (decimale, €) | null",
+      "dailyPrice": "number (decimale, €) | null",
+      "weekendPrice": "number (decimale, €) | null",
+      "halfDayWeekendPrice": "number (decimale, €) | null",
+      "halfDaySevenDaysPrice": "number (decimale, €) | null",
+      "sevenDaysPrice": "number (decimale, €) | null",
+      "halfDayFourteenDaysPrice": "number (decimale, €) | null",
+      "fourteenDaysPrice": "number (decimale, €) | null",
+      "halfDayMonthlyPrice": "number (decimale, €) | null",
+      "monthlyPrice": "number (decimale, €) | null"
+    }
+  ],
+  "vatRate": "number | null",
+  "calculationMethod": "string (enum PriceCalculationMethod) | null",
+  "isCumulative": "boolean",
+  "monthlySetting": "string (enum PriceMonthlySetting) | null",
+  "weekendSetting": "string (enum PriceWeekendSetting) | null",
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "number (intero)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idPackage` | string (UUID) |
+| `translations[]` | PackageTranslation[] (array di oggetti, una per lingua) |
+| `translations[].language` | string |
+| `translations[].packageName` | string \| null |
+| `maxAdditionalItemQuantity` | number (intero) \| null |
+| `maxPeopleQuantity` | number (intero) \| null |
+| `items[]` | PackageItemQuantity[] (array di oggetti) |
+| `items[].idInventoryItem` | string (UUID) |
+| `items[].quantity` | number (intero) |
+| `includedServices` | string \| null |
+| `idSectorAreas` | string[] (UUID) |
+| `idSectors` | string[] (UUID) |
+| `isDefault` | boolean |
+| `isDefaultOnline` | boolean |
+| `isOnlineEnabled` | boolean |
+| `isOnlineOnly` | boolean |
+| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].startsOn` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].endsOn` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].reducedSeasonalPriceName` | string |
+| `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `sectorPrices[].idSector` | string (UUID) |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null |
+| `isCumulative` | boolean |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null |
+| `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | number (intero) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/sectors/sector-combobox`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "value": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].value` | string |
+
+### POST `/api/catalog/sectors/sector-area-combobox`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "value": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].value` | string |
+
+### GET `/api/catalog/tariff-periods`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "key": "number (intero)",
+    "name": "string",
+    "ranges": [
+      {
+        "startsOn": "string (data, AAAA-MM-GG)",
+        "endsOn": "string (data, AAAA-MM-GG)"
+      }
+    ],
+    "version": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].key` | number (intero) |
+| `[].name` | string |
+| `[].ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `[].ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `[].ranges[].endsOn` | string (data, AAAA-MM-GG) |
+| `[].version` | string |
 
 ## Sconti e voucher
 
-### POST `/api/vouchers/voucher-list`
+### POST `/api/catalog/discounts/voucher-list`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -1393,11 +3852,11 @@ Nessun corpo (204).
   "rows": [
     {
       "idVoucher": "string (UUID)",
-      "voucherName": "string | null",
+      "voucherName": "string",
       "validFrom": "string (data ISO 8601 UTC) | null",
       "validTo": "string (data ISO 8601 UTC) | null",
-      "discountType": "string (enum DiscountType) | null",
-      "discountValue": "number (decimale) | null"
+      "discountType": "string (enum DiscountType)",
+      "discountValue": "number (decimale)"
     }
   ]
 }
@@ -1407,7 +3866,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -1424,20 +3882,21 @@ Nessun corpo (204).
 | `total` | number (intero) |
 | `rows[]` | VoucherItem[] (array di oggetti) |
 | `rows[].idVoucher` | string (UUID) |
-| `rows[].voucherName` | string \| null |
+| `rows[].voucherName` | string |
 | `rows[].validFrom` | string (data ISO 8601 UTC) \| null |
 | `rows[].validTo` | string (data ISO 8601 UTC) \| null |
-| `rows[].discountType` | string (enum DiscountType) \| null |
-| `rows[].discountValue` | number (decimale) \| null |
+| `rows[].discountType` | string (enum DiscountType) |
+| `rows[].discountValue` | number (decimale) |
 
-### POST `/api/vouchers/add-voucher-item`
+### POST `/api/catalog/discounts/add-voucher-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "voucherName": "string",
+  "voucherCode": "string",
+  "isCodeRequired": "boolean",
   "validityPeriods": [
     {
       "validFrom": "string (data ISO 8601 UTC)",
@@ -1454,7 +3913,9 @@ Nessun corpo (204).
   "discountType": "string (enum DiscountType)",
   "discountValue": "number (decimale)",
   "discountScope": "string (enum DiscountScope)",
-  "maxUseQuantity": "number (intero ≥ 1)",
+  "serviceCategories": "string[] (enum DiscountServiceCategory, anche vuoto)",
+  "idSectors": "string[] (UUID, anche vuoto)",
+  "maxUseQuantity": "number (intero, 1-2.147.483.647) | null",
   "isEnabled": "boolean"
 }
 ```
@@ -1467,26 +3928,29 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `voucherName` | string |
-| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) |
+| `voucherCode` | string |
+| `isCodeRequired` | boolean |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, al massimo 50) |
 | `validityPeriods[].validFrom` | string (data ISO 8601 UTC) |
 | `validityPeriods[].validTo` | string (data ISO 8601 UTC) |
 | `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) |
-| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, al massimo 20, anche vuoto) |
 | `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) |
 | `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) |
 | `discountType` | string (enum DiscountType) |
 | `discountValue` | number (decimale) |
 | `discountScope` | string (enum DiscountScope) |
-| `maxUseQuantity` | number (intero ≥ 1) |
+| `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) |
+| `idSectors` | string[] (UUID, anche vuoto) |
+| `maxUseQuantity` | number (intero, 1-2.147.483.647) \| null |
 | `isEnabled` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### GET `/api/vouchers/get-selected-item?idVoucher={idVoucher}`
+### GET `/api/catalog/discounts/get-selected-item?idVoucher={idVoucher}`
 
 **Payload JSON** (query string)
 
@@ -1502,61 +3966,8 @@ Nessun corpo (204).
 {
   "idVoucher": "string (UUID)",
   "voucherName": "string | null",
-  "validityPeriods": [
-    {
-      "validFrom": "string (data ISO 8601 UTC)",
-      "validTo": "string (data ISO 8601 UTC)",
-      "daysOfWeek": "number[] (interi da 1 a 7, almeno uno)",
-      "timeSlots": [
-        {
-          "from": "string (HH:mm, 24 ore)",
-          "to": "string (HH:mm, 24 ore)"
-        }
-      ]
-    }
-  ],
-  "discountType": "string (enum DiscountType) | null",
-  "discountValue": "number (decimale) | null",
-  "discountScope": "string (enum DiscountScope) | null",
-  "maxUseQuantity": "number (intero) | null",
-  "isEnabled": "boolean | null"
-}
-```
-
-**Payload tabella** (query string)
-
-| Campo | Tipo |
-|---|---|
-| `idVoucher` | string (UUID) |
-
-**Response tabella**
-
-| Campo | Tipo |
-|---|---|
-| `idVoucher` | string (UUID) |
-| `voucherName` | string \| null |
-| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti) |
-| `validityPeriods[].validFrom` | string (data ISO 8601 UTC) |
-| `validityPeriods[].validTo` | string (data ISO 8601 UTC) |
-| `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) |
-| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) |
-| `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) |
-| `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) |
-| `discountType` | string (enum DiscountType) \| null |
-| `discountValue` | number (decimale) \| null |
-| `discountScope` | string (enum DiscountScope) \| null |
-| `maxUseQuantity` | number (intero) \| null |
-| `isEnabled` | boolean \| null |
-
-### POST `/api/vouchers/update-voucher-item`
-
-**Payload JSON**
-
-```json
-{
-  "idProperty": "string (UUID)",
-  "idVoucher": "string (UUID)",
-  "voucherName": "string",
+  "voucherCode": "string",
+  "isCodeRequired": "boolean",
   "validityPeriods": [
     {
       "validFrom": "string (data ISO 8601 UTC)",
@@ -1573,7 +3984,73 @@ Nessun corpo (204).
   "discountType": "string (enum DiscountType)",
   "discountValue": "number (decimale)",
   "discountScope": "string (enum DiscountScope)",
-  "maxUseQuantity": "number (intero ≥ 1)",
+  "serviceCategories": "string[] (enum DiscountServiceCategory, anche vuoto)",
+  "idSectors": "string[] (UUID, anche vuoto)",
+  "maxUseQuantity": "number (intero) | null",
+  "isEnabled": "boolean",
+  "version": "string"
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idVoucher` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idVoucher` | string (UUID) |
+| `voucherName` | string \| null |
+| `voucherCode` | string |
+| `isCodeRequired` | boolean |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, anche vuoto) |
+| `validityPeriods[].validFrom` | string (data ISO 8601 UTC) |
+| `validityPeriods[].validTo` | string (data ISO 8601 UTC) |
+| `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, al massimo 20, anche vuoto) |
+| `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) |
+| `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) |
+| `discountType` | string (enum DiscountType) |
+| `discountValue` | number (decimale) |
+| `discountScope` | string (enum DiscountScope) |
+| `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) |
+| `idSectors` | string[] (UUID, anche vuoto) |
+| `maxUseQuantity` | number (intero) \| null |
+| `isEnabled` | boolean |
+| `version` | string |
+
+### POST `/api/catalog/discounts/update-voucher-item`
+
+**Payload JSON**
+
+```json
+{
+  "idVoucher": "string (UUID)",
+  "voucherName": "string",
+  "voucherCode": "string",
+  "isCodeRequired": "boolean",
+  "validityPeriods": [
+    {
+      "validFrom": "string (data ISO 8601 UTC)",
+      "validTo": "string (data ISO 8601 UTC)",
+      "daysOfWeek": "number[] (interi da 1 a 7, almeno uno)",
+      "timeSlots": [
+        {
+          "from": "string (HH:mm, 24 ore)",
+          "to": "string (HH:mm, 24 ore)"
+        }
+      ]
+    }
+  ],
+  "discountType": "string (enum DiscountType)",
+  "discountValue": "number (decimale)",
+  "discountScope": "string (enum DiscountScope)",
+  "serviceCategories": "string[] (enum DiscountServiceCategory, anche vuoto)",
+  "idSectors": "string[] (UUID, anche vuoto)",
+  "maxUseQuantity": "number (intero, 1-2.147.483.647) | null",
   "isEnabled": "boolean"
 }
 ```
@@ -1586,33 +4063,35 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idVoucher` | string (UUID) |
 | `voucherName` | string |
-| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) |
+| `voucherCode` | string |
+| `isCodeRequired` | boolean |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, al massimo 50) |
 | `validityPeriods[].validFrom` | string (data ISO 8601 UTC) |
 | `validityPeriods[].validTo` | string (data ISO 8601 UTC) |
 | `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) |
-| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, al massimo 20, anche vuoto) |
 | `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) |
 | `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) |
 | `discountType` | string (enum DiscountType) |
 | `discountValue` | number (decimale) |
 | `discountScope` | string (enum DiscountScope) |
-| `maxUseQuantity` | number (intero ≥ 1) |
+| `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) |
+| `idSectors` | string[] (UUID, anche vuoto) |
+| `maxUseQuantity` | number (intero, 1-2.147.483.647) \| null |
 | `isEnabled` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/vouchers/delete-voucher-item`
+### POST `/api/catalog/discounts/delete-voucher-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idVouchers": "string[] (UUID, almeno uno)"
 }
 ```
@@ -1625,20 +4104,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idVouchers` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/vouchers/duplicate-voucher-item`
+### POST `/api/catalog/discounts/duplicate-voucher-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idVouchers": "string[] (UUID, almeno uno)"
 }
 ```
@@ -1651,7 +4128,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idVouchers` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -1660,13 +4136,12 @@ Nessun corpo (204).
 
 ## Servizi
 
-### POST `/api/catalog/bar-service-list`
+### POST `/api/catalog/services/bar-service-list`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -1701,7 +4176,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -1722,13 +4196,79 @@ Nessun corpo (204).
 | `rows[].category` | string (enum BarServiceCategory) \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
-### POST `/api/catalog/create-bar-service`
+### POST `/api/catalog/sectors/sector-combobox`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "value": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].value` | string |
+
+### GET `/api/catalog/tariff-periods`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "key": "number (intero)",
+    "name": "string",
+    "ranges": [
+      {
+        "startsOn": "string (data, AAAA-MM-GG)",
+        "endsOn": "string (data, AAAA-MM-GG)"
+      }
+    ],
+    "version": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].key` | number (intero) |
+| `[].name` | string |
+| `[].ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `[].ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `[].ranges[].endsOn` | string (data, AAAA-MM-GG) |
+| `[].version` | string |
+
+### POST `/api/catalog/services/create-bar-service`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "translations": [
     {
       "language": "string",
@@ -1739,18 +4279,18 @@ Nessun corpo (204).
   "category": "string (enum BarServiceCategory) | null",
   "icon": "string (enum BarServiceIcon) | null",
   "isHighlighted": "boolean",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "variants": [
     {
-      "variantName": "string | null",
-      "price": "number (decimale, €) | null"
+      "variantName": "string",
+      "price": "number (decimale, €)"
     }
   ],
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
@@ -1760,13 +4300,15 @@ Nessun corpo (204).
     {
       "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
       "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
       "managementStartTime": "string (HH:mm) | null",
       "managementEndTime": "string (HH:mm) | null",
       "onlineStartTime": "string (HH:mm) | null",
       "onlineEndTime": "string (HH:mm) | null",
       "maxBookingPerHourQuantity": "number (intero) | null",
       "maxBookingPerDayQuantity": "number (intero) | null",
-      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
       "minItemPerBookingQuantity": "number (intero) | null",
       "maxItemPerBookingQuantity": "number (intero) | null"
     }
@@ -1776,13 +4318,14 @@ Nessun corpo (204).
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+"string"
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
@@ -1790,35 +4333,81 @@ Nessun corpo (204).
 | `category` | string (enum BarServiceCategory) \| null |
 | `icon` | string (enum BarServiceIcon) \| null |
 | `isHighlighted` | boolean |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `variants[]` | ServiceVariant[] (array di oggetti) |
-| `variants[].variantName` | string \| null |
-| `variants[].price` | number (decimale, €) \| null |
+| `variants[].variantName` | string |
+| `variants[].price` | number (decimale, €) |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `(corpo)` | string |
 
-### GET `/api/catalog/get-bar-service-general-info?idBarService={idBarService}`
+### POST `/api/catalog/services/{id}/image`
+
+**Payload JSON**
+
+```json
+{
+  "file": "file (multipart/form-data)"
+}
+```
+
+**Response JSON**
+
+200 OK (il servizio, che il frontend non legge).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `file` | file (multipart/form-data) |
+
+**Response tabella**
+
+200 OK (il servizio, che il frontend non legge).
+
+### DELETE `/api/catalog/services/{id}/image`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+200 OK (il servizio, che il frontend non legge).
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+200 OK (il servizio, che il frontend non legge).
+
+### GET `/api/catalog/services/get-bar-service-general-info?idBarService={idBarService}`
 
 **Payload JSON** (query string)
 
@@ -1841,8 +4430,10 @@ Nessun corpo (204).
     }
   ],
   "category": "string (enum BarServiceCategory) | null",
-  "icon": "string (enum BarServiceIcon) | null",
-  "isHighlighted": "boolean"
+  "icon": "string | null",
+  "imageUrl": "string (URL) | null",
+  "isHighlighted": "boolean",
+  "version": "string"
 }
 ```
 
@@ -1862,10 +4453,12 @@ Nessun corpo (204).
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
 | `category` | string (enum BarServiceCategory) \| null |
-| `icon` | string (enum BarServiceIcon) \| null |
+| `icon` | string \| null |
+| `imageUrl` | string (URL) \| null |
 | `isHighlighted` | boolean |
+| `version` | string |
 
-### GET `/api/catalog/get-bar-service-prices?idBarService={idBarService}`
+### GET `/api/catalog/services/get-bar-service-prices?idBarService={idBarService}`
 
 **Payload JSON** (query string)
 
@@ -1879,23 +4472,24 @@ Nessun corpo (204).
 
 ```json
 {
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "variants": [
     {
-      "variantName": "string | null",
-      "price": "number (decimale, €) | null"
+      "variantName": "string",
+      "price": "number (decimale, €)"
     }
   ],
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
   "idSectors": "string[] (UUID)",
-  "isOnlinePurchaseEnabled": "boolean"
+  "isOnlinePurchaseEnabled": "boolean",
+  "version": "string"
 }
 ```
 
@@ -1909,19 +4503,20 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `variants[]` | ServiceVariant[] (array di oggetti) |
-| `variants[].variantName` | string \| null |
-| `variants[].price` | number (decimale, €) \| null |
+| `variants[].variantName` | string |
+| `variants[].price` | number (decimale, €) |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
+| `version` | string |
 
-### GET `/api/catalog/get-bar-service-booking-options?idBarService={idBarService}`
+### GET `/api/catalog/services/get-bar-service-booking-options?idBarService={idBarService}`
 
 **Payload JSON** (query string)
 
@@ -1934,21 +4529,26 @@ Nessun corpo (204).
 **Response JSON**
 
 ```json
-[
-  {
-    "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
-    "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
-    "managementStartTime": "string (HH:mm) | null",
-    "managementEndTime": "string (HH:mm) | null",
-    "onlineStartTime": "string (HH:mm) | null",
-    "onlineEndTime": "string (HH:mm) | null",
-    "maxBookingPerHourQuantity": "number (intero) | null",
-    "maxBookingPerDayQuantity": "number (intero) | null",
-    "timeInterval": "string (enum BookingTimeInterval) | null",
-    "minItemPerBookingQuantity": "number (intero) | null",
-    "maxItemPerBookingQuantity": "number (intero) | null"
-  }
-]
+{
+  "bookingOptions": [
+    {
+      "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
+      "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
+      "managementStartTime": "string (HH:mm) | null",
+      "managementEndTime": "string (HH:mm) | null",
+      "onlineStartTime": "string (HH:mm) | null",
+      "onlineEndTime": "string (HH:mm) | null",
+      "maxBookingPerHourQuantity": "number (intero) | null",
+      "maxBookingPerDayQuantity": "number (intero) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
+      "minItemPerBookingQuantity": "number (intero) | null",
+      "maxItemPerBookingQuantity": "number (intero) | null"
+    }
+  ],
+  "version": "string"
+}
 ```
 
 **Payload tabella** (query string)
@@ -1961,25 +4561,28 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
-| `[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
-| `[].managementStartTime` | string (HH:mm) \| null |
-| `[].managementEndTime` | string (HH:mm) \| null |
-| `[].onlineStartTime` | string (HH:mm) \| null |
-| `[].onlineEndTime` | string (HH:mm) \| null |
-| `[].maxBookingPerHourQuantity` | number (intero) \| null |
-| `[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `[].timeInterval` | string (enum BookingTimeInterval) \| null |
-| `[].minItemPerBookingQuantity` | number (intero) \| null |
-| `[].maxItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
+| `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
+| `version` | string |
 
-### POST `/api/catalog/update-bar-service-general`
+### POST `/api/catalog/services/update-bar-service-general`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBarService": "string (UUID)",
   "translations": [
     {
@@ -1989,7 +4592,7 @@ Nessun corpo (204).
     }
   ],
   "category": "string (enum BarServiceCategory) | null",
-  "icon": "string (enum BarServiceIcon) | null",
+  "icon": "string | null",
   "isHighlighted": "boolean"
 }
 ```
@@ -2002,40 +4605,38 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBarService` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
 | `category` | string (enum BarServiceCategory) \| null |
-| `icon` | string (enum BarServiceIcon) \| null |
+| `icon` | string \| null |
 | `isHighlighted` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-bar-service-prices`
+### POST `/api/catalog/services/update-bar-service-prices`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBarService": "string (UUID)",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "variants": [
     {
-      "variantName": "string | null",
-      "price": "number (decimale, €) | null"
+      "variantName": "string",
+      "price": "number (decimale, €)"
     }
   ],
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
@@ -2052,16 +4653,15 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBarService` | string (UUID) |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `variants[]` | ServiceVariant[] (array di oggetti) |
-| `variants[].variantName` | string \| null |
-| `variants[].price` | number (decimale, €) \| null |
+| `variants[].variantName` | string |
+| `variants[].price` | number (decimale, €) |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
@@ -2070,25 +4670,26 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-bar-service-booking`
+### POST `/api/catalog/services/update-bar-service-booking`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBarService": "string (UUID)",
   "bookingOptions": [
     {
       "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
       "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
       "managementStartTime": "string (HH:mm) | null",
       "managementEndTime": "string (HH:mm) | null",
       "onlineStartTime": "string (HH:mm) | null",
       "onlineEndTime": "string (HH:mm) | null",
       "maxBookingPerHourQuantity": "number (intero) | null",
       "maxBookingPerDayQuantity": "number (intero) | null",
-      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
       "minItemPerBookingQuantity": "number (intero) | null",
       "maxItemPerBookingQuantity": "number (intero) | null"
     }
@@ -2104,18 +4705,19 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBarService` | string (UUID) |
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
 
@@ -2123,13 +4725,12 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/delete-bar-service-item`
+### POST `/api/catalog/services/delete-bar-service-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBarServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2142,20 +4743,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBarServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-bar-service-item`
+### POST `/api/catalog/services/duplicate-bar-service-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBarServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2168,20 +4767,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBarServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/standard-service-list`
+### POST `/api/catalog/services/standard-service-list`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -2215,7 +4812,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -2235,13 +4831,12 @@ Nessun corpo (204).
 | `rows[].serviceName` | string \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
-### POST `/api/catalog/create-standard-service`
+### POST `/api/catalog/services/create-standard-service`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "translations": [
     {
       "language": "string",
@@ -2251,12 +4846,12 @@ Nessun corpo (204).
   ],
   "icon": "string (enum StandardServiceIcon) | null",
   "isHighlighted": "boolean",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
@@ -2266,13 +4861,15 @@ Nessun corpo (204).
     {
       "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
       "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
       "managementStartTime": "string (HH:mm) | null",
       "managementEndTime": "string (HH:mm) | null",
       "onlineStartTime": "string (HH:mm) | null",
       "onlineEndTime": "string (HH:mm) | null",
       "maxBookingPerHourQuantity": "number (intero) | null",
       "maxBookingPerDayQuantity": "number (intero) | null",
-      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
       "minItemPerBookingQuantity": "number (intero) | null",
       "maxItemPerBookingQuantity": "number (intero) | null"
     }
@@ -2282,45 +4879,50 @@ Nessun corpo (204).
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+"string"
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
 | `icon` | string (enum StandardServiceIcon) \| null |
 | `isHighlighted` | boolean |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `(corpo)` | string |
 
-### GET `/api/catalog/get-standard-service-general-info?idStandardService={idStandardService}`
+### GET `/api/catalog/services/get-standard-service-general-info?idStandardService={idStandardService}`
 
 **Payload JSON** (query string)
 
@@ -2342,8 +4944,10 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum StandardServiceIcon) | null",
-  "isHighlighted": "boolean"
+  "icon": "string | null",
+  "imageUrl": "string (URL) | null",
+  "isHighlighted": "boolean",
+  "version": "string"
 }
 ```
 
@@ -2362,10 +4966,12 @@ Nessun corpo (204).
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum StandardServiceIcon) \| null |
+| `icon` | string \| null |
+| `imageUrl` | string (URL) \| null |
 | `isHighlighted` | boolean |
+| `version` | string |
 
-### GET `/api/catalog/get-standard-service-prices?idStandardService={idStandardService}`
+### GET `/api/catalog/services/get-standard-service-prices?idStandardService={idStandardService}`
 
 **Payload JSON** (query string)
 
@@ -2379,17 +4985,18 @@ Nessun corpo (204).
 
 ```json
 {
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
   "idSectors": "string[] (UUID)",
-  "isOnlinePurchaseEnabled": "boolean"
+  "isOnlinePurchaseEnabled": "boolean",
+  "version": "string"
 }
 ```
 
@@ -2403,16 +5010,17 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
+| `version` | string |
 
-### GET `/api/catalog/get-standard-service-booking-options?idStandardService={idStandardService}`
+### GET `/api/catalog/services/get-standard-service-booking-options?idStandardService={idStandardService}`
 
 **Payload JSON** (query string)
 
@@ -2425,21 +5033,26 @@ Nessun corpo (204).
 **Response JSON**
 
 ```json
-[
-  {
-    "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
-    "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
-    "managementStartTime": "string (HH:mm) | null",
-    "managementEndTime": "string (HH:mm) | null",
-    "onlineStartTime": "string (HH:mm) | null",
-    "onlineEndTime": "string (HH:mm) | null",
-    "maxBookingPerHourQuantity": "number (intero) | null",
-    "maxBookingPerDayQuantity": "number (intero) | null",
-    "timeInterval": "string (enum BookingTimeInterval) | null",
-    "minItemPerBookingQuantity": "number (intero) | null",
-    "maxItemPerBookingQuantity": "number (intero) | null"
-  }
-]
+{
+  "bookingOptions": [
+    {
+      "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
+      "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
+      "managementStartTime": "string (HH:mm) | null",
+      "managementEndTime": "string (HH:mm) | null",
+      "onlineStartTime": "string (HH:mm) | null",
+      "onlineEndTime": "string (HH:mm) | null",
+      "maxBookingPerHourQuantity": "number (intero) | null",
+      "maxBookingPerDayQuantity": "number (intero) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
+      "minItemPerBookingQuantity": "number (intero) | null",
+      "maxItemPerBookingQuantity": "number (intero) | null"
+    }
+  ],
+  "version": "string"
+}
 ```
 
 **Payload tabella** (query string)
@@ -2452,25 +5065,28 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
-| `[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
-| `[].managementStartTime` | string (HH:mm) \| null |
-| `[].managementEndTime` | string (HH:mm) \| null |
-| `[].onlineStartTime` | string (HH:mm) \| null |
-| `[].onlineEndTime` | string (HH:mm) \| null |
-| `[].maxBookingPerHourQuantity` | number (intero) \| null |
-| `[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `[].timeInterval` | string (enum BookingTimeInterval) \| null |
-| `[].minItemPerBookingQuantity` | number (intero) \| null |
-| `[].maxItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
+| `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
+| `version` | string |
 
-### POST `/api/catalog/update-standard-service-general`
+### POST `/api/catalog/services/update-standard-service-general`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idStandardService": "string (UUID)",
   "translations": [
     {
@@ -2479,7 +5095,7 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum StandardServiceIcon) | null",
+  "icon": "string | null",
   "isHighlighted": "boolean"
 }
 ```
@@ -2492,33 +5108,31 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idStandardService` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum StandardServiceIcon) \| null |
+| `icon` | string \| null |
 | `isHighlighted` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-standard-service-prices`
+### POST `/api/catalog/services/update-standard-service-prices`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idStandardService": "string (UUID)",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
@@ -2535,13 +5149,12 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idStandardService` | string (UUID) |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
@@ -2550,25 +5163,26 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-standard-service-booking`
+### POST `/api/catalog/services/update-standard-service-booking`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idStandardService": "string (UUID)",
   "bookingOptions": [
     {
       "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
       "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
       "managementStartTime": "string (HH:mm) | null",
       "managementEndTime": "string (HH:mm) | null",
       "onlineStartTime": "string (HH:mm) | null",
       "onlineEndTime": "string (HH:mm) | null",
       "maxBookingPerHourQuantity": "number (intero) | null",
       "maxBookingPerDayQuantity": "number (intero) | null",
-      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
       "minItemPerBookingQuantity": "number (intero) | null",
       "maxItemPerBookingQuantity": "number (intero) | null"
     }
@@ -2584,18 +5198,19 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idStandardService` | string (UUID) |
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
 
@@ -2603,13 +5218,12 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/delete-standard-service-item`
+### POST `/api/catalog/services/delete-standard-service-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idStandardServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2622,20 +5236,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idStandardServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-standard-service-item`
+### POST `/api/catalog/services/duplicate-standard-service-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idStandardServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2648,20 +5260,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idStandardServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/hourly-service-list`
+### POST `/api/catalog/services/hourly-service-list`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -2694,7 +5304,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -2713,13 +5322,12 @@ Nessun corpo (204).
 | `rows[].idHourlyService` | string (UUID) |
 | `rows[].serviceName` | string \| null |
 
-### POST `/api/catalog/delete-hourly-service-item`
+### POST `/api/catalog/services/delete-hourly-service-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idHourlyServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2732,20 +5340,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idHourlyServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-hourly-service-item`
+### POST `/api/catalog/services/duplicate-hourly-service-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idHourlyServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2758,20 +5364,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idHourlyServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/create-hourly-service`
+### POST `/api/catalog/services/create-hourly-service`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "translations": [
     {
       "language": "string",
@@ -2781,10 +5385,32 @@ Nessun corpo (204).
   ],
   "icon": "string (enum StandardServiceIcon) | null",
   "isHighlighted": "boolean",
+  "price": "number (decimale, €)",
+  "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
+  "availabilityOptions": [
+    {
+      "startTime": "string (HH:mm) | null",
+      "endTime": "string (HH:mm) | null",
+      "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
+      "timeSlotPrices": [
+        {
+          "timeSlot": "string (enum ServiceTimeSlot)",
+          "isEnabled": "boolean",
+          "price": "number (decimale, €) | null"
+        }
+      ],
+      "isCustomTimeSlotEnabled": "boolean",
+      "customTimeSlotMinuteQuantity": "number (intero, minuti) | null",
+      "customTimeSlotPrice": "number (decimale, €) | null",
+      "vatRate": "number (decimale, %) | null",
+      "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+      "hasFixedTimeSlots": "boolean"
+    }
+  ],
   "periodAvailabilities": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "availabilityOptions": [
         {
           "startTime": "string (HH:mm) | null",
@@ -2813,6 +5439,17 @@ Nessun corpo (204).
     {
       "dateFrom": "string (ISO 8601, UTC) | null",
       "dateTo": "string (ISO 8601, UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
+      "managementStartTime": "string (HH:mm) | null",
+      "managementEndTime": "string (HH:mm) | null",
+      "onlineStartTime": "string (HH:mm) | null",
+      "onlineEndTime": "string (HH:mm) | null",
+      "maxBookingPerHourQuantity": "number (intero) | null",
+      "maxBookingPerDayQuantity": "number (intero) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
+      "minItemPerBookingQuantity": "number (intero) | null",
+      "maxItemPerBookingQuantity": "number (intero) | null",
       "availabilityOption": {
         "startTime": "string (HH:mm) | null",
         "endTime": "string (HH:mm) | null",
@@ -2838,22 +5475,39 @@ Nessun corpo (204).
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+"string"
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
 | `icon` | string (enum StandardServiceIcon) \| null |
 | `isHighlighted` | boolean |
+| `price` | number (decimale, €) |
+| `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
+| `availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
+| `availabilityOptions[].startTime` | string (HH:mm) \| null |
+| `availabilityOptions[].endTime` | string (HH:mm) \| null |
+| `availabilityOptions[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
+| `availabilityOptions[].timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) |
+| `availabilityOptions[].timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) |
+| `availabilityOptions[].timeSlotPrices[].isEnabled` | boolean |
+| `availabilityOptions[].timeSlotPrices[].price` | number (decimale, €) \| null |
+| `availabilityOptions[].isCustomTimeSlotEnabled` | boolean |
+| `availabilityOptions[].customTimeSlotMinuteQuantity` | number (intero, minuti) \| null |
+| `availabilityOptions[].customTimeSlotPrice` | number (decimale, €) \| null |
+| `availabilityOptions[].vatRate` | number (decimale, %) \| null |
+| `availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `availabilityOptions[].hasFixedTimeSlots` | boolean |
 | `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) |
-| `periodAvailabilities[].idPeriod` | string (UUID) |
+| `periodAvailabilities[].idPeriod` | number (intero) |
 | `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
 | `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null |
 | `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null |
@@ -2873,7 +5527,18 @@ Nessun corpo (204).
 | `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, UTC) \| null |
-| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) \| null |
 | `bookingOptions[].availabilityOption.startTime` | string (HH:mm) \| null |
 | `bookingOptions[].availabilityOption.endTime` | string (HH:mm) \| null |
 | `bookingOptions[].availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
@@ -2890,9 +5555,11 @@ Nessun corpo (204).
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `(corpo)` | string |
 
-### GET `/api/catalog/get-hourly-service-general-info?idHourlyService={idHourlyService}`
+### GET `/api/catalog/services/get-hourly-service-general-info?idHourlyService={idHourlyService}`
 
 **Payload JSON** (query string)
 
@@ -2914,8 +5581,10 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum StandardServiceIcon) | null",
-  "isHighlighted": "boolean"
+  "icon": "string | null",
+  "imageUrl": "string (URL) | null",
+  "isHighlighted": "boolean",
+  "version": "string"
 }
 ```
 
@@ -2934,10 +5603,12 @@ Nessun corpo (204).
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum StandardServiceIcon) \| null |
+| `icon` | string \| null |
+| `imageUrl` | string (URL) \| null |
 | `isHighlighted` | boolean |
+| `version` | string |
 
-### GET `/api/catalog/get-hourly-service-prices?idHourlyService={idHourlyService}`
+### GET `/api/catalog/services/get-hourly-service-prices?idHourlyService={idHourlyService}`
 
 **Payload JSON** (query string)
 
@@ -2951,85 +5622,11 @@ Nessun corpo (204).
 
 ```json
 {
+  "price": "number (decimale, €)",
+  "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
-  "periodAvailabilities": [
+  "availabilityOptions": [
     {
-      "idPeriod": "string (UUID)",
-      "availabilityOptions": [
-        {
-          "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null",
-          "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
-          "timeSlotPrices": [
-            {
-              "timeSlot": "string (enum ServiceTimeSlot)",
-              "isEnabled": "boolean",
-              "price": "number (decimale, €) | null"
-            }
-          ],
-          "isCustomTimeSlotEnabled": "boolean",
-          "customTimeSlotMinuteQuantity": "number (intero, minuti) | null",
-          "customTimeSlotPrice": "number (decimale, €) | null",
-          "vatRate": "number (decimale, %) | null",
-          "maxBookingPerTimeSlotQuantity": "number (intero) | null",
-          "hasFixedTimeSlots": "boolean"
-        }
-      ]
-    }
-  ],
-  "idSectors": "string[] (UUID)",
-  "isOnlinePurchaseEnabled": "boolean"
-}
-```
-
-**Payload tabella** (query string)
-
-| Campo | Tipo |
-|---|---|
-| `idHourlyService` | string (UUID) |
-
-**Response tabella**
-
-| Campo | Tipo |
-|---|---|
-| `isPeriodPricingEnabled` | boolean |
-| `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) |
-| `periodAvailabilities[].idPeriod` | string (UUID) |
-| `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
-| `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null |
-| `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null |
-| `periodAvailabilities[].availabilityOptions[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
-| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) |
-| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) |
-| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].isEnabled` | boolean |
-| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].price` | number (decimale, €) \| null |
-| `periodAvailabilities[].availabilityOptions[].isCustomTimeSlotEnabled` | boolean |
-| `periodAvailabilities[].availabilityOptions[].customTimeSlotMinuteQuantity` | number (intero, minuti) \| null |
-| `periodAvailabilities[].availabilityOptions[].customTimeSlotPrice` | number (decimale, €) \| null |
-| `periodAvailabilities[].availabilityOptions[].vatRate` | number (decimale, %) \| null |
-| `periodAvailabilities[].availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null |
-| `periodAvailabilities[].availabilityOptions[].hasFixedTimeSlots` | boolean |
-| `idSectors` | string[] (UUID) |
-| `isOnlinePurchaseEnabled` | boolean |
-
-### GET `/api/catalog/get-hourly-service-booking-options?idHourlyService={idHourlyService}`
-
-**Payload JSON** (query string)
-
-```json
-{
-  "idHourlyService": "string (UUID)"
-}
-```
-
-**Response JSON**
-
-```json
-[
-  {
-    "dateFrom": "string (ISO 8601, UTC) | null",
-    "dateTo": "string (ISO 8601, UTC) | null",
-    "availabilityOption": {
       "startTime": "string (HH:mm) | null",
       "endTime": "string (HH:mm) | null",
       "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
@@ -3047,8 +5644,36 @@ Nessun corpo (204).
       "maxBookingPerTimeSlotQuantity": "number (intero) | null",
       "hasFixedTimeSlots": "boolean"
     }
-  }
-]
+  ],
+  "periodAvailabilities": [
+    {
+      "idPeriod": "number (intero)",
+      "availabilityOptions": [
+        {
+          "startTime": "string (HH:mm) | null",
+          "endTime": "string (HH:mm) | null",
+          "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
+          "timeSlotPrices": [
+            {
+              "timeSlot": "string (enum ServiceTimeSlot)",
+              "isEnabled": "boolean",
+              "price": "number (decimale, €) | null"
+            }
+          ],
+          "isCustomTimeSlotEnabled": "boolean",
+          "customTimeSlotMinuteQuantity": "number (intero, minuti) | null",
+          "customTimeSlotPrice": "number (decimale, €) | null",
+          "vatRate": "number (decimale, %) | null",
+          "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+          "hasFixedTimeSlots": "boolean"
+        }
+      ]
+    }
+  ],
+  "idSectors": "string[] (UUID)",
+  "isOnlinePurchaseEnabled": "boolean",
+  "version": "string"
+}
 ```
 
 **Payload tabella** (query string)
@@ -3061,30 +5686,142 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `[].dateFrom` | string (ISO 8601, UTC) \| null |
-| `[].dateTo` | string (ISO 8601, UTC) \| null |
-| `[].availabilityOption` | ServiceAvailabilityOption (oggetto) |
-| `[].availabilityOption.startTime` | string (HH:mm) \| null |
-| `[].availabilityOption.endTime` | string (HH:mm) \| null |
-| `[].availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
-| `[].availabilityOption.timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) |
-| `[].availabilityOption.timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) |
-| `[].availabilityOption.timeSlotPrices[].isEnabled` | boolean |
-| `[].availabilityOption.timeSlotPrices[].price` | number (decimale, €) \| null |
-| `[].availabilityOption.isCustomTimeSlotEnabled` | boolean |
-| `[].availabilityOption.customTimeSlotMinuteQuantity` | number (intero, minuti) \| null |
-| `[].availabilityOption.customTimeSlotPrice` | number (decimale, €) \| null |
-| `[].availabilityOption.vatRate` | number (decimale, %) \| null |
-| `[].availabilityOption.maxBookingPerTimeSlotQuantity` | number (intero) \| null |
-| `[].availabilityOption.hasFixedTimeSlots` | boolean |
+| `price` | number (decimale, €) |
+| `vatRate` | number (decimale, %) \| null |
+| `isPeriodPricingEnabled` | boolean |
+| `availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
+| `availabilityOptions[].startTime` | string (HH:mm) \| null |
+| `availabilityOptions[].endTime` | string (HH:mm) \| null |
+| `availabilityOptions[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
+| `availabilityOptions[].timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) |
+| `availabilityOptions[].timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) |
+| `availabilityOptions[].timeSlotPrices[].isEnabled` | boolean |
+| `availabilityOptions[].timeSlotPrices[].price` | number (decimale, €) \| null |
+| `availabilityOptions[].isCustomTimeSlotEnabled` | boolean |
+| `availabilityOptions[].customTimeSlotMinuteQuantity` | number (intero, minuti) \| null |
+| `availabilityOptions[].customTimeSlotPrice` | number (decimale, €) \| null |
+| `availabilityOptions[].vatRate` | number (decimale, %) \| null |
+| `availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `availabilityOptions[].hasFixedTimeSlots` | boolean |
+| `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) |
+| `periodAvailabilities[].idPeriod` | number (intero) |
+| `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
+| `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null |
+| `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null |
+| `periodAvailabilities[].availabilityOptions[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].isEnabled` | boolean |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].price` | number (decimale, €) \| null |
+| `periodAvailabilities[].availabilityOptions[].isCustomTimeSlotEnabled` | boolean |
+| `periodAvailabilities[].availabilityOptions[].customTimeSlotMinuteQuantity` | number (intero, minuti) \| null |
+| `periodAvailabilities[].availabilityOptions[].customTimeSlotPrice` | number (decimale, €) \| null |
+| `periodAvailabilities[].availabilityOptions[].vatRate` | number (decimale, %) \| null |
+| `periodAvailabilities[].availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `periodAvailabilities[].availabilityOptions[].hasFixedTimeSlots` | boolean |
+| `idSectors` | string[] (UUID) |
+| `isOnlinePurchaseEnabled` | boolean |
+| `version` | string |
 
-### POST `/api/catalog/update-hourly-service-general`
+### GET `/api/catalog/services/get-hourly-service-booking-options?idHourlyService={idHourlyService}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idHourlyService": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "bookingOptions": [
+    {
+      "dateFrom": "string (ISO 8601, UTC) | null",
+      "dateTo": "string (ISO 8601, UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
+      "managementStartTime": "string (HH:mm) | null",
+      "managementEndTime": "string (HH:mm) | null",
+      "onlineStartTime": "string (HH:mm) | null",
+      "onlineEndTime": "string (HH:mm) | null",
+      "maxBookingPerHourQuantity": "number (intero) | null",
+      "maxBookingPerDayQuantity": "number (intero) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
+      "minItemPerBookingQuantity": "number (intero) | null",
+      "maxItemPerBookingQuantity": "number (intero) | null",
+      "availabilityOption": {
+        "startTime": "string (HH:mm) | null",
+        "endTime": "string (HH:mm) | null",
+        "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
+        "timeSlotPrices": [
+          {
+            "timeSlot": "string (enum ServiceTimeSlot)",
+            "isEnabled": "boolean",
+            "price": "number (decimale, €) | null"
+          }
+        ],
+        "isCustomTimeSlotEnabled": "boolean",
+        "customTimeSlotMinuteQuantity": "number (intero, minuti) | null",
+        "customTimeSlotPrice": "number (decimale, €) | null",
+        "vatRate": "number (decimale, %) | null",
+        "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+        "hasFixedTimeSlots": "boolean"
+      }
+    }
+  ],
+  "version": "string"
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idHourlyService` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) |
+| `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null |
+| `bookingOptions[].dateTo` | string (ISO 8601, UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) \| null |
+| `bookingOptions[].availabilityOption.startTime` | string (HH:mm) \| null |
+| `bookingOptions[].availabilityOption.endTime` | string (HH:mm) \| null |
+| `bookingOptions[].availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
+| `bookingOptions[].availabilityOption.timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].isEnabled` | boolean |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].price` | number (decimale, €) \| null |
+| `bookingOptions[].availabilityOption.isCustomTimeSlotEnabled` | boolean |
+| `bookingOptions[].availabilityOption.customTimeSlotMinuteQuantity` | number (intero, minuti) \| null |
+| `bookingOptions[].availabilityOption.customTimeSlotPrice` | number (decimale, €) \| null |
+| `bookingOptions[].availabilityOption.vatRate` | number (decimale, %) \| null |
+| `bookingOptions[].availabilityOption.maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `bookingOptions[].availabilityOption.hasFixedTimeSlots` | boolean |
+| `version` | string |
+
+### POST `/api/catalog/services/update-hourly-service-general`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idHourlyService": "string (UUID)",
   "translations": [
     {
@@ -3093,7 +5830,7 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum StandardServiceIcon) | null",
+  "icon": "string | null",
   "isHighlighted": "boolean"
 }
 ```
@@ -3106,31 +5843,51 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idHourlyService` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum StandardServiceIcon) \| null |
+| `icon` | string \| null |
 | `isHighlighted` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-hourly-service-prices`
+### POST `/api/catalog/services/update-hourly-service-prices`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idHourlyService": "string (UUID)",
+  "price": "number (decimale, €)",
+  "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
+  "availabilityOptions": [
+    {
+      "startTime": "string (HH:mm) | null",
+      "endTime": "string (HH:mm) | null",
+      "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
+      "timeSlotPrices": [
+        {
+          "timeSlot": "string (enum ServiceTimeSlot)",
+          "isEnabled": "boolean",
+          "price": "number (decimale, €) | null"
+        }
+      ],
+      "isCustomTimeSlotEnabled": "boolean",
+      "customTimeSlotMinuteQuantity": "number (intero, minuti) | null",
+      "customTimeSlotPrice": "number (decimale, €) | null",
+      "vatRate": "number (decimale, %) | null",
+      "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+      "hasFixedTimeSlots": "boolean"
+    }
+  ],
   "periodAvailabilities": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "availabilityOptions": [
         {
           "startTime": "string (HH:mm) | null",
@@ -3166,11 +5923,26 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idHourlyService` | string (UUID) |
+| `price` | number (decimale, €) |
+| `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
+| `availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
+| `availabilityOptions[].startTime` | string (HH:mm) \| null |
+| `availabilityOptions[].endTime` | string (HH:mm) \| null |
+| `availabilityOptions[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
+| `availabilityOptions[].timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) |
+| `availabilityOptions[].timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) |
+| `availabilityOptions[].timeSlotPrices[].isEnabled` | boolean |
+| `availabilityOptions[].timeSlotPrices[].price` | number (decimale, €) \| null |
+| `availabilityOptions[].isCustomTimeSlotEnabled` | boolean |
+| `availabilityOptions[].customTimeSlotMinuteQuantity` | number (intero, minuti) \| null |
+| `availabilityOptions[].customTimeSlotPrice` | number (decimale, €) \| null |
+| `availabilityOptions[].vatRate` | number (decimale, %) \| null |
+| `availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `availabilityOptions[].hasFixedTimeSlots` | boolean |
 | `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) |
-| `periodAvailabilities[].idPeriod` | string (UUID) |
+| `periodAvailabilities[].idPeriod` | number (intero) |
 | `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
 | `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null |
 | `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null |
@@ -3192,18 +5964,28 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-hourly-service-booking`
+### POST `/api/catalog/services/update-hourly-service-booking`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idHourlyService": "string (UUID)",
   "bookingOptions": [
     {
       "dateFrom": "string (ISO 8601, UTC) | null",
       "dateTo": "string (ISO 8601, UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
+      "managementStartTime": "string (HH:mm) | null",
+      "managementEndTime": "string (HH:mm) | null",
+      "onlineStartTime": "string (HH:mm) | null",
+      "onlineEndTime": "string (HH:mm) | null",
+      "maxBookingPerHourQuantity": "number (intero) | null",
+      "maxBookingPerDayQuantity": "number (intero) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
+      "minItemPerBookingQuantity": "number (intero) | null",
+      "maxItemPerBookingQuantity": "number (intero) | null",
       "availabilityOption": {
         "startTime": "string (HH:mm) | null",
         "endTime": "string (HH:mm) | null",
@@ -3235,12 +6017,22 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idHourlyService` | string (UUID) |
 | `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, UTC) \| null |
-| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) \| null |
 | `bookingOptions[].availabilityOption.startTime` | string (HH:mm) \| null |
 | `bookingOptions[].availabilityOption.endTime` | string (HH:mm) \| null |
 | `bookingOptions[].availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
@@ -3259,13 +6051,12 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/automatic-price-list`
+### POST `/api/catalog/automatic-prices/automatic-price-list`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -3299,7 +6090,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -3319,15 +6109,11 @@ Nessun corpo (204).
 | `rows[].serviceName` | string \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
-### GET `/api/catalog/get-automatic-price-services?idProperty={idProperty}`
+### GET `/api/catalog/automatic-prices/get-automatic-price-services`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -3354,11 +6140,9 @@ Nessun corpo (204).
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -3374,13 +6158,12 @@ Nessun corpo (204).
 | `hourlyServices[].id` | string (UUID) |
 | `hourlyServices[].value` | string |
 
-### POST `/api/catalog/create-automatic-price`
+### POST `/api/catalog/automatic-prices/create-automatic-price`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "translations": [
     {
       "language": "string",
@@ -3389,7 +6172,7 @@ Nessun corpo (204).
     }
   ],
   "icon": "string (enum BarServiceIcon o StandardServiceIcon) | null",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isOnlinePurchaseEnabled": "boolean",
   "validityPeriods": [
@@ -3399,12 +6182,13 @@ Nessun corpo (204).
       "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
       "timeSlots": [
         {
-          "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "startTime": "string (HH:mm)",
+          "endTime": "string (HH:mm)"
         }
       ]
     }
   ],
+  "isAllServicesEnabled": "boolean",
   "idBarServices": "string[] (UUID)",
   "idStandardServices": "string[] (UUID)",
   "idHourlyServices": "string[] (UUID)",
@@ -3415,19 +6199,20 @@ Nessun corpo (204).
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+"string"
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
 | `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isOnlinePurchaseEnabled` | boolean |
 | `validityPeriods[]` | AutomaticPriceValidityPeriod[] (array di oggetti) |
@@ -3435,8 +6220,9 @@ Nessun corpo (204).
 | `validityPeriods[].dateTo` | string (ISO 8601, UTC) \| null |
 | `validityPeriods[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) |
-| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) \| null |
-| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) \| null |
+| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) |
+| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) |
+| `isAllServicesEnabled` | boolean |
 | `idBarServices` | string[] (UUID) |
 | `idStandardServices` | string[] (UUID) |
 | `idHourlyServices` | string[] (UUID) |
@@ -3445,9 +6231,11 @@ Nessun corpo (204).
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `(corpo)` | string |
 
-### GET `/api/catalog/get-automatic-price-general-info?idAutomaticPrice={idAutomaticPrice}`
+### GET `/api/catalog/automatic-prices/get-automatic-price-general-info?idAutomaticPrice={idAutomaticPrice}`
 
 **Payload JSON** (query string)
 
@@ -3469,7 +6257,9 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum BarServiceIcon o StandardServiceIcon) | null"
+  "icon": "string | null",
+  "imageUrl": "string (URL) | null",
+  "version": "string"
 }
 ```
 
@@ -3488,9 +6278,11 @@ Nessun corpo (204).
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null |
+| `icon` | string \| null |
+| `imageUrl` | string (URL) \| null |
+| `version` | string |
 
-### GET `/api/catalog/get-automatic-price-prices-validity?idAutomaticPrice={idAutomaticPrice}`
+### GET `/api/catalog/automatic-prices/get-automatic-price-prices-validity?idAutomaticPrice={idAutomaticPrice}`
 
 **Payload JSON** (query string)
 
@@ -3504,7 +6296,7 @@ Nessun corpo (204).
 
 ```json
 {
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isOnlinePurchaseEnabled": "boolean",
   "validityPeriods": [
@@ -3514,17 +6306,19 @@ Nessun corpo (204).
       "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
       "timeSlots": [
         {
-          "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "startTime": "string (HH:mm)",
+          "endTime": "string (HH:mm)"
         }
       ]
     }
   ],
+  "isAllServicesEnabled": "boolean",
   "idBarServices": "string[] (UUID)",
   "idStandardServices": "string[] (UUID)",
   "idHourlyServices": "string[] (UUID)",
   "isPricePerServiceEnabled": "boolean",
-  "idSectors": "string[] (UUID)"
+  "idSectors": "string[] (UUID)",
+  "version": "string"
 }
 ```
 
@@ -3538,7 +6332,7 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isOnlinePurchaseEnabled` | boolean |
 | `validityPeriods[]` | AutomaticPriceValidityPeriod[] (array di oggetti) |
@@ -3546,21 +6340,22 @@ Nessun corpo (204).
 | `validityPeriods[].dateTo` | string (ISO 8601, UTC) \| null |
 | `validityPeriods[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) |
-| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) \| null |
-| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) \| null |
+| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) |
+| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) |
+| `isAllServicesEnabled` | boolean |
 | `idBarServices` | string[] (UUID) |
 | `idStandardServices` | string[] (UUID) |
 | `idHourlyServices` | string[] (UUID) |
 | `isPricePerServiceEnabled` | boolean |
 | `idSectors` | string[] (UUID) |
+| `version` | string |
 
-### POST `/api/catalog/update-automatic-price-general`
+### POST `/api/catalog/automatic-prices/update-automatic-price-general`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idAutomaticPrice": "string (UUID)",
   "translations": [
     {
@@ -3569,7 +6364,7 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum BarServiceIcon o StandardServiceIcon) | null"
+  "icon": "string | null"
 }
 ```
 
@@ -3581,27 +6376,25 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idAutomaticPrice` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null |
+| `icon` | string \| null |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-automatic-price-prices-validity`
+### POST `/api/catalog/automatic-prices/update-automatic-price-prices-validity`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idAutomaticPrice": "string (UUID)",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isOnlinePurchaseEnabled": "boolean",
   "validityPeriods": [
@@ -3611,12 +6404,13 @@ Nessun corpo (204).
       "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
       "timeSlots": [
         {
-          "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "startTime": "string (HH:mm)",
+          "endTime": "string (HH:mm)"
         }
       ]
     }
   ],
+  "isAllServicesEnabled": "boolean",
   "idBarServices": "string[] (UUID)",
   "idStandardServices": "string[] (UUID)",
   "idHourlyServices": "string[] (UUID)",
@@ -3633,9 +6427,8 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idAutomaticPrice` | string (UUID) |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isOnlinePurchaseEnabled` | boolean |
 | `validityPeriods[]` | AutomaticPriceValidityPeriod[] (array di oggetti) |
@@ -3643,8 +6436,9 @@ Nessun corpo (204).
 | `validityPeriods[].dateTo` | string (ISO 8601, UTC) \| null |
 | `validityPeriods[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) |
-| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) \| null |
-| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) \| null |
+| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) |
+| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) |
+| `isAllServicesEnabled` | boolean |
 | `idBarServices` | string[] (UUID) |
 | `idStandardServices` | string[] (UUID) |
 | `idHourlyServices` | string[] (UUID) |
@@ -3655,13 +6449,54 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/delete-automatic-price-item`
+### POST `/api/catalog/automatic-prices/{id}/image`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
+  "file": "file (multipart/form-data)"
+}
+```
+
+**Response JSON**
+
+200 OK (il prezzo automatico, che il frontend non legge).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `file` | file (multipart/form-data) |
+
+**Response tabella**
+
+200 OK (il prezzo automatico, che il frontend non legge).
+
+### DELETE `/api/catalog/automatic-prices/{id}/image`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+200 OK (il prezzo automatico, che il frontend non legge).
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+200 OK (il prezzo automatico, che il frontend non legge).
+
+### POST `/api/catalog/automatic-prices/delete-automatic-price-item`
+
+**Payload JSON**
+
+```json
+{
   "idAutomaticPrices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -3674,20 +6509,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idAutomaticPrices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-automatic-price-item`
+### POST `/api/catalog/automatic-prices/duplicate-automatic-price-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idAutomaticPrices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -3700,20 +6533,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idAutomaticPrices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/table-service-list`
+### POST `/api/catalog/table-services/table-service-list`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -3746,7 +6577,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -3765,13 +6595,12 @@ Nessun corpo (204).
 | `rows[].idTableService` | string (UUID) |
 | `rows[].serviceName` | string \| null |
 
-### POST `/api/catalog/delete-table-service-item`
+### POST `/api/catalog/table-services/delete-table-service-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idTableServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -3784,20 +6613,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idTableServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-table-service-item`
+### POST `/api/catalog/table-services/duplicate-table-service-item`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idTableServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -3810,20 +6637,18 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idTableServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/create-table-service`
+### POST `/api/catalog/table-services/create-table-service`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "translations": [
     {
       "language": "string",
@@ -3834,17 +6659,20 @@ Nessun corpo (204).
   "isHighlighted": "boolean",
   "availabilities": [
     {
-      "dateFrom": "string (ISO 8601, UTC) | null",
-      "dateTo": "string (ISO 8601, UTC) | null",
-      "isSameTimeForAllDays": "boolean",
-      "startTime": "string (HH:mm) | null",
-      "endTime": "string (HH:mm) | null",
+      "dateFrom": "string (ISO 8601, UTC)",
+      "dateTo": "string (ISO 8601, UTC)",
       "days": [
         {
           "dayOfWeek": "number (intero ISO 8601: 1 = lunedì … 7 = domenica)",
           "isEnabled": "boolean",
           "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "endTime": "string (HH:mm) | null",
+          "otherTimeSlots": [
+            {
+              "startTime": "string (HH:mm)",
+              "endTime": "string (HH:mm)"
+            }
+          ]
         }
       ]
     }
@@ -3852,16 +6680,19 @@ Nessun corpo (204).
   "availabilityMode": "string (enum TableServiceAvailabilityMode: Tables, Seats)",
   "tableGroups": [
     {
-      "tableQuantity": "number (intero) | null",
-      "seatPerTableQuantity": "number (intero) | null"
+      "tableQuantity": "number (intero)",
+      "seatPerTableQuantity": "number (intero)"
     }
   ],
   "totalSeatQuantity": "number (intero) | null",
-  "averageMealDuration": "string (enum TableServiceMealDuration) | null",
+  "averageMealMinutes": "number (intero, minuti) | null",
   "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+  "minSeatPerBookingQuantity": "number (intero) | null",
+  "maxSeatPerBookingQuantity": "number (intero) | null",
   "bookingPayment": "string (enum TableServiceBookingPayment: None, Deposit)",
   "depositMode": "string (enum TableServiceDepositMode: Total, PerPerson)",
   "depositPercentage": "number (decimale, %) | null",
+  "depositAmount": "number (decimale, €) | null",
   "isOnlineBookingEnabled": "boolean"
 }
 ```
@@ -3874,40 +6705,42 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
 | `isHighlighted` | boolean |
 | `availabilities[]` | TableServiceAvailability[] (array di oggetti) |
-| `availabilities[].dateFrom` | string (ISO 8601, UTC) \| null |
-| `availabilities[].dateTo` | string (ISO 8601, UTC) \| null |
-| `availabilities[].isSameTimeForAllDays` | boolean |
-| `availabilities[].startTime` | string (HH:mm) \| null |
-| `availabilities[].endTime` | string (HH:mm) \| null |
+| `availabilities[].dateFrom` | string (ISO 8601, UTC) |
+| `availabilities[].dateTo` | string (ISO 8601, UTC) |
 | `availabilities[].days[]` | TableServiceAvailabilityDay[] (array di 7 oggetti) |
 | `availabilities[].days[].dayOfWeek` | number (intero ISO 8601: 1 = lunedì … 7 = domenica) |
 | `availabilities[].days[].isEnabled` | boolean |
 | `availabilities[].days[].startTime` | string (HH:mm) \| null |
 | `availabilities[].days[].endTime` | string (HH:mm) \| null |
+| `availabilities[].days[].otherTimeSlots[]` | TableServiceTimeSlot[] (array di oggetti) |
+| `availabilities[].days[].otherTimeSlots[].startTime` | string (HH:mm) |
+| `availabilities[].days[].otherTimeSlots[].endTime` | string (HH:mm) |
 | `availabilityMode` | string (enum TableServiceAvailabilityMode: Tables, Seats) |
 | `tableGroups[]` | TableServiceTableGroup[] (array di oggetti) |
-| `tableGroups[].tableQuantity` | number (intero) \| null |
-| `tableGroups[].seatPerTableQuantity` | number (intero) \| null |
+| `tableGroups[].tableQuantity` | number (intero) |
+| `tableGroups[].seatPerTableQuantity` | number (intero) |
 | `totalSeatQuantity` | number (intero) \| null |
-| `averageMealDuration` | string (enum TableServiceMealDuration) \| null |
+| `averageMealMinutes` | number (intero, minuti) \| null |
 | `maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `minSeatPerBookingQuantity` | number (intero) \| null |
+| `maxSeatPerBookingQuantity` | number (intero) \| null |
 | `bookingPayment` | string (enum TableServiceBookingPayment: None, Deposit) |
 | `depositMode` | string (enum TableServiceDepositMode: Total, PerPerson) |
 | `depositPercentage` | number (decimale, %) \| null |
+| `depositAmount` | number (decimale, €) \| null |
 | `isOnlineBookingEnabled` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### GET `/api/catalog/get-table-service-general-info?idTableService={idTableService}`
+### GET `/api/catalog/table-services/get-table-service-general-info?idTableService={idTableService}`
 
 **Payload JSON** (query string)
 
@@ -3929,7 +6762,8 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "isHighlighted": "boolean"
+  "isHighlighted": "boolean",
+  "version": "string"
 }
 ```
 
@@ -3949,8 +6783,9 @@ Nessun corpo (204).
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
 | `isHighlighted` | boolean |
+| `version` | string |
 
-### GET `/api/catalog/get-table-service-availability-bookings?idTableService={idTableService}`
+### GET `/api/catalog/table-services/get-table-service-availability-bookings?idTableService={idTableService}`
 
 **Payload JSON** (query string)
 
@@ -3966,17 +6801,20 @@ Nessun corpo (204).
 {
   "availabilities": [
     {
-      "dateFrom": "string (ISO 8601, UTC) | null",
-      "dateTo": "string (ISO 8601, UTC) | null",
-      "isSameTimeForAllDays": "boolean",
-      "startTime": "string (HH:mm) | null",
-      "endTime": "string (HH:mm) | null",
+      "dateFrom": "string (ISO 8601, UTC)",
+      "dateTo": "string (ISO 8601, UTC)",
       "days": [
         {
           "dayOfWeek": "number (intero ISO 8601: 1 = lunedì … 7 = domenica)",
           "isEnabled": "boolean",
           "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "endTime": "string (HH:mm) | null",
+          "otherTimeSlots": [
+            {
+              "startTime": "string (HH:mm)",
+              "endTime": "string (HH:mm)"
+            }
+          ]
         }
       ]
     }
@@ -3984,17 +6822,21 @@ Nessun corpo (204).
   "availabilityMode": "string (enum TableServiceAvailabilityMode: Tables, Seats)",
   "tableGroups": [
     {
-      "tableQuantity": "number (intero) | null",
-      "seatPerTableQuantity": "number (intero) | null"
+      "tableQuantity": "number (intero)",
+      "seatPerTableQuantity": "number (intero)"
     }
   ],
   "totalSeatQuantity": "number (intero) | null",
-  "averageMealDuration": "string (enum TableServiceMealDuration) | null",
+  "averageMealMinutes": "number (intero, minuti) | null",
   "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+  "minSeatPerBookingQuantity": "number (intero) | null",
+  "maxSeatPerBookingQuantity": "number (intero) | null",
   "bookingPayment": "string (enum TableServiceBookingPayment: None, Deposit)",
   "depositMode": "string (enum TableServiceDepositMode: Total, PerPerson)",
   "depositPercentage": "number (decimale, %) | null",
-  "isOnlineBookingEnabled": "boolean"
+  "depositAmount": "number (decimale, €) | null",
+  "isOnlineBookingEnabled": "boolean",
+  "version": "string"
 }
 ```
 
@@ -4009,35 +6851,38 @@ Nessun corpo (204).
 | Campo | Tipo |
 |---|---|
 | `availabilities[]` | TableServiceAvailability[] (array di oggetti) |
-| `availabilities[].dateFrom` | string (ISO 8601, UTC) \| null |
-| `availabilities[].dateTo` | string (ISO 8601, UTC) \| null |
-| `availabilities[].isSameTimeForAllDays` | boolean |
-| `availabilities[].startTime` | string (HH:mm) \| null |
-| `availabilities[].endTime` | string (HH:mm) \| null |
+| `availabilities[].dateFrom` | string (ISO 8601, UTC) |
+| `availabilities[].dateTo` | string (ISO 8601, UTC) |
 | `availabilities[].days[]` | TableServiceAvailabilityDay[] (array di 7 oggetti) |
 | `availabilities[].days[].dayOfWeek` | number (intero ISO 8601: 1 = lunedì … 7 = domenica) |
 | `availabilities[].days[].isEnabled` | boolean |
 | `availabilities[].days[].startTime` | string (HH:mm) \| null |
 | `availabilities[].days[].endTime` | string (HH:mm) \| null |
+| `availabilities[].days[].otherTimeSlots[]` | TableServiceTimeSlot[] (array di oggetti) |
+| `availabilities[].days[].otherTimeSlots[].startTime` | string (HH:mm) |
+| `availabilities[].days[].otherTimeSlots[].endTime` | string (HH:mm) |
 | `availabilityMode` | string (enum TableServiceAvailabilityMode: Tables, Seats) |
 | `tableGroups[]` | TableServiceTableGroup[] (array di oggetti) |
-| `tableGroups[].tableQuantity` | number (intero) \| null |
-| `tableGroups[].seatPerTableQuantity` | number (intero) \| null |
+| `tableGroups[].tableQuantity` | number (intero) |
+| `tableGroups[].seatPerTableQuantity` | number (intero) |
 | `totalSeatQuantity` | number (intero) \| null |
-| `averageMealDuration` | string (enum TableServiceMealDuration) \| null |
+| `averageMealMinutes` | number (intero, minuti) \| null |
 | `maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `minSeatPerBookingQuantity` | number (intero) \| null |
+| `maxSeatPerBookingQuantity` | number (intero) \| null |
 | `bookingPayment` | string (enum TableServiceBookingPayment: None, Deposit) |
 | `depositMode` | string (enum TableServiceDepositMode: Total, PerPerson) |
 | `depositPercentage` | number (decimale, %) \| null |
+| `depositAmount` | number (decimale, €) \| null |
 | `isOnlineBookingEnabled` | boolean |
+| `version` | string |
 
-### POST `/api/catalog/update-table-service-general`
+### POST `/api/catalog/table-services/update-table-service-general`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idTableService": "string (UUID)",
   "translations": [
     {
@@ -4058,7 +6903,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idTableService` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
@@ -4070,27 +6914,29 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-table-service-availability-bookings`
+### POST `/api/catalog/table-services/update-table-service-availability-bookings`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idTableService": "string (UUID)",
   "availabilities": [
     {
-      "dateFrom": "string (ISO 8601, UTC) | null",
-      "dateTo": "string (ISO 8601, UTC) | null",
-      "isSameTimeForAllDays": "boolean",
-      "startTime": "string (HH:mm) | null",
-      "endTime": "string (HH:mm) | null",
+      "dateFrom": "string (ISO 8601, UTC)",
+      "dateTo": "string (ISO 8601, UTC)",
       "days": [
         {
           "dayOfWeek": "number (intero ISO 8601: 1 = lunedì … 7 = domenica)",
           "isEnabled": "boolean",
           "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "endTime": "string (HH:mm) | null",
+          "otherTimeSlots": [
+            {
+              "startTime": "string (HH:mm)",
+              "endTime": "string (HH:mm)"
+            }
+          ]
         }
       ]
     }
@@ -4098,16 +6944,19 @@ Nessun corpo (204).
   "availabilityMode": "string (enum TableServiceAvailabilityMode: Tables, Seats)",
   "tableGroups": [
     {
-      "tableQuantity": "number (intero) | null",
-      "seatPerTableQuantity": "number (intero) | null"
+      "tableQuantity": "number (intero)",
+      "seatPerTableQuantity": "number (intero)"
     }
   ],
   "totalSeatQuantity": "number (intero) | null",
-  "averageMealDuration": "string (enum TableServiceMealDuration) | null",
+  "averageMealMinutes": "number (intero, minuti) | null",
   "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+  "minSeatPerBookingQuantity": "number (intero) | null",
+  "maxSeatPerBookingQuantity": "number (intero) | null",
   "bookingPayment": "string (enum TableServiceBookingPayment: None, Deposit)",
   "depositMode": "string (enum TableServiceDepositMode: Total, PerPerson)",
   "depositPercentage": "number (decimale, %) | null",
+  "depositAmount": "number (decimale, €) | null",
   "isOnlineBookingEnabled": "boolean"
 }
 ```
@@ -4120,29 +6969,31 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idTableService` | string (UUID) |
 | `availabilities[]` | TableServiceAvailability[] (array di oggetti) |
-| `availabilities[].dateFrom` | string (ISO 8601, UTC) \| null |
-| `availabilities[].dateTo` | string (ISO 8601, UTC) \| null |
-| `availabilities[].isSameTimeForAllDays` | boolean |
-| `availabilities[].startTime` | string (HH:mm) \| null |
-| `availabilities[].endTime` | string (HH:mm) \| null |
+| `availabilities[].dateFrom` | string (ISO 8601, UTC) |
+| `availabilities[].dateTo` | string (ISO 8601, UTC) |
 | `availabilities[].days[]` | TableServiceAvailabilityDay[] (array di 7 oggetti) |
 | `availabilities[].days[].dayOfWeek` | number (intero ISO 8601: 1 = lunedì … 7 = domenica) |
 | `availabilities[].days[].isEnabled` | boolean |
 | `availabilities[].days[].startTime` | string (HH:mm) \| null |
 | `availabilities[].days[].endTime` | string (HH:mm) \| null |
+| `availabilities[].days[].otherTimeSlots[]` | TableServiceTimeSlot[] (array di oggetti) |
+| `availabilities[].days[].otherTimeSlots[].startTime` | string (HH:mm) |
+| `availabilities[].days[].otherTimeSlots[].endTime` | string (HH:mm) |
 | `availabilityMode` | string (enum TableServiceAvailabilityMode: Tables, Seats) |
 | `tableGroups[]` | TableServiceTableGroup[] (array di oggetti) |
-| `tableGroups[].tableQuantity` | number (intero) \| null |
-| `tableGroups[].seatPerTableQuantity` | number (intero) \| null |
+| `tableGroups[].tableQuantity` | number (intero) |
+| `tableGroups[].seatPerTableQuantity` | number (intero) |
 | `totalSeatQuantity` | number (intero) \| null |
-| `averageMealDuration` | string (enum TableServiceMealDuration) \| null |
+| `averageMealMinutes` | number (intero, minuti) \| null |
 | `maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `minSeatPerBookingQuantity` | number (intero) \| null |
+| `maxSeatPerBookingQuantity` | number (intero) \| null |
 | `bookingPayment` | string (enum TableServiceBookingPayment: None, Deposit) |
 | `depositMode` | string (enum TableServiceDepositMode: Total, PerPerson) |
 | `depositPercentage` | number (decimale, %) \| null |
+| `depositAmount` | number (decimale, €) \| null |
 | `isOnlineBookingEnabled` | boolean |
 
 **Response tabella**
@@ -4151,15 +7002,11 @@ Nessun corpo (204).
 
 ## Sharing
 
-### GET `/api/sharing/general-information?idProperty={idProperty}`
+### GET `/api/sharing/general-information`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -4177,15 +7024,14 @@ Nessun corpo (204).
   "isAutomaticVoucherEnabled": "boolean",
   "voucherCreditValue": "number (decimale, €) | null",
   "isPrepaidCardTopUpEnabled": "boolean",
-  "prepaidCardCreditValue": "number (decimale, €) | null"
+  "prepaidCardCreditValue": "number (decimale, €) | null",
+  "version": "string"
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -4204,6 +7050,7 @@ Nessun corpo (204).
 | `voucherCreditValue` | number (decimale, €) \| null |
 | `isPrepaidCardTopUpEnabled` | boolean |
 | `prepaidCardCreditValue` | number (decimale, €) \| null |
+| `version` | string |
 
 ### POST `/api/sharing/save-information`
 
@@ -4223,8 +7070,7 @@ Nessun corpo (204).
   "isAutomaticVoucherEnabled": "boolean",
   "voucherCreditValue": "number (decimale, €) | null",
   "isPrepaidCardTopUpEnabled": "boolean",
-  "prepaidCardCreditValue": "number (decimale, €) | null",
-  "idProperty": "string (UUID)"
+  "prepaidCardCreditValue": "number (decimale, €) | null"
 }
 ```
 
@@ -4249,7 +7095,6 @@ Nessun corpo (204).
 | `voucherCreditValue` | number (decimale, €) \| null |
 | `isPrepaidCardTopUpEnabled` | boolean |
 | `prepaidCardCreditValue` | number (decimale, €) \| null |
-| `idProperty` | string (UUID) |
 
 **Response tabella**
 
@@ -4257,15 +7102,11 @@ Nessun corpo (204).
 
 ## Prenotazioni online
 
-### GET `/api/system/get-stripe-information?idProperty={idProperty}`
+### GET `/api/system/get-stripe-information`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -4273,11 +7114,9 @@ Nessun corpo (204).
 "string | null"
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -4285,15 +7124,11 @@ Nessun corpo (204).
 |---|---|
 | `(corpo)` | string \| null |
 
-### GET `/api/booking/get-online-services-options?idProperty={idProperty}`
+### GET `/api/booking/get-online-services-options`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -4309,15 +7144,14 @@ Nessun corpo (204).
   "isDepositAccepted": "boolean",
   "isPrepaidCardAccepted": "boolean",
   "bookingPanelTitle": "string (HTML) | null",
-  "usefulInformation": "string (HTML) | null"
+  "usefulInformation": "string (HTML) | null",
+  "version": "string"
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -4334,6 +7168,7 @@ Nessun corpo (204).
 | `isPrepaidCardAccepted` | boolean |
 | `bookingPanelTitle` | string (HTML) \| null |
 | `usefulInformation` | string (HTML) \| null |
+| `version` | string |
 
 ### POST `/api/booking/update-online-services-options`
 
@@ -4351,8 +7186,7 @@ Nessun corpo (204).
   "isDepositAccepted": "boolean",
   "isPrepaidCardAccepted": "boolean",
   "bookingPanelTitle": "string (HTML) | null",
-  "usefulInformation": "string (HTML) | null",
-  "idProperty": "string (UUID)"
+  "usefulInformation": "string (HTML) | null"
 }
 ```
 
@@ -4375,11 +7209,38 @@ Nessun corpo (204).
 | `isPrepaidCardAccepted` | boolean |
 | `bookingPanelTitle` | string (HTML) \| null |
 | `usefulInformation` | string (HTML) \| null |
-| `idProperty` | string (UUID) |
 
 **Response tabella**
 
 Nessun corpo (204).
+
+### POST `/api/catalog/sectors/sector-combobox`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "value": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].value` | string |
 
 ## Fiscalizzazione
 
@@ -4389,7 +7250,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -4424,7 +7284,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -4451,7 +7310,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idPrinter": "string (UUID)",
   "isEnabled": "boolean"
 }
@@ -4465,7 +7323,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idPrinter` | string (UUID) |
 | `isEnabled` | boolean |
 
@@ -4479,7 +7336,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "printerName": "string",
   "printerIP": "string | null",
   "printerPort": "number (intero) | null",
@@ -4504,7 +7360,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `printerName` | string |
 | `printerIP` | string \| null |
 | `printerPort` | number (intero) \| null |
@@ -4529,7 +7384,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idPrinter": "string (UUID)"
 }
 ```
@@ -4542,22 +7396,17 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idPrinter` | string (UUID) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### GET `/api/taxation/electronic-receipt?idProperty={idProperty}`
+### GET `/api/taxation/electronic-receipt`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -4565,11 +7414,9 @@ Nessun corpo (204).
 "string (HTML)"
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -4583,7 +7430,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "isElectronicReceiptAccepted": "boolean"
 }
 ```
@@ -4596,7 +7442,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `isElectronicReceiptAccepted` | boolean |
 
 **Response tabella**
@@ -4607,11 +7452,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -4619,9 +7460,7 @@ File (binario), non JSON.
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -4633,7 +7472,6 @@ File (binario), non JSON.
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "companyName": "string | null",
   "companyAddress": "string | null",
   "streetNumber": "string | null",
@@ -4656,7 +7494,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `companyName` | string \| null |
 | `companyAddress` | string \| null |
 | `streetNumber` | string \| null |
@@ -4675,15 +7512,11 @@ Nessun corpo (204).
 
 ## Configurazione email
 
-### GET `/api/system/email-configuration?idProperty={idProperty}`
+### GET `/api/system/email-configuration`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -4695,15 +7528,14 @@ Nessun corpo (204).
   "smtpPort": "number (intero)",
   "smtpUsername": "string",
   "hasSmtpPassword": "boolean",
-  "smtpSecurity": "string (enum SmtpSecurity)"
+  "smtpSecurity": "string (enum SmtpSecurity)",
+  "version": "string"
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -4716,6 +7548,7 @@ Nessun corpo (204).
 | `smtpUsername` | string |
 | `hasSmtpPassword` | boolean |
 | `smtpSecurity` | string (enum SmtpSecurity) |
+| `version` | string |
 
 ### POST `/api/system/send-test-email`
 
@@ -4723,7 +7556,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "senderMailAddress": "string",
   "senderName": "string",
   "smtpServerAddress": "string",
@@ -4742,7 +7574,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `senderMailAddress` | string |
 | `senderName` | string |
 | `smtpServerAddress` | string |
@@ -4761,7 +7592,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "senderMailAddress": "string",
   "senderName": "string",
   "smtpServerAddress": "string",
@@ -4780,7 +7610,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `senderMailAddress` | string |
 | `senderName` | string |
 | `smtpServerAddress` | string |
@@ -4801,7 +7630,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -4840,7 +7668,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -4865,15 +7692,11 @@ Nessun corpo (204).
 | `rows[].reservationStatus` | string (enum ReservationStatus) \| null |
 | `rows[].isTrashed` | boolean |
 
-### POST `/api/database/get-affiliated-hotel-combobox`
+### POST `/api/database/affiliated-hotel-combobox`
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -4888,9 +7711,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -4905,7 +7726,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBookings": "string[] (UUID, almeno uno)",
   "password": "string"
 }
@@ -4919,7 +7739,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBookings` | string[] (UUID, almeno uno) |
 | `password` | string |
 
@@ -4933,7 +7752,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -4972,7 +7790,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -5001,11 +7818,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -5013,9 +7826,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -5027,7 +7838,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBookings": "string[] (UUID, almeno uno)"
 }
 ```
@@ -5040,7 +7850,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBookings` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -5053,7 +7862,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBookings": "string[] (UUID, almeno uno)"
 }
 ```
@@ -5066,7 +7874,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBookings` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -5079,11 +7886,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -5097,9 +7900,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -5115,7 +7916,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "firstName": "string",
   "lastName": "string",
   "email": "string",
@@ -5132,7 +7932,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `firstName` | string |
 | `lastName` | string |
 | `email` | string |

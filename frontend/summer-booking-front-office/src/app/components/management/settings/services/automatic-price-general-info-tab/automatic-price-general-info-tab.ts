@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
 import { AutomaticPriceAddItemRequest } from '../../../../../entities/settings/services/automatic-price-add-item-request';
@@ -21,10 +22,13 @@ export class AutomaticPriceGeneralInfoTab {
   /** Only to look at: the buttons that change the data (icons, image) are off. */
   readonly isReadonly = input(false);
   readonly imagePreviewUrl = input<string | null>(null);
+  readonly imageError = input<string | null>(null);
   readonly iconChosen = output<BarServiceIcon | StandardServiceIcon>();
   readonly imageChosen = output<File>();
+  readonly imageRemoveRequest = output<void>();
 
-  /** The icons of the bar services, then those of the other services, as in the grid of the mockup. */
+  protected readonly validationText = inject(ValidationTextBehaviour);
+
   protected readonly icons: readonly ServicesImagesIcon<BarServiceIcon | StandardServiceIcon>[] = [
     ...Object.values(BarServiceIcon).map((value) => ({
       value,

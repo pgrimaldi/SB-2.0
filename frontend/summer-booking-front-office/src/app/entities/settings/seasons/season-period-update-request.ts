@@ -1,4 +1,6 @@
+import { SeasonPeriodInterval } from './season-period-interval';
+
 export class SeasonPeriodUpdateRequest {
-  idPeriod: string | null = null;
-  periodName: string | null = null;
+  name: string | null = null;
+  ranges: SeasonPeriodInterval[] = [];
 }

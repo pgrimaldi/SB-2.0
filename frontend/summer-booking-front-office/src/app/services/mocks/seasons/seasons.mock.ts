@@ -1,136 +1,81 @@
-import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpEvent, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
-import { DeleteIntervalsRequest } from '../../../entities/settings/seasons/delete-intervals-request';
-import { DeletePeriodRequest } from '../../../entities/settings/seasons/delete-period-request';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { SeasonDates } from '../../../entities/settings/seasons/season-dates';
 import { SeasonPeriodAddRequest } from '../../../entities/settings/seasons/season-period-add-request';
 import { SeasonPeriodInterval } from '../../../entities/settings/seasons/season-period-interval';
-import { SeasonPeriodIntervalItem } from '../../../entities/settings/seasons/season-period-interval-item';
-import { SeasonPeriodItem } from '../../../entities/settings/seasons/season-period-item';
+import {
+  MAX_BULK_DELETE_RANGES,
+  SeasonPeriodIntervalItem,
+} from '../../../entities/settings/seasons/season-period-interval-item';
+import {
+  MAX_SEASON_PERIOD_NAME_LENGTH,
+  MAX_SEASON_PERIOD_RANGES,
+  SeasonPeriodItem,
+} from '../../../entities/settings/seasons/season-period-item';
 import { SeasonPeriodUpdateRequest } from '../../../entities/settings/seasons/season-period-update-request';
-import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { servicesUsingPeriod } from '../catalog/catalog.mock';
+import { priceListsUsingPeriod } from '../catalog/price-lists.mock';
+import { MockFieldError, problem } from '../errors/problem.mock';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
+import { PERIODS, PeriodRow } from './periods-data.mock';
+import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 
-type SeasonDatesRow = SeasonDates & { propertyId: number };
-type PeriodRow = SeasonPeriodItem & { propertyId: number; isNextSeason: boolean };
-type AddPeriodBody = Partial<SeasonPeriodAddRequest> & {
-  idProperty?: unknown;
-  isNextSeason?: unknown;
-};
+type SeasonDatesRow = Omit<SeasonDates, 'version'> & { propertyId: number };
 
+/** What a missing day becomes in the backend's DTOs (`DateOnly` default). */
+const MISSING_DAY = '0001-01-01';
 const SEASON_DATES: SeasonDatesRow[] = [
   {
     propertyId: 1,
-    currentSeasonDateFrom: '2026-05-01T00:00:00.000Z',
-    currentSeasonDateTo: '2026-09-30T00:00:00.000Z',
-    nextSeasonDateFrom: '2027-05-01T00:00:00.000Z',
-    nextSeasonDateTo: '2027-09-30T00:00:00.000Z',
+    startsOn: '2026-05-01T00:00:00.000Z',
+    endsOn: '2026-09-30T00:00:00.000Z',
+    nextStartsOn: '2027-05-01T00:00:00.000Z',
+    nextEndsOn: '2027-09-30T00:00:00.000Z',
   },
 ];
 
-const PERIODS: PeriodRow[] = [
-  {
-    propertyId: 1,
-    isNextSeason: false,
-    idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01',
-    periodName: 'Bassa stagione',
-    intervals: [
-      {
-        idInterval: '7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01',
-        dateFrom: '2026-05-01T00:00:00.000Z',
-        dateTo: '2026-06-15T00:00:00.000Z',
-      },
-      {
-        idInterval: '7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e02',
-        dateFrom: '2026-09-01T00:00:00.000Z',
-        dateTo: '2026-09-30T00:00:00.000Z',
-      },
-    ],
-  },
-  {
-    propertyId: 1,
-    isNextSeason: false,
-    idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02',
-    periodName: 'Media stagione',
-    intervals: [
-      {
-        idInterval: '7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e03',
-        dateFrom: '2026-06-16T00:00:00.000Z',
-        dateTo: '2026-07-31T00:00:00.000Z',
-      },
-    ],
-  },
-  {
-    propertyId: 1,
-    isNextSeason: false,
-    idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e03',
-    periodName: 'Alta stagione',
-    intervals: [
-      {
-        idInterval: '7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e04',
-        dateFrom: '2026-08-01T00:00:00.000Z',
-        dateTo: '2026-08-31T00:00:00.000Z',
-      },
-    ],
-  },
-  {
-    propertyId: 1,
-    isNextSeason: true,
-    idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e04',
-    periodName: 'Bassa stagione',
-    intervals: [
-      {
-        idInterval: '7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e05',
-        dateFrom: '2027-05-01T00:00:00.000Z',
-        dateTo: '2027-06-30T00:00:00.000Z',
-      },
-      {
-        idInterval: '7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e06',
-        dateFrom: '2027-09-01T00:00:00.000Z',
-        dateTo: '2027-09-30T00:00:00.000Z',
-      },
-    ],
-  },
-  {
-    propertyId: 1,
-    isNextSeason: true,
-    idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e05',
-    periodName: 'Alta stagione',
-    intervals: [
-      {
-        idInterval: '7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e07',
-        dateFrom: '2027-07-01T00:00:00.000Z',
-        dateTo: '2027-08-31T00:00:00.000Z',
-      },
-    ],
-  },
-];
+/** The next `key` of each season: it only grows, so the key of a deleted period never comes back. */
+const NEXT_KEYS = new Map<boolean, number>(
+  [false, true].map((isNextSeason) => [
+    isNextSeason,
+    Math.max(
+      -1,
+      ...PERIODS.filter((row) => row.isNextSeason === isNextSeason).map(({ key }) => key ?? 0),
+    ) + 1,
+  ]),
+);
 
 /**
- * `GET /api/seasons/season-dates?idProperty=…`: first and last day of the current season and of the
- * next one (the next one may be null). 401 without a valid access token; 403 for a missing or
- * unknown property.
+ * `GET /api/catalog/season`: first and last day of the current season and of the next one (the next
+ * ones may be null) of the property of the token, as days (`2026-05-01`), with their version. 204
+ * without a body while the season is not set; 401 without a valid access token.
  */
 export const seasonDatesMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf(request.params.get('idProperty'));
-  if (!property) {
-    return forbidden(request);
+  const row = SEASON_DATES.find((dates) => dates.propertyId === DEMO_PROPERTY.id);
+  if (!row) {
+    return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(300));
   }
-  const row = SEASON_DATES.find((dates) => dates.propertyId === property.id);
-  const dates = row ? onlyFieldsOf(SeasonDates, row) : new SeasonDates();
-  return of(new HttpResponse({ status: 200, url: request.url, body: dates })).pipe(delay(300));
+  return of(new HttpResponse({ status: 200, url: request.url, body: seasonDatesOf(row) })).pipe(
+    delay(300),
+  );
 };
 
 /**
- * `POST /api/seasons/save-season-dates` with the four days and `idProperty`: the new season dates
- * (until the page is reloaded). 204 without a body; 401 without a valid access token; 403 for a
- * missing or unknown property; 400 with one error per wrong day: each season needs both, and no end
- * before its start.
+ * `PUT /api/catalog/season` with the four days (`2026-05-01`): the new season dates of the property of
+ * the token (until the page is reloaded); without the next season its periods go. As
+ * `SaveSeasonRequestValidator`: 400 without `errors[]` for a day of the current season that is null or
+ * not a day (a missing one is `0001-01-01`); 400 with one error per rule: no end before its start
+ * (`validation.end_before_start`), the next season with both days or none (`validation.required` on
+ * the missing one) and starting after the current one ends (`validation.out_of_range` on
+ * `nextStartsOn`). 409 `resource.version_conflict` when `If-Match` is not the version of the saved
+ * season (a season not set yet takes none). 200 with the days as saved and the new version in `ETag`;
+ * 401 without a valid access token.
  */
 export const saveSeasonDatesMock = (
   request: HttpRequest<unknown>,
@@ -138,382 +83,526 @@ export const saveSeasonDatesMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<SeasonDates> & { idProperty?: unknown };
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
+  const body = (request.body ?? {}) as Partial<Record<keyof SeasonDates, unknown>>;
+  const property = DEMO_PROPERTY;
+  const startsOn = body.startsOn === undefined ? MISSING_DAY : body.startsOn;
+  const endsOn = body.endsOn === undefined ? MISSING_DAY : body.endsOn;
+  const nextStartsOn = body.nextStartsOn ?? null;
+  const nextEndsOn = body.nextEndsOn ?? null;
+  if (![startsOn, endsOn].every(isDay) || ![nextStartsOn, nextEndsOn].every(isDayOrNull)) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed);
   }
   const errors: MockFieldError[] = [];
-  const checkRange = (from: keyof SeasonDates, to: keyof SeasonDates): void => {
-    const hasFrom = isDay(body[from]);
-    const hasTo = isDay(body[to]);
-    if (!hasFrom) {
-      errors.push({ field: from, code: 'validation.required' });
-    }
-    if (!hasTo) {
-      errors.push({ field: to, code: 'validation.required' });
-    }
-    if (hasFrom && hasTo && (body[to] as string) < (body[from] as string)) {
-      errors.push({ field: to, code: 'validation.end_before_start' });
-    }
-  };
-  checkRange('currentSeasonDateFrom', 'currentSeasonDateTo');
-  checkRange('nextSeasonDateFrom', 'nextSeasonDateTo');
+  if (dayText(endsOn) < dayText(startsOn)) {
+    errors.push({
+      field: 'endsOn',
+      code: ApiErrorCode.ValidationEndBeforeStart,
+      args: { value: dayText(startsOn) },
+    });
+  }
+  if (nextStartsOn !== null && nextEndsOn === null) {
+    errors.push({ field: 'nextEndsOn', code: ApiErrorCode.ValidationRequired });
+  }
+  if (nextEndsOn !== null && nextStartsOn === null) {
+    errors.push({ field: 'nextStartsOn', code: ApiErrorCode.ValidationRequired });
+  }
+  if (nextStartsOn !== null && dayText(nextStartsOn) <= dayText(endsOn)) {
+    errors.push({
+      field: 'nextStartsOn',
+      code: ApiErrorCode.ValidationOutOfRange,
+      args: { value: dayText(endsOn) },
+    });
+  }
+  if (nextStartsOn !== null && nextEndsOn !== null && dayText(nextEndsOn) < dayText(nextStartsOn)) {
+    errors.push({
+      field: 'nextEndsOn',
+      code: ApiErrorCode.ValidationEndBeforeStart,
+      args: { value: dayText(nextStartsOn) },
+    });
+  }
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
+  }
+  const current = SEASON_DATES.find((row) => row.propertyId === property.id);
+  const conflict = current ? versionConflict(request, seasonDaysOf(current)) : null;
+  if (conflict) {
+    return conflict;
   }
   const dates: SeasonDatesRow = {
     propertyId: property.id,
-    currentSeasonDateFrom: body.currentSeasonDateFrom ?? null,
-    currentSeasonDateTo: body.currentSeasonDateTo ?? null,
-    nextSeasonDateFrom: body.nextSeasonDateFrom ?? null,
-    nextSeasonDateTo: body.nextSeasonDateTo ?? null,
+    startsOn: midnightOf(startsOn as string),
+    endsOn: midnightOf(endsOn as string),
+    nextStartsOn: midnightOf(nextStartsOn as string | null),
+    nextEndsOn: midnightOf(nextEndsOn as string | null),
   };
+  if (nextStartsOn === null) {
+    removePeriods(property.id, true);
+  }
   const index = SEASON_DATES.findIndex((row) => row.propertyId === property.id);
   if (index < 0) {
     SEASON_DATES.push(dates);
   } else {
     SEASON_DATES[index] = dates;
   }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, seasonDaysOf(dates), seasonDatesOf(dates));
 };
 
 /**
- * `GET /api/seasons/period-list?idProperty=…&isNextSeason=…`: the periods of the current season of
- * the property (of the next one with `isNextSeason=true`), each with its date intervals. 401 without
- * a valid access token; 403 for a missing or unknown property.
+ * `GET /api/catalog/tariff-periods` (current season) and `GET /api/catalog/next-season/tariff-periods`
+ * (next season): the periods of the property of the token, each with its date ranges as days
+ * (`2026-05-01`) and its version, in the order of their first day; `[]` while the season is not set.
+ * 401 without a valid access token.
  */
 export const seasonPeriodListMock = (
   request: HttpRequest<unknown>,
+  isNextSeason: boolean,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf(request.params.get('idProperty'));
-  if (!property) {
-    return forbidden(request);
-  }
-  const isNextSeason = request.params.get('isNextSeason') === 'true';
-  const periods = PERIODS.filter(
-    (row) => row.propertyId === property.id && row.isNextSeason === isNextSeason,
-  ).map((row) => structuredClone(onlyFieldsOf(SeasonPeriodItem, row)));
+  const isSeasonSet = SEASON_DATES.some((row) => row.propertyId === DEMO_PROPERTY.id);
+  const periods = isSeasonSet ? periodsOf(DEMO_PROPERTY.id, isNextSeason).map(periodItemOf) : [];
   return of(new HttpResponse({ status: 200, url: request.url, body: periods })).pipe(delay(300));
 };
 
 /**
- * `POST /api/seasons/add-period` with the name, the date intervals, `idProperty` and `isNextSeason`:
- * adds the period to the current or to the next season (until the page is reloaded). 204 without a body; 401 without a valid access token; 403 for a
- * missing or unknown property; 400 with one error per wrong field.
+ * `POST /api/catalog/tariff-periods` (current season) and `POST /api/catalog/next-season/tariff-periods`
+ * (next season) with the name and the date ranges as days: a new period of that season (until the page
+ * is reloaded), with the next free key of the season, checked as the backend does. 201 with the period
+ * created and its version; 401 without a valid access token; 400 with one error per wrong field; 422
+ * `pricing.season_required` / `pricing.next_season_required` while the season has no dates; 409
+ * `pricing.period_name_taken` for the name of another period of the season; 422
+ * `pricing.period_outside_season` for a day outside the season; 409 `pricing.period_overlap` with
+ * `periodName` for a day already in another period of the season.
  */
-export const addSeasonPeriodMock = (
+export const createSeasonPeriodMock = (
   request: HttpRequest<unknown>,
+  isNextSeason: boolean,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as AddPeriodBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
+  const body = (request.body ?? {}) as Partial<SeasonPeriodAddRequest>;
+  if (!hasReadableDays(body)) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed);
   }
-  const errors = periodErrors(body);
-  const season = seasonOf(property.id, body.isNextSeason === true);
-  const intervals = Array.isArray(body.intervals) ? body.intervals : [];
-  if (!errors.length && season && !intervals.every((interval) => isInside(interval, season))) {
-    errors.push({ field: 'intervals', code: 'validation.out_of_range' });
-  }
-  const taken = intervalsOf(property.id, body.isNextSeason === true);
-  if (!errors.length && hasOverlap(intervals, taken)) {
-    errors.push({ field: 'intervals', code: 'validation.invalid' });
-  }
+  const errors = savePeriodErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
   }
-  PERIODS.push({
+  const property = DEMO_PROPERTY;
+  const season = seasonOf(property.id, isNextSeason);
+  if (!season) {
+    return seasonRequired(request, isNextSeason);
+  }
+  const periods = periodsOf(property.id, isNextSeason);
+  const name = (body.name as string).trim();
+  if (periods.some((row) => sameTextIgnoringCase(row.name, name))) {
+    return problem(request, 409, ApiErrorCode.PricingPeriodNameTaken);
+  }
+  const ranges = (body.ranges as SeasonPeriodInterval[]).map(daysOf);
+  if (!ranges.every((range) => isInside(range, season))) {
+    return problem(request, 422, ApiErrorCode.PricingPeriodOutsideSeason, {
+      args: { seasonStartsOn: season.startsOn as string, seasonEndsOn: season.endsOn as string },
+    });
+  }
+  const overlapping = periods.find((row) => hasOverlap(ranges, row.ranges));
+  if (overlapping) {
+    return periodOverlap(request, overlapping);
+  }
+  const period: PeriodRow = {
     propertyId: property.id,
-    isNextSeason: body.isNextSeason === true,
-    idPeriod: crypto.randomUUID(),
-    periodName: (body.periodName as string).trim(),
-    intervals: (body.intervals as SeasonPeriodInterval[]).map((interval) => ({
-      idInterval: crypto.randomUUID(),
-      ...onlyFieldsOf(SeasonPeriodInterval, interval),
-    })),
-  });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+    isNextSeason,
+    key: newKey(isNextSeason),
+    name,
+    ranges: sorted(ranges),
+  };
+  PERIODS.push(period);
+  const created = periodItemOf(period);
+  return of(
+    new HttpResponse({
+      status: 201,
+      url: request.url,
+      headers: new HttpHeaders({ Location: `${request.url}/${period.key}` }),
+      body: created,
+    }),
+  ).pipe(delay(600));
 };
 
 /**
- * `POST /api/seasons/delete-period` with `DeletePeriodRequest`: the period goes away with all its date
- * intervals (until the page is reloaded). 204 without a body; 401 without a valid access token; 403
- * for a missing or unknown property; 404 `resource.not_found` for an id that is not one of its periods.
+ * `DELETE /api/catalog/tariff-periods/{key}` and `DELETE /api/catalog/next-season/tariff-periods/{key}`:
+ * the period of that season goes away with all its date ranges (until the page is reloaded). 204
+ * without a body; 401 without a valid access token; 422 `pricing.season_required` while the property
+ * has no season; 404 `pricing.period_not_found`; 409 `pricing.period_in_use` with the names of the
+ * price lists in `priceLists` when a period of the current season has prices in them, otherwise 409
+ * `pricing.period_in_use_by_services` with the names of the services in `services` when services use it.
  */
 export const deleteSeasonPeriodMock = (
   request: HttpRequest<unknown>,
+  isNextSeason: boolean,
+  key: number,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DeletePeriodRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
+  const property = DEMO_PROPERTY;
+  if (!seasonOf(property.id, isNextSeason)) {
+    return seasonRequired(request, isNextSeason);
   }
-  const period = PERIODS.find(
-    (row) => row.idPeriod === body.idPeriod && row.propertyId === property.id,
-  );
+  const period = periodsOf(property.id, isNextSeason).find((row) => row.key === key);
   if (!period) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.PricingPeriodNotFound);
+  }
+  const priceLists = isNextSeason ? [] : priceListsUsingPeriod(key);
+  if (priceLists.length) {
+    return problem(request, 409, ApiErrorCode.PricingPeriodInUse, {
+      args: { priceLists },
+    });
+  }
+  const services = isNextSeason ? [] : servicesUsingPeriod(key);
+  if (services.length) {
+    return problem(request, 409, ApiErrorCode.PricingPeriodInUseByServices, {
+      args: { services },
+    });
   }
   PERIODS.splice(PERIODS.indexOf(period), 1);
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
 /**
- * `POST /api/seasons/update-period` with `idPeriod`, the new `periodName` and `idProperty`: the period
- * gets the new name (until the page is reloaded). 204 without a body; 401 without a valid access
- * token; 403 for a missing or unknown property; 404 `resource.not_found` for an id that is not one of
- * its periods; 400 for an empty name.
+ * `PUT /api/catalog/tariff-periods/{key}` and `PUT /api/catalog/next-season/tariff-periods/{key}`
+ * with the name and all the date ranges of the period, as days: the period gets them (until the page
+ * is reloaded), checked as the backend does. 200 with the period saved and its new version in
+ * `ETag`; 401 without a valid access token; 400 with one error per wrong field; 422
+ * `pricing.season_required` / `pricing.next_season_required` while the season has no dates; 404
+ * `pricing.period_not_found`; 409 `resource.version_conflict` when `If-Match` is not the version of
+ * the period; 409 `pricing.period_name_taken` for the name of another period of the season; 422
+ * `pricing.period_outside_season` for a day outside the season; 409 `pricing.period_overlap` with
+ * `periodName` for a day already in another period of the season.
  */
 export const updateSeasonPeriodMock = (
   request: HttpRequest<unknown>,
+  isNextSeason: boolean,
+  key: number,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<SeasonPeriodUpdateRequest> & {
-    idProperty?: unknown;
-  };
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
+  const body = (request.body ?? {}) as Partial<SeasonPeriodUpdateRequest>;
+  if (!hasReadableDays(body)) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed);
   }
-  const period = PERIODS.find(
-    (row) => row.idPeriod === body.idPeriod && row.propertyId === property.id,
-  );
-  if (!period) {
-    return resourceNotFound(request);
-  }
-  if (typeof body.periodName !== 'string' || !body.periodName.trim()) {
-    return problem(request, 400, 'validation.failed', {
-      title: 'Invalid request',
-      errors: [{ field: 'periodName', code: 'validation.required' }],
-    });
-  }
-  period.periodName = body.periodName.trim();
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
-
-/**
- * `POST /api/seasons/add-interval` with the days, `idPeriod` and `idProperty`: a new date interval of
- * the period (until the page is reloaded); one the period has already is not added. 204 without a
- * body; 401 without a valid access token; 403 for a missing or unknown property; 404
- * `resource.not_found` for an id that is not one of its periods; 400 with one error per wrong day.
- */
-export const addSeasonIntervalMock = (
-  request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<SeasonPeriodInterval> & {
-    idPeriod?: unknown;
-    idProperty?: unknown;
-  };
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const period = PERIODS.find(
-    (row) => row.idPeriod === body.idPeriod && row.propertyId === property.id,
-  );
-  if (!period) {
-    return resourceNotFound(request);
-  }
-  const season = seasonOf(property.id, period.isNextSeason);
-  const errors: MockFieldError[] = [];
-  if (!isDay(body.dateFrom)) {
-    errors.push({ field: 'dateFrom', code: 'validation.required' });
-  }
-  if (!isDay(body.dateTo)) {
-    errors.push({ field: 'dateTo', code: 'validation.required' });
-  } else if (isDay(body.dateFrom) && (body.dateTo as string) < (body.dateFrom as string)) {
-    errors.push({ field: 'dateTo', code: 'validation.end_before_start' });
-  }
-  if (season && isDay(body.dateFrom) && (body.dateFrom as string) < (season.dateFrom as string)) {
-    errors.push({ field: 'dateFrom', code: 'validation.out_of_range' });
-  }
-  if (season && isDay(body.dateTo) && (body.dateTo as string) > (season.dateTo as string)) {
-    errors.push({ field: 'dateTo', code: 'validation.out_of_range' });
-  }
+  const errors = savePeriodErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
   }
-  if (hasOverlap([body as SeasonPeriodInterval], intervalsOf(property.id, period.isNextSeason))) {
-    return problem(request, 400, 'validation.failed', {
-      title: 'Invalid request',
-      errors: [{ field: 'dateTo', code: 'validation.invalid' }],
+  const property = DEMO_PROPERTY;
+  const season = seasonOf(property.id, isNextSeason);
+  if (!season) {
+    return seasonRequired(request, isNextSeason);
+  }
+  const periods = periodsOf(property.id, isNextSeason);
+  const period = periods.find((row) => row.key === key);
+  if (!period) {
+    return problem(request, 404, ApiErrorCode.PricingPeriodNotFound);
+  }
+  const conflict = versionConflict(request, periodDataOf(period));
+  if (conflict) {
+    return conflict;
+  }
+  const name = (body.name as string).trim();
+  const isNameTaken = periods.some((row) => row !== period && sameTextIgnoringCase(row.name, name));
+  if (isNameTaken) {
+    return problem(request, 409, ApiErrorCode.PricingPeriodNameTaken);
+  }
+  const ranges = (body.ranges as SeasonPeriodInterval[]).map(daysOf);
+  if (!ranges.every((range) => isInside(range, season))) {
+    return problem(request, 422, ApiErrorCode.PricingPeriodOutsideSeason, {
+      args: { seasonStartsOn: season.startsOn as string, seasonEndsOn: season.endsOn as string },
     });
   }
-  period.intervals.push({
-    idInterval: crypto.randomUUID(),
-    dateFrom: body.dateFrom as string,
-    dateTo: body.dateTo as string,
-  });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  const overlapping = periods.find((row) => row !== period && hasOverlap(ranges, row.ranges));
+  if (overlapping) {
+    return periodOverlap(request, overlapping);
+  }
+  period.name = name;
+  period.ranges = sorted(ranges);
+  return savedWithVersion(request, periodDataOf(period), periodItemOf(period));
 };
 
 /**
- * `POST /api/seasons/update-interval` with the interval (`idInterval`, `dateFrom`, `dateTo`) and
- * `idProperty`: new days of the interval (until the page is reloaded). 204 without a body; 401
- * without a valid access token; 403 for a missing or unknown property; 404 `resource.not_found` for
- * an id that is not an interval of its periods; 400 with one error per wrong date.
+ * `POST /api/catalog/tariff-periods/bulk-delete-ranges` and
+ * `POST /api/catalog/next-season/tariff-periods/bulk-delete-ranges` with `{ ranges }`, each with the
+ * `key` of its period and its days: the date ranges go away from their periods, all or none (until
+ * the page is reloaded). 204 without a body; 401 without a valid access token; 400 as
+ * `DeleteTariffPeriodRangesRequestValidator` (see `deleteRangesErrors`); 422 `pricing.season_required`
+ * / `pricing.next_season_required`; 404 `pricing.period_not_found` /
+ * `pricing.period_range_not_found`; 422 `pricing.period_ranges_required` when a period would be left
+ * without ranges.
  */
-export const updateSeasonIntervalMock = (
+export const deleteSeasonRangesMock = (
   request: HttpRequest<unknown>,
+  isNextSeason: boolean,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<SeasonPeriodIntervalItem> & { idProperty?: unknown };
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
+  const body = (request.body ?? {}) as { ranges?: unknown };
+  const ranges: unknown[] = Array.isArray(body.ranges) ? body.ranges : [];
+  if (!ranges.every(isReadableRangeOfPeriod)) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed);
   }
-  const period = PERIODS.find(
-    (row) =>
-      row.propertyId === property.id &&
-      row.intervals.some((interval) => interval.idInterval === body.idInterval),
-  );
-  const interval = period?.intervals.find((row) => row.idInterval === body.idInterval);
-  if (!period || !interval) {
-    return resourceNotFound(request);
-  }
-  const season = seasonOf(property.id, period.isNextSeason);
-  const errors: MockFieldError[] = [];
-  if (!isDay(body.dateFrom)) {
-    errors.push({ field: 'dateFrom', code: 'validation.required' });
-  }
-  if (!isDay(body.dateTo)) {
-    errors.push({ field: 'dateTo', code: 'validation.required' });
-  } else if (isDay(body.dateFrom) && (body.dateTo as string) < (body.dateFrom as string)) {
-    errors.push({ field: 'dateTo', code: 'validation.end_before_start' });
-  }
-  if (season && isDay(body.dateFrom) && (body.dateFrom as string) < (season.dateFrom as string)) {
-    errors.push({ field: 'dateFrom', code: 'validation.out_of_range' });
-  }
-  if (season && isDay(body.dateTo) && (body.dateTo as string) > (season.dateTo as string)) {
-    errors.push({ field: 'dateTo', code: 'validation.out_of_range' });
-  }
+  const errors = deleteRangesErrors(ranges);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
   }
-  const others = intervalsOf(property.id, period.isNextSeason).filter(
-    (other) => other.idInterval !== interval.idInterval,
-  );
-  if (hasOverlap([body as SeasonPeriodInterval], others)) {
-    return problem(request, 400, 'validation.failed', {
-      title: 'Invalid request',
-      errors: [{ field: 'dateTo', code: 'validation.invalid' }],
-    });
+  const property = DEMO_PROPERTY;
+  if (!seasonOf(property.id, isNextSeason)) {
+    return seasonRequired(request, isNextSeason);
   }
-  interval.dateFrom = body.dateFrom as string;
-  interval.dateTo = body.dateTo as string;
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
-
-/**
- * `POST /api/seasons/delete-intervals` with `DeleteIntervalsRequest`: the date intervals go away from
- * their periods, all or none (until the page is reloaded); a period left without intervals stays.
- * 204 without a body; 401 without a valid access token; 403 for a missing or unknown property; 400
- * for no ids; 404 `resource.not_found` when one id is not an interval of its periods.
- */
-export const deleteSeasonIntervalsMock = (
-  request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
+  const periods = periodsOf(property.id, isNextSeason);
+  const toDelete = (ranges as SeasonPeriodIntervalItem[]).map(daysOfRangeOfPeriod);
+  if (!toDelete.every((item) => periods.some(({ key }) => key === item.key))) {
+    return problem(request, 404, ApiErrorCode.PricingPeriodNotFound);
   }
-  const body = (request.body ?? {}) as Partial<DeleteIntervalsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const idIntervals = Array.isArray(body.idIntervals) ? body.idIntervals : [];
-  if (!idIntervals.length) {
-    return problem(request, 400, 'validation.failed', {
-      title: 'Invalid request',
-      errors: [{ field: 'idIntervals', code: 'validation.required' }],
-    });
-  }
-  const periods = PERIODS.filter((row) => row.propertyId === property.id);
-  const isKnown = (idInterval: string): boolean =>
-    periods.some((period) =>
-      period.intervals.some((interval) => interval.idInterval === idInterval),
+  const isListed = (key: number | null, range: SeasonPeriodInterval): boolean =>
+    toDelete.some(
+      (item) =>
+        item.key === key && item.startsOn === range.startsOn && item.endsOn === range.endsOn,
     );
-  if (!idIntervals.every(isKnown)) {
-    return resourceNotFound(request);
+  const isKnown = toDelete.every((item) =>
+    periods.some(
+      (period) =>
+        period.key === item.key &&
+        period.ranges.some(
+          ({ startsOn, endsOn }) => startsOn === item.startsOn && endsOn === item.endsOn,
+        ),
+    ),
+  );
+  if (!isKnown) {
+    return problem(request, 404, ApiErrorCode.PricingPeriodRangeNotFound);
+  }
+  if (periods.some((period) => period.ranges.every((range) => isListed(period.key, range)))) {
+    return problem(request, 422, ApiErrorCode.PricingPeriodRangesRequired);
   }
   periods.forEach((period) => {
-    period.intervals = period.intervals.filter(
-      (interval) => !idIntervals.includes(interval.idInterval as string),
-    );
+    period.ranges = period.ranges.filter((range) => !isListed(period.key, range));
   });
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
-/** As the backend checks it: a name and at least one interval, each with both days, the last not before the first. */
-function periodErrors(body: AddPeriodBody): MockFieldError[] {
+/**
+ * As `SaveTariffPeriodRequestValidator`: a name up to 80 characters, 1 to 20 ranges, none ending
+ * before it starts (`ranges[i]`), none overlapping another of the period (`ranges`, checked with
+ * every other rule). A missing day is `0001-01-01`, as in the backend's DTO.
+ */
+function savePeriodErrors(
+  body: Partial<SeasonPeriodAddRequest | SeasonPeriodUpdateRequest>,
+): MockFieldError[] {
   const errors: MockFieldError[] = [];
-  if (typeof body.periodName !== 'string' || !body.periodName.trim()) {
-    errors.push({ field: 'periodName', code: 'validation.required' });
+  if (typeof body.name !== 'string' || !body.name.trim()) {
+    errors.push({ field: 'name', code: ApiErrorCode.ValidationRequired });
+  } else if (body.name.length > MAX_SEASON_PERIOD_NAME_LENGTH) {
+    errors.push({
+      field: 'name',
+      code: ApiErrorCode.ValidationMaxLength,
+      args: { max: MAX_SEASON_PERIOD_NAME_LENGTH, min: 0 },
+    });
   }
-  const intervals = Array.isArray(body.intervals) ? body.intervals : [];
-  const isValid = (interval: SeasonPeriodInterval): boolean =>
-    isDay(interval.dateFrom) &&
-    isDay(interval.dateTo) &&
-    (interval.dateTo as string) >= (interval.dateFrom as string);
-  if (!intervals.length || !intervals.every(isValid)) {
-    errors.push({ field: 'intervals', code: 'validation.required' });
+  const ranges = (Array.isArray(body.ranges) ? body.ranges : []).map(withMissingDays);
+  if (!ranges.length) {
+    errors.push({ field: 'ranges', code: ApiErrorCode.ValidationRequired });
+  } else if (ranges.length > MAX_SEASON_PERIOD_RANGES) {
+    errors.push({ field: 'ranges', code: ApiErrorCode.ValidationInvalid });
+  }
+  ranges.forEach((range, index) => {
+    if ((range.endsOn as string) < (range.startsOn as string)) {
+      errors.push({ field: `ranges[${index}]`, code: ApiErrorCode.ValidationEndBeforeStart });
+    }
+  });
+  if (ranges.length > 1 && hasOverlap(ranges, [])) {
+    errors.push({ field: 'ranges', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
+}
+
+/**
+ * As `DeleteTariffPeriodRangesRequestValidator`: `ranges` with 1 to 300 elements (only that error
+ * beyond 300), every element not null with its `key`, `startsOn` and `endsOn`.
+ */
+function deleteRangesErrors(ranges: unknown[]): MockFieldError[] {
+  if (!ranges.length) {
+    return [{ field: 'ranges', code: ApiErrorCode.ValidationRequired }];
+  }
+  if (ranges.length > MAX_BULK_DELETE_RANGES) {
+    return [{ field: 'ranges', code: ApiErrorCode.ValidationInvalid }];
+  }
+  return ranges.flatMap((value, index): MockFieldError[] => {
+    if (value === null || typeof value !== 'object') {
+      return [{ field: `ranges[${index}]`, code: ApiErrorCode.ValidationRequired }];
+    }
+    const range = value as Partial<SeasonPeriodIntervalItem>;
+    return (['key', 'startsOn', 'endsOn'] as const)
+      .filter((field) => range[field] === null || range[field] === undefined)
+      .map((field) => ({
+        field: `ranges[${index}].${field}`,
+        code: ApiErrorCode.ValidationRequired,
+      }));
+  });
+}
+
+function seasonDatesOf(row: SeasonDatesRow): SeasonDates {
+  const days = seasonDaysOf(row);
+  return { ...days, version: versionOf(days) };
+}
+
+/** What `GET /season` answers besides the version: the version covers it. */
+function seasonDaysOf(row: SeasonDatesRow): Omit<SeasonDates, 'version'> {
+  return {
+    startsOn: dayOf(row.startsOn),
+    endsOn: dayOf(row.endsOn),
+    nextStartsOn: dayOf(row.nextStartsOn),
+    nextEndsOn: dayOf(row.nextEndsOn),
+  };
+}
+
+function periodItemOf(row: PeriodRow): SeasonPeriodItem {
+  const period = periodDataOf(row);
+  return { ...period, version: versionOf(period) };
+}
+
+/** What the list answers for a period besides the version: the version covers it. */
+function periodDataOf(row: PeriodRow): Omit<SeasonPeriodItem, 'version'> {
+  return structuredClone({ key: row.key, name: row.name, ranges: row.ranges });
+}
+
+/** A day of the new ranges is already in another period of the season. */
+function periodOverlap(request: HttpRequest<unknown>, other: PeriodRow): Observable<never> {
+  return problem(request, 409, ApiErrorCode.PricingPeriodOverlap, {
+    args: { periodName: other.name ?? '' },
+  });
+}
+
+/** As `RequireNextSeasonAsync`: without any season `pricing.season_required`, then the next one. */
+function seasonRequired(request: HttpRequest<unknown>, isNextSeason: boolean): Observable<never> {
+  const hasSeason = SEASON_DATES.some((row) => row.propertyId === DEMO_PROPERTY.id);
+  return isNextSeason && hasSeason
+    ? problem(request, 422, ApiErrorCode.PricingNextSeasonRequired)
+    : problem(request, 422, ApiErrorCode.PricingSeasonRequired);
+}
+
+function newKey(isNextSeason: boolean): number {
+  const key = NEXT_KEYS.get(isNextSeason) ?? 0;
+  NEXT_KEYS.set(isNextSeason, key + 1);
+  return key;
+}
+
+function removePeriods(propertyId: number, isNextSeason: boolean): void {
+  for (const row of periodsOf(propertyId, isNextSeason)) {
+    PERIODS.splice(PERIODS.indexOf(row), 1);
+  }
+}
+
+/** The periods of the current or of the next season of the property, in the order of their first day. */
+function periodsOf(propertyId: number, isNextSeason: boolean): PeriodRow[] {
+  return PERIODS.filter(
+    (row) => row.propertyId === propertyId && row.isNextSeason === isNextSeason,
+  ).sort((first, second) =>
+    (first.ranges[0]?.startsOn ?? '').localeCompare(second.ranges[0]?.startsOn ?? ''),
+  );
 }
 
 /** First and last day of the current or of the next season of the property, when both are set. */
 function seasonOf(propertyId: number, isNextSeason: boolean): SeasonPeriodInterval | null {
   const dates = SEASON_DATES.find((row) => row.propertyId === propertyId);
-  const dateFrom =
-    (isNextSeason ? dates?.nextSeasonDateFrom : dates?.currentSeasonDateFrom) ?? null;
-  const dateTo = (isNextSeason ? dates?.nextSeasonDateTo : dates?.currentSeasonDateTo) ?? null;
-  return dateFrom && dateTo ? { dateFrom, dateTo } : null;
+  const startsOn = dayOf((isNextSeason ? dates?.nextStartsOn : dates?.startsOn) ?? null);
+  const endsOn = dayOf((isNextSeason ? dates?.nextEndsOn : dates?.endsOn) ?? null);
+  return startsOn && endsOn ? { startsOn, endsOn } : null;
 }
 
-/** All the date intervals of the periods of the current or of the next season of the property. */
-function intervalsOf(propertyId: number, isNextSeason: boolean): SeasonPeriodIntervalItem[] {
-  return PERIODS.filter(
-    (row) => row.propertyId === propertyId && row.isNextSeason === isNextSeason,
-  ).flatMap((period) => period.intervals);
-}
-
-/** One of the new intervals shares a day with another new one or with one of the season. */
+/** One of the new ranges shares a day with another new one or with one of `taken`. */
 function hasOverlap(
-  intervals: readonly SeasonPeriodInterval[],
+  ranges: readonly SeasonPeriodInterval[],
   taken: readonly SeasonPeriodInterval[],
 ): boolean {
   const overlap = (first: SeasonPeriodInterval, second: SeasonPeriodInterval): boolean =>
-    (first.dateFrom as string) <= (second.dateTo as string) &&
-    (second.dateFrom as string) <= (first.dateTo as string);
-  return intervals.some(
-    (interval, index) =>
-      taken.some((other) => overlap(interval, other)) ||
-      intervals.some((other, otherIndex) => otherIndex !== index && overlap(interval, other)),
+    (first.startsOn as string) <= (second.endsOn as string) &&
+    (second.startsOn as string) <= (first.endsOn as string);
+  return ranges.some(
+    (range, index) =>
+      taken.some((other) => overlap(range, other)) ||
+      ranges.some((other, otherIndex) => otherIndex !== index && overlap(range, other)),
   );
 }
 
-function isInside(interval: SeasonPeriodInterval, season: SeasonPeriodInterval): boolean {
+function isInside(range: SeasonPeriodInterval, season: SeasonPeriodInterval): boolean {
   return (
-    (interval.dateFrom as string) >= (season.dateFrom as string) &&
-    (interval.dateTo as string) <= (season.dateTo as string)
+    (range.startsOn as string) >= (season.startsOn as string) &&
+    (range.endsOn as string) <= (season.endsOn as string)
   );
+}
+
+/** A body the backend can read: every day given is a day, never null (`DateOnly`). */
+function hasReadableDays(
+  body: Partial<SeasonPeriodAddRequest | SeasonPeriodUpdateRequest>,
+): boolean {
+  return (Array.isArray(body.ranges) ? body.ranges : []).every(
+    (range: Partial<Record<keyof SeasonPeriodInterval, unknown>> | null) =>
+      range !== null &&
+      [range.startsOn, range.endsOn].every((day) => day === undefined || isDay(day)),
+  );
+}
+
+/** A day missing from the body is `0001-01-01` in the backend's DTO. */
+function withMissingDays(range: SeasonPeriodInterval): SeasonPeriodInterval {
+  return daysOf({
+    startsOn: range.startsOn ?? MISSING_DAY,
+    endsOn: range.endsOn ?? MISSING_DAY,
+  });
+}
+
+/** Missing or null fields are left to the validator; anything else must be a key and days. */
+function isReadableRangeOfPeriod(value: unknown): boolean {
+  if (value === null || typeof value !== 'object') {
+    return true;
+  }
+  const range = value as Partial<Record<keyof SeasonPeriodIntervalItem, unknown>>;
+  return (
+    (range.key === null || range.key === undefined || Number.isInteger(range.key)) &&
+    [range.startsOn, range.endsOn].every((day) => day === null || day === undefined || isDay(day))
+  );
+}
+
+function isDayOrNull(value: unknown): boolean {
+  return value === null || isDay(value);
+}
+
+/** The day (`2026-05-01`) of a value already checked with `isDay`. */
+function dayText(value: unknown): string {
+  return String(value).slice(0, 10);
+}
+
+function sorted(ranges: SeasonPeriodInterval[]): SeasonPeriodInterval[] {
+  return [...ranges].sort((first, second) =>
+    (first.startsOn as string).localeCompare(second.startsOn as string),
+  );
+}
+
+/** The days of a range, as the backend keeps them (`2026-05-01`). */
+function daysOf(range: SeasonPeriodInterval): SeasonPeriodInterval {
+  return { startsOn: dayOf(range.startsOn), endsOn: dayOf(range.endsOn) };
+}
+
+function daysOfRangeOfPeriod(range: SeasonPeriodIntervalItem): SeasonPeriodIntervalItem {
+  return { key: range.key, ...daysOf(range) };
+}
+
+function dayOf(date: string | null): string | null {
+  return date ? date.slice(0, 10) : null;
+}
+
+function midnightOf(day: string | null | undefined): string | null {
+  return day ? `${day.slice(0, 10)}T00:00:00.000Z` : null;
 }
 
 function isDay(value: unknown): boolean {

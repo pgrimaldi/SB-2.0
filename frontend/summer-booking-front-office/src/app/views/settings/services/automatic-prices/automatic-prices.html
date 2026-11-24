@@ -34,6 +34,7 @@
   [idAutomaticPrice]="idAutomaticPriceToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
+  (failed)="reloadIfGone($event, table, [idAutomaticPriceToEdit()]); reloadIfChanged($event, table)"
 />
 
 <app-delete-items-popup
@@ -44,6 +45,7 @@
   [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idAutomaticPricesToDelete())"
 />
 <app-duplicate-items-popup
   [idItems]="idAutomaticPricesToDuplicate()"
@@ -53,6 +55,7 @@
   [pathIcon]="alertIcons"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idAutomaticPricesToDuplicate())"
 />
 
 <app-table-error-popup

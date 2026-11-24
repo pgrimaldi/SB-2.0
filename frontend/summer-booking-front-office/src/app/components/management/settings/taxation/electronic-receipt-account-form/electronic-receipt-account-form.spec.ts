@@ -5,6 +5,8 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { UnsavedChangesBehaviour } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ElectronicReceiptAccount } from '../../../../../entities/settings/taxation/electronic-receipt-account';
 import { TaxationService } from '../../../../../services/api/taxation/taxation.service';
 import { ElectronicReceiptAccountForm } from './electronic-receipt-account-form';
@@ -70,7 +72,7 @@ describe('ElectronicReceiptAccountForm', () => {
     expect(element.querySelector('.electronic__receipt__account__form__saved')).toBeNull();
     save().click();
     await settle();
-    expect(saveElectronicReceiptAccount).toHaveBeenCalledWith('p1', filled);
+    expect(saveElectronicReceiptAccount).toHaveBeenCalledWith(filled);
     expect(save().querySelector('mat-progress-spinner')).not.toBeNull();
     expect(
       element.querySelector('.electronic__receipt__account__form__fields')!.hasAttribute('inert'),
@@ -99,9 +101,9 @@ describe('ElectronicReceiptAccountForm', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.failed',
+              code: ApiErrorCode.ValidationFailed,
               title: 'Invalid request',
-              errors: [{ field: 'vatNumber', code: 'validation.invalid' }],
+              errors: [{ field: 'vatNumber', code: ApiErrorCode.ValidationInvalid }],
             },
           }),
       ),
@@ -150,7 +152,6 @@ describe('ElectronicReceiptAccountForm', () => {
     button('save')!.click();
     await settle();
     expect(saveElectronicReceiptAccount).toHaveBeenCalledWith(
-      'p1',
       expect.objectContaining({ password: 'segreta-1' }),
     );
     expect(inputs()[10].value).toBe('');
@@ -173,9 +174,22 @@ describe('ElectronicReceiptAccountForm', () => {
     await type(inputs()[0], 'Bagno Nuovo');
     button('cancel')!.click();
     await fixture.whenStable();
+    const unsaved = TestBed.inject(UnsavedChangesBehaviour);
+    expect(unsaved.asking()).toBe(true);
+    unsaved.answer(true); // Esci senza salvare
+    await settle();
     expect(inputs()[0].value).toBe('Bagno Esempio');
     expect(inputs()[10].value).toBe('');
     expect(editable()).toEqual([]);
     expect(button('edit')).not.toBeNull();
+  });
+
+  it('should count as a change only a value different from the saved one, spaces at the sides aside', async () => {
+    const { fixture, inputs, type } = await setup();
+
+    await type(inputs()[0], 'Bagno Esempio');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    await type(inputs()[0], '   ');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
   });
 });

@@ -15,6 +15,7 @@
   subscriptSizing="dynamic"
   [class.filled__text__field__invalid]="!!error()"
   [class.filled__text__field__locked]="readonly() || disabled()"
+  [class.filled__text__field__code]="isCodeField()"
 >
   <!-- One @if around the span alone, or Material would not place it before the text. -->
   @if (icons().list[2]; as icon) {
@@ -33,7 +34,7 @@
     [readonly]="readonly()"
     [disabled]="disabled()"
     [type]="inputType()"
-    [attr.dir]="isPhoneField() ? 'ltr' : null"
+    [attr.dir]="isPhoneField() || isCodeField() ? 'ltr' : null"
     [id]="id"
     [value]="value() ?? ''"
     [placeholder]="placeholder() ?? ''"
@@ -45,12 +46,7 @@
     (blur)="touch.emit()"
   />
   @if (isPasswordField()) {
-    <button
-      matSuffix
-      class="filled__text__field__toggle"
-      type="button"
-      (click)="toggleVisible()"
-    >
+    <button matSuffix class="filled__text__field__toggle" type="button" (click)="toggleVisible()">
       @if (icons().list[visible() ? 0 : 1]; as icon) {
         @if (icons().material) {
           <mat-icon>{{ icon }}</mat-icon>

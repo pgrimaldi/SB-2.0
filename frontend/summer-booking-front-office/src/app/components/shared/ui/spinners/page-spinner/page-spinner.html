@@ -1,5 +1,11 @@
 @if (isLoading()) {
-  <div class="page__spinner">
+  <dialog
+    #dialog
+    class="page__spinner"
+    (keydown.escape)="$event.preventDefault()"
+    (cancel)="$event.preventDefault()"
+    (close)="dialog.showModal()"
+  >
     <app-spinner [diameter]="48" />
-  </div>
+  </dialog>
 }

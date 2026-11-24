@@ -14,15 +14,18 @@
         [attr.inert]="isFetching() ? '' : null"
         [form]="draftForm"
         [mainLanguage]="mainLanguage()"
+        [isReadonly]="!open()"
         [imagePreviewUrl]="imagePreviewUrl()"
         (iconChosen)="chooseIcon($event)"
         (imageChosen)="chooseImage($event)"
+        (imageRemoveRequest)="removeImage()"
       />
     } @else if (selectedTab() === PanelTab.Prices) {
       <app-service-prices-tab
         [attr.inert]="isFetching() ? '' : null"
         [form]="draftForm"
         [periods]="periods()"
+        [sectorsVersion]="sectorsVersion()"
       />
     } @else if (selectedTab() === PanelTab.Bookings) {
       <app-service-bookings-tab
@@ -35,3 +38,4 @@
     }
   </app-tab-group>
 </app-side-panel>
+<app-service-image-error-popup [pathIcon]="pathIcon()" [(problem)]="imageError" />

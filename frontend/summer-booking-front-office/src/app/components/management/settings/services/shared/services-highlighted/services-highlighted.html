@@ -1,4 +1,4 @@
-<app-toggle [formField]="form()">
+<app-toggle [formField]="form()" [error]="validationText.text(form())">
   {{ 'management.settings.services.form.highlighted' | translate }}
 </app-toggle>
 <app-icon-button

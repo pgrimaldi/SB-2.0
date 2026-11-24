@@ -79,7 +79,7 @@ app-login-dialog {
 
 .login__dialog__error {
   margin: 0;
-  color: #dc3545;
+  color: var(--color__layout__error);
   font-size: 0.875rem;
   line-height: 1.3125rem;
 }

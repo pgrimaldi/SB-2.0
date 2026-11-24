@@ -34,18 +34,30 @@ export class FilledMultiSelect<K extends string = string> {
   readonly isPanelSizedToOptions = input(false);
   /** The panel was closed: a Signal Forms `[formField]` marks the select as touched. */
   readonly touch = output<void>();
+  /**
+   * The user tried to open the list (click, Enter or Space), also while it has no options and so
+   * does not open: e.g. to read again a list that could not be loaded.
+   */
+  readonly openRequest = output<void>();
+
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
 
   /** As in the filled select: the error look follows our `error`, not a classic form control. */
   protected readonly errorMatcher: ErrorStateMatcher = { isErrorState: () => !!this.error() };
   private readonly matSelect = viewChild.required(MatSelect);
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly injector = inject(Injector);
 
   constructor() {
     effect(() => {
       this.error();
       this.matSelect().updateErrorState();
     });
+  }
+
+  protected requestOpen(): void {
+    if (!this.disabled()) {
+      this.openRequest.emit();
+    }
   }
 
   /** A list sized to its options is never narrower than the field. */

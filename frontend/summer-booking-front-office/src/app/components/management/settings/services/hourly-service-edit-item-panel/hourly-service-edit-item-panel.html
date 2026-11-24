@@ -11,15 +11,24 @@
     [(selectedIndex)]="tabIndex"
     (selectedIndexChange)="requestTab($event)"
   >
-    @if (selectedTab() === PanelTab.GeneralInfo) {
+    @if (tabErrorMessage(); as tabErrorMessage) {
+      <div class="hourly__service__edit__item__panel__tab__error">
+        <p class="hourly__service__edit__item__panel__error">{{ tabErrorMessage }}</p>
+        <app-button [size]="ButtonSize.Small" (clicked)="retryTab()">{{
+          'table.load_error.retry' | translate
+        }}</app-button>
+      </div>
+    } @else if (selectedTab() === PanelTab.GeneralInfo) {
       <app-hourly-service-general-info-tab
         [attr.inert]="isLoading(PanelTab.GeneralInfo) ? '' : null"
         [form]="draftForm"
         [mainLanguage]="mainLanguage()"
         [isReadonly]="isLocked()"
         [imagePreviewUrl]="imagePreviewUrl()"
+        [imageError]="imageRemovalMessage()"
         (iconChosen)="chooseIcon($event)"
         (imageChosen)="chooseImage($event)"
+        (imageRemoveRequest)="removeImage()"
       />
     } @else if (selectedTab() === PanelTab.Prices) {
       <app-hourly-service-prices-tab
@@ -27,6 +36,7 @@
         [form]="draftForm"
         [periods]="periods()"
         [isReadonly]="isLocked()"
+        [sectorsVersion]="sectorsVersion()"
       />
     } @else if (selectedTab() === PanelTab.Bookings) {
       <app-hourly-service-bookings-tab
@@ -47,7 +57,7 @@
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
         [disabled]="isSaving()"
-        (clicked)="cancelEdit()"
+        (clicked)="requestCancel()"
       >
         {{ 'management.settings.services.form.cancel' | translate }}
       </app-button>
@@ -73,3 +83,16 @@
     }
   </div>
 </app-side-panel>
+<app-read-error-popup [pathIcon]="pathIcon()" [(problem)]="readError" (retry)="retryRead()" />
+<app-version-conflict-popup [pathIcon]="pathIcon()" [(open)]="isConflictShown" />
+<app-service-image-error-popup [pathIcon]="pathIcon()" [(problem)]="imageError" />
+<app-confirm-popup
+  [pathIcon]="pathIcon()"
+  [title]="'management.settings.services.form.image.delete.title' | translate"
+  [text]="'management.settings.services.form.image.delete.text' | translate"
+  [texts]="'management.settings.services.form.image.delete' | translate"
+  [danger]="true"
+  [(open)]="isImageDeletionAsked"
+  (confirmed)="confirmImageDeletion()"
+/>
+<app-page-spinner [isLoading]="isRemovingImage()" />

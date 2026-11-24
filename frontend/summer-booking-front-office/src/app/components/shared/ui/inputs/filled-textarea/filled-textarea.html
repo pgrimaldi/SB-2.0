@@ -1,9 +1,11 @@
-<label class="filled__textarea__label" [for]="id"
-  >{{ label() }}
-  @if (isMandatory()) {
-    <span class="filled__textarea__mandatory">*</span>
-  }
-</label>
+@if (label()) {
+  <label class="filled__textarea__label" [for]="id"
+    >{{ label() }}
+    @if (isMandatory()) {
+      <span class="filled__textarea__mandatory">*</span>
+    }
+  </label>
+}
 <mat-form-field
   class="filled__textarea__control"
   appearance="fill"

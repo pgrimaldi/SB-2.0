@@ -37,6 +37,8 @@ export class FilledTextField {
   readonly isPasswordField = input(false);
   /** Telephone keyboard and left-to-right content, also in a right-to-left page. */
   readonly isPhoneField = input(false);
+  /** Left-to-right content, e.g. a code, on the same side as the other fields also in Arabic. */
+  readonly isCodeField = input(false);
   readonly name = input<string>();
   readonly placeholder = input<string>();
   /** Browser autofill hint, e.g. `given-name`, `email`, `tel`. */

@@ -40,7 +40,13 @@
         {{ day.label }}
       </app-checkbox>
     }
-    @if (validationText.text(form().daysOfWeek); as error) {
+    @if (
+      validationText.text(
+        form().daysOfWeek,
+        'management.settings.services.form.availability.field_names.day_of_week'
+      );
+      as error
+    ) {
       <p class="services__availability__option__error">{{ error }}</p>
     }
   </div>
@@ -51,8 +57,11 @@
     {{ 'management.settings.services.form.availability.time_slots' | translate }}
   </span>
   <div class="services__availability__option__slots">
-    @for (timeSlotPrice of form().timeSlotPrices; track timeSlotPrice) {
-      <app-checkbox [formField]="timeSlotPrice.isEnabled">
+    @for (timeSlotPrice of timeSlotPrices(); track timeSlotPrice) {
+      <app-checkbox
+        [formField]="timeSlotPrice.isEnabled"
+        (checkedChange)="timeSlotPrice.price().markAsTouched()"
+      >
         {{ timeSlotName(timeSlotPrice.timeSlot().value()) }}
       </app-checkbox>
       <div class="services__availability__option__amount">
@@ -70,7 +79,10 @@
       {{ 'management.settings.services.form.availability.custom' | translate }}
     </span>
     <div class="services__availability__option__amount">
-      <app-checkbox [formField]="form().isCustomTimeSlotEnabled" />
+      <app-checkbox
+        [formField]="form().isCustomTimeSlotEnabled"
+        (checkedChange)="touchCustomTimeSlot()"
+      />
       <app-filled-number-field
         class="services__availability__option__minutes"
         [formField]="form().customTimeSlotMinuteQuantity"
@@ -87,6 +99,7 @@
         [isCurrency]="true"
         [formField]="form().customTimeSlotPrice"
         [error]="validationText.text(form().customTimeSlotPrice)"
+        (valueChange)="form().customTimeSlotMinuteQuantity().markAsTouched()"
       />
       <span class="services__availability__option__unit">€</span>
     </div>
@@ -106,6 +119,9 @@
   [formField]="form().maxBookingPerTimeSlotQuantity"
   [error]="validationText.text(form().maxBookingPerTimeSlotQuantity)"
 />
-<app-toggle [formField]="form().hasFixedTimeSlots">
+<app-toggle
+  [formField]="form().hasFixedTimeSlots"
+  [error]="validationText.text(form().hasFixedTimeSlots)"
+>
   {{ 'management.settings.services.form.availability.fixed_time_slots' | translate }}
 </app-toggle>

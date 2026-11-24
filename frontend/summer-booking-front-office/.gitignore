@@ -58,7 +58,8 @@ credentials
 # Miscellaneous local files
 /connect.lock
 /typings/
-# Documents live in docs/: they are local working documents, except the versioned ones below
+# Documents live in docs/: the files directly in docs/ are local working documents, except the versioned ones below;
+# the rules (docs/File di regole/) and the page descriptions (docs/Pagine/) are versioned
 /README.md
 /docs/*.docx
 /docs/*.md

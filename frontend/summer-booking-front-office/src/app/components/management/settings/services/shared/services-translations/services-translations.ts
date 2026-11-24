@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ValidationTextBehaviour } from '../../../../../../behaviours/validation/validation-text.behaviour';
@@ -59,6 +59,15 @@ export class ServicesTranslations {
       (translation) => translation.language().value() !== this.mainLanguage(),
     ),
   );
+  protected readonly areNamesOpen = signal(false);
+  protected readonly areDescriptionsOpen = signal(false);
+  /** The error of a name, or of a description, in a closed panel: it shows under the panel. */
+  protected readonly closedNameError = computed(() =>
+    this.areNamesOpen() ? null : this.firstError(({ serviceName }) => serviceName),
+  );
+  protected readonly closedDescriptionError = computed(() =>
+    this.areDescriptionsOpen() ? null : this.firstError(({ description }) => description),
+  );
   private readonly languageNames = computed(
     () => new Intl.DisplayNames([this.mainLanguage()], { type: 'language' }),
   );
@@ -67,5 +76,18 @@ export class ServicesTranslations {
   protected languageName(language: Language | null): string {
     const name = language ? (this.languageNames().of(language) ?? language) : '';
     return name.charAt(0).toLocaleUpperCase(this.mainLanguage()) + name.slice(1);
+  }
+
+  /** "Inglese: …" for the first language with an error in that field. */
+  private firstError(
+    fieldOf: (translation: FieldTree<ServiceTranslation>) => FieldTree<string | null>,
+  ): string | null {
+    for (const translation of this.otherTranslations()) {
+      const text = this.validationText.text(fieldOf(translation));
+      if (text) {
+        return `${this.languageName(translation.language().value())}: ${text}`;
+      }
+    }
+    return null;
   }
 }

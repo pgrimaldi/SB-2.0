@@ -60,7 +60,7 @@
         [appearance]="ButtonAppearance.Light"
         [size]="ButtonSize.Small"
         [disabled]="isLoading()"
-        (clicked)="cancel()"
+        (clicked)="requestCancel()"
       >
         {{ 'management.settings.taxation.receipt.account.cancel' | translate }}
       </app-button>

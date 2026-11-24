@@ -5,18 +5,20 @@ import {
   computed,
   input,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { boldParts } from '../../texts/bold-text';
+import { TextBlockKind, textBlocks } from '../../texts/text-blocks';
 import { BasePopup } from '../base-popup/base-popup';
 
 /**
  * What a field or an option means, opened from its (i): icon, title and text, closed by the X. In the
- * text a line break starts a new line and `**…**` is bold.
+ * text a line break starts a new line, a blank line leaves a space and `**…**` is bold; a line
+ * starting with `## ` is a heading, `- ` a point of a list and `  - ` a point under the one above.
  */
 @Component({
   selector: 'app-info-popup',
-  imports: [MatIconModule],
+  imports: [MatIconModule, NgTemplateOutlet],
   templateUrl: './info-popup.html',
   styleUrl: './info-popup.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,12 +29,14 @@ export class InfoPopup extends BasePopup {
   readonly title = input<string>();
   readonly text = input<string>();
 
-  protected readonly textParts = computed(() => boldParts(this.text()));
+  protected readonly TextBlockKind = TextBlockKind;
+  protected readonly blocks = computed(() => textBlocks(this.text()));
 
   protected dialogConfig(): MatDialogConfig {
     return {
       width: 'min(28rem, 90vw)',
       maxWidth: 'none',
+      maxHeight: '90vh',
       panelClass: 'info__popup__panel',
     };
   }

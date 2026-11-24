@@ -1,0 +1,68 @@
+<main class="rows__and__sectors">
+  <app-page-title
+    class="rows__and__sectors__title"
+    [text]="'management.settings.rows_and_sectors.title' | translate"
+    [pathIcon]="titleIcon"
+  />
+  <app-table
+    #table
+    [columns]="columns()"
+    [params]="params()"
+    [load]="load"
+    idField="idSector"
+    [texts]="'table' | translate"
+    [isSearchable]="true"
+    [useAppTheme]="false"
+    [areMassiveActionsHidden]="false"
+    [isCreateButtonHidden]="false"
+    [createLabel]="'management.settings.rows_and_sectors.create' | translate"
+    [rowActions]="rowActions()"
+    [(selection)]="idSelectedSectors"
+    [pathIcon]="tableIcons"
+    (loadError)="loadFailed.set(true)"
+    (deleteSelected)="askDelete($event)"
+    (duplicateSelected)="askDuplicate($event)"
+    (create)="adding.set(true)"
+  />
+</main>
+
+<app-sector-add-popup [pathIcon]="closeIcon" [(open)]="adding" (added)="table.reload()" />
+<app-sector-edit-popup
+  [pathIcon]="closeIcon"
+  [sector]="sectorToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+  (failed)="
+    reloadIfGone($event, table, [sectorToEdit()?.idSector ?? null]); reloadIfChanged($event, table)
+  "
+/>
+
+<app-delete-items-popup
+  [idItems]="idSectorsToDelete()"
+  [itemName]="sectorNameToDelete()"
+  translationKey="management.settings.rows_and_sectors.delete"
+  [action]="deleteSectors"
+  [pathIcon]="alertIcons"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idSectorsToDelete())"
+/>
+<app-duplicate-items-popup
+  [idItems]="idSectorsToDuplicate()"
+  [itemName]="sectorNameToDuplicate()"
+  translationKey="management.settings.rows_and_sectors.duplicate"
+  [action]="duplicateSectors"
+  [pathIcon]="alertIcons"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idSectorsToDuplicate())"
+/>
+
+<app-table-error-popup
+  [pathIcon]="closeIcon"
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

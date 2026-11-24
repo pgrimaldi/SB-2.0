@@ -2,11 +2,15 @@
 
 @include field.filled-field(filled__text__field);
 
-// The label, with what the page puts beside it (e.g. a button with a tooltip).
+// The label, with what the page puts beside it (e.g. an (i) button).
 .filled__text__field__heading {
   display: flex;
   align-items: center;
   gap: 0.375rem;
+}
+
+:host-context([dir='rtl']) .filled__text__field__code input {
+  text-align: right;
 }
 
 // Material lines the prefix up on the text baseline, which puts an icon too high: it is centred in

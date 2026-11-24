@@ -1,5 +1,4 @@
 export class BathhousePhoto {
-  idPhoto: number | null = null;
+  idPhoto: string | null = null;
   url: string | null = null;
-  isMain = false;
 }

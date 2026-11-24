@@ -4,7 +4,7 @@ import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
-import { TableServiceAvailability } from '../../../../../entities/settings/services/table-service-availability';
+import { TableServiceAvailabilityDraft } from '../../../../../entities/settings/services/table-service-availability-draft';
 import { TableServiceAvailabilityDay } from '../../../../../entities/settings/services/table-service-availability-day';
 import { DAYS_OF_WEEK } from '../../../../../entities/shared/days-of-week';
 import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
@@ -39,7 +39,7 @@ type DayKey = (typeof DAYS_OF_WEEK)[number]['key'];
 })
 export class TableServiceAvailabilities {
   /** The availabilities of the form of the panel, which validates and saves them. */
-  readonly form = input.required<FieldTree<TableServiceAvailability[]>>();
+  readonly form = input.required<FieldTree<TableServiceAvailabilityDraft[]>>();
   /** Only to look at: adding and removing availabilities are off. */
   readonly isReadonly = input(false);
 
@@ -78,17 +78,40 @@ export class TableServiceAvailabilities {
     );
   }
 
+  /** The hours a day chosen wants show at once. */
+  protected touchDay(
+    availability: FieldTree<TableServiceAvailabilityDraft>,
+    day: FieldTree<TableServiceAvailabilityDay>,
+  ): void {
+    availability.days().markAsTouched({ skipDescendants: true });
+    day.startTime().markAsTouched();
+    day.endTime().markAsTouched();
+  }
+
+  /** The hours written for all the days or, without them, those of the first day chosen. */
   protected chooseSameTime(
-    availability: FieldTree<TableServiceAvailability>,
+    availability: FieldTree<TableServiceAvailabilityDraft>,
     isSameTimeForAllDays: boolean,
   ): void {
-    if (isSameTimeForAllDays) {
-      copyTimes(availability, availability.startTime().value(), availability.endTime().value());
+    if (!isSameTimeForAllDays) {
+      return;
     }
+    if (!availability.startTime().value() && !availability.endTime().value()) {
+      const first = availability
+        .days()
+        .value()
+        .find(({ isEnabled, startTime, endTime }) => isEnabled && startTime && endTime);
+      if (!first) {
+        return;
+      }
+      availability.startTime().value.set(first.startTime);
+      availability.endTime().value.set(first.endTime);
+    }
+    copyTimes(availability, availability.startTime().value(), availability.endTime().value());
   }
 
   protected changeStartTime(
-    availability: FieldTree<TableServiceAvailability>,
+    availability: FieldTree<TableServiceAvailabilityDraft>,
     startTime: string | null,
   ): void {
     if (availability.isSameTimeForAllDays().value()) {
@@ -97,7 +120,7 @@ export class TableServiceAvailabilities {
   }
 
   protected changeEndTime(
-    availability: FieldTree<TableServiceAvailability>,
+    availability: FieldTree<TableServiceAvailabilityDraft>,
     endTime: string | null,
   ): void {
     if (availability.isSameTimeForAllDays().value()) {
@@ -107,8 +130,8 @@ export class TableServiceAvailabilities {
 }
 
 /** Empty, with a line for every day of the week. */
-function newAvailability(): TableServiceAvailability {
-  return Object.assign(new TableServiceAvailability(), {
+function newAvailability(): TableServiceAvailabilityDraft {
+  return Object.assign(new TableServiceAvailabilityDraft(), {
     days: DAYS_OF_WEEK.map(({ number }) =>
       Object.assign(new TableServiceAvailabilityDay(), { dayOfWeek: number }),
     ),
@@ -117,7 +140,7 @@ function newAvailability(): TableServiceAvailability {
 
 /** The hours of "Applica stessi orari per tutti i giorni" become those of every day. */
 function copyTimes(
-  availability: FieldTree<TableServiceAvailability>,
+  availability: FieldTree<TableServiceAvailabilityDraft>,
   startTime: string | null,
   endTime: string | null,
 ): void {

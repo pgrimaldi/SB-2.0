@@ -4,7 +4,10 @@ import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { ValidationTextBehaviour } from '../../../../../../behaviours/validation/validation-text.behaviour';
-import { BookingTimeInterval } from '../../../../../../entities/enums/booking-time-interval';
+import {
+  BOOKING_TIME_INTERVAL_MINUTES,
+  BookingTimeInterval,
+} from '../../../../../../entities/enums/booking-time-interval';
 import { ServiceBookingOption } from '../../../../../../entities/settings/services/service-booking-option';
 import { Button, ButtonSize } from '../../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../../shared/ui/buttons/icon-button/icon-button';
@@ -19,6 +22,7 @@ import { SelectOption } from '../../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../../shared/ui/titles/section-title/section-title';
 
 interface TimeIntervalTexts {
+  none: string;
   fifteen_minutes: string;
   thirty_minutes: string;
   forty_five_minutes: string;
@@ -82,13 +86,33 @@ export class ServicesBookingOption {
     ) as Observable<TimeIntervalTexts>,
     { initialValue: null },
   );
-  protected readonly timeIntervalOptions = computed<readonly SelectOption<BookingTimeInterval>[]>(
-    () =>
-      Object.values(BookingTimeInterval).map((value) => ({
-        value,
-        label: this.timeIntervalTexts()?.[TIME_INTERVAL_KEYS[value]] ?? '',
-      })),
-  );
+  /** First the empty choice, to take the interval away. */
+  protected readonly timeIntervalOptions = computed<
+    readonly SelectOption<BookingTimeInterval | ''>[]
+  >(() => [
+    { value: '', label: this.timeIntervalTexts()?.none ?? '' },
+    ...Object.values(BookingTimeInterval).map((value) => ({
+      value,
+      label: this.timeIntervalTexts()?.[TIME_INTERVAL_KEYS[value]] ?? '',
+    })),
+  ]);
+
+  /** The choice of those minutes; none for other minutes, which stay until one is chosen. */
+  protected timeIntervalOf(minutes: number | null): BookingTimeInterval | null {
+    return (
+      Object.values(BookingTimeInterval).find(
+        (value) => BOOKING_TIME_INTERVAL_MINUTES[value] === minutes,
+      ) ?? null
+    );
+  }
+
+  protected chooseTimeInterval(
+    field: FieldTree<number | null>,
+    interval: BookingTimeInterval | '' | null,
+  ): void {
+    field().value.set(interval ? BOOKING_TIME_INTERVAL_MINUTES[interval] : null);
+    field().markAsDirty();
+  }
 
   protected addOption(): void {
     this.form()().value.update((options) => [...options, new ServiceBookingOption()]);

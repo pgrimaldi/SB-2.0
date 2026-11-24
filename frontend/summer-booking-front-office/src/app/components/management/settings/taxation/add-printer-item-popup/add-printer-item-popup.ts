@@ -36,6 +36,7 @@ import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-fi
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 @Component({
   selector: 'app-add-printer-item-popup',
@@ -108,20 +109,19 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
 
   hasUnsavedChanges(): boolean {
     return (
-      this.open() && JSON.stringify(this.draft()) !== JSON.stringify(new AddPrinterItemRequest())
+      this.open() && comparableJson(this.draft()) !== comparableJson(new AddPrinterItemRequest())
     );
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty) {
+    if (this.isLoading() || !this.auth.user()?.propertyId) {
       return;
     }
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.taxation.addPrinter(idProperty, this.draft()));
+        await firstValueFrom(this.taxation.addPrinter(this.draft()));
         this.isLoading.set(false);
         this.close();
         this.added.emit();

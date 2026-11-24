@@ -6,6 +6,7 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { SystemService } from '../../../services/api/system/system.service';
 import { ContactSupport } from './contact-support';
 
@@ -74,7 +75,7 @@ describe('ContactSupport', () => {
   it('should show the support contacts of the API', async () => {
     const { element, supportInfo } = await setup();
 
-    expect(supportInfo).toHaveBeenCalledWith('p1');
+    expect(supportInfo).toHaveBeenCalledWith();
     expect(element.querySelector('a[href="tel:0507916620"]')?.textContent?.trim()).toBe(
       '050 7916620',
     );
@@ -117,7 +118,6 @@ describe('ContactSupport', () => {
     send().click();
     await fixture.whenStable();
     expect(contactSupport).toHaveBeenCalledWith({
-      idProperty: 'p1',
       firstName: 'Anna',
       lastName: 'Bianchi',
       email: 'anna.bianchi@example.com',
@@ -180,9 +180,9 @@ describe('ContactSupport', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.failed',
+              code: ApiErrorCode.ValidationFailed,
               title: 'Invalid request',
-              errors: [{ field: 'email', code: 'validation.invalid' }],
+              errors: [{ field: 'email', code: ApiErrorCode.ValidationInvalid }],
             },
           }),
       ),
@@ -201,5 +201,14 @@ describe('ContactSupport', () => {
 
     await type(2, 'anna@example.com');
     expect(emailError()).toBeNull();
+  });
+
+  it('should count as a change only a text typed, not spaces', async () => {
+    const { fixture, type } = await setup();
+
+    await type(0, 'Anna');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    await type(0, '   ');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
   });
 });

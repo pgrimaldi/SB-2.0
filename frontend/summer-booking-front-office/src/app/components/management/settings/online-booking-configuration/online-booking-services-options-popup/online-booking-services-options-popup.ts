@@ -31,8 +31,9 @@ import {
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { SupplementType } from '../../../../../entities/enums/supplement-type';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { OnlineBookingServicesOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-services-options';
+import { OnlineBookingServicesOptionsUpdateRequest } from '../../../../../entities/settings/online-booking-configuration/online-booking-services-options-update-request';
 import { BookingService } from '../../../../../services/api/booking/booking.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { onlyFieldsOf } from '../../../../../services/api/only-fields-of';
@@ -47,6 +48,8 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 interface ServicesOptionsTexts {
   supplement_types: Record<'none' | 'percentage' | 'fixed', string>;
@@ -65,6 +68,7 @@ interface ServicesOptionsTexts {
     SectionTitle,
     Toggle,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './online-booking-services-options-popup.html',
   styleUrl: './online-booking-services-options-popup.scss',
@@ -95,8 +99,11 @@ export class OnlineBookingServicesOptionsPopup
     '/assets/images/GeneralIcon_TextLink.svg',
   ] as const;
 
-  private readonly draft = signal(new OnlineBookingServicesOptions());
-  private loaded: OnlineBookingServicesOptions | null = null;
+  private readonly draft = signal(new OnlineBookingServicesOptionsUpdateRequest());
+  private loaded: OnlineBookingServicesOptionsUpdateRequest | null = null;
+  private version: string | null = null;
+  /** Whether a supplement was chosen: only a change to none by the user empties its value. */
+  private hadSupplement: boolean | null = null;
   protected readonly draftForm = form(this.draft, (path) => {
     applyWhen(
       path.supplementValue,
@@ -114,19 +121,23 @@ export class OnlineBookingServicesOptionsPopup
     () => this.draftForm.supplementType().value() === SupplementType.Percentage,
   );
   protected readonly fieldErrors = Object.fromEntries(
-    (Object.keys(this.draft()) as (keyof OnlineBookingServicesOptions)[]).map((name) => [
-      name,
-      this.validationText.message(
-        this.draftForm[name],
-        name === 'supplementValue'
-          ? 'management.settings.online_booking_configuration.services_options.field_names.supplement_value'
-          : undefined,
-      ),
-    ]),
-  ) as Readonly<Record<keyof OnlineBookingServicesOptions, Signal<string | null>>>;
+    (Object.keys(this.draft()) as (keyof OnlineBookingServicesOptionsUpdateRequest)[]).map(
+      (name) => [
+        name,
+        this.validationText.message(
+          this.draftForm[name],
+          name === 'supplementValue'
+            ? 'management.settings.online_booking_configuration.services_options.field_names.supplement_value'
+            : undefined,
+        ),
+      ],
+    ),
+  ) as Readonly<Record<keyof OnlineBookingServicesOptionsUpdateRequest, Signal<string | null>>>;
   protected readonly isLoading = signal(false);
+  protected readonly isLoaded = signal(false);
   protected readonly isSaving = signal(false);
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -155,12 +166,18 @@ export class OnlineBookingServicesOptionsPopup
         return;
       }
       const subscription = untracked(() => this.load());
-      onCleanup(() => subscription?.unsubscribe());
+      onCleanup(() => {
+        subscription?.unsubscribe();
+      });
     });
     effect(() => {
-      if (!this.hasSupplement()) {
-        untracked(() => this.draftForm.supplementValue().value.set(null));
-      }
+      const hasSupplement = this.hasSupplement();
+      untracked(() => {
+        if (this.hadSupplement && !hasSupplement) {
+          this.draftForm.supplementValue().value.set(null);
+        }
+        this.hadSupplement = hasSupplement;
+      });
     });
   }
 
@@ -168,14 +185,13 @@ export class OnlineBookingServicesOptionsPopup
     return (
       this.open() &&
       !this.isLoading() &&
-      JSON.stringify(this.draft()) !==
-        JSON.stringify(this.loaded ?? new OnlineBookingServicesOptions())
+      comparableJson(this.draft()) !==
+        comparableJson(this.loaded ?? new OnlineBookingServicesOptionsUpdateRequest())
     );
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || this.isSaving() || !idProperty) {
+    if (this.isLoading() || this.isSaving() || !this.isLoaded() || !this.auth.user()?.propertyId) {
       return;
     }
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
@@ -183,13 +199,20 @@ export class OnlineBookingServicesOptionsPopup
       this.error.set(null);
       try {
         const sent = this.draft();
-        await firstValueFrom(this.booking.updateOnlineServicesOptions(idProperty, sent));
+        await firstValueFrom(this.booking.updateOnlineServicesOptions(sent, this.version));
         this.loaded = sent;
         this.isSaving.set(false);
         this.close();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.isSaving.set(false);
+          this.close();
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isSaving.set(false);
@@ -221,27 +244,22 @@ export class OnlineBookingServicesOptionsPopup
     };
   }
 
-  /** The saved options are asked only the first time: then the popup shows the last ones kept. */
+  /** The saved options are read at every opening: the popup always starts from the server. */
   private load(): Subscription | undefined {
     this.error.set(null);
-    if (this.loaded) {
-      this.fill(this.loaded);
+    this.isLoaded.set(false);
+    if (!this.auth.user()?.propertyId) {
       return;
     }
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
-      return;
-    }
-    this.fill(new OnlineBookingServicesOptions());
+    this.fill(new OnlineBookingServicesOptionsUpdateRequest());
     this.isLoading.set(true);
-    return this.booking.onlineServicesOptions(idProperty).subscribe({
+    return this.booking.onlineServicesOptions().subscribe({
       next: (options) => {
-        const loaded = onlyFieldsOf(OnlineBookingServicesOptions, options);
-        if (loaded.supplementType === SupplementType.None) {
-          loaded.supplementValue = null;
-        }
+        const loaded = onlyFieldsOf(OnlineBookingServicesOptionsUpdateRequest, options);
         this.loaded = loaded;
+        this.version = options.version;
         this.fill(loaded);
+        this.isLoaded.set(true);
         this.isLoading.set(false);
       },
       error: (error: unknown) => {
@@ -251,7 +269,8 @@ export class OnlineBookingServicesOptionsPopup
     });
   }
 
-  private fill(options: OnlineBookingServicesOptions): void {
+  private fill(options: OnlineBookingServicesOptionsUpdateRequest): void {
+    this.hadSupplement = null;
     this.draft.set(options);
     this.draftForm().reset();
   }

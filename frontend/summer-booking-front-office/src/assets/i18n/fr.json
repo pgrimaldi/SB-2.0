@@ -46,7 +46,8 @@
       "range": "{{start}} – {{end}} sur {{total}}"
     },
     "search": {
-      "placeholder": "Rechercher..."
+      "placeholder": "Rechercher...",
+      "max_length": "{{max}} caractères maximum"
     },
     "load_error": {
       "title": "Erreur",
@@ -105,12 +106,75 @@
       "password_too_common": "Ce mot de passe est trop courant : choisissez-en un plus sûr."
     },
     "resource": {
-      "not_found": "Cet élément n'existe plus."
+      "not_found": "Cet élément n'existe plus.",
+      "version_conflict": "Un autre utilisateur a modifié ces données entre-temps : elles ont été rechargées. Refaites vos modifications."
     },
     "account": {
       "email_taken": "Un compte existe déjà avec cet e-mail.",
+      "not_found": "L'utilisateur n'existe plus : il a peut-être déjà été supprimé.",
       "cannot_modify_self": "Vous ne pouvez pas supprimer ou modifier votre propre compte ici.",
-      "role_not_assignable": "Ce compte ne peut pas être géré depuis le panneau."
+      "role_not_assignable": "Ce compte ne peut pas être géré depuis le panneau.",
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
+    },
+    "audit": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
+      "export_too_large": "Il y a {total, number, integer} entrées à exporter, mais on peut en exporter au maximum {max, number, integer} : réduisez la période ou les filtres et réessayez."
+    },
+    "map": {
+      "spot_not_found": "La zone de la carte n'existe plus : elle a peut-être déjà été supprimée.",
+      "spots_outside_grid": "Des emplacements sont hors de ces dimensions : il faut au moins {{rows}} rangées et {{columns}} articles par rangée.",
+      "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo."
+    },
+    "catalog": {
+      "sector_in_use": "Le secteur/la rangée {{sectorName}} est utilisé et ne peut pas être supprimé : emplacements sur la carte {{mapSpots}}, tarifs {{priceLists}}, limites de séjour {{stayLimits}}, remises {{discounts}}, services {{services}}, prix automatiques {{automaticPrices}}.",
+      "sector_name_taken": "Un secteur/une rangée porte déjà ce nom.",
+      "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo.",
+      "invalid_pdf": "Le fichier doit être un PDF et ne pas dépasser 10 Mo.",
+      "gallery_full": "La galerie est pleine : vous pouvez charger jusqu'à {{max}} images.",
+      "photo_not_found": "L'image n'existe plus : elle a peut-être déjà été supprimée.",
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
+      "property_not_found": "L'établissement de votre compte est introuvable. Déconnectez-vous et reconnectez-vous ; si cela se reproduit, contactez l'assistance.",
+      "country_not_found": "Le pays choisi n'est plus disponible : choisissez-en un autre.",
+      "sector_not_found": "Le secteur/la rangée n'existe plus : il a peut-être déjà été supprimé.",
+      "vat_rate_not_allowed": "Ce taux n'est pas autorisé. Taux valides : {{rates}}."
+    },
+    "pricing": {
+      "season_required": "Définissez d'abord les dates de la saison.",
+      "next_season_required": "Définissez d'abord les dates de la saison prochaine.",
+      "period_not_found": "La période n'existe plus : elle a peut-être déjà été supprimée.",
+      "period_name_taken": "Une période porte déjà ce nom.",
+      "period_outside_season": "Les dates de la période doivent être comprises dans la saison.",
+      "period_range_not_found": "La plage de dates n'existe plus : elle a peut-être déjà été supprimée.",
+      "period_ranges_required": "Une période doit avoir au moins une plage de dates. Pour la supprimer entièrement, utilisez la corbeille à côté de son nom.",
+      "period_in_use": "La période a des prix dans les tarifs {{priceLists}} : retirez d'abord ses prix de ces tarifs, puis supprimez-la.",
+      "period_in_use_by_services": "La période est utilisée par les services {{services}} : retirez d'abord ses prix de ces services, puis supprimez-la.",
+      "period_overlap": "Les dates chevauchent la période {{periodName}} : choisissez des jours qui ne sont pas déjà dans une autre période.",
+      "calculation_method_not_found": "Ce calcul du prix n'est plus disponible : choisissez-en un autre.",
+      "price_list_not_found": "L'élément du tarif n'existe plus : il a peut-être déjà été supprimé.",
+      "price_list_in_use": "{{priceListName}} ne peut pas être supprimé : les articles/services supplémentaires {{additionalItems}} resteraient sans forfait et vaudraient pour tous. Associez-les d'abord à d'autres forfaits, ou supprimez-les.",
+      "package_not_found": "Un forfait choisi n'existe plus : il a peut-être déjà été supprimé.",
+      "discount_not_found": "La remise n'existe plus : elle a peut-être déjà été supprimée.",
+      "discount_code_taken": "Le code {{code}} est déjà utilisé par une autre remise.",
+      "discount_max_uses_below_used": "La remise a déjà été utilisée {{usedCount}} fois : le nombre maximal ne peut pas être inférieur.",
+      "duplicate_vat_rate_not_allowed": "{{priceListName}} ne peut pas être dupliqué : sa TVA ne fait pas partie des taux autorisés ({{rates}}). Modifiez-la et réessayez.",
+      "duplicate_period_not_found": "{{priceListName}} ne peut pas être dupliqué : il a des prix pour une période supprimée. Ouvrez-le, modifiez-le et enregistrez-le, puis réessayez.",
+      "duplicate_area_not_found": "{{priceListName}} ne peut pas être dupliqué : il a une zone de la carte supprimée. Ouvrez-le, retirez-la des zones activées et enregistrez-le, puis réessayez.",
+      "duplicate_sector_not_found": "{{priceListName}} ne peut pas être dupliqué : il a des données d'une rangée ou d'un secteur supprimé. Ouvrez-le, modifiez-le et enregistrez-le, puis réessayez."
+    },
+    "inventory": {
+      "item_not_found": "L'article n'existe plus : il a peut-être déjà été supprimé.",
+      "name_taken": "Un autre article porte déjà ce nom.",
+      "item_in_use": "L'article {{articleName}} est utilisé dans les tarifs {{usedIn}} et ne peut pas être supprimé : retirez-le d'abord de ces tarifs."
+    },
+    "service": {
+      "not_found": "Le service n'existe plus : il a peut-être déjà été supprimé.",
+      "automatic_price_not_found": "Le prix automatique n'existe plus : il a peut-être déjà été supprimé.",
+      "table_service_not_found": "Le service à table n'existe plus : il a peut-être déjà été supprimé.",
+      "icon_not_found": "L'icône choisie n'est plus disponible : choisissez-en une autre.",
+      "duplicate_vat_rate_not_allowed": "{{serviceName}} ne peut pas être dupliqué : sa TVA ne fait pas partie des taux autorisés ({{rates}}). Modifiez-la et réessayez.",
+      "duplicate_period_not_found": "{{serviceName}} ne peut pas être dupliqué : il a des prix pour une période supprimée. Modifiez et enregistrez son onglet Prix, puis réessayez.",
+      "duplicate_icon_not_found": "{{serviceName}} ne peut pas être dupliqué : son icône n'est plus disponible. Choisissez-en une autre et réessayez.",
+      "duplicate_sector_not_found": "{{serviceName}} ne peut pas être dupliqué : il est limité à une rangée ou un secteur supprimé. Vérifiez ses rangées et ses secteurs, enregistrez et réessayez."
     }
   },
   "alert": {
@@ -248,12 +312,14 @@
           "cancellation": "Annulation",
           "cancellation_policies": {
             "free_until_48_hours": "Gratuite jusqu'à 48 h avant",
-            "free_until_24_hours": "Gratuite jusqu'à 24 h avant"
+            "free_until_24_hours": "Gratuite jusqu'à 24 h avant",
+            "none": "Aucune"
           },
           "pets": "Animaux",
           "pets_options": {
             "allowed": "Acceptés",
-            "not_allowed": "Non acceptés"
+            "not_allowed": "Non acceptés",
+            "on_request": "Sur demande"
           },
           "regulation": "Règlement",
           "edit": "Modifier",
@@ -284,7 +350,13 @@
             "main": "Image principale",
             "main_hint": "Glissez ici l'image principale ou cliquez pour la charger",
             "gallery": "Galerie d'images",
-            "add": "Ajouter une image"
+            "add": "Ajouter une image",
+            "delete": {
+              "title": "Supprimer l'image",
+              "text": "Voulez-vous vraiment supprimer cette image ?",
+              "cancel": "Annuler",
+              "confirm": "Supprimer"
+            }
           },
           "virtual_tour": {
             "title": "Lien visite virtuelle",
@@ -296,7 +368,13 @@
             "menu": "Menu",
             "no_file": "Aucun fichier sélectionné",
             "open": "Ouvrir le document",
-            "upload": "Charger"
+            "upload": "Charger",
+            "delete": {
+              "title": "Supprimer le document",
+              "text": "Voulez-vous vraiment supprimer ce document ?",
+              "cancel": "Annuler",
+              "confirm": "Supprimer"
+            }
           }
         }
       },
@@ -460,7 +538,7 @@
           "add": "Ajouter",
           "save": "Enregistrer",
           "field_names": {
-            "total": "total"
+            "quantity": "de la quantité"
           }
         },
         "delete": {
@@ -776,7 +854,7 @@
         "table": {
           "voucher_name": "Remise",
           "valid_from": "Valable du",
-          "valid_to": "au",
+          "valid_to": "Valable jusqu'au",
           "discount_type": "Type de remise",
           "discount_value": "Valeur"
         },
@@ -810,9 +888,11 @@
         },
         "form": {
           "title": "Ajouter une remise/un bon",
+          "edit_title": "Modifier la remise/le bon",
           "cancel": "Annuler",
           "save": "Enregistrer",
           "name": "Nom de la remise",
+          "code": "Code de la remise",
           "periods": {
             "title": "Périodes de validité",
             "add": "Ajouter une période",
@@ -838,21 +918,24 @@
           },
           "field_names": {
             "validity_period": "période de validité",
+            "discount_value": "de la remise",
+            "scope_choice": "catégorie ou secteur",
             "day_of_week": "jour"
           },
           "options": {
             "title": "Options",
             "type": "Type de remise/bon",
-            "types": {
-              "percentage": "Pourcentage",
-              "fixed": "Montant"
-            },
             "value": "Valeur de la remise/du bon",
             "applies_to": "Appliquer la remise/le bon à",
             "scopes": {
               "all": "Tout",
-              "services": "Services"
+              "custom": "Certains choix seulement",
+              "without_custom": "Tout sauf certains choix"
             },
+            "categories": "Catégories",
+            "sectors": "Secteurs et rangées",
+            "choose": "Sélectionner",
+            "missing_sector": "Rangée/secteur indisponible",
             "max_uses": "Nombre maximal d'utilisations",
             "enabled": "Activer la remise/le bon"
           }
@@ -897,13 +980,120 @@
           },
           "table": {
             "booking_number": "ID réservation",
-            "user_number": "ID utilisateur",
             "full_name": "Nom complet",
             "spot": "Emplacement",
             "action": "Action",
             "occurred_at": "Date et heure"
           },
           "actions": {
+            "identity": {
+              "login_succeeded": "Connexion réussie",
+              "login_failed": "Échec de la connexion",
+              "login_locked": "Connexion bloquée après trop de tentatives",
+              "login_app_denied": "Connexion à cette application refusée",
+              "second_factor_requested": "Code de vérification demandé",
+              "second_factor_failed": "Code de vérification erroné",
+              "refresh_reuse_detected": "Session fermée après un accès suspect",
+              "logout": "Déconnexion effectuée",
+              "password_reset_requested": "Réinitialisation du mot de passe demandée",
+              "password_reset_completed": "Mot de passe réinitialisé",
+              "password_changed": "Mot de passe modifié",
+              "account_registered": "Compte créé",
+              "account_deleted": "Compte supprimé",
+              "session_revoked": "Session fermée",
+              "user_created": "Utilisateur ajouté",
+              "user_updated": "Utilisateur modifié",
+              "user_deleted": "Utilisateur supprimé",
+              "security_settings_changed": "Paramètres de sécurité modifiés",
+              "external_token_issued": "Accès externe autorisé",
+              "external_token_denied": "Accès externe refusé",
+              "customer_created": "Client ajouté",
+              "customer_updated": "Données client modifiées",
+              "customer_deleted": "Client supprimé",
+              "customers_exported": "Clients exportés",
+              "contract_acceptance_changed": "Acceptation du contrat modifiée"
+            },
+            "catalog": {
+              "inventory_item_created": "Article du stock ajouté",
+              "inventory_item_updated": "Article du stock modifié",
+              "inventory_item_deleted": "Article du stock supprimé",
+              "season_updated": "Dates de la saison modifiées",
+              "tariff_period_created": "Période ajoutée",
+              "tariff_period_updated": "Période modifiée",
+              "tariff_period_deleted": "Période supprimée",
+              "sector_created": "Secteur/rangée ajouté",
+              "sector_updated": "Secteur/rangée modifié",
+              "sector_deleted": "Secteur/rangée supprimé",
+              "map_settings_updated": "Paramètres de la carte modifiés",
+              "map_background_updated": "Fond de la carte modifié",
+              "map_icons_updated": "Icônes de la carte modifiées",
+              "map_spots_created": "Emplacements ajoutés à la carte",
+              "map_spot_updated": "Emplacement de la carte modifié",
+              "map_spots_deleted": "Emplacements supprimés de la carte",
+              "map_grid_changed": "Grille de la carte modifiée",
+              "map_reset": "Carte réinitialisée",
+              "property_info_updated": "Informations de l'établissement modifiées",
+              "property_amenities_updated": "Services de l'établissement modifiés",
+              "property_photos_updated": "Photos de l'établissement modifiées",
+              "property_documents_updated": "Documents de l'établissement modifiés",
+              "online_settings_updated": "Paramètres des réservations en ligne modifiés",
+              "service_online_settings_updated": "Options en ligne des services modifiées",
+              "stay_limits_updated": "Limites de séjour modifiées",
+              "online_legend_updated": "Légende des réservations en ligne modifiée",
+              "service_created": "Service ajouté",
+              "service_updated": "Service modifié",
+              "service_deleted": "Service supprimé",
+              "automatic_price_created": "Prix automatique ajouté",
+              "automatic_price_updated": "Prix automatique modifié",
+              "automatic_price_deleted": "Prix automatique supprimé",
+              "table_service_created": "Service de tables ajouté",
+              "table_service_updated": "Service de tables modifié",
+              "table_service_deleted": "Service de tables supprimé",
+              "price_list_created": "Forfait ou article supplémentaire ajouté",
+              "price_list_updated": "Forfait ou article supplémentaire modifié",
+              "price_list_deleted": "Forfait ou article supplémentaire supprimé",
+              "price_list_duplicated": "Forfait ou article supplémentaire dupliqué",
+              "price_lists_imported": "Forfaits et articles supplémentaires importés",
+              "reduced_season_created": "Prix saisonnier réduit ajouté",
+              "reduced_season_updated": "Prix saisonnier réduit modifié",
+              "reduced_season_deleted": "Prix saisonnier réduit supprimé",
+              "discount_created": "Remise/bon ajouté",
+              "discount_updated": "Remise/bon modifié",
+              "discount_deleted": "Remise/bon supprimé",
+              "agreement_partner_created": "Convention ajoutée",
+              "agreement_partner_updated": "Convention modifiée",
+              "agreement_partner_deleted": "Convention supprimée",
+              "agreement_partner_duplicated": "Convention dupliquée",
+              "agreement_price_list_created": "Liste de prix de la convention ajoutée",
+              "agreement_price_list_updated": "Liste de prix de la convention modifiée",
+              "agreement_price_list_deleted": "Liste de prix de la convention supprimée",
+              "agreement_report_cancelled": "Rapport de la convention annulé",
+              "revenue_settings_updated": "Paramètres du revenue modifiés",
+              "suggested_prices_computed": "Prix suggérés calculés",
+              "suggested_prices_applied": "Prix suggérés appliqués",
+              "revenue_weights_updated": "Pondérations du revenue modifiées",
+              "revenue_standard_periods_updated": "Périodes standard du revenue modifiées",
+              "platform_property_status_changed": "Statut de l'établissement modifié par la plateforme",
+              "platform_property_trashed": "Établissement placé dans la corbeille par la plateforme",
+              "platform_property_restored": "Établissement restauré par la plateforme",
+              "platform_property_purged": "Établissement supprimé définitivement par la plateforme",
+              "platform_property_showcase_updated": "Vitrine de l'établissement modifiée par la plateforme",
+              "platform_map_icon_saved": "Icône de la carte enregistrée par la plateforme",
+              "platform_map_icon_deleted": "Icône de la carte supprimée par la plateforme",
+              "platform_beach_element_saved": "Élément de plage enregistré par la plateforme",
+              "platform_beach_element_deleted": "Élément de plage supprimé par la plateforme",
+              "platform_badge_saved": "Badge enregistré par la plateforme",
+              "platform_badge_deleted": "Badge supprimé par la plateforme",
+              "platform_region_saved": "Région enregistrée par la plateforme",
+              "platform_region_deleted": "Région supprimée par la plateforme",
+              "platform_showcase_updated": "Vitrine modifiée par la plateforme",
+              "service_duplicated": "Service dupliqué",
+              "automatic_price_duplicated": "Prix automatique dupliqué",
+              "table_service_duplicated": "Service de tables dupliqué"
+            },
+            "audit": {
+              "entries_exported": "Journal exporté"
+            },
             "booking": {
               "checked_in": "Check-in",
               "checked_out": "Check-out",
@@ -920,9 +1110,6 @@
               "renewed": "Réservation renouvelée",
               "cancelled": "Réservation annulée"
             },
-            "customer": {
-              "updated": "Données client modifiées"
-            },
             "payment": {
               "deposit_added": "Acompte ajouté",
               "balance_added": "Solde ajouté",
@@ -930,13 +1117,6 @@
               "discount_code_applied": "Code de réduction appliqué",
               "discount_applied": "Réduction appliquée",
               "increase_added": "Supplément ajouté"
-            },
-            "property": {
-              "info_updated": "Informations de l'établissement modifiées"
-            },
-            "identity": {
-              "user_created": "Utilisateur ajouté",
-              "user_deleted": "Utilisateur supprimé"
             },
             "cash": {
               "pre_bill_printed": "Pré-addition imprimée",
@@ -955,35 +1135,8 @@
             "order": {
               "marked_done": "Commande marquée comme servie",
               "marked_not_done": "Commande marquée comme non servie"
-            },
-            "price_list": {
-              "package_updated": "Forfait de la liste de prix modifié",
-              "extra_item_updated": "Article supplémentaire de la liste de prix modifié",
-              "package_created": "Forfait de la liste de prix ajouté",
-              "extra_item_created": "Article supplémentaire de la liste de prix ajouté",
-              "package_deleted": "Forfait de la liste de prix supprimé",
-              "extra_item_deleted": "Article supplémentaire de la liste de prix supprimé",
-              "package_duplicated": "Forfait de la liste de prix dupliqué",
-              "extra_item_duplicated": "Article supplémentaire de la liste de prix dupliqué"
-            },
-            "warehouse": {
-              "item_updated": "Article du stock modifié",
-              "item_created": "Article du stock ajouté",
-              "item_deleted": "Article du stock supprimé"
-            },
-            "season": {
-              "dates_updated": "Dates de la saison modifiées",
-              "period_updated": "Période modifiée",
-              "period_created": "Période ajoutée",
-              "period_deleted": "Période supprimée"
-            },
-            "map": {
-              "sector_updated": "Secteur/rangée modifié",
-              "sector_created": "Secteur/rangée ajouté",
-              "sector_deleted": "Secteur/rangée supprimé"
             }
           },
-          "not_implemented": "Le service n'est pas encore implémenté",
           "clear_filters": "Effacer les filtres",
           "filters_popup": {
             "title": "Filtres",
@@ -1004,6 +1157,7 @@
           "email": "E-mail",
           "password": "Mot de passe",
           "phone": "Téléphone portable",
+          "phone_prefix": "Indicatif",
           "account_type": "Type de compte",
           "choose": "Sélectionner",
           "enable": "Activer",
@@ -1025,7 +1179,7 @@
           }
         },
         "log": "Log",
-        "owner_not_editable": "Le propriétaire ne peut pas être modifié"
+        "user_not_editable": "Cet utilisateur ne peut pas être modifié ici"
       },
       "seasons": {
         "season_dates": {
@@ -1052,7 +1206,8 @@
           "date_to": "Date de fin",
           "empty": "Aucune période ajoutée",
           "clear_selection": "Désélectionner",
-          "delete_selected": "Supprimer la sélection"
+          "delete_selected": "Supprimer la sélection",
+          "period_full": "Une période peut avoir au maximum {{max}} plages de dates. Pour en ajouter une autre, supprimez-en d'abord une."
         },
         "add_popup": {
           "title": "Définir la période",
@@ -1109,7 +1264,9 @@
           "many": {
             "title": "Supprimer les plages de dates",
             "text": "Voulez-vous supprimer les {{count}} plages de dates sélectionnées ?"
-          }
+          },
+          "period_left_empty": "Une période doit avoir au moins une plage de dates. Pour la supprimer entièrement, utilisez la corbeille à côté de son nom.",
+          "too_many": "Vous pouvez supprimer au maximum {{max}} plages de dates à la fois. Retirez celles en trop de la sélection."
         }
       },
       "services": {
@@ -1155,11 +1312,18 @@
           "add_title": "Ajouter un nouveau service bar",
           "edit_title": "Modifier le service bar",
           "categories": {
-            "cafeteria": "Café",
-            "drinks": "Boissons",
-            "snacks_and_sandwiches": "Snacks et sandwichs",
-            "ice_creams": "Glaces",
-            "desserts": "Desserts"
+            "bar": "Bar",
+            "pizzeria": "Pizzeria",
+            "restaurant": "Restaurant",
+            "fry_shop": "Friterie",
+            "sandwich_shop": "Sandwicherie",
+            "appetizers": "Entrées",
+            "first_courses": "Premiers plats",
+            "second_courses": "Plats principaux",
+            "desserts": "Desserts",
+            "fruit": "Fruits",
+            "ice_cream_shop": "Glacier",
+            "drinks": "Boissons"
           }
         },
         "standard_services": {
@@ -1318,7 +1482,15 @@
             "title": "Image du service",
             "choose_icon": "Choisissez une icône",
             "upload": "Ou importez une image",
-            "drop": "Faites glisser l'image ici ou cliquez pour l'importer"
+            "drop": "Faites glisser l'image ici ou cliquez pour l'importer",
+            "upload_failed_title": "Image non importée",
+            "upload_failed_text": "Le service a été enregistré, mais pas l'image. {{reason}}",
+            "delete": {
+              "title": "Supprimer l'image",
+              "text": "Voulez-vous vraiment supprimer cette image ?",
+              "cancel": "Annuler",
+              "confirm": "Supprimer"
+            }
           },
           "highlighted": "Mettre en avant",
           "highlighted_info": "Si cette option **est activée**, lorsqu'un client réserve un service de plage, il peut voir ce service et l'ajouter directement à sa réservation.",
@@ -1328,7 +1500,8 @@
             "variants": {
               "title": "Variantes",
               "add": "Ajouter une variante",
-              "name": "Nom de la variante"
+              "name": "Nom de la variante",
+              "surcharge": "Supplément"
             },
             "online_purchase": "Activer l'achat en ligne",
             "period_pricing": {
@@ -1339,7 +1512,8 @@
             "limits": {
               "title": "Limites",
               "sectors": "Service en vente dans ces rangées/secteurs",
-              "all_sectors": "Toutes les rangées/secteurs"
+              "all_sectors": "Toutes les rangées/secteurs",
+              "missing_sector": "Rangée/secteur indisponible"
             }
           },
           "bookings": {
@@ -1359,6 +1533,7 @@
             "min_items_per_booking": "Nombre minimum d'articles par réservation",
             "max_items_per_booking": "Nombre maximum d'articles par réservation",
             "time_intervals": {
+              "none": "Aucun intervalle",
               "fifteen_minutes": "15 minutes",
               "thirty_minutes": "30 minutes",
               "forty_five_minutes": "45 minutes",
@@ -1369,6 +1544,7 @@
           "availability": {
             "title": "Options de disponibilité",
             "hours": "Horaires de disponibilité",
+            "period_info": "Si cette option **est activée**, chaque période de la saison a ses propres disponibilités, avec leurs prix.\n\nSi cette option **n'est pas activée**, les disponibilités saisies ci-dessous valent pour toute la saison.",
             "days_title": "Jours disponibles",
             "days": {
               "monday": "Lun",
@@ -1393,7 +1569,10 @@
             "custom": "Personnalisé",
             "minutes": "min",
             "max_bookings_per_time_slot": "Réservations max par créneau",
-            "fixed_time_slots": "Créneaux fixes"
+            "fixed_time_slots": "Créneaux fixes",
+            "field_names": {
+              "day_of_week": "jour"
+            }
           },
           "validity": {
             "periods_title": "Périodes de validité",
@@ -1402,19 +1581,24 @@
             "time_slots": "Créneaux horaires",
             "add_time_slot": "Ajouter un créneau",
             "services_title": "Validité sur les services",
+            "all_services": "Tous les services",
             "bar_services": "Services bar",
             "standard_services": "Services",
             "hourly_services": "Services horaires",
             "select_all": "Tout sélectionner",
             "no_services": "Aucun service de ce type.",
             "price_per_service": "Activer le prix automatique pour chaque service",
-            "price_per_service_info": "Si cette option **est activée**, le prix automatique est appliqué et ajouté automatiquement pour chaque service ajouté à la réservation.\n\nSi cette option **n'est pas activée**, le prix automatique est appliqué et ajouté automatiquement une seule fois par commande."
+            "price_per_service_info": "Si cette option **est activée**, le prix automatique est appliqué et ajouté automatiquement pour chaque service ajouté à la réservation.\n\nSi cette option **n'est pas activée**, le prix automatique est appliqué et ajouté automatiquement une seule fois par commande.",
+            "field_names": {
+              "service": "service"
+            }
           },
           "tables": {
             "availability_title": "Disponibilité",
             "add_availability": "Ajouter une disponibilité",
             "days_hours": "Jours et créneaux",
             "same_hours": "Appliquer les mêmes horaires à tous les jours",
+            "other_time_slots": "Autres créneaux :",
             "days": {
               "monday": "Lundi",
               "tuesday": "Mardi",
@@ -1444,6 +1628,7 @@
             "seats_hint": "Indiquez le nombre total de places disponibles.",
             "meal_duration": "Durée moyenne du repas",
             "meal_durations": {
+              "none": "Aucune durée",
               "thirty_minutes": "30 minutes",
               "forty_five_minutes": "45 minutes",
               "one_hour": "1 h",
@@ -1473,7 +1658,322 @@
             },
             "deposit_amount": "Montant de l'acompte",
             "deposit_info": "**1. Total**\nL'acompte de confirmation pour la réservation du service à table est appliqué une seule fois pour l'ensemble des personnes/places réservées.\n\n**2. Par personne**\nL'acompte de confirmation pour la réservation du service à table est appliqué pour chaque personne/place réservée.",
-            "online_booking": "Activer la réservation en ligne"
+            "online_booking": "Activer la réservation en ligne",
+            "field_names": {
+              "table": "table"
+            }
+          }
+        }
+      },
+      "map_configuration": {
+        "background": {
+          "title": "Définir le fond",
+          "templates": "Fond de carte",
+          "custom": "Fond personnalisé",
+          "drop": "Glissez une image ici ou cliquez pour la charger",
+          "delete": {
+            "title": "Supprimer le fond",
+            "text": "Voulez-vous vraiment supprimer le fond personnalisé ?",
+            "cancel": "Annuler",
+            "confirm": "Supprimer"
+          }
+        },
+        "grid": {
+          "title": "Définir la grille",
+          "rows": "Nombre de rangées",
+          "row_items": "Articles max par rangée",
+          "tilt": "Inclinaison de la carte (°)",
+          "icons": {
+            "title": "Icônes des éléments",
+            "free": "Libre",
+            "occupied": "Occupé",
+            "umbrella": "Parasol",
+            "custom_article": "Article personnalisé {{number}}",
+            "select": "Choisir une icône",
+            "invalid": {
+              "umbrella": "Les icônes du parasol ne sont pas valides : choisissez-en d'autres et enregistrez à nouveau.",
+              "custom_articles": "Les icônes des articles personnalisés ne sont pas valides : choisissez-en d'autres et enregistrez à nouveau."
+            }
+          }
+        },
+        "edit": "Modifier",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "reset": "Réinitialiser la carte",
+        "reset_popup": {
+          "title": "Réinitialiser la carte",
+          "text": "Vous réinitialisez toute la carte.\n\nLes articles placés sur la carte seront supprimés et la grille devra être définie à nouveau. Le fond, les icônes et l'inclinaison restent inchangés. Cette action est irréversible.",
+          "cancel": "Annuler et garder la carte",
+          "confirm": "Continuer et supprimer la carte"
+        }
+      },
+      "rows_and_sectors": {
+        "title": "Secteurs et rangées",
+        "create": "Ajouter secteur/rangée",
+        "table": {
+          "sector_name": "Nom"
+        },
+        "delete": {
+          "cancel": "Annuler",
+          "confirm": "Supprimer",
+          "one": {
+            "title": "Supprimer secteur/rangée",
+            "text": "Voulez-vous supprimer le secteur/la rangée {{name}} ?"
+          },
+          "many": {
+            "title": "Supprimer secteurs/rangées",
+            "text": "Voulez-vous supprimer les {{count}} secteurs/rangées sélectionnés ?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Annuler",
+          "confirm": "Dupliquer",
+          "one": {
+            "title": "Dupliquer secteur/rangée",
+            "text": "Voulez-vous dupliquer le secteur/la rangée {{name}} ?"
+          },
+          "many": {
+            "title": "Dupliquer secteurs/rangées",
+            "text": "Voulez-vous dupliquer les {{count}} secteurs/rangées sélectionnés ?"
+          }
+        },
+        "add_popup": {
+          "title": "Nom du secteur/de la rangée",
+          "placeholder": "Rangée 1",
+          "cancel": "Annuler",
+          "save": "Enregistrer"
+        },
+        "edit_popup": {
+          "title": "Nom du secteur/de la rangée",
+          "placeholder": "Rangée 1",
+          "cancel": "Annuler",
+          "save": "Enregistrer"
+        }
+      },
+      "catalog": {
+        "tabs": {
+          "packages": "Forfaits",
+          "additional_items": "Articles/Services supplémentaires"
+        },
+        "packages": {
+          "title": "Forfaits",
+          "create": "Ajouter un forfait",
+          "table": {
+            "package_name": "Nom"
+          },
+          "delete": {
+            "cancel": "Annuler",
+            "confirm": "Supprimer",
+            "one": {
+              "title": "Supprimer le forfait",
+              "text": "Voulez-vous supprimer le forfait {{name}} ?"
+            },
+            "many": {
+              "title": "Supprimer les forfaits",
+              "text": "Voulez-vous supprimer les {{count}} forfaits sélectionnés ?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Annuler",
+            "confirm": "Dupliquer",
+            "one": {
+              "title": "Dupliquer le forfait",
+              "text": "Voulez-vous dupliquer le forfait {{name}} ?"
+            },
+            "many": {
+              "title": "Dupliquer les forfaits",
+              "text": "Voulez-vous dupliquer les {{count}} forfaits sélectionnés ?"
+            }
+          },
+          "form": {
+            "add_title": "Ajouter un nouveau forfait",
+            "edit_title": "Modifier le forfait",
+            "cancel": "Annuler",
+            "save": "Créer le forfait",
+            "edit": "Modifier",
+            "save_changes": "Enregistrer",
+            "tabs": {
+              "general_info": "Infos générales",
+              "price_list": "Liste de prix"
+            },
+            "name": "Nom du forfait",
+            "other_languages": "Autres langues",
+            "translated_name": "Nom ({{language}})",
+            "choose": "Sélectionner",
+            "max_additional_items": "Nombre max d'articles supplémentaires",
+            "max_people": "Nombre max de personnes",
+            "no_limit": "Aucune limite",
+            "articles": {
+              "title": "Articles du forfait",
+              "none": "Aucun",
+              "unavailable": "Pas en stock",
+              "unavailable_note": "Les articles en gris ne sont pas en stock.",
+              "names": {
+                "umbrella": "Parasol",
+                "sunbed": "Bain de soleil",
+                "sunbed_xl": "Bain de soleil XL",
+                "sunbed_maxi": "Bain de soleil maxi",
+                "deckchair": "Transat",
+                "directors_chair": "Fauteuil réalisateur",
+                "tent": "Tente",
+                "gazebo": "Gazebo",
+                "cabin": "Cabine",
+                "custom_cabin": "Cabine personnalisée",
+                "parking": "Parking",
+                "ticket": "Billet",
+                "sunbed_area": "Zone bains de soleil",
+                "umbrella_area": "Zone parasols",
+                "parking_area": "Zone parking",
+                "cabin_area": "Zone cabines",
+                "custom_article": "Article personnalisé {{number}}"
+              }
+            },
+            "included_services": "Services inclus (facultatif)",
+            "enabled_areas": "Zones activées",
+            "sectors": "Secteurs et rangées",
+            "all_sectors": "Tous les secteurs et rangées",
+            "missing_sector": "Rangée/secteur indisponible",
+            "missing_area": "Zone indisponible",
+            "is_default": "Définir comme forfait par défaut",
+            "is_default_online": "Définir comme forfait par défaut en ligne",
+            "online_enabled": "Activer aussi pour les réservations en ligne",
+            "online_only": "Activer seulement pour les réservations en ligne",
+            "reduced_seasonal_price": "Prix saisonnier réduit",
+            "reduced_seasonal": {
+              "date_from": "Du",
+              "date_to": "Au",
+              "name": "Nom",
+              "add": "Ajouter",
+              "save": "Enregistrer",
+              "section_title": "Prix saisonniers réduits : {{name}} ({{dateFrom}} – {{dateTo}})",
+              "overlap": "Ces dates chevauchent un autre prix saisonnier réduit",
+              "delete": {
+                "title": "Supprimer le prix saisonnier réduit",
+                "text": "Voulez-vous vraiment supprimer cette section et toutes les données saisies ?",
+                "cancel": "Annuler",
+                "confirm": "Supprimer"
+              }
+            }
+          }
+        },
+        "additional_items": {
+          "title": "Articles/Services supplémentaires",
+          "create": "Ajouter des articles/services supplémentaires",
+          "table": {
+            "additional_item_name": "Nom"
+          },
+          "delete": {
+            "cancel": "Annuler",
+            "confirm": "Supprimer",
+            "one": {
+              "title": "Supprimer l'article/service supplémentaire",
+              "text": "Voulez-vous supprimer l'article/service supplémentaire {{name}} ?"
+            },
+            "many": {
+              "title": "Supprimer les articles/services supplémentaires",
+              "text": "Voulez-vous supprimer les {{count}} articles/services supplémentaires sélectionnés ?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Annuler",
+            "confirm": "Dupliquer",
+            "one": {
+              "title": "Dupliquer l'article/service supplémentaire",
+              "text": "Voulez-vous dupliquer l'article/service supplémentaire {{name}} ?"
+            },
+            "many": {
+              "title": "Dupliquer les articles/services supplémentaires",
+              "text": "Voulez-vous dupliquer les {{count}} articles/services supplémentaires sélectionnés ?"
+            }
+          },
+          "form": {
+            "add_title": "Ajouter un nouvel article/service supplémentaire",
+            "edit_title": "Modifier l'article/service supplémentaire",
+            "cancel": "Annuler",
+            "save": "Créer l'article/service",
+            "edit": "Modifier",
+            "save_changes": "Enregistrer",
+            "article": "Choisir l'article",
+            "choose": "Sélectionner",
+            "packages": "Forfaits",
+            "all_packages": "Tous les forfaits",
+            "online_enabled": "Réservations en ligne",
+            "online_only": "En ligne uniquement",
+            "map_assignable": "Définir comme article attribuable sur la carte",
+            "missing_article": "Article indisponible",
+            "missing_package": "Forfait indisponible",
+            "price_list": "Liste de prix"
+          }
+        },
+        "price_list": {
+          "choose": "Sélectionner",
+          "seasonal_prices": "Prix saisonniers",
+          "period_prices": "Prix par période",
+          "seasonal_half_day": "Prix saisonnier demi-journée",
+          "seasonal": "Prix saisonnier",
+          "half_day": "Prix demi-journée",
+          "daily": "Prix journalier",
+          "weekend": "Prix week-end",
+          "half_day_weekend": "Prix demi-journée week-end",
+          "half_day_seven_days": "Prix demi-journée 7 jours",
+          "seven_days": "Prix 7 jours",
+          "half_day_fourteen_days": "Prix demi-journée 14 jours",
+          "fourteen_days": "Prix 14 jours",
+          "half_day_monthly": "Prix demi-journée mensuel",
+          "monthly": "Prix mensuel",
+          "no_sectors": "Aucun secteur ni rangée : ajoutez-les dans la page Secteurs et rangées.",
+          "no_periods": "Les prix par période demandent au moins un secteur ou une rangée et une période de la saison en cours.",
+          "vat": "TVA (%)",
+          "calculation_method": "Calcul du prix",
+          "no_calculation": "Aucun calcul",
+          "no_setting": "Aucun réglage",
+          "calculation_methods": {
+            "proportional": "Prix proportionnel",
+            "daily": "Prix journalier",
+            "logarithmic": "Prix logarithmique",
+            "daily_with_weekend": "Prix journalier avec week-end"
+          },
+          "calculation_method_info": "## 1. Prix proportionnel\nLe prix est calculé de façon linéaire selon les jours d'utilisation.\nLe logiciel multiplie le prix journalier par le nombre de jours, en appliquant les éventuels coefficients prévus par la grille tarifaire (ex. coefficients hebdomadaire, sur deux semaines, mensuel, saisonnier).\n\n**Exemple :**\n- Prix journalier : 20 €\n- Coefficient hebdomadaire (7 jours) : 0,95\n- Calcul : 20 × 7 × 0,95 = 133 €\nAvec cette méthode, le logiciel fait un calcul linéaire : il prend le prix journalier, le multiplie par les jours et applique le coefficient prévu par la grille. Le coefficient sert à créer des remises « standard » (ex. hebdomadaire, mensuelle, saisonnière).\n\n**Utilisation conseillée :** quand on veut un calcul simple et cohérent, avec des remises proportionnelles déjà définies dans la grille.\n\n## 2. Prix logarithmique\nLe prix augmente de moins en moins à mesure que la durée s'allonge.\nLes premiers jours ont un coût unitaire plus élevé, tandis que les jours suivants sont « remisés » automatiquement selon une courbe logarithmique.\n\n**Exemple :**\n- Prix pour 1 jour : 20 €\n- Prix pour 3 jours (non proportionnel) : au lieu de 60 €, le système calcule 55 €\n- Prix pour 7 jours : au lieu de 140 €, le système calcule 110 €\nIci, le logiciel n'utilise pas une multiplication linéaire.\nIl applique une courbe logarithmique, c'est-à-dire une formule mathématique qui réduit le coût moyen par jour à mesure que la durée augmente.\n- Les premiers jours coûtent plus cher.\n- Les jours suivants « pèsent » moins sur le total.\n\n**Utilisation conseillée :** quand on veut favoriser les longues réservations avec des remises plus marquées que le calcul proportionnel.\n\n## 3. Prix journalier\nChaque jour a le même prix, sans remises ni coefficients.\nLe total est simplement la somme des jours réservés.\n**Exemple :**\n- Prix journalier : 25 €\n- Réservation de 10 jours : 25 × 10 = 250 €\nIci, le logiciel n'applique aucune remise.\nChaque jour coûte exactement la même somme, quelle que soit la durée. Aucun coefficient ni réduction.\n\n**Utilisation conseillée :** quand on ne veut pas de réductions pour les périodes plus longues et qu'on préfère une grille fixe et uniforme.\n\n## 4. Prix journalier avec week-end\nLe prix est calculé en distinguant automatiquement les jours de semaine des jours fériés et des week-ends.\nLe logiciel applique le prix de semaine aux jours ouvrés et le prix week-end aux samedis, aux dimanches et aux éventuels jours fériés.\n\n**Exemple :**\n- Prix de semaine : 22 €\n- Prix week-end : 30 €\n- Réservation de 7 jours :\n  - 5 jours de semaine → 5 × 22 = 110 €\n  - 2 jours de week-end → 2 × 30 = 60 €\n- Total : 170 €\nLe logiciel analyse le calendrier de la réservation et distingue automatiquement :\n- les jours de semaine\n- les samedis\n- les dimanches\n- les éventuels jours fériés\nIl applique le bon prix à chaque jour et additionne les résultats. Il n'utilise ni coefficients ni remises : il calcule simplement selon le type de jour.\n\n**Utilisation conseillée :** quand l'établissement applique des tarifs différents le week-end ou les jours de forte affluence.",
+          "cumulative": "Prix cumulé",
+          "cumulative_info": "Le Prix cumulé est un mode de calcul qui donne un prix final plus précis quand une réservation couvre plusieurs périodes.\n## Comment ça marche\nLorsqu'il est activé, le système calcule le total avec une moyenne pondérée des prix des différentes saisons, selon le nombre de jours qui tombent dans chacune d'elles.\n## Quand il s'applique\n- **Réservation sur une seule saison** : le prix du tableau de cette saison est utilisé, sans calcul supplémentaire.\n- **Réservation sur plusieurs saisons** : le système combine les prix des tableaux saisonniers en proportion des jours en basse et en haute saison.\n- **Réservations multiples** : au lieu d'additionner les prix des différentes périodes, le système recalcule le total avec le nombre total de jours.",
+          "monthly_setting": "Réglage du mois",
+          "monthly_settings": {
+            "effective_month_duration": "Durée réelle du mois (31 jours)",
+            "actual_month_duration": "Jours réels du mois",
+            "thirty_days": "30 jours"
+          },
+          "weekend_setting": "Réglage du week-end",
+          "weekend_settings": {
+            "saturday_sunday": "Week-end : samedi et dimanche",
+            "sunday_only": "Week-end : dimanche seulement"
+          },
+          "public_holidays": {
+            "title": "Jours fériés",
+            "add": "Ajouter des jours fériés",
+            "date": "Date",
+            "hint": "Cliquez sur les jours pour les choisir ou les retirer",
+            "cancel": "Annuler",
+            "confirm": "Confirmer",
+            "disable": {
+              "title": "Désactiver les jours fériés",
+              "text": "En désactivant cette option, tous les jours fériés sélectionnés seront perdus. Êtes-vous sûr ?",
+              "cancel": "Annuler",
+              "confirm": "Désactiver"
+            }
+          },
+          "intermediate_prices": {
+            "title": "Modifier les prix intermédiaires",
+            "first_row": "Rangée 1 {{period}}",
+            "other_rows": "Autres rangées {{period}}",
+            "name": "Nom/article",
+            "days": "Jours",
+            "price": "Prix",
+            "disable": {
+              "title": "Désactiver les prix intermédiaires",
+              "text": "En désactivant cette option, tous les prix intermédiaires seront perdus. Êtes-vous sûr ?",
+              "cancel": "Annuler",
+              "confirm": "Désactiver"
+            }
           }
         }
       }
@@ -1598,7 +2098,51 @@
     "missing_digit": "Au moins 1 chiffre",
     "missing_uppercase": "Au moins 1 majuscule",
     "missing_lowercase": "Au moins 1 minuscule",
-    "overlap": "Ces dates chevauchent une autre plage de dates de la saison"
+    "overlap": "Ces dates chevauchent une autre plage de dates de la saison",
+    "max_file_size": "Le fichier dépasse {{max}} Mo",
+    "unknown_icon": "Icône inexistante",
+    "web_link": "Saisissez un lien complet commençant par http:// ou https://",
+    "email": "E-mail non valide",
+    "max_length": "{{max}} caractères maximum",
+    "phone_digits": "Chiffres et espaces uniquement : l’indicatif va dans le champ à côté",
+    "phone_digits_without_prefix": "Chiffres et espaces uniquement, sans +",
+    "phone_max_length": "Le numéro peut contenir au maximum {{max}} caractères, espaces compris",
+    "time_before_end": "Doit précéder l'heure de fin",
+    "time_after_start": "Doit suivre l'heure de début",
+    "seasons": {
+      "period_name": {
+        "taken": "Une période de cette saison porte déjà ce nom."
+      },
+      "ranges": {
+        "max": "Une période peut avoir au maximum {{max}} plages de dates.",
+        "invalid": "Plages de dates non valides : une période peut en avoir au maximum {{max}} et elles ne peuvent pas avoir de jours en commun."
+      },
+      "season_required": "Définissez et enregistrez d'abord les dates de début et de fin de la saison en cours.",
+      "next_season_required": "Définissez et enregistrez d'abord les dates de début et de fin de la saison prochaine.",
+      "next_season_too_early": "La prochaine saison doit commencer après la fin de la saison en cours."
+    },
+    "catalog": {
+      "price": {
+        "max": "Un prix dépasse le maximum autorisé de {max, number, currency}."
+      },
+      "vat": {
+        "range": "La TVA doit être supérieure à 0 et inférieure à 100."
+      },
+      "public_holidays": {
+        "max": "{{max}} jours fériés au maximum."
+      }
+    },
+    "services": {
+      "translation": {
+        "name_missing": "Saisissez aussi le nom dans cette langue"
+      },
+      "availability": {
+        "vat_missing": "Saisissez la TVA de cette disponibilité, ou celle du service dans l'onglet Prix"
+      },
+      "tables": {
+        "seats_taken": "Places déjà utilisées"
+      }
+    }
   },
   "unsaved_changes": {
     "title": "Modifications non enregistrées",

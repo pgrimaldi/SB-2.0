@@ -3,7 +3,8 @@
 // Some things can be changed from outside with CSS variables, e.g. in a popup with smaller buttons:
 // --button-text-size (0.9375rem), --button-height (the height of the size, border included: it makes a
 // light button as high as a filled one), --button-padding (left and right of the text, the one of the
-// size) and, for the light appearance, --button-border-color (the border grey of the theme).
+// size), --button-icon-size (the side of the icon, 1.5625 times the text) and, for the light appearance,
+// --button-border-color (the border grey of the theme).
 :host {
   display: inline-flex;
 
@@ -36,7 +37,7 @@ button {
 .button__icon {
   width: 1em;
   height: 1em;
-  font-size: 1.5625em;
+  font-size: var(--button-icon-size, 1.5625em);
 }
 
 .button__label__hidden {
