@@ -853,8 +853,8 @@
         "create": "إضافة خصم/قسيمة",
         "table": {
           "voucher_name": "الخصم",
-          "valid_from": "صالح من",
-          "valid_to": "إلى",
+          "valid_from": "صالح ابتداءً من",
+          "valid_to": "صالح حتى تاريخ",
           "discount_type": "نوع الخصم",
           "discount_value": "القيمة"
         },
@@ -888,6 +888,7 @@
         },
         "form": {
           "title": "إضافة خصم/قسيمة جديدة",
+          "edit_title": "تعديل الخصم/القسيمة",
           "cancel": "إلغاء",
           "save": "حفظ",
           "name": "اسم الخصم",

@@ -853,8 +853,8 @@
         "create": "添加折扣/代金券",
         "table": {
           "voucher_name": "折扣",
-          "valid_from": "有效期自",
-          "valid_to": "至",
+          "valid_from": "有效期开始",
+          "valid_to": "有效期截止",
           "discount_type": "折扣类型",
           "discount_value": "数值"
         },
@@ -888,6 +888,7 @@
         },
         "form": {
           "title": "添加新折扣/优惠券",
+          "edit_title": "编辑折扣/代金券",
           "cancel": "取消",
           "save": "保存",
           "name": "折扣名称",

@@ -11,6 +11,7 @@ import {
   MAX_VOUCHER_NAME_LENGTH,
   MAX_VOUCHER_PERIOD_QUANTITY,
   MAX_VOUCHER_TIME_SLOT_QUANTITY,
+  MAX_VOUCHER_USE_QUANTITY,
   VoucherAddItemRequest,
 } from '../../../entities/settings/vouchers/voucher-add-item-request';
 import { VoucherItem } from '../../../entities/settings/vouchers/voucher-item';
@@ -413,8 +414,8 @@ function codeTaken(
  * type and at most `MAX_VOUCHER_PERIOD_QUANTITY`, and in each period both days (the last not before the
  * first), at least one day of the week from 1 to 7 and time slots `HH:mm`, the end after the start
  * (none is fine); a known type and scope, a value more than 0 (up to 100 for a percentage and to
- * `MAX_FIXED_DISCOUNT` for an amount), a category or a sector at least unless the scope is `All`, at
- * least 1 use or no limit, the switch.
+ * `MAX_FIXED_DISCOUNT` for an amount), a category or a sector at least unless the scope is `All`, from
+ * 1 to `MAX_VOUCHER_USE_QUANTITY` uses or no limit, the switch.
  */
 function voucherErrors(body: AddVoucherBody): MockFieldError[] {
   const errors: MockFieldError[] = [];
@@ -487,7 +488,7 @@ function voucherErrors(body: AddVoucherBody): MockFieldError[] {
     errors.push({ field: 'serviceCategories', code: ApiErrorCode.ValidationRequired });
   }
   const uses = body.maxUseQuantity ?? null;
-  if (uses !== null && (!Number.isInteger(uses) || uses < 1)) {
+  if (uses !== null && (!Number.isInteger(uses) || uses < 1 || uses > MAX_VOUCHER_USE_QUANTITY)) {
     errors.push({ field: 'maxUseQuantity', code: ApiErrorCode.ValidationOutOfRange });
   }
   if (typeof body.isEnabled !== 'boolean') {

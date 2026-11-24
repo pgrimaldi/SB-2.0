@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  EnvironmentInjector,
   OnDestroy,
   ViewEncapsulation,
   computed,
@@ -10,6 +12,7 @@ import {
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -50,6 +53,7 @@ import {
   MAX_VOUCHER_NAME_LENGTH,
   MAX_VOUCHER_PERIOD_QUANTITY,
   MAX_VOUCHER_TIME_SLOT_QUANTITY,
+  MAX_VOUCHER_USE_QUANTITY,
 } from '../../../../../entities/settings/vouchers/voucher-add-item-request';
 import { VoucherSelectedItem } from '../../../../../entities/settings/vouchers/voucher-selected-item';
 import { VoucherTimeSlot } from '../../../../../entities/settings/vouchers/voucher-time-slot';
@@ -58,6 +62,7 @@ import { VoucherValidityPeriod } from '../../../../../entities/settings/vouchers
 import { DAYS_OF_WEEK } from '../../../../../entities/shared/days-of-week';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { VoucherService } from '../../../../../services/api/vouchers/voucher.service';
+import { showFirstError } from '../../../../shared/forms/first-error';
 import {
   greaterThan,
   minItems,
@@ -79,9 +84,9 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
-import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
 import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
+import { comparableVoucher } from '../voucher-scope/comparable-voucher';
 import { VoucherScope } from '../voucher-scope/voucher-scope';
 import { withScope } from '../voucher-scope/with-scope';
 
@@ -129,10 +134,13 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly translateService = inject(TranslateService);
+  private readonly injector = inject(EnvironmentInjector);
   protected readonly validationText = inject(ValidationTextBehaviour);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
+
+  private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
 
   private readonly draft = signal(new VoucherUpdateItemRequest());
   private readonly loaded = signal<VoucherUpdateItemRequest | null>(null);
@@ -153,6 +161,8 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
       required(period.validTo);
       minItems(period.daysOfWeek, 1);
       applyEach(period.timeSlots, (timeSlot) => {
+        required(timeSlot.from);
+        required(timeSlot.to);
         timeRange(timeSlot.from, timeSlot.to);
       });
     });
@@ -169,6 +179,7 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
       (limited) => minItems(limited.serviceCategories, 1),
     );
     min(path.maxUseQuantity, 1);
+    max(path.maxUseQuantity, MAX_VOUCHER_USE_QUANTITY);
   });
   protected readonly isPercentage = computed(
     () => this.draftForm.discountType().value() === DiscountType.Percentage,
@@ -254,7 +265,7 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
     return (
       this.open() &&
       loaded !== null &&
-      comparableJson(withScope(this.draft())) !== comparableJson(loaded)
+      comparableVoucher(this.draft()) !== comparableVoucher(loaded)
     );
   }
 
@@ -280,10 +291,12 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
 
   protected setDays(period: FieldTree<VoucherValidityPeriod>, days: readonly string[]): void {
     period.daysOfWeek().value.set(days.map(Number).sort((a, b) => a - b));
+    period.daysOfWeek().markAsTouched();
   }
 
   protected setAllDays(period: FieldTree<VoucherValidityPeriod>, isAll: boolean): void {
     period.daysOfWeek().value.set(isAll ? DAYS_OF_WEEK.map(({ number }) => number) : []);
+    period.daysOfWeek().markAsTouched();
   }
 
   protected canAddTimeSlot(period: FieldTree<VoucherValidityPeriod>): boolean {
@@ -338,6 +351,10 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
         );
       } finally {
         this.isLoading.set(false);
+      }
+    }).then((isSaved) => {
+      if (!isSaved) {
+        showFirstError(this.panel(), '.voucher__edit__item__panel__error', this.injector);
       }
     });
   }

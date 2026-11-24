@@ -12,8 +12,9 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
 ## Tabella
 
 - Righe `VoucherItem` (`entities/settings/vouchers/`; `DiscountType` in `entities/enums/`).
-- Colonne Sconto (il nome, o il codice se manca), Valido dal e al (date UTC mostrate come giorno, vuote senza periodi),
-  Tipo di sconto tradotto, Valore con % o € (`Intl.NumberFormat`). Senza un ordinamento scelto, per nome.
+- Colonne Sconto (il nome, o il codice se manca), Valido dal e Valido fino al (date UTC mostrate come giorno, vuote senza
+  periodi), Tipo di sconto tradotto, Valore con % o € (`Intl.NumberFormat`). Senza un ordinamento scelto, per nome. I titoli
+  delle due date sono lunghi quanto basta perché sul telefono la data si legga intera, in tutte le lingue.
 
 ## Elimina e duplica
 
@@ -41,9 +42,12 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
   - riquadro "Opzioni": tipo, valore con % o €, applica a (sotto), numero massimo di utilizzi;
   - interruttore "Abilita sconto/voucher".
 - Form `VoucherAddItemRequest` con i Signal Forms: nome (al massimo 120 caratteri) e codice (60) obbligatori; per ogni
-  periodo Dal, al e almeno un giorno; in ogni fascia oraria "alle" dopo "dalle" (`timeRange`, errore sotto i due orari);
-  valore obbligatorio, più di 0 con 2 decimali (fino a 100 la percentuale, fino a 100.000 l'importo); utilizzi almeno 1,
-  vuoto = illimitati (partono da 1).
+  periodo Dal, al e almeno un giorno; in ogni fascia oraria i due orari obbligatori e "alle" dopo "dalle" (`timeRange`,
+  errore sotto i due orari); valore obbligatorio, più di 0 con 2 decimali (fino a 100 la percentuale, fino a 100.000
+  l'importo); utilizzi da 1 a 2.147.483.647, vuoto = illimitati (partono da 1).
+- **Salva resta acceso anche con il form non valido**, un'eccezione alla regola dei form: premendolo si vedono tutti gli
+  errori e il popup scorre fino al primo (`showFirstError`, `components/shared/forms/first-error.ts`), anche quando l'errore
+  arriva dal backend sotto un campo. L'errore dei giorni della settimana compare appena si tolgono tutti.
 - **Codice da digitare o sconto automatico** (`isCodeRequired`): il popup non lo mostra. Uno sconto nuovo ha sempre un
   codice da digitare; in modifica il valore letto torna uguale. Con il codice i periodi sono facoltativi (senza, vale
   sempre); per uno sconto automatico ne serve almeno uno.
@@ -65,11 +69,13 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
 
 - La matita apre `app-voucher-edit-item-panel` (`components/management/settings/vouchers/voucher-edit-item-panel/`) e
   gli passa l'`idVoucher` della riga.
+- Il titolo è "Modifica sconto/voucher".
 - All'apertura (effect su `open`, perché il componente nasce con la pagina e `ngOnInit` scatta una volta sola) legge lo
   sconto e riempie il form campo per campo. Durante il caricamento i campi sono bloccati e Salva è spento; se fallisce
   il popup si chiude e compare `app-read-error-popup` (il messaggio del `code`, Chiudi e Riprova, che riapre il popup e
   rilegge; per un 404 solo Chiudi).
-- Le modifiche non salvate si confrontano con i dati caricati.
+- Le modifiche non salvate si confrontano con i dati caricati, senza guardare l'ordine di categorie e settori
+  (`comparableVoucher`, `voucher-scope/comparable-voucher.ts`, nei due popup).
 - Per il resto è una copia identica del popup di aggiunta (codice duplicato voluto, accorpamento nel TODO), con tutti i
   campi modificabili.
 - Salva chiama l'aggiornamento con l'`idVoucher` della risposta della GET (non quello della riga), poi chiude il popup e

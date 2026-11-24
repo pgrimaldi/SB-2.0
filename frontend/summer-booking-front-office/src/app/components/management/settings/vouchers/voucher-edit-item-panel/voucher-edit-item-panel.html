@@ -1,7 +1,7 @@
 <ng-template #content>
-  <div class="voucher__edit__item__panel">
+  <div #panel class="voucher__edit__item__panel">
     <h2 class="voucher__edit__item__panel__title">
-      {{ 'management.settings.vouchers.form.title' | translate }}
+      {{ 'management.settings.vouchers.form.edit_title' | translate }}
     </h2>
 
     <div [attr.inert]="isLoading() || isFetching() ? '' : null">

@@ -1553,7 +1553,7 @@ Sconti e voucher: aggiunta.
 | `discountScope` | string (enum DiscountScope) | `Custom` |
 | `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) | `["Bar", "Normal"]` |
 | `idSectors` | string[] (UUID, anche vuoto) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
-| `maxUseQuantity` | number (intero ≥ 1) \| null | `1` |
+| `maxUseQuantity` | number (intero, 1-2.147.483.647) \| null | `1` |
 | `isEnabled` | boolean | `true` |
 
 #### Response
@@ -1632,7 +1632,7 @@ Sconti e voucher: modifica.
 | `discountScope` | string (enum DiscountScope) | `All` |
 | `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) | `[]` |
 | `idSectors` | string[] (UUID, anche vuoto) | `[]` |
-| `maxUseQuantity` | number (intero ≥ 1) \| null | `null` |
+| `maxUseQuantity` | number (intero, 1-2.147.483.647) \| null | `null` |
 | `isEnabled` | boolean | `true` |
 
 #### Response

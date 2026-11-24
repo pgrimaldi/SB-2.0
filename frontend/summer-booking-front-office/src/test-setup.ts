@@ -15,6 +15,11 @@ if (!Reflect.has(HTMLDialogElement.prototype, 'showModal')) {
   });
 }
 
+// jsdom has no layout: there is nothing to scroll to (e.g. `showFirstError`).
+if (!Reflect.has(Element.prototype, 'scrollIntoView')) {
+  Object.assign(Element.prototype, { scrollIntoView: () => undefined });
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();

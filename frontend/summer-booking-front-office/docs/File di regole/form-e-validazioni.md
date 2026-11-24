@@ -65,7 +65,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 ## Errori sotto i campi
 
 - Ogni errore sta sotto il campo che lo genera, mai solo in un messaggio generico. Le validazioni sono reattive: il
-  bottone che salva è spento finché il form non è valido.
+  bottone che salva è spento finché il form non è valido. Un'eccezione: nei due popup di Sconti e voucher Salva resta
+  acceso, e premendolo il popup scorre fino al primo errore (`showFirstError`,
+  `components/shared/forms/first-error.ts`).
 - Anche gli errori del backend su un campo (`errors[]` di Problem Details, con `field` uguale al nome nella richiesta)
   vanno sotto quel campo: si invia con `submit()` dei Signal Forms e, se la chiamata fallisce, l'azione restituisce
   `apiFieldErrorsOrGeneral(problem, form, …)` (`behaviours/validation/api-field-errors.ts`; questi errori hanno
@@ -200,7 +202,8 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - In ogni form la fine di una coppia non viene mai prima dell'inizio. Giorni: il "Al" non prima del "Dal", uguali vanno
   bene (es. 01/06–01/06), salvo dove il backend lo vieta o l'utente dice altrimenti. Orari: l'"Alle" **sempre dopo** il
   "Dalle", mai la stessa ora (come vuole il backend). Ogni coppia nuova segue la stessa regola.
-- Orari: ogni coppia di `app-filled-time-field` ha `timeRange` e ognuno dei due campi ha il suo `[error]`. Nei pannelli
+- Orari: ogni coppia di `app-filled-time-field` ha `timeRange` e ognuno dei due campi ha il suo `[error]`; in una riga
+  aggiunta (es. una fascia oraria) i due orari sono anche obbligatori. Esc non svuota mai un orario. Nei pannelli
   che salvano una tab alla volta il controllo vale solo sulla tab aperta, come gli altri (`applyWhen` su
   `selectedTab()`).
 - Giorni: sotto.

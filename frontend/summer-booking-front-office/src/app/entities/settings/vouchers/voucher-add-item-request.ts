@@ -8,6 +8,7 @@ export const MAX_VOUCHER_CODE_LENGTH = 60;
 export const MAX_VOUCHER_PERIOD_QUANTITY = 50;
 export const MAX_VOUCHER_TIME_SLOT_QUANTITY = 20;
 export const MAX_FIXED_DISCOUNT = 100_000;
+export const MAX_VOUCHER_USE_QUANTITY = 2_147_483_647;
 
 export class VoucherAddItemRequest {
   voucherName: string | null = null;

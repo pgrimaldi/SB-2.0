@@ -854,7 +854,7 @@
         "table": {
           "voucher_name": "Discount",
           "valid_from": "Valid from",
-          "valid_to": "to",
+          "valid_to": "Valid until",
           "discount_type": "Discount type",
           "discount_value": "Value"
         },
@@ -888,6 +888,7 @@
         },
         "form": {
           "title": "Add new discount/voucher",
+          "edit_title": "Edit discount/voucher",
           "cancel": "Cancel",
           "save": "Save",
           "name": "Discount name",

@@ -13,8 +13,9 @@ import { DateAdapter, ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInput, MatInputModule } from '@angular/material/input';
-import { MatTimepicker, MatTimepickerInput } from '@angular/material/timepicker';
+import { MatTimepicker } from '@angular/material/timepicker';
 import { resolveIcons } from '../../icons/icons';
+import { TimepickerInput } from './timepicker-input';
 
 let nextId = 0;
 
@@ -24,7 +25,7 @@ let nextId = 0;
  */
 @Component({
   selector: 'app-filled-time-field',
-  imports: [MatFormFieldModule, MatIconModule, MatInputModule, MatTimepicker, MatTimepickerInput],
+  imports: [MatFormFieldModule, MatIconModule, MatInputModule, MatTimepicker, TimepickerInput],
   templateUrl: './filled-time-field.html',
   styleUrl: './filled-time-field.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

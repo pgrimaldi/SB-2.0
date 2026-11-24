@@ -854,7 +854,7 @@
         "table": {
           "voucher_name": "Sconto",
           "valid_from": "Valido dal",
-          "valid_to": "al",
+          "valid_to": "Valido fino al",
           "discount_type": "Tipo di sconto",
           "discount_value": "Valore"
         },
@@ -888,6 +888,7 @@
         },
         "form": {
           "title": "Aggiungi nuovo sconto/voucher",
+          "edit_title": "Modifica sconto/voucher",
           "cancel": "Annulla",
           "save": "Salva",
           "name": "Nome sconto",

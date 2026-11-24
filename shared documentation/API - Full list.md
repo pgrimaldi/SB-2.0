@@ -3915,7 +3915,7 @@ Nessun payload.
   "discountScope": "string (enum DiscountScope)",
   "serviceCategories": "string[] (enum DiscountServiceCategory, anche vuoto)",
   "idSectors": "string[] (UUID, anche vuoto)",
-  "maxUseQuantity": "number (intero ≥ 1) | null",
+  "maxUseQuantity": "number (intero, 1-2.147.483.647) | null",
   "isEnabled": "boolean"
 }
 ```
@@ -3943,7 +3943,7 @@ Nessun corpo (204).
 | `discountScope` | string (enum DiscountScope) |
 | `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) |
 | `idSectors` | string[] (UUID, anche vuoto) |
-| `maxUseQuantity` | number (intero ≥ 1) \| null |
+| `maxUseQuantity` | number (intero, 1-2.147.483.647) \| null |
 | `isEnabled` | boolean |
 
 **Response tabella**
@@ -4050,7 +4050,7 @@ Nessun corpo (204).
   "discountScope": "string (enum DiscountScope)",
   "serviceCategories": "string[] (enum DiscountServiceCategory, anche vuoto)",
   "idSectors": "string[] (UUID, anche vuoto)",
-  "maxUseQuantity": "number (intero ≥ 1) | null",
+  "maxUseQuantity": "number (intero, 1-2.147.483.647) | null",
   "isEnabled": "boolean"
 }
 ```
@@ -4079,7 +4079,7 @@ Nessun corpo (204).
 | `discountScope` | string (enum DiscountScope) |
 | `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) |
 | `idSectors` | string[] (UUID, anche vuoto) |
-| `maxUseQuantity` | number (intero ≥ 1) \| null |
+| `maxUseQuantity` | number (intero, 1-2.147.483.647) \| null |
 | `isEnabled` | boolean |
 
 **Response tabella**

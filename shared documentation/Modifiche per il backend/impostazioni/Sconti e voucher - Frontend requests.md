@@ -114,7 +114,7 @@ il `total` vero.
 | `idVoucher` | `public_id` | string (UUID) | Non si mostra: serve alle azioni della riga. |
 | `voucherName` | `name`, o `code` se il nome manca | string | Colonna "Sconto". |
 | `validFrom` | il più piccolo `starts_on` dei periodi | string (giorno UTC) o `null` | Colonna "Valido dal". `null` senza periodi. |
-| `validTo` | il più grande `ends_on` dei periodi | string (giorno UTC) o `null` | Colonna "al". `null` senza periodi. |
+| `validTo` | il più grande `ends_on` dei periodi | string (giorno UTC) o `null` | Colonna "Valido fino al". `null` senza periodi. |
 | `discountType` | `type` | `Percentage` o `Fixed` | Colonna "Tipo di sconto". |
 | `discountValue` | `value` | number | Colonna "Valore", con % o €. |
 
@@ -228,7 +228,7 @@ le modifiche dell'utente.
 | `discountScope` | `scope` | string | `All`, `Custom` o `WithoutCustom` ("A cosa si applica"). |
 | `serviceCategories` | `serviceCategories` | string[] | `Bar`, `Normal`, `Hourly`, `Additional`; `[]` con `All`. |
 | `idSectors` | `sectorIds` | string[] (UUID) | `public_id` dei settori; `[]` con `All`. |
-| `maxUseQuantity` | `maxUses` | number (intero) o `null` | Almeno 1; `null` = illimitato, come oggi. Non meno degli utilizzi già fatti. |
+| `maxUseQuantity` | `maxUses` | number (intero) o `null` | Da 1 a 2.147.483.647 (la colonna è `integer`); `null` = illimitato, come oggi. Non meno degli utilizzi già fatti. |
 | `isEnabled` | `isActive` | boolean | Obbligatorio. |
 
 - **Canale** (`channel`): il frontend non lo manda. Uno sconto nuovo è `manager_and_online`; la modifica lascia quello salvato.
@@ -330,7 +330,7 @@ Errori dei campi (400 `validation.failed`, più di uno insieme):
 | `serviceCategories` | `validation.invalid` | Una categoria che non esiste. |
 | `serviceCategories` | `validation.required` | Vuoto con `Custom` o `WithoutCustom`, se anche `idSectors` è vuoto. |
 | `discountValue` | `validation.out_of_range` | Mancante, 0 o meno, oltre 100 (`Percentage`) o oltre 100.000 (`Fixed`). |
-| `maxUseQuantity` | `validation.out_of_range` | Meno di 1 o non intero. |
+| `maxUseQuantity` | `validation.out_of_range` | Meno di 1, più di 2.147.483.647 o non intero. |
 
 Il frontend controlla gli stessi limiti e mostra gli errori sotto i campi: `pricing.discount_code_taken` sotto il codice,
 `pricing.discount_max_uses_below_used` sotto il numero massimo di utilizzi; gli errori dentro un periodo compaiono sopra i bottoni. Con
@@ -516,7 +516,7 @@ Con un token con `CatalogRead` e `CatalogPricing`:
     suo periodo. Senza giorni: `daysOfWeek` con tutti e sette.
 13. `PUT /api/catalog/discounts/{id}` e lo snapshot `price_catalog` dopo la modifica: come deciso in "API di oggi" e "Snapshot offline".
 14. `update-voucher-item` con `maxUseQuantity` minore degli utilizzi: 422 `pricing.discount_max_uses_below_used` con `usedCount`; con `null`: 204
-    e illimitato.
+    e illimitato; con 3000000000: 400 `validation.out_of_range` su `maxUseQuantity`.
 15. `update-voucher-item` di uno sconto `online_only`: il canale non cambia. Uno sconto `without_custom` con una categoria e un settore si
     rilegge uguale; salvato con `All`, categorie e settori sono vuoti. `Custom` senza categorie e settori: 400 `validation.required` su
     `serviceCategories`. Con un settore di un altro stabilimento: 404 `catalog.sector_not_found` e lo sconto non cambia.

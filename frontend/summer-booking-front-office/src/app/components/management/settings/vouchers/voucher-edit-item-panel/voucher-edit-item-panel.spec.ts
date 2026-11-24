@@ -4,12 +4,14 @@ import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS, provideNativeDateAdapter } from '@angular/material/core';
 import { By } from '@angular/platform-browser';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
-import { of, throwError } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { DiscountScope } from '../../../../../entities/enums/discount-scope';
 import { DiscountServiceCategory } from '../../../../../entities/enums/discount-service-category';
 import { DiscountType } from '../../../../../entities/enums/discount-type';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../../entities/errors/api-problem';
+import { MAX_VOUCHER_USE_QUANTITY } from '../../../../../entities/settings/vouchers/voucher-add-item-request';
 import { VoucherSelectedItem } from '../../../../../entities/settings/vouchers/voucher-selected-item';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
 import { VoucherService } from '../../../../../services/api/vouchers/voucher.service';
@@ -40,16 +42,33 @@ const VOUCHER: VoucherSelectedItem = {
 
 @Component({
   imports: [VoucherEditItemPanel],
-  template: `<app-voucher-edit-item-panel idVoucher="v1" [(open)]="open" />`,
+  template: `<app-voucher-edit-item-panel
+    idVoucher="v1"
+    [(open)]="open"
+    (updated)="updates = updates + 1"
+    (failed)="failures.push($event)"
+  />`,
 })
 class VoucherEditItemPanelHost {
   readonly open = signal(true);
+  updates = 0;
+  readonly failures: ApiProblem[] = [];
 }
 
+const refusal = (status: number, code: string, args = {}) =>
+  throwError(() => new HttpErrorResponse({ status, error: { status, code, args } }));
+
 describe('VoucherEditItemPanel', () => {
-  const setup = async () => {
+  const setup = async (
+    selectedItem = vi.fn((): Observable<VoucherSelectedItem> => of(VOUCHER)),
+  ) => {
     const updateVoucherItem = vi.fn(() => of('version-2'));
-    const sectorCombobox = vi.fn(() => of([{ id: 's1', value: 'Fila 1' }]));
+    const sectorCombobox = vi.fn(() =>
+      of([
+        { id: 's1', value: 'Fila 1' },
+        { id: 's2', value: 'Fila 2' },
+      ]),
+    );
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
@@ -57,7 +76,7 @@ describe('VoucherEditItemPanel', () => {
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
         {
           provide: VoucherService,
-          useValue: { selectedItem: () => of(VOUCHER), updateVoucherItem },
+          useValue: { selectedItem, updateVoucherItem },
         },
         { provide: SectorService, useValue: { sectorCombobox } },
         { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 1 }) } },
@@ -76,10 +95,18 @@ describe('VoucherEditItemPanel', () => {
       await fixture.whenStable();
     };
     const refuse = (status: number, code: string, args = {}) =>
-      updateVoucherItem.mockReturnValueOnce(
-        throwError(() => new HttpErrorResponse({ status, error: { status, code, args } })) as never,
-      );
-    return { panel, form: panel['draftForm'], save, refuse, updateVoucherItem, sectorCombobox };
+      updateVoucherItem.mockReturnValueOnce(refusal(status, code, args) as never);
+    return {
+      fixture,
+      host: fixture.componentInstance,
+      panel,
+      form: panel['draftForm'],
+      save,
+      refuse,
+      selectedItem,
+      updateVoucherItem,
+      sectorCombobox,
+    };
   };
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
@@ -148,5 +175,93 @@ describe('VoucherEditItemPanel', () => {
     await save();
     expect(sectorCombobox).toHaveBeenCalledTimes(2);
     expect(panel['error']()?.code).toBe(ApiErrorCode.CatalogSectorNotFound);
+  });
+
+  it('should save nothing until the voucher is read and forget an answer that comes after the closing', async () => {
+    const answer = new Subject<VoucherSelectedItem>();
+    const { fixture, host, panel, save, updateVoucherItem } = await setup(vi.fn(() => answer));
+
+    await save();
+    expect(updateVoucherItem).not.toHaveBeenCalled();
+
+    host.open.set(false);
+    await fixture.whenStable();
+    answer.next(VOUCHER);
+    expect(panel['isLoaded']()).toBe(false);
+  });
+
+  it('should close, tell the page and offer to read again when the voucher cannot be read', async () => {
+    const { fixture, host, panel, selectedItem } = await setup(
+      vi
+        .fn((): Observable<VoucherSelectedItem> => of(VOUCHER))
+        .mockReturnValueOnce(refusal(404, ApiErrorCode.PricingDiscountNotFound)),
+    );
+
+    expect(host.open()).toBe(false);
+    expect(host.failures.map(({ code }) => code)).toEqual([ApiErrorCode.PricingDiscountNotFound]);
+    expect(panel['readError']()?.code).toBe(ApiErrorCode.PricingDiscountNotFound);
+
+    panel['retryRead']();
+    await fixture.whenStable();
+    expect(selectedItem).toHaveBeenCalledTimes(2);
+    expect(panel['isLoaded']()).toBe(true);
+  });
+
+  it('should close with the alert when another user changed the voucher, and stay open when it is gone', async () => {
+    const { fixture, host, panel, save, refuse } = await setup();
+
+    refuse(404, ApiErrorCode.PricingDiscountNotFound);
+    await save();
+    expect(host.open()).toBe(true);
+    expect(panel['error']()?.code).toBe(ApiErrorCode.PricingDiscountNotFound);
+
+    refuse(409, ApiErrorCode.ResourceVersionConflict);
+    await save();
+    await fixture.whenStable();
+    expect(host.open()).toBe(false);
+    expect(panel['isConflictShown']()).toBe(true);
+    expect(host.failures.map(({ code }) => code)).toEqual([
+      ApiErrorCode.PricingDiscountNotFound,
+      ApiErrorCode.ResourceVersionConflict,
+    ]);
+    expect(host.updates).toBe(0);
+  });
+
+  it('should not count another order of the categories and of the sectors as a change', async () => {
+    const { form, panel } = await setup(
+      vi.fn(() =>
+        of({
+          ...VOUCHER,
+          serviceCategories: [DiscountServiceCategory.Additional, DiscountServiceCategory.Bar],
+          idSectors: ['s2', 's1'],
+        }),
+      ),
+    );
+
+    form
+      .serviceCategories()
+      .value.set([DiscountServiceCategory.Bar, DiscountServiceCategory.Additional]);
+    form.idSectors().value.set(['s1', 's2']);
+    expect(panel.hasUnsavedChanges()).toBe(false);
+
+    form.idSectors().value.set(['s1']);
+    expect(panel.hasUnsavedChanges()).toBe(true);
+  });
+
+  it('should want both times of a time slot and no more uses than the backend keeps', async () => {
+    const { form, save, updateVoucherItem } = await setup();
+
+    form.validityPeriods[0].timeSlots[0].to().value.set(null);
+    await save();
+    expect(updateVoucherItem).not.toHaveBeenCalled();
+
+    form.validityPeriods[0].timeSlots[0].to().value.set('13:00');
+    form.maxUseQuantity().value.set(MAX_VOUCHER_USE_QUANTITY + 1);
+    await save();
+    expect(updateVoucherItem).not.toHaveBeenCalled();
+
+    form.maxUseQuantity().value.set(MAX_VOUCHER_USE_QUANTITY);
+    await save();
+    expect(updateVoucherItem).toHaveBeenCalledOnce();
   });
 });
