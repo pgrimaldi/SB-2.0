@@ -1000,7 +1000,7 @@ Nessun corpo.
 
 ## /taxation
 
-### POST `/api/taxation/printer-list`
+### POST `/api/fiscalprint/printers/printer-list`
 
 Fiscalizzazione: stampanti.
 
@@ -1010,17 +1010,9 @@ Fiscalizzazione: stampanti.
 {
   "page": 1,
   "pageSize": 5,
-  "search": "epson",
-  "filters": [
-    {
-      "field": "isEnabled",
-      "value": [
-        "true",
-        "false"
-      ]
-    }
-  ],
-  "sortField": "printerName",
+  "search": "",
+  "filters": [],
+  "sortField": "",
   "sortDirection": "Ascending"
 }
 ```
@@ -1029,11 +1021,9 @@ Fiscalizzazione: stampanti.
 |---|---|---|
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `5` |
-| `search` | string | `epson` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "isEnabled", "value": ["true", "false"]}]` |
-| `filters[].field` | string | `isEnabled` |
-| `filters[].value` | string[] (array di stringhe, almeno una) | `["true", "false"]` |
-| `sortField` | string | `printerName` |
+| `search` | string | `""` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
+| `sortField` | string | `""` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
 #### Response
@@ -1048,12 +1038,14 @@ Stato: 200 OK.
       "idPrinter": "5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60",
       "printerName": "EPSON - 1",
       "printerIP": "192.0.2.10",
+      "printerMode": "fiscal",
       "isEnabled": false
     },
     {
       "idPrinter": "9a4e6b2c-1d3f-4e5a-8b7c-2f6d1e3a4b50",
       "printerName": "EPSON - 2",
       "printerIP": "192.0.2.11",
+      "printerMode": "orders",
       "isEnabled": true
     }
   ]
@@ -1063,13 +1055,14 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | PrinterItemListResponse[] (array di oggetti) | `[{"idPrinter": "5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60", "printerName": "EPSON - 1", "printerIP": "192.0.2.10", "isEnabled": false}, {"idPrinter": "9a4e6b2c-1d3f-4e5a-8b7c-2f6d1e3a4b50", "printerName": "EPSON - 2", "printerIP": "192.0.2.11", "isEnabled": true}]` |
+| `rows[]` | PrinterItemListResponse[] (array di oggetti) | `[{"idPrinter": "5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60", "printerName": "EPSON - 1", "printerIP": "192.0.2.10", "printerMode": "fiscal", "isEnabled": false}, {"idPrinter": "9a4e6b2c-1d3f-4e5a-8b7c-2f6d1e3a4b50", "printerName": "EPSON - 2", "printerIP": "192.0.2.11", "printerMode": "orders", "isEnabled": true}]` |
 | `rows[].idPrinter` | string (UUID) | `5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60` |
 | `rows[].printerName` | string | `EPSON - 1` |
-| `rows[].printerIP` | string | `192.0.2.10` |
+| `rows[].printerIP` | string \| null | `192.0.2.10` |
+| `rows[].printerMode` | string (enum PrinterMode) | `fiscal` |
 | `rows[].isEnabled` | boolean | `false` |
 
-### POST `/api/taxation/set-is-active`
+### POST `/api/fiscalprint/printers/set-is-active`
 
 Fiscalizzazione: attivazione di una stampante.
 
@@ -1093,7 +1086,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/taxation/add-printer`
+### POST `/api/fiscalprint/printers/add-printer`
 
 Fiscalizzazione: aggiunta di una stampante.
 
@@ -1104,18 +1097,15 @@ Fiscalizzazione: aggiunta di una stampante.
   "printerName": "EPSON - 3",
   "printerIP": "192.0.2.12",
   "printerPort": 9100,
-  "printerModel": "FP-81 II",
+  "printerModel": "fp_81",
+  "printerMode": "fiscal",
   "isSsl": false,
-  "isFiscalMode": true,
-  "isNonFiscalMode": false,
-  "isOrderMode": false,
-  "isTextMode": false,
   "departmentVatRates": [
-    "22",
-    "10",
-    "4",
-    "0",
-    "0"
+    22,
+    10,
+    null,
+    null,
+    null
   ],
   "firstHeader": "Bagno Esempio",
   "secondHeader": "Via del Mare 1",
@@ -1125,19 +1115,16 @@ Fiscalizzazione: aggiunta di una stampante.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `printerName` | string | `EPSON - 3` |
-| `printerIP` | string \| null | `192.0.2.12` |
-| `printerPort` | number (intero) \| null | `9100` |
-| `printerModel` | string \| null | `FP-81 II` |
+| `printerName` | string (al massimo 120 caratteri) | `EPSON - 3` |
+| `printerIP` | string (al massimo 255 caratteri) | `192.0.2.12` |
+| `printerPort` | number (intero, 1-65535) | `9100` |
+| `printerModel` | string (enum PrinterModel) | `fp_81` |
+| `printerMode` | string (enum PrinterMode) | `fiscal` |
 | `isSsl` | boolean | `false` |
-| `isFiscalMode` | boolean | `true` |
-| `isNonFiscalMode` | boolean | `false` |
-| `isOrderMode` | boolean | `false` |
-| `isTextMode` | boolean | `false` |
-| `departmentVatRates` | string[] (5 elementi) | `["22", "10", "4", "0", "0"]` |
-| `firstHeader` | string \| null | `Bagno Esempio` |
-| `secondHeader` | string \| null | `Via del Mare 1` |
-| `footer` | string \| null | `Grazie e arrivederci` |
+| `departmentVatRates` | (number \| null)[] (5 elementi) | `[22, 10, null, null, null]` |
+| `firstHeader` | string \| null (al massimo 160 caratteri) | `Bagno Esempio` |
+| `secondHeader` | string \| null (al massimo 160 caratteri) | `Via del Mare 1` |
+| `footer` | string \| null (al massimo 160 caratteri) | `Grazie e arrivederci` |
 
 #### Response
 
@@ -1145,7 +1132,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/taxation/delete-printer`
+### POST `/api/fiscalprint/printers/delete-printer`
 
 Fiscalizzazione: eliminazione di una stampante.
 
@@ -1167,7 +1154,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/taxation/download-guide-electronic-receipt`
+### POST `/api/fiskaly/download-guide-electronic-receipt`
 
 Fiscalizzazione: guida dello scontrino elettronico.
 
@@ -1186,7 +1173,7 @@ Il corpo è il file della guida (binario), non JSON.
 | `Content-Type` | `application/pdf` |
 | `Content-Disposition` | `attachment; filename="guida-scontrino-elettronico.pdf"` |
 
-### POST `/api/taxation/electronic-receipt-activation`
+### POST `/api/fiskaly/electronic-receipt-activation`
 
 Fiscalizzazione: attivazione dello scontrino elettronico.
 
@@ -1208,7 +1195,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/taxation/save-electronic-receipt-account`
+### POST `/api/fiskaly/save-electronic-receipt-account`
 
 Fiscalizzazione: account dello scontrino elettronico.
 
@@ -1225,23 +1212,23 @@ Fiscalizzazione: account dello scontrino elettronico.
   "taxCode": "XXXXXXXXXXXXXXXX",
   "revenueAgencyCode": "AE00000000",
   "vatNumber": "00000000000",
-  "pin": "00000",
+  "pin": "0000000000",
   "password": "password-digitata"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `companyName` | string \| null | `Bagno Esempio Srl` |
-| `companyAddress` | string \| null | `Via del Mare` |
-| `streetNumber` | string \| null | `1` |
-| `postalCode` | string \| null | `00100` |
-| `city` | string \| null | `Roma` |
+| `companyName` | string (al massimo 128 caratteri) | `Bagno Esempio Srl` |
+| `companyAddress` | string (al massimo 128 caratteri) | `Via del Mare` |
+| `streetNumber` | string (al massimo 16 caratteri) | `1` |
+| `postalCode` | string (al massimo 5 caratteri) | `00100` |
+| `city` | string (al massimo 128 caratteri) | `Roma` |
 | `country` | string \| null | `Italia` |
-| `taxCode` | string \| null | `XXXXXXXXXXXXXXXX` |
+| `taxCode` | string (al massimo 16 caratteri) | `XXXXXXXXXXXXXXXX` |
 | `revenueAgencyCode` | string \| null | `AE00000000` |
-| `vatNumber` | string \| null | `00000000000` |
-| `pin` | string \| null | `00000` |
+| `vatNumber` | string (al massimo 13 caratteri) | `00000000000` |
+| `pin` | string \| null | `0000000000` |
 | `password` | string \| null | `password-digitata` |
 
 #### Response
@@ -1250,7 +1237,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### GET `/api/taxation/electronic-receipt`
+### GET `/api/fiskaly/electronic-receipt`
 
 Fiscalizzazione: scontrino elettronico.
 
@@ -1262,7 +1249,7 @@ Nessun corpo né parametri: lo stabilimento viene dal token.
 
 Stato: 200 OK.
 
-Il corpo è solo il testo dei termini e condizioni in HTML, come stringa JSON (tra virgolette, Content-Type application/json), nella lingua dell'header Accept-Language.
+Il corpo è solo il testo dei termini e condizioni in HTML, come stringa JSON (tra virgolette, Content-Type application/json), nella lingua dell'header Accept-Language; null se il testo non c'è.
 
 ```json
 "<h4>Generale</h4><p>Testo dei termini e condizioni…</p>"
@@ -1270,7 +1257,7 @@ Il corpo è solo il testo dei termini e condizioni in HTML, come stringa JSON (t
 
 ## /sharing
 
-### GET `/api/sharing/general-information`
+### GET `/api/booking/sharing/settings`
 
 Sharing: impostazioni generali.
 
@@ -1284,41 +1271,39 @@ Stato: 200 OK.
 
 ```json
 {
-  "isSharingEnabled": true,
-  "isMinimumBookingDayEnabled": true,
-  "minimumBookingDayQuantity": 3,
-  "isOnlySeasonalEnabled": false,
-  "isEnabledOnAllArticles": true,
-  "isScheduledAbsenceSharing": true,
-  "isManualCreditAssignmentEnabled": false,
-  "resoldDayCreditQuantity": 1,
-  "manualCreditValue": 2.5,
-  "isAutomaticVoucherEnabled": true,
-  "voucherCreditValue": 5.5,
-  "isPrepaidCardTopUpEnabled": false,
-  "prepaidCardCreditValue": 10,
+  "isEnabled": true,
+  "minBookingDays": 3,
+  "seasonalOnly": false,
+  "allArticles": true,
+  "absencesAsSharing": true,
+  "manualCreditEnabled": false,
+  "manualCreditUnitsPerDay": 1,
+  "manualCreditAmount": 2.5,
+  "voucherCreditEnabled": true,
+  "voucherCreditAmount": 5.5,
+  "cardTopUpEnabled": false,
+  "cardTopUpAmount": 10,
   "version": "106cb2d0"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `isSharingEnabled` | boolean | `true` |
-| `isMinimumBookingDayEnabled` | boolean | `true` |
-| `minimumBookingDayQuantity` | number (intero) \| null | `3` |
-| `isOnlySeasonalEnabled` | boolean | `false` |
-| `isEnabledOnAllArticles` | boolean | `true` |
-| `isScheduledAbsenceSharing` | boolean | `true` |
-| `isManualCreditAssignmentEnabled` | boolean | `false` |
-| `resoldDayCreditQuantity` | number (intero) \| null | `1` |
-| `manualCreditValue` | number (decimale, €) \| null | `2.5` |
-| `isAutomaticVoucherEnabled` | boolean | `true` |
-| `voucherCreditValue` | number (decimale, €) \| null | `5.5` |
-| `isPrepaidCardTopUpEnabled` | boolean | `false` |
-| `prepaidCardCreditValue` | number (decimale, €) \| null | `10` |
+| `isEnabled` | boolean | `true` |
+| `minBookingDays` | number (intero, 1-366) \| null | `3` |
+| `seasonalOnly` | boolean | `false` |
+| `allArticles` | boolean | `true` |
+| `absencesAsSharing` | boolean | `true` |
+| `manualCreditEnabled` | boolean | `false` |
+| `manualCreditUnitsPerDay` | number (intero, 0-1000) | `1` |
+| `manualCreditAmount` | number (decimale, €, 0-100.000) | `2.5` |
+| `voucherCreditEnabled` | boolean | `true` |
+| `voucherCreditAmount` | number (decimale, €, 0-100.000) | `5.5` |
+| `cardTopUpEnabled` | boolean | `false` |
+| `cardTopUpAmount` | number (decimale, €, 0-100.000) | `10` |
 | `version` | string | `106cb2d0` |
 
-### POST `/api/sharing/save-information`
+### PUT `/api/booking/sharing/settings`
 
 Sharing: salvataggio delle impostazioni.
 
@@ -1326,43 +1311,73 @@ Sharing: salvataggio delle impostazioni.
 
 ```json
 {
-  "isSharingEnabled": true,
-  "isMinimumBookingDayEnabled": true,
-  "minimumBookingDayQuantity": 3,
-  "isOnlySeasonalEnabled": false,
-  "isEnabledOnAllArticles": true,
-  "isScheduledAbsenceSharing": true,
-  "isManualCreditAssignmentEnabled": false,
-  "resoldDayCreditQuantity": 1,
-  "manualCreditValue": 2.5,
-  "isAutomaticVoucherEnabled": true,
-  "voucherCreditValue": 5.5,
-  "isPrepaidCardTopUpEnabled": false,
-  "prepaidCardCreditValue": 10
+  "isEnabled": true,
+  "minBookingDays": 3,
+  "seasonalOnly": false,
+  "allArticles": true,
+  "absencesAsSharing": true,
+  "manualCreditEnabled": false,
+  "manualCreditUnitsPerDay": 1,
+  "manualCreditAmount": 2.5,
+  "voucherCreditEnabled": true,
+  "voucherCreditAmount": 5.5,
+  "cardTopUpEnabled": false,
+  "cardTopUpAmount": 10
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `isSharingEnabled` | boolean | `true` |
-| `isMinimumBookingDayEnabled` | boolean | `true` |
-| `minimumBookingDayQuantity` | number (intero) \| null | `3` |
-| `isOnlySeasonalEnabled` | boolean | `false` |
-| `isEnabledOnAllArticles` | boolean | `true` |
-| `isScheduledAbsenceSharing` | boolean | `true` |
-| `isManualCreditAssignmentEnabled` | boolean | `false` |
-| `resoldDayCreditQuantity` | number (intero) \| null | `1` |
-| `manualCreditValue` | number (decimale, €) \| null | `2.5` |
-| `isAutomaticVoucherEnabled` | boolean | `true` |
-| `voucherCreditValue` | number (decimale, €) \| null | `5.5` |
-| `isPrepaidCardTopUpEnabled` | boolean | `false` |
-| `prepaidCardCreditValue` | number (decimale, €) \| null | `10` |
+| `isEnabled` | boolean | `true` |
+| `minBookingDays` | number (intero, 1-366) \| null | `3` |
+| `seasonalOnly` | boolean | `false` |
+| `allArticles` | boolean | `true` |
+| `absencesAsSharing` | boolean | `true` |
+| `manualCreditEnabled` | boolean | `false` |
+| `manualCreditUnitsPerDay` | number (intero, 0-1000) | `1` |
+| `manualCreditAmount` | number (decimale, €, 0-100.000) | `2.5` |
+| `voucherCreditEnabled` | boolean | `true` |
+| `voucherCreditAmount` | number (decimale, €, 0-100.000) | `5.5` |
+| `cardTopUpEnabled` | boolean | `false` |
+| `cardTopUpAmount` | number (decimale, €, 0-100.000) | `10` |
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 200 OK (le impostazioni salvate).
 
-Nessun corpo.
+```json
+{
+  "isEnabled": true,
+  "minBookingDays": 3,
+  "seasonalOnly": false,
+  "allArticles": true,
+  "absencesAsSharing": true,
+  "manualCreditEnabled": false,
+  "manualCreditUnitsPerDay": 1,
+  "manualCreditAmount": 2.5,
+  "voucherCreditEnabled": true,
+  "voucherCreditAmount": 5.5,
+  "cardTopUpEnabled": false,
+  "cardTopUpAmount": 10,
+  "version": "6b0c41e7"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `minBookingDays` | number (intero, 1-366) \| null | `3` |
+| `seasonalOnly` | boolean | `false` |
+| `allArticles` | boolean | `true` |
+| `absencesAsSharing` | boolean | `true` |
+| `manualCreditEnabled` | boolean | `false` |
+| `manualCreditUnitsPerDay` | number (intero, 0-1000) | `1` |
+| `manualCreditAmount` | number (decimale, €, 0-100.000) | `2.5` |
+| `voucherCreditEnabled` | boolean | `true` |
+| `voucherCreditAmount` | number (decimale, €, 0-100.000) | `5.5` |
+| `cardTopUpEnabled` | boolean | `false` |
+| `cardTopUpAmount` | number (decimale, €, 0-100.000) | `10` |
+| `version` | string | `6b0c41e7` |
 
 ## /vouchers
 
@@ -6276,6 +6291,508 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+### GET `/api/catalog/online-settings`
+
+Prenotazioni online: opzioni.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "isSuspendedByPlatform": false,
+  "isEnabled": true,
+  "isMapPick": true,
+  "isLocationRestricted": true,
+  "allowedSpotIds": [
+    "7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"
+  ],
+  "isPeriodRestricted": true,
+  "allowedPeriods": [
+    {
+      "startsOn": "2027-05-15",
+      "endsOn": "2027-09-20"
+    }
+  ],
+  "surchargeType": "disable",
+  "surchargeValue": 0,
+  "isBlocked": false,
+  "onlineBookingBlock": "three_hours_before",
+  "requiresManualConfirmation": false,
+  "allowsSameDayBooking": true,
+  "allowsHalfDay": true,
+  "morningFrom": "08:00:00",
+  "morningTo": "13:00:00",
+  "afternoonFrom": "13:30:00",
+  "afternoonTo": "19:00:00",
+  "afternoonConversionTime": "12:30:00",
+  "allowsSeasonal": false,
+  "allowsSharing": false,
+  "maxSpotsPerBooking": 4,
+  "bookingHorizonDays": 180,
+  "scope": "all",
+  "maxBookingsPerDay": null,
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property"
+  ],
+  "stayLimits": [
+    {
+      "id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601",
+      "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "startsOn": "2027-08-01",
+      "endsOn": "2027-08-31",
+      "minDays": 3,
+      "maxDays": 14
+    }
+  ],
+  "legend": [
+    {
+      "id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01",
+      "label": "Ombrellone libero",
+      "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01",
+      "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"
+    }
+  ],
+  "goodToKnow": null,
+  "usefulInfo": "<p>Il parcheggio è gratuito per i clienti.</p>",
+  "version": "7c1f03ab"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `isSuspendedByPlatform` | boolean | `false` |
+| `isMapPick` | boolean | `true` |
+| `isLocationRestricted` | boolean | `true` |
+| `allowedSpotIds` | string[] (UUID) | `["7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"]` |
+| `isPeriodRestricted` | boolean | `true` |
+| `allowedPeriods[]` | OnlineBookingPeriod[] (array di oggetti, al massimo 50) | `[{"startsOn": "2027-05-15", "endsOn": "2027-09-20"}]` |
+| `allowedPeriods[].startsOn` | string (giorno AAAA-MM-GG) | `2027-05-15` |
+| `allowedPeriods[].endsOn` | string (giorno AAAA-MM-GG) | `2027-09-20` |
+| `surchargeType` | string (enum SupplementType) | `disable` |
+| `surchargeValue` | number (decimale) | `0` |
+| `isBlocked` | boolean | `false` |
+| `onlineBookingBlock` | string (enum OnlineBookingBlock) | `three_hours_before` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `allowsSameDayBooking` | boolean | `true` |
+| `allowsHalfDay` | boolean | `true` |
+| `morningFrom` | string (HH:mm:ss in lettura, HH:mm in salvataggio) \| null | `08:00:00` |
+| `morningTo` | string (come morningFrom) \| null | `13:00:00` |
+| `afternoonFrom` | string (come morningFrom) \| null | `13:30:00` |
+| `afternoonTo` | string (come morningFrom) \| null | `19:00:00` |
+| `afternoonConversionTime` | string (come morningFrom) \| null | `12:30:00` |
+| `allowsSeasonal` | boolean | `false` |
+| `allowsSharing` | boolean | `false` |
+| `maxSpotsPerBooking` | number (intero da 1) \| null | `4` |
+| `bookingHorizonDays` | number (intero 0-730) \| null | `180` |
+| `scope` | string (enum OnlineBookingAudience) | `all` |
+| `maxBookingsPerDay` | number (intero da 1) \| null | `null` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property"]` |
+| `stayLimits[]` | BookingLimitRule[] (array di oggetti) | `[{"id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601", "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "startsOn": "2027-08-01", "endsOn": "2027-08-31", "minDays": 3, "maxDays": 14}]` |
+| `stayLimits[].id` | string (UUID) \| null | `3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601` |
+| `stayLimits[].sectorId` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `stayLimits[].startsOn` | string (giorno AAAA-MM-GG) | `2027-08-01` |
+| `stayLimits[].endsOn` | string (giorno AAAA-MM-GG) | `2027-08-31` |
+| `stayLimits[].minDays` | number (intero 1-366) \| null | `3` |
+| `stayLimits[].maxDays` | number (intero 1-366) \| null | `14` |
+| `legend[]` | LegendItem[] (array di oggetti, al massimo 30) | `[{"id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01", "label": "Ombrellone libero", "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01", "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"}]` |
+| `legend[].id` | string (UUID) \| null | `8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01` |
+| `legend[].label` | string (al massimo 100 caratteri) | `Ombrellone libero` |
+| `legend[].iconId` | string (UUID) \| null | `2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01` |
+| `legend[].iconUrl` | string (URL) \| null | `/assets/images/MapConfiguration_Umbrella1.svg` |
+| `goodToKnow` | string (HTML, al massimo 10.000 caratteri) \| null | `null` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il parcheggio è gratuito per i clienti.</p>` |
+| `version` | string | `7c1f03ab` |
+
+### PUT `/api/catalog/online-settings`
+
+Prenotazioni online: salvataggio delle opzioni.
+
+#### Payload
+
+```json
+{
+  "isEnabled": true,
+  "isMapPick": true,
+  "isLocationRestricted": true,
+  "allowedSpotIds": [
+    "7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"
+  ],
+  "isPeriodRestricted": true,
+  "allowedPeriods": [
+    {
+      "startsOn": "2027-05-15",
+      "endsOn": "2027-09-20"
+    }
+  ],
+  "surchargeType": "disable",
+  "surchargeValue": 0,
+  "isBlocked": false,
+  "onlineBookingBlock": "three_hours_before",
+  "requiresManualConfirmation": false,
+  "allowsSameDayBooking": true,
+  "allowsHalfDay": true,
+  "morningFrom": "08:00",
+  "morningTo": "13:00",
+  "afternoonFrom": "13:30",
+  "afternoonTo": "19:00",
+  "afternoonConversionTime": "12:30",
+  "allowsSeasonal": false,
+  "allowsSharing": false,
+  "maxSpotsPerBooking": 4,
+  "bookingHorizonDays": 180,
+  "scope": "all",
+  "maxBookingsPerDay": null,
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property"
+  ],
+  "stayLimits": [
+    {
+      "id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601",
+      "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "startsOn": "2027-08-01",
+      "endsOn": "2027-08-31",
+      "minDays": 3,
+      "maxDays": 14
+    }
+  ],
+  "legend": [
+    {
+      "id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01",
+      "label": "Ombrellone libero",
+      "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01",
+      "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"
+    }
+  ],
+  "goodToKnow": null,
+  "usefulInfo": "<p>Il parcheggio è gratuito per i clienti.</p>"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `isMapPick` | boolean | `true` |
+| `isLocationRestricted` | boolean | `true` |
+| `allowedSpotIds` | string[] (UUID) | `["7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"]` |
+| `isPeriodRestricted` | boolean | `true` |
+| `allowedPeriods[]` | OnlineBookingPeriod[] (array di oggetti, al massimo 50) | `[{"startsOn": "2027-05-15", "endsOn": "2027-09-20"}]` |
+| `allowedPeriods[].startsOn` | string (giorno AAAA-MM-GG) | `2027-05-15` |
+| `allowedPeriods[].endsOn` | string (giorno AAAA-MM-GG) | `2027-09-20` |
+| `surchargeType` | string (enum SupplementType) | `disable` |
+| `surchargeValue` | number (decimale) | `0` |
+| `isBlocked` | boolean | `false` |
+| `onlineBookingBlock` | string (enum OnlineBookingBlock) | `three_hours_before` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `allowsSameDayBooking` | boolean | `true` |
+| `allowsHalfDay` | boolean | `true` |
+| `morningFrom` | string (HH:mm:ss in lettura, HH:mm in salvataggio) \| null | `08:00` |
+| `morningTo` | string (come morningFrom) \| null | `13:00` |
+| `afternoonFrom` | string (come morningFrom) \| null | `13:30` |
+| `afternoonTo` | string (come morningFrom) \| null | `19:00` |
+| `afternoonConversionTime` | string (come morningFrom) \| null | `12:30` |
+| `allowsSeasonal` | boolean | `false` |
+| `allowsSharing` | boolean | `false` |
+| `maxSpotsPerBooking` | number (intero da 1) \| null | `4` |
+| `bookingHorizonDays` | number (intero 0-730) \| null | `180` |
+| `scope` | string (enum OnlineBookingAudience) | `all` |
+| `maxBookingsPerDay` | number (intero da 1) \| null | `null` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property"]` |
+| `stayLimits[]` | BookingLimitRule[] (array di oggetti) | `[{"id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601", "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "startsOn": "2027-08-01", "endsOn": "2027-08-31", "minDays": 3, "maxDays": 14}]` |
+| `stayLimits[].id` | string (UUID) \| null | `3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601` |
+| `stayLimits[].sectorId` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `stayLimits[].startsOn` | string (giorno AAAA-MM-GG) | `2027-08-01` |
+| `stayLimits[].endsOn` | string (giorno AAAA-MM-GG) | `2027-08-31` |
+| `stayLimits[].minDays` | number (intero 1-366) \| null | `3` |
+| `stayLimits[].maxDays` | number (intero 1-366) \| null | `14` |
+| `legend[]` | LegendItem[] (array di oggetti, al massimo 30) | `[{"id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01", "label": "Ombrellone libero", "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01", "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"}]` |
+| `legend[].id` | string (UUID) \| null | `8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01` |
+| `legend[].label` | string (al massimo 100 caratteri) | `Ombrellone libero` |
+| `legend[].iconId` | string (UUID) \| null | `2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01` |
+| `legend[].iconUrl` | string (URL) \| null | `/assets/images/MapConfiguration_Umbrella1.svg` |
+| `goodToKnow` | string (HTML, al massimo 10.000 caratteri) \| null | `null` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il parcheggio è gratuito per i clienti.</p>` |
+
+#### Response
+
+Stato: 200 OK (le opzioni salvate).
+
+```json
+{
+  "isSuspendedByPlatform": false,
+  "isEnabled": true,
+  "isMapPick": true,
+  "isLocationRestricted": true,
+  "allowedSpotIds": [
+    "7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"
+  ],
+  "isPeriodRestricted": true,
+  "allowedPeriods": [
+    {
+      "startsOn": "2027-05-15",
+      "endsOn": "2027-09-20"
+    }
+  ],
+  "surchargeType": "disable",
+  "surchargeValue": 0,
+  "isBlocked": false,
+  "onlineBookingBlock": "three_hours_before",
+  "requiresManualConfirmation": false,
+  "allowsSameDayBooking": true,
+  "allowsHalfDay": true,
+  "morningFrom": "08:00:00",
+  "morningTo": "13:00:00",
+  "afternoonFrom": "13:30:00",
+  "afternoonTo": "19:00:00",
+  "afternoonConversionTime": "12:30:00",
+  "allowsSeasonal": false,
+  "allowsSharing": false,
+  "maxSpotsPerBooking": 4,
+  "bookingHorizonDays": 180,
+  "scope": "all",
+  "maxBookingsPerDay": null,
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property"
+  ],
+  "stayLimits": [
+    {
+      "id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601",
+      "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "startsOn": "2027-08-01",
+      "endsOn": "2027-08-31",
+      "minDays": 3,
+      "maxDays": 14
+    }
+  ],
+  "legend": [
+    {
+      "id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01",
+      "label": "Ombrellone libero",
+      "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01",
+      "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"
+    }
+  ],
+  "goodToKnow": null,
+  "usefulInfo": "<p>Il parcheggio è gratuito per i clienti.</p>",
+  "version": "91d2e0c4"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `isSuspendedByPlatform` | boolean | `false` |
+| `isMapPick` | boolean | `true` |
+| `isLocationRestricted` | boolean | `true` |
+| `allowedSpotIds` | string[] (UUID) | `["7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"]` |
+| `isPeriodRestricted` | boolean | `true` |
+| `allowedPeriods[]` | OnlineBookingPeriod[] (array di oggetti, al massimo 50) | `[{"startsOn": "2027-05-15", "endsOn": "2027-09-20"}]` |
+| `allowedPeriods[].startsOn` | string (giorno AAAA-MM-GG) | `2027-05-15` |
+| `allowedPeriods[].endsOn` | string (giorno AAAA-MM-GG) | `2027-09-20` |
+| `surchargeType` | string (enum SupplementType) | `disable` |
+| `surchargeValue` | number (decimale) | `0` |
+| `isBlocked` | boolean | `false` |
+| `onlineBookingBlock` | string (enum OnlineBookingBlock) | `three_hours_before` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `allowsSameDayBooking` | boolean | `true` |
+| `allowsHalfDay` | boolean | `true` |
+| `morningFrom` | string (HH:mm:ss in lettura, HH:mm in salvataggio) \| null | `08:00:00` |
+| `morningTo` | string (come morningFrom) \| null | `13:00:00` |
+| `afternoonFrom` | string (come morningFrom) \| null | `13:30:00` |
+| `afternoonTo` | string (come morningFrom) \| null | `19:00:00` |
+| `afternoonConversionTime` | string (come morningFrom) \| null | `12:30:00` |
+| `allowsSeasonal` | boolean | `false` |
+| `allowsSharing` | boolean | `false` |
+| `maxSpotsPerBooking` | number (intero da 1) \| null | `4` |
+| `bookingHorizonDays` | number (intero 0-730) \| null | `180` |
+| `scope` | string (enum OnlineBookingAudience) | `all` |
+| `maxBookingsPerDay` | number (intero da 1) \| null | `null` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property"]` |
+| `stayLimits[]` | BookingLimitRule[] (array di oggetti) | `[{"id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601", "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "startsOn": "2027-08-01", "endsOn": "2027-08-31", "minDays": 3, "maxDays": 14}]` |
+| `stayLimits[].id` | string (UUID) \| null | `3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601` |
+| `stayLimits[].sectorId` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `stayLimits[].startsOn` | string (giorno AAAA-MM-GG) | `2027-08-01` |
+| `stayLimits[].endsOn` | string (giorno AAAA-MM-GG) | `2027-08-31` |
+| `stayLimits[].minDays` | number (intero 1-366) \| null | `3` |
+| `stayLimits[].maxDays` | number (intero 1-366) \| null | `14` |
+| `legend[]` | LegendItem[] (array di oggetti, al massimo 30) | `[{"id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01", "label": "Ombrellone libero", "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01", "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"}]` |
+| `legend[].id` | string (UUID) \| null | `8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01` |
+| `legend[].label` | string (al massimo 100 caratteri) | `Ombrellone libero` |
+| `legend[].iconId` | string (UUID) \| null | `2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01` |
+| `legend[].iconUrl` | string (URL) \| null | `/assets/images/MapConfiguration_Umbrella1.svg` |
+| `goodToKnow` | string (HTML, al massimo 10.000 caratteri) \| null | `null` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il parcheggio è gratuito per i clienti.</p>` |
+| `version` | string | `91d2e0c4` |
+
+### GET `/api/catalog/map/icon-catalog`
+
+Catalogo delle icone della mappa.
+
+#### Payload
+
+Nessun corpo né parametri.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "id": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01",
+    "category": "umbrella",
+    "state": "free",
+    "name": "Umbrella1",
+    "url": "/assets/images/MapConfiguration_Umbrella1.svg",
+    "isDefault": true
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (UUID) | `2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01` |
+| `category` | string (enum MapIconCategory) | `umbrella` |
+| `state` | string | `free` |
+| `name` | string | `Umbrella1` |
+| `url` | string (URL) \| null | `/assets/images/MapConfiguration_Umbrella1.svg` |
+| `isDefault` | boolean | `true` |
+
+### GET `/api/catalog/property-info`
+
+Scheda pubblica dello stabilimento: indirizzo sul sito.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "slug": "lido-demo"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `slug` | string \| null | `lido-demo` |
+
+### GET `/api/catalog/online-settings/services`
+
+Prenotazioni online: opzioni dei servizi.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "isEnabled": true,
+  "surchargeType": "percentage",
+  "surchargeValue": 10,
+  "requiresManualConfirmation": false,
+  "sectionTitle": "<p>Prenota i tuoi servizi.</p>",
+  "usefulInfo": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property",
+    "pay_at_property_prepaid"
+  ],
+  "version": "0fb5c88e"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `surchargeType` | string (enum SupplementType) | `percentage` |
+| `surchargeValue` | number (decimale) | `10` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `sectionTitle` | string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) \| null | `<p>Prenota i tuoi servizi.</p>` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property", "pay_at_property_prepaid"]` |
+| `version` | string | `0fb5c88e` |
+
+### PUT `/api/catalog/online-settings/services`
+
+Prenotazioni online: salvataggio delle opzioni dei servizi.
+
+#### Payload
+
+```json
+{
+  "isEnabled": true,
+  "surchargeType": "percentage",
+  "surchargeValue": 10,
+  "requiresManualConfirmation": false,
+  "sectionTitle": "<p>Prenota i tuoi servizi.</p>",
+  "usefulInfo": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property",
+    "pay_at_property_prepaid"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `surchargeType` | string (enum SupplementType) | `percentage` |
+| `surchargeValue` | number (decimale) | `10` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `sectionTitle` | string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) \| null | `<p>Prenota i tuoi servizi.</p>` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property", "pay_at_property_prepaid"]` |
+
+#### Response
+
+Stato: 200 OK (le opzioni salvate).
+
+```json
+{
+  "isEnabled": true,
+  "surchargeType": "percentage",
+  "surchargeValue": 10,
+  "requiresManualConfirmation": false,
+  "sectionTitle": "<p>Prenota i tuoi servizi.</p>",
+  "usefulInfo": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property",
+    "pay_at_property_prepaid"
+  ],
+  "version": "6b0c41e7"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `surchargeType` | string (enum SupplementType) | `percentage` |
+| `surchargeValue` | number (decimale) | `10` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `sectionTitle` | string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) \| null | `<p>Prenota i tuoi servizi.</p>` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property", "pay_at_property_prepaid"]` |
+| `version` | string | `6b0c41e7` |
+
 ### GET `/api/catalog/map/settings`
 
 Configura mappa: impostazioni.
@@ -8596,11 +9113,11 @@ Stato: 200 OK.
 | `priceListPdf` | PropertyInfoDocument \| null | `null` |
 | `menuPdf` | PropertyInfoDocument \| null | `null` |
 
-## /booking
+## /payment
 
-### GET `/api/booking/get-online-services-options`
+### GET `/api/payment/get-stripe-information`
 
-Prenotazioni online: opzioni dei servizi.
+Prenotazioni online: conto Stripe collegato.
 
 #### Payload
 
@@ -8610,83 +9127,15 @@ Nessun corpo né parametri: lo stabilimento viene dal token.
 
 Stato: 200 OK.
 
-```json
-{
-  "isServicesOnlineBookingEnabled": true,
-  "supplementType": "Percentage",
-  "supplementValue": 10,
-  "isBookingConfirmationRequired": false,
-  "isPayNowAccepted": true,
-  "isPayAtPropertyAccepted": true,
-  "isPayAtPropertyWithoutCardAccepted": false,
-  "isDepositAccepted": false,
-  "isPrepaidCardAccepted": true,
-  "bookingPanelTitle": "<p>Prenota i tuoi servizi.</p>",
-  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
-  "version": "0fb5c88e"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `isServicesOnlineBookingEnabled` | boolean | `true` |
-| `supplementType` | string (enum SupplementType) | `Percentage` |
-| `supplementValue` | number (decimale) \| null | `10` |
-| `isBookingConfirmationRequired` | boolean | `false` |
-| `isPayNowAccepted` | boolean | `true` |
-| `isPayAtPropertyAccepted` | boolean | `true` |
-| `isPayAtPropertyWithoutCardAccepted` | boolean | `false` |
-| `isDepositAccepted` | boolean | `false` |
-| `isPrepaidCardAccepted` | boolean | `true` |
-| `bookingPanelTitle` | string (HTML) \| null | `<p>Prenota i tuoi servizi.</p>` |
-| `usefulInformation` | string (HTML) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
-| `version` | string | `0fb5c88e` |
-
-### POST `/api/booking/update-online-services-options`
-
-Prenotazioni online: salvataggio delle opzioni dei servizi.
-
-#### Payload
+Il corpo è solo l'id del conto Stripe collegato, come stringa JSON (tra virgolette, Content-Type application/json): acct_…. null se lo stabilimento non ha ancora collegato Stripe.
 
 ```json
-{
-  "isServicesOnlineBookingEnabled": true,
-  "supplementType": "Percentage",
-  "supplementValue": 10,
-  "isBookingConfirmationRequired": false,
-  "isPayNowAccepted": true,
-  "isPayAtPropertyAccepted": true,
-  "isPayAtPropertyWithoutCardAccepted": false,
-  "isDepositAccepted": false,
-  "isPrepaidCardAccepted": true,
-  "bookingPanelTitle": "<p>Prenota i tuoi servizi.</p>",
-  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>"
-}
+"acct_1QmDemo4Fz8Lw2Xc"
 ```
 
-| Property | Tipo | Esempio |
-|---|---|---|
-| `isServicesOnlineBookingEnabled` | boolean | `true` |
-| `supplementType` | string (enum SupplementType) | `Percentage` |
-| `supplementValue` | number (decimale) \| null | `10` |
-| `isBookingConfirmationRequired` | boolean | `false` |
-| `isPayNowAccepted` | boolean | `true` |
-| `isPayAtPropertyAccepted` | boolean | `true` |
-| `isPayAtPropertyWithoutCardAccepted` | boolean | `false` |
-| `isDepositAccepted` | boolean | `false` |
-| `isPrepaidCardAccepted` | boolean | `true` |
-| `bookingPanelTitle` | string (HTML) \| null | `<p>Prenota i tuoi servizi.</p>` |
-| `usefulInformation` | string (HTML) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+## /notification
 
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-## /system
-
-### GET `/api/system/email-configuration`
+### GET `/api/notification/email-configuration`
 
 Configurazione email: lettura.
 
@@ -8700,29 +9149,41 @@ Stato: 200 OK.
 
 ```json
 {
-  "senderMailAddress": "prenotazioni@lido-demo.example",
-  "senderName": "Lido Demo",
-  "smtpServerAddress": "smtp.lido-demo.example",
+  "fromEmail": "prenotazioni@lido-demo.example",
+  "fromName": "Lido Demo",
+  "smtpHost": "smtp.lido-demo.example",
   "smtpPort": 587,
   "smtpUsername": "prenotazioni@lido-demo.example",
   "hasSmtpPassword": true,
-  "smtpSecurity": "Tls",
+  "security": "starttls",
+  "verifyCertificate": true,
+  "testRecipients": [
+    "prova@lido-demo.example"
+  ],
+  "isActive": true,
+  "lastVerificationAt": "2026-11-20T10:15:00Z",
+  "lastVerificationError": null,
   "version": "9e40274f"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `senderMailAddress` | string | `prenotazioni@lido-demo.example` |
-| `senderName` | string | `Lido Demo` |
-| `smtpServerAddress` | string | `smtp.lido-demo.example` |
+| `fromEmail` | string \| null | `prenotazioni@lido-demo.example` |
+| `fromName` | string \| null | `Lido Demo` |
+| `smtpHost` | string \| null | `smtp.lido-demo.example` |
 | `smtpPort` | number (intero) | `587` |
-| `smtpUsername` | string | `prenotazioni@lido-demo.example` |
+| `smtpUsername` | string \| null | `prenotazioni@lido-demo.example` |
 | `hasSmtpPassword` | boolean | `true` |
-| `smtpSecurity` | string (enum SmtpSecurity) | `Tls` |
+| `security` | string (enum SmtpSecurity) | `starttls` |
+| `verifyCertificate` | boolean | `true` |
+| `testRecipients` | string[] (anche vuoto) | `["prova@lido-demo.example"]` |
+| `isActive` | boolean | `true` |
+| `lastVerificationAt` | string (data e ora UTC) \| null | `2026-11-20T10:15:00Z` |
+| `lastVerificationError` | string \| null | `null` |
 | `version` | string | `9e40274f` |
 
-### POST `/api/system/send-test-email`
+### POST `/api/notification/send-test-email`
 
 Configurazione email: invio di prova.
 
@@ -8730,25 +9191,33 @@ Configurazione email: invio di prova.
 
 ```json
 {
-  "senderMailAddress": "prenotazioni@lido-demo.example",
-  "senderName": "Lido Demo",
-  "smtpServerAddress": "smtp.lido-demo.example",
+  "fromEmail": "prenotazioni@lido-demo.example",
+  "fromName": "Lido Demo",
+  "smtpHost": "smtp.lido-demo.example",
   "smtpPort": 587,
   "smtpUsername": "prenotazioni@lido-demo.example",
-  "smtpPassword": "password-smtp-digitata",
-  "smtpSecurity": "Tls"
+  "smtpPassword": null,
+  "security": "starttls",
+  "verifyCertificate": true,
+  "testRecipients": [
+    "prova@lido-demo.example"
+  ],
+  "isActive": true
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `senderMailAddress` | string | `prenotazioni@lido-demo.example` |
-| `senderName` | string | `Lido Demo` |
-| `smtpServerAddress` | string | `smtp.lido-demo.example` |
+| `fromEmail` | string (email, al massimo 320 caratteri) | `prenotazioni@lido-demo.example` |
+| `fromName` | string (al massimo 160 caratteri) \| null | `Lido Demo` |
+| `smtpHost` | string (al massimo 255 caratteri) | `smtp.lido-demo.example` |
 | `smtpPort` | number (intero 1–65535) | `587` |
-| `smtpUsername` | string | `prenotazioni@lido-demo.example` |
-| `smtpPassword` | string \| null | `password-smtp-digitata` |
-| `smtpSecurity` | string (enum SmtpSecurity) \| null | `Tls` |
+| `smtpUsername` | string (al massimo 320 caratteri) | `prenotazioni@lido-demo.example` |
+| `smtpPassword` | string \| null | `null` |
+| `security` | string (enum SmtpSecurity) | `starttls` |
+| `verifyCertificate` | boolean | `true` |
+| `testRecipients` | string[] (email di al massimo 320 caratteri, al massimo 10, anche vuoto) | `["prova@lido-demo.example"]` |
+| `isActive` | boolean | `true` |
 
 #### Response
 
@@ -8756,7 +9225,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/system/save-email-configuration`
+### POST `/api/notification/save-email-configuration`
 
 Configurazione email: salvataggio.
 
@@ -8764,31 +9233,41 @@ Configurazione email: salvataggio.
 
 ```json
 {
-  "senderMailAddress": "prenotazioni@lido-demo.example",
-  "senderName": "Lido Demo",
-  "smtpServerAddress": "smtp.lido-demo.example",
+  "fromEmail": "prenotazioni@lido-demo.example",
+  "fromName": "Lido Demo",
+  "smtpHost": "smtp.lido-demo.example",
   "smtpPort": 465,
   "smtpUsername": "prenotazioni@lido-demo.example",
   "smtpPassword": "password-smtp-digitata",
-  "smtpSecurity": "Ssl"
+  "security": "ssl",
+  "verifyCertificate": true,
+  "testRecipients": [
+    "prova@lido-demo.example"
+  ],
+  "isActive": true
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `senderMailAddress` | string | `prenotazioni@lido-demo.example` |
-| `senderName` | string | `Lido Demo` |
-| `smtpServerAddress` | string | `smtp.lido-demo.example` |
+| `fromEmail` | string (email, al massimo 320 caratteri) | `prenotazioni@lido-demo.example` |
+| `fromName` | string (al massimo 160 caratteri) \| null | `Lido Demo` |
+| `smtpHost` | string (al massimo 255 caratteri) | `smtp.lido-demo.example` |
 | `smtpPort` | number (intero 1–65535) | `465` |
-| `smtpUsername` | string | `prenotazioni@lido-demo.example` |
+| `smtpUsername` | string (al massimo 320 caratteri) | `prenotazioni@lido-demo.example` |
 | `smtpPassword` | string \| null | `password-smtp-digitata` |
-| `smtpSecurity` | string (enum SmtpSecurity) \| null | `Ssl` |
+| `security` | string (enum SmtpSecurity) | `ssl` |
+| `verifyCertificate` | boolean | `true` |
+| `testRecipients` | string[] (email di al massimo 320 caratteri, al massimo 10, anche vuoto) | `["prova@lido-demo.example"]` |
+| `isActive` | boolean | `true` |
 
 #### Response
 
 Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
+
+## /system
 
 ### POST `/api/system/info-support`
 
@@ -8848,21 +9327,3 @@ Assistenza: messaggio al supporto.
 Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
-
-### GET `/api/system/get-stripe-information`
-
-Prenotazioni online: conto Stripe collegato.
-
-#### Payload
-
-Nessun corpo né parametri: lo stabilimento viene dal token.
-
-#### Response
-
-Stato: 200 OK.
-
-Il corpo è solo l'id del conto Stripe collegato, come stringa JSON (tra virgolette, Content-Type application/json): acct_…. null se lo stabilimento non ha ancora collegato Stripe.
-
-```json
-"acct_1QmDemo4Fz8Lw2Xc"
-```

@@ -116,14 +116,38 @@
       "role_not_assignable": "Dieses Konto kann nicht über das Panel verwaltet werden.",
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
     },
+    "booking": {
+      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
+    },
+    "payment": {
+      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
+    },
+    "notification": {
+      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
+      "test_email_failed": "Die Test-E-Mail wurde nicht gesendet. Antwort des Servers: {{detail}}",
+      "test_email_blocked": "In dieser Umgebung sind E-Mails gesperrt: Die Test-E-Mail wurde nicht gesendet.",
+      "unavailable": "Der E-Mail-Dienst antwortet nicht. Bitte versuche es in Kürze erneut."
+    },
+    "fiscalprint": {
+      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
+      "printer_not_found": "Dieser Drucker ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht."
+    },
+    "fiskaly": {
+      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
+      "not_enabled": "Der elektronische Kassenbeleg ist für dein Strandbad nicht aktiv.",
+      "terms_not_accepted": "Um das Konto einzurichten, akzeptiere zuerst die Nutzungsbedingungen.",
+      "unavailable": "Der Dienst für den elektronischen Kassenbeleg antwortet nicht. Bitte versuche es in Kürze erneut.",
+      "guide_not_found": "Die Anleitung ist noch nicht verfügbar."
+    },
     "audit": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
       "export_too_large": "Es gibt {total, number, integer} Einträge zum Exportieren, aber höchstens {max, number, integer} können exportiert werden: Schränke den Zeitraum oder die Filter ein und versuche es erneut."
     },
     "map": {
-      "spot_not_found": "Der Bereich der Karte ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
+      "spot_not_found": "Ein Platz oder Bereich der Karte ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
       "spots_outside_grid": "Einige Plätze liegen außerhalb dieser Größe: Es braucht mindestens {{rows}} Reihen und {{columns}} Artikel pro Reihe.",
-      "invalid_image": "Das Bild muss PNG, JPEG oder WebP sein und darf höchstens 5 MB groß sein."
+      "invalid_image": "Das Bild muss PNG, JPEG oder WebP sein und darf höchstens 5 MB groß sein.",
+      "icon_not_found": "Das Symbol ist nicht mehr vorhanden: Wähle ein anderes."
     },
     "catalog": {
       "sector_in_use": "Der Sektor/die Reihe {{sectorName}} wird verwendet und kann nicht gelöscht werden: Plätze auf der Karte {{mapSpots}}, Preislisten {{priceLists}}, Aufenthaltsgrenzen {{stayLimits}}, Rabatte {{discounts}}, Leistungen {{services}}, automatische Preise {{automaticPrices}}.",
@@ -136,7 +160,9 @@
       "property_not_found": "Das Strandbad deines Kontos wurde nicht gefunden. Melde dich ab und wieder an; wenn es erneut passiert, wende dich an den Support.",
       "country_not_found": "Das gewählte Land ist nicht mehr verfügbar: Wähle ein anderes.",
       "sector_not_found": "Der Sektor/die Reihe ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
-      "vat_rate_not_allowed": "Dieser Satz ist nicht zulässig. Gültige Sätze: {{rates}}."
+      "vat_rate_not_allowed": "Dieser Satz ist nicht zulässig. Gültige Sätze: {{rates}}.",
+      "stay_limit_not_found": "Die Buchungsregel ist nicht mehr vorhanden: Sie wurde vielleicht schon gelöscht.",
+      "stay_limit_overlap": "Zwei Regeln derselben Reihe/desselben Sektors überschneiden sich."
     },
     "pricing": {
       "season_required": "Lege zuerst die Daten der Saison fest.",
@@ -380,15 +406,20 @@
       },
       "online_booking_configuration": {
         "stripe": {
-          "title": "Verbinden Sie Ihr Stripe-Konto",
-          "subtitle": "Erhalten Sie Zahlungen für Online-Buchungen einfach und sicher.",
-          "description": "Summer Booking nutzt Stripe für die Online-Zahlungen Ihrer Buchungen, mit schnellen und sicheren Transaktionen und dem Schutz persönlicher Daten und Zahlungsdaten.",
+          "title": "Verbinde dein Stripe-Konto",
+          "subtitle": "Erhalte Zahlungen für Online-Buchungen einfach und sicher.",
+          "description": "Summer Booking nutzt Stripe für die Online-Zahlungen deiner Buchungen, mit schnellen und sicheren Transaktionen und dem Schutz persönlicher Daten und Zahlungsdaten.",
           "configure_title": "Stripe-Konto einrichten",
-          "configure_text": "Verbinden Sie Ihr bestehendes Stripe-Konto oder erstellen Sie ein neues, um Zahlungen für Online-Buchungen zu erhalten.",
+          "configure_text": "Verbinde dein bestehendes Stripe-Konto oder erstelle ein neues, um Zahlungen für Online-Buchungen zu erhalten.",
           "configure": "Stripe-Konto einrichten",
           "how_it_works": "So funktioniert es:",
           "step_1": "Bei Stripe anmelden oder registrieren",
-          "step_2": "Zahlungen einfach empfangen und tätigen"
+          "step_2": "Zahlungen einfach empfangen und tätigen",
+          "blocked": {
+            "title": "Verbindung nicht gestartet",
+            "text": "Der Browser blockiert den Speicher der Seite: Erlaube ihn für diese Website und versuche es erneut.",
+            "close": "Schließen"
+          }
         },
         "options": {
           "title": "Optionen verwalten",
@@ -396,11 +427,22 @@
           "online_booking_services": "Optionen Service-Buchungen"
         },
         "iframe": {
-          "title": "Iframe-Code für Ihre Website",
-          "subtitle": "Ihre Gäste buchen Sonnenschirme, Liegen und Services mit wenigen Klicks direkt auf Ihrer Website.",
-          "description": "Kopieren Sie den Einbettungscode an die gewünschte Stelle Ihrer Website. Das Widget gleicht die Verfügbarkeiten in Echtzeit mit dem Plan der Verwaltungssoftware ab.",
-          "direct_link": "Direkter Link",
-          "copy": "Link kopieren"
+          "title": "Iframe-Code für deine Website",
+          "subtitle": "Deine Gäste buchen Sonnenschirme, Liegen und Services mit wenigen Klicks direkt auf deiner Website.",
+          "description": "Kopiere den Einbettungscode an die gewünschte Stelle deiner Website. Das Widget gleicht die Verfügbarkeiten in Echtzeit mit dem Plan der Verwaltungssoftware ab.",
+          "direct_link": "Einbettungscode",
+          "copy": "Code kopieren",
+          "copied": {
+            "title": "Code kopiert",
+            "text": "Füge ihn in die Seite deiner Website ein.",
+            "close": "Schließen"
+          },
+          "copy_failed": {
+            "title": "Code nicht kopiert",
+            "text": "Markiere den Code und kopiere ihn von Hand.",
+            "close": "Schließen"
+          },
+          "no_address": "Das Strandbad hat noch keine Adresse auf der öffentlichen Website: Der Code erscheint hier, sobald es eine hat."
         },
         "booking_options": {
           "title": "Optionen Online-Buchungen",
@@ -461,8 +503,9 @@
           "legend": {
             "title": "Legende festlegen",
             "add": "Element hinzufügen",
-            "name_placeholder": "Name des Elements",
-            "choose_icon": "Symbol auswählen"
+            "choose_icon": "Symbol auswählen",
+            "name": "Name des Elements",
+            "no_icons": "Keine Symbole verfügbar."
           },
           "payment_methods": {
             "title": "Akzeptierte Zahlungsarten",
@@ -475,20 +518,19 @@
           "booking_limits": {
             "title": "Buchungslimits",
             "add": "Neue Regel hinzufügen",
-            "description": "Lege Buchungsregeln fest, um eine minimale und maximale Anzahl buchbarer Plätze in einem bestimmten Zeitraum und in einer bestimmten Reihe bzw. einem Sektor festzulegen.",
+            "description": "Lege Buchungsregeln fest, um eine minimale und maximale Anzahl buchbarer Tage in einem bestimmten Zeitraum und in einer bestimmten Reihe bzw. einem Sektor festzulegen.",
             "sector": "Reihe/Sektor",
             "date_from": "Vom",
             "date_to": "Bis",
-            "min": "Min",
-            "max": "Max"
-          },
-          "field_names": {
-            "supplement_value": "des Zuschlags"
+            "min": "Min. Tage",
+            "max": "Max. Tage",
+            "missing_sector": "Reihe/Sektor nicht mehr verfügbar"
           },
           "periods": {
-            "hint": "Klicken Sie auf zwei Daten, um einen Zeitraum zu wählen",
+            "hint": "Klicke auf zwei Daten, um einen Zeitraum zu wählen",
             "selected": "Gewählte Zeiträume:"
-          }
+          },
+          "suspended": "Der Online-Verkauf ist von der Plattform ausgesetzt: Du kannst die Optionen ändern, aber Kunden können nicht online buchen."
         },
         "services_options": {
           "title": "Optionen Service-Buchungen",
@@ -503,9 +545,6 @@
           },
           "supplement_value": "Zuschlagswert",
           "confirmation_required": "Bestätigung anfordern",
-          "field_names": {
-            "supplement_value": "des Zuschlags"
-          },
           "payment_methods": {
             "title": "Akzeptierte Zahlungsarten",
             "pay_now": "Jetzt bezahlen",
@@ -610,7 +649,7 @@
           },
           "smtp_port": {
             "title": "SMTP-Port:",
-            "description": "Der Port des SMTP-Servers. Übliche Ports sind: 25 (nicht sicher) 465 (SSL) 587 (TLS) SMTP-Authentifizierung:"
+            "description": "Der Port des SMTP-Servers. Übliche Ports sind: 25 (nicht sicher) 465 (SSL) 587 (STARTTLS) SMTP-Authentifizierung:"
           },
           "smtp_username": {
             "title": "Benutzername:",
@@ -619,18 +658,37 @@
           "smtp_password": {
             "title": "Passwort:",
             "description": "Das Passwort des Benutzernamens.",
-            "saved": "Passwort festgelegt: zum Ändern neu eingeben",
+            "saved": "Festgelegt: neues eingeben",
             "missing": "Kein Passwort festgelegt"
           },
           "smtp_security": {
             "title": "Sicherheitstyp:",
-            "description": "Der verwendete Sicherheitstyp (Keine, SSL, TLS)."
+            "description": "Der verwendete Sicherheitstyp (Keine, STARTTLS, SSL)."
+          },
+          "is_active": {
+            "title": "Diese Konfiguration verwenden:",
+            "description": "Wenn sie aus ist, gehen die E-Mails vom Absender Summer Booking aus und die Daten bleiben gespeichert."
+          },
+          "verify_certificate": {
+            "title": "Zertifikat prüfen:",
+            "description": "Prüft das Zertifikat des SMTP-Servers. Schalte sie nur aus, wenn der Server ein Zertifikat hat, das du kennst und dem du vertraust."
+          },
+          "test_recipients": {
+            "title": "Empfänger der Test-E-Mail:",
+            "description": "Die Adressen, an die die Test-E-Mail geht, durch Kommas getrennt."
           }
         },
         "security": {
           "none": "Keine",
-          "ssl": "SSL",
-          "tls": "TLS"
+          "starttls": "STARTTLS",
+          "ssl": "SSL"
+        },
+        "verification": {
+          "not_configured": "Keine Konfiguration gespeichert: Die E-Mails gehen vom Absender Summer Booking aus.",
+          "off": "Die Konfiguration ist aus: Die E-Mails gehen vom Absender Summer Booking aus.",
+          "never": "Die Konfiguration wurde noch nie getestet: Sende eine Test-E-Mail.",
+          "failed": "Der letzte Test am {at, date, medium} um {at, time, short} ist fehlgeschlagen: {detail}",
+          "done": "Letzter erfolgreicher Test am {at, date, medium} um {at, time, short}."
         },
         "send_test": "Test-E-Mail senden",
         "reset": "Zurücksetzen",
@@ -656,13 +714,20 @@
           "added": "Hinzugefügte Drucker",
           "table": {
             "name": "Name",
-            "ip": "IP-Adresse"
+            "ip": "IP-Adresse",
+            "mode": "Modus"
           },
           "delete": {
-            "title": "Drucker löschen",
-            "text": "Möchten Sie den Drucker {{name}} löschen?",
             "cancel": "Abbrechen",
-            "confirm": "Löschen"
+            "confirm": "Löschen",
+            "one": {
+              "title": "Drucker löschen",
+              "text": "Möchtest du den Drucker {{name}} löschen?"
+            },
+            "many": {
+              "title": "Drucker löschen",
+              "text": "Möchtest du die {{count}} ausgewählten Drucker löschen?"
+            }
           },
           "add": "Drucker hinzufügen",
           "form": {
@@ -672,13 +737,25 @@
             "port": "Port",
             "model": "Modell",
             "ssl": "SSL",
-            "modes": "Modi",
-            "fiscal": "Fiskal",
-            "non_fiscal": "Nicht fiskal",
-            "orders": "Bestellungen",
-            "text": "Text",
+            "choose": "Auswählen",
+            "mode": "Modus",
+            "modes": {
+              "fiscal": "Fiskal",
+              "non_fiscal": "Nicht fiskal",
+              "orders": "Bestellungen",
+              "text": "Text"
+            },
+            "models": {
+              "fp_81": "FP-81",
+              "fp_90": "FP-90",
+              "rch": "RCH",
+              "tm_t88": "TM-T88",
+              "tm_t20": "TM-T20",
+              "online": "Online"
+            },
             "departments": "Abteilungen",
             "vat_rate": "MwSt.-Satz",
+            "no_vat_rate": "Keiner",
             "first_header": "Kopfzeile Nr. 1",
             "second_header": "Kopfzeile Nr. 2",
             "footer": "Fußzeile",
@@ -692,7 +769,8 @@
           "accept": "Akzeptieren",
           "refuse": "Ablehnen",
           "send": "Senden",
-          "refused_warning": "Akzeptieren Sie die Nutzungsbedingungen, um den E-Beleg zu nutzen",
+          "refused_warning": "Akzeptiere die Nutzungsbedingungen, um den elektronischen Kassenbeleg zu nutzen",
+          "no_terms": "Die Nutzungsbedingungen sind noch nicht verfügbar.",
           "account": {
             "title": "Kontokonfiguration",
             "company_name": "Firmenname",
@@ -840,7 +918,9 @@
         },
         "save": "Speichern",
         "field_names": {
-          "days": "der Tage"
+          "days": "der Tage",
+          "credits": "der Guthaben",
+          "credit_value": "des Guthabens"
         },
         "saved": {
           "title": "Einstellungen gespeichert",
@@ -2091,6 +2171,14 @@
     "email_configuration": {
       "smtp_password": {
         "retype": "Sie haben die Verbindungsparameter geändert: Geben Sie das Passwort erneut ein oder legen Sie ein neues fest."
+      },
+      "security": {
+        "ssl_port": "Port 465 braucht die Sicherheit SSL.",
+        "start_tls_port": "Port 587 braucht die Sicherheit STARTTLS."
+      },
+      "test_recipients": {
+        "wrong": "Eine oder mehrere Adressen sind ungültig.",
+        "max": "Höchstens {{max}} Adressen."
       }
     },
     "min_items": "Mindestens {{count}} {{field}} erforderlich",
@@ -2104,6 +2192,7 @@
     "web_link": "Gib einen vollständigen Link ein, der mit http:// oder https:// beginnt",
     "email": "Ungültige E-Mail-Adresse",
     "max_length": "Höchstens {{max}} Zeichen",
+    "max_html_length": "Höchstens {{max}} Zeichen, einschließlich Formatierung",
     "phone_digits": "Nur Ziffern und Leerzeichen: Die Vorwahl gehört ins Feld daneben",
     "phone_digits_without_prefix": "Nur Ziffern und Leerzeichen, ohne +",
     "phone_max_length": "Die Nummer darf höchstens {{max}} Zeichen haben, Leerzeichen eingeschlossen",
@@ -2141,6 +2230,18 @@
       },
       "tables": {
         "seats_taken": "Plätze schon verwendet"
+      }
+    },
+    "online_booking_configuration": {
+      "periods": {
+        "overlap": "Zwei Datumsbereiche überschneiden sich.",
+        "max": "Höchstens {{max}} Datumsbereiche.",
+        "required": "Wähle mindestens einen Datumsbereich."
+      },
+      "booking_limits": {
+        "days_required": "Gib mindestens ein Minimum oder Maximum an Tagen an.",
+        "max_days": "Das Maximum an Tagen darf nicht kleiner als das Minimum sein.",
+        "overlap": "Diese Reihe/dieser Sektor hat an diesen Daten bereits eine Regel."
       }
     }
   },

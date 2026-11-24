@@ -37,6 +37,19 @@ describe('MapService', () => {
     controller.verify();
   });
 
+  it('should read the icons of the catalogue without parameters', () => {
+    const { map, controller } = setup();
+
+    map.iconCatalog().subscribe();
+
+    const { request } = controller.expectOne(
+      ({ method, url }) =>
+        method === 'GET' && url === `${environment.apiBaseUrl}/catalog/map/icon-catalog`,
+    );
+    expect(request.params.keys()).toEqual([]);
+    controller.verify();
+  });
+
   it('should send the custom background as the file field of a multipart form', () => {
     const { map, controller } = setup();
     const image = new File(['png'], 'sfondo.png', { type: 'image/png' });

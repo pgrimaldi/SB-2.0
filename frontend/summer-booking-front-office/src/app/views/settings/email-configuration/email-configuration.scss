@@ -53,6 +53,26 @@
   font-weight: 600;
 }
 
+.email__configuration__mandatory {
+  color: var(--color__layout__error);
+}
+
+.email__configuration__toggle {
+  margin-inline-end: auto;
+}
+
+.email__configuration__verification {
+  margin: 0;
+  color: var(--color__main__theme__one);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  overflow-wrap: anywhere;
+}
+
+.email__configuration__verification__failed {
+  color: var(--color__layout__error);
+}
+
 .email__configuration__error {
   margin: 0;
   color: var(--color__layout__error);

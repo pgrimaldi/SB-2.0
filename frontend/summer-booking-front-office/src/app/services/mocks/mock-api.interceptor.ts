@@ -2,7 +2,6 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { entriesListMock } from './audit/audit.mock';
 import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
-import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
   automaticPriceListMock,
   automaticPriceGeneralInfoMock,
@@ -68,6 +67,7 @@ import {
   saveBathhouseConfigurationServicesMock,
   standardServiceListMock,
   tableServiceListMock,
+  propertyInfoMock,
 } from './catalog/catalog.mock';
 import {
   mapSettingsMock,
@@ -76,6 +76,7 @@ import {
   updateMapBackgroundMock,
   updateMapConfigurationMock,
   uploadMapBackgroundMock,
+  mapIconCatalogMock,
 } from './catalog/map.mock';
 import {
   addSectorMock,
@@ -86,6 +87,12 @@ import {
   sectorListMock,
   updateSectorMock,
 } from './catalog/sectors.mock';
+import {
+  onlineBookingOptionsMock,
+  onlineServicesOptionsMock,
+  updateOnlineBookingOptionsMock,
+  updateOnlineServicesOptionsMock,
+} from './catalog/online-settings.mock';
 import {
   additionalItemListMock,
   createAdditionalItemMock,
@@ -128,7 +135,8 @@ import {
   seasonPeriodListMock,
   updateSeasonPeriodMock,
 } from './seasons/seasons.mock';
-import { saveSharingInformationMock, sharingGeneralInformationMock } from './sharing/sharing.mock';
+import { stripeInformationMock } from './payment/payment.mock';
+import { saveSharingSettingsMock, sharingSettingsMock } from './sharing/sharing.mock';
 import {
   addVoucherItemMock,
   deleteVoucherItemsMock,
@@ -138,13 +146,11 @@ import {
   voucherListMock,
 } from './vouchers/vouchers.mock';
 import {
-  contactSupportMock,
   emailConfigurationMock,
   saveEmailConfigurationMock,
   sendTestEmailMock,
-  stripeInformationMock,
-  supportInfoMock,
-} from './system/system.mock';
+} from './notification/notification.mock';
+import { contactSupportMock, supportInfoMock } from './system/system.mock';
 import {
   addPrinterMock,
   deletePrinterMock,
@@ -298,21 +304,21 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/system/email-configuration`
+    request.url === `${environment.apiBaseUrl}/notification/email-configuration`
   ) {
     return emailConfigurationMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/system/save-email-configuration`
+    request.url === `${environment.apiBaseUrl}/notification/save-email-configuration`
   ) {
     return saveEmailConfigurationMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/system/send-test-email`
+    request.url === `${environment.apiBaseUrl}/notification/send-test-email`
   ) {
     return sendTestEmailMock(request);
   }
@@ -333,77 +339,100 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/system/get-stripe-information`
+    request.url === `${environment.apiBaseUrl}/payment/get-stripe-information`
   ) {
     return stripeInformationMock(request);
   }
 
+  if (request.url === `${environment.apiBaseUrl}/catalog/online-settings`) {
+    if (request.method === 'GET') {
+      return onlineBookingOptionsMock(request);
+    }
+    if (request.method === 'PUT') {
+      return updateOnlineBookingOptionsMock(request);
+    }
+  }
+
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/booking/get-online-services-options`
+    request.url === `${environment.apiBaseUrl}/catalog/map/icon-catalog`
+  ) {
+    return mapIconCatalogMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/property-info`
+  ) {
+    return propertyInfoMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/online-settings/services`
   ) {
     return onlineServicesOptionsMock(request);
   }
 
   if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/booking/update-online-services-options`
+    request.method === 'PUT' &&
+    request.url === `${environment.apiBaseUrl}/catalog/online-settings/services`
   ) {
     return updateOnlineServicesOptionsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/printer-list`
+    request.url === `${environment.apiBaseUrl}/fiscalprint/printers/printer-list`
   ) {
     return printerListMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/taxation/electronic-receipt`
+    request.url === `${environment.apiBaseUrl}/fiskaly/electronic-receipt`
   ) {
     return electronicReceiptMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/set-is-active`
+    request.url === `${environment.apiBaseUrl}/fiscalprint/printers/set-is-active`
   ) {
     return setPrinterIsActiveMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/electronic-receipt-activation`
+    request.url === `${environment.apiBaseUrl}/fiskaly/electronic-receipt-activation`
   ) {
     return electronicReceiptActivationMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/save-electronic-receipt-account`
+    request.url === `${environment.apiBaseUrl}/fiskaly/save-electronic-receipt-account`
   ) {
     return saveElectronicReceiptAccountMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/add-printer`
+    request.url === `${environment.apiBaseUrl}/fiscalprint/printers/add-printer`
   ) {
     return addPrinterMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/delete-printer`
+    request.url === `${environment.apiBaseUrl}/fiscalprint/printers/delete-printer`
   ) {
     return deletePrinterMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/download-guide-electronic-receipt`
+    request.url === `${environment.apiBaseUrl}/fiskaly/download-guide-electronic-receipt`
   ) {
     return downloadGuideElectronicReceiptMock(request);
   }
@@ -490,16 +519,16 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/sharing/general-information`
+    request.url === `${environment.apiBaseUrl}/booking/sharing/settings`
   ) {
-    return sharingGeneralInformationMock(request);
+    return sharingSettingsMock(request);
   }
 
   if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/sharing/save-information`
+    request.method === 'PUT' &&
+    request.url === `${environment.apiBaseUrl}/booking/sharing/settings`
   ) {
-    return saveSharingInformationMock(request);
+    return saveSharingSettingsMock(request);
   }
 
   if (

@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { MapBackgroundImage } from '../../../entities/enums/map-background-image';
+import { MapCatalogIcon } from '../../../entities/settings/map-configuration/map-catalog-icon';
 import { MapGrid } from '../../../entities/settings/map-configuration/map-grid';
 import { MapLayout } from '../../../entities/settings/map-configuration/map-layout';
 import { MapSettings } from '../../../entities/settings/map-configuration/map-settings';
@@ -16,6 +17,10 @@ export class MapService {
 
   readonly settings = (): Observable<MapSettings> =>
     this.httpClient.get<MapSettings>(`${this.endpoint}/settings`);
+
+  /** The active icons of the catalogue of the map, backgrounds included. */
+  readonly iconCatalog = (): Observable<MapCatalogIcon[]> =>
+    this.httpClient.get<MapCatalogIcon[]>(`${this.endpoint}/icon-catalog`);
 
   /** The image goes as the `file` field of a multipart form. */
   readonly uploadBackground = (image: File): Observable<MapSettings> => {

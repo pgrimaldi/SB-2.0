@@ -56,6 +56,11 @@ export interface MaxLengthError extends ValidationError {
   readonly max: number;
 }
 
+export interface MaxHtmlLengthError extends ValidationError {
+  readonly kind: 'max_html_length';
+  readonly max: number;
+}
+
 export interface PhoneDigitsError extends ValidationError {
   readonly kind: 'phone_digits';
 }
@@ -168,6 +173,16 @@ export function maxRichTextLength<TPathKind extends PathKind = PathKind.Root>(
 ): void {
   validate(path, ({ value }): MaxLengthError | undefined =>
     visibleTextLength(value()) > max ? { kind: 'max_length', max } : undefined,
+  );
+}
+
+/** Rich text (HTML) longer than `max` characters with its formatting, as the backend counts them. */
+export function maxHtmlLength<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+  max: number,
+): void {
+  validate(path, ({ value }): MaxHtmlLengthError | undefined =>
+    (value()?.length ?? 0) > max ? { kind: 'max_html_length', max } : undefined,
   );
 }
 

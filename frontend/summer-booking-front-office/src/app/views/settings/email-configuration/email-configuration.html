@@ -8,20 +8,50 @@
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
       [disabled]="!canOverride()"
-      (clicked)="editable.set(true)"
+      (clicked)="allowChanges()"
     >
       <span appI18nText="management.settings.email_configuration.override.confirm"></span>
     </app-button>
   </section>
 
+  @if (verification(); as verification) {
+    <p
+      class="email__configuration__verification"
+      [class.email__configuration__verification__failed]="verification === EmailVerification.Failed"
+      [appI18nText]="'management.settings.email_configuration.verification.' + verification"
+      [params]="verificationParams()"
+    ></p>
+  }
+
   <section class="email__configuration__panel">
+    <app-form-row>
+      <div appFormRowLabel>
+        <p
+          class="email__configuration__title"
+          appI18nText="management.settings.email_configuration.fields.is_active.title"
+        ></p>
+        <p
+          class="email__configuration__description"
+          appI18nText="management.settings.email_configuration.fields.is_active.description"
+        ></p>
+      </div>
+      <app-toggle
+        class="email__configuration__toggle"
+        [error]="fieldErrors.isActive()"
+        [formField]="configurationForm.isActive"
+      />
+    </app-form-row>
     @for (field of maskedFields; track field.name) {
       <app-form-row>
         <div appFormRowLabel>
-          <p
-            class="email__configuration__title"
-            [appI18nText]="'management.settings.email_configuration.fields.' + field.key + '.title'"
-          ></p>
+          <p class="email__configuration__title">
+            {{
+              'management.settings.email_configuration.fields.' + field.key + '.title' | translate
+            }}
+            @if (field.isMandatory) {
+              <span class="email__configuration__mandatory">*</span>
+            }
+          </p>
           <p
             class="email__configuration__description"
             [appI18nText]="
@@ -43,6 +73,7 @@
           <app-filled-text-field
             class="email__configuration__field"
             [isPasswordField]="true"
+            [isCodeField]="field.name !== 'fromName'"
             autocomplete="new-password"
             [pathIcon]="eyeIcons"
             [placeholder]="
@@ -61,10 +92,10 @@
     }
     <app-form-row>
       <div appFormRowLabel>
-        <p
-          class="email__configuration__title"
-          appI18nText="management.settings.email_configuration.fields.smtp_security.title"
-        ></p>
+        <p class="email__configuration__title">
+          {{ 'management.settings.email_configuration.fields.smtp_security.title' | translate }}
+          <span class="email__configuration__mandatory">*</span>
+        </p>
         <p
           class="email__configuration__description"
           appI18nText="management.settings.email_configuration.fields.smtp_security.description"
@@ -73,8 +104,44 @@
       <app-filled-select
         class="email__configuration__field"
         [options]="securityOptions()"
-        [error]="fieldErrors.smtpSecurity()"
-        [formField]="configurationForm.smtpSecurity"
+        [error]="fieldErrors.security()"
+        [formField]="configurationForm.security"
+      />
+    </app-form-row>
+    <app-form-row>
+      <div appFormRowLabel>
+        <p
+          class="email__configuration__title"
+          appI18nText="management.settings.email_configuration.fields.verify_certificate.title"
+        ></p>
+        <p
+          class="email__configuration__description"
+          appI18nText="management.settings.email_configuration.fields.verify_certificate.description"
+        ></p>
+      </div>
+      <app-toggle
+        class="email__configuration__toggle"
+        [error]="fieldErrors.verifyCertificate()"
+        [formField]="configurationForm.verifyCertificate"
+      />
+    </app-form-row>
+    <app-form-row>
+      <div appFormRowLabel>
+        <p
+          class="email__configuration__title"
+          appI18nText="management.settings.email_configuration.fields.test_recipients.title"
+        ></p>
+        <p
+          class="email__configuration__description"
+          appI18nText="management.settings.email_configuration.fields.test_recipients.description"
+        ></p>
+      </div>
+      <app-filled-text-field
+        class="email__configuration__field"
+        autocomplete="off"
+        [isCodeField]="true"
+        [error]="fieldErrors.testRecipients()"
+        [formField]="configurationForm.testRecipients"
       />
     </app-form-row>
   </section>
@@ -87,7 +154,7 @@
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
       [pathIcon]="sendTestIcon"
-      [disabled]="(isBusy() && !isSendingTest()) || !loaded()"
+      [disabled]="(isBusy() && !isSendingTest()) || !loaded() || !hasRecipients()"
       [isLoading]="isSendingTest()"
       (clicked)="sendTestEmail()"
     >

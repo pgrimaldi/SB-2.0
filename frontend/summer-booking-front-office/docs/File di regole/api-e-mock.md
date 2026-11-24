@@ -110,8 +110,9 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   `app.config.ts` con la lingua corrente), come fa `app-table` (ricarica la pagina corrente, senza tornare a pagina 1).
   Anche ogni nuovo caricamento (dettaglio, elenco di una select…) dipende da `DATA_RELOAD`, e una cache di pagina
   (es. `BathhouseConfigurationCacheBehaviour`) scarta le sue risposte quando cambia.
-- Le enum viaggiano con i nomi dei membri .NET (es. `FullDay`), tranne i ruoli degli utenti (`UserRole`), che usano i
-  codici di `RoleCodes` del backend (es. `cashoperator`).
+- Le enum viaggiano con i codici del backend: dove ne ha già uno in snake_case (`Codes.Of`, es. `non_fiscal`, `pay_now`) si
+  usa quello, altrimenti il nome del membro .NET (es. `FullDay`). I ruoli degli utenti (`UserRole`) usano i codici di
+  `RoleCodes` (es. `cashoperator`).
 - Il prefisso del telefono viaggia senza `+` (es. `39`): `PhonePrefix` (`entities/enums/phone-prefix.ts`) dà il
   prefisso di ogni paese (codice ISO 3166-1 alpha-2) e si importa ovunque serva un prefisso con la bandiera.
 

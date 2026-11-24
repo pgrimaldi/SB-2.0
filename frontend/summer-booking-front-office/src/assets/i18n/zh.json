@@ -116,14 +116,38 @@
       "role_not_assignable": "无法在面板中管理此账户。",
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
     },
+    "booking": {
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
+    },
+    "payment": {
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
+    },
+    "notification": {
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
+      "test_email_failed": "测试邮件未发送。服务器答复：{{detail}}",
+      "test_email_blocked": "此环境中邮件已被阻止：测试邮件未发送。",
+      "unavailable": "邮件服务没有响应，请稍后重试。"
+    },
+    "fiscalprint": {
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
+      "printer_not_found": "该打印机已不存在：可能已被删除。"
+    },
+    "fiskaly": {
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
+      "not_enabled": "您的浴场尚未启用电子收据。",
+      "terms_not_accepted": "要配置账户，您必须先接受条款与条件。",
+      "unavailable": "电子收据服务没有响应，请稍后重试。",
+      "guide_not_found": "指南尚未提供。"
+    },
     "audit": {
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
       "export_too_large": "要导出的记录有 {total, number, integer} 条，但最多只能导出 {max, number, integer} 条：请缩小时间范围或筛选条件后重试。"
     },
     "map": {
-      "spot_not_found": "地图区域已不存在：可能已被删除。",
+      "spot_not_found": "地图上的某个位置或区域已不存在：可能已被删除。",
       "spots_outside_grid": "有位置超出这些尺寸：至少需要 {{rows}} 排，每排 {{columns}} 个物品。",
-      "invalid_image": "图片必须是 PNG、JPEG 或 WebP 格式，且不超过 5 MB。"
+      "invalid_image": "图片必须是 PNG、JPEG 或 WebP 格式，且不超过 5 MB。",
+      "icon_not_found": "图标已不存在：请选择其他图标。"
     },
     "catalog": {
       "sector_in_use": "区域/排 {{sectorName}} 正在使用，无法删除：地图上的位置 {{mapSpots}}，价目表 {{priceLists}}，停留限制 {{stayLimits}}，折扣 {{discounts}}，服务 {{services}}，自动价格 {{automaticPrices}}。",
@@ -136,7 +160,9 @@
       "property_not_found": "未找到您账户所属的浴场。请退出后重新登录；如果仍然出现，请联系支持。",
       "country_not_found": "所选国家已不可用：请选择其他国家。",
       "sector_not_found": "区域/排已不存在：可能已被删除。",
-      "vat_rate_not_allowed": "不允许使用此税率。有效税率：{{rates}}。"
+      "vat_rate_not_allowed": "不允许使用此税率。有效税率：{{rates}}。",
+      "stay_limit_not_found": "预订规则已不存在：可能已被删除。",
+      "stay_limit_overlap": "同一排/区域的两条规则重叠。"
     },
     "pricing": {
       "season_required": "请先设置季节日期。",
@@ -388,7 +414,12 @@
           "configure": "配置您的 Stripe 账户",
           "how_it_works": "使用方法：",
           "step_1": "登录或注册 Stripe",
-          "step_2": "轻松开始收款和付款"
+          "step_2": "轻松开始收款和付款",
+          "blocked": {
+            "title": "未能开始连接",
+            "text": "浏览器阻止了页面存储：请为此网站允许存储后重试。",
+            "close": "关闭"
+          }
         },
         "options": {
           "title": "管理选项",
@@ -399,8 +430,19 @@
           "title": "您网站的 iframe 代码",
           "subtitle": "让您的客人只需点击几下，即可直接在您的网站上预订遮阳伞、躺椅和服务。",
           "description": "将嵌入代码复制并粘贴到您网站的所需位置。该小部件会与管理系统的地图实时同步可用情况。",
-          "direct_link": "直接链接",
-          "copy": "复制链接"
+          "direct_link": "嵌入代码",
+          "copy": "复制代码",
+          "copied": {
+            "title": "代码已复制",
+            "text": "请将其粘贴到您网站的页面中。",
+            "close": "关闭"
+          },
+          "copy_failed": {
+            "title": "代码未复制",
+            "text": "请选中代码并手动复制。",
+            "close": "关闭"
+          },
+          "no_address": "该浴场在公共网站上还没有地址：有了地址后代码会显示在这里。"
         },
         "booking_options": {
           "title": "在线预订选项",
@@ -426,7 +468,7 @@
             "percentage": "百分比",
             "fixed": "固定"
           },
-          "supplement_value": "附加费金额",
+          "supplement_value": "附加费数值",
           "online_booking_block": "在线预订截止",
           "online_booking_blocks": {
             "disabled": "已停用",
@@ -461,8 +503,9 @@
           "legend": {
             "title": "设置图例",
             "add": "添加项目",
-            "name_placeholder": "项目名称",
-            "choose_icon": "选择图标"
+            "choose_icon": "选择图标",
+            "name": "项目名称",
+            "no_icons": "没有可用的图标。"
           },
           "payment_methods": {
             "title": "接受的付款方式",
@@ -475,20 +518,19 @@
           "booking_limits": {
             "title": "预订限制配置",
             "add": "添加新规则",
-            "description": "创建预订规则，为指定期间和指定排/区域设置可预订位置的最小和最大数量。",
+            "description": "创建预订规则，为指定期间和指定排/区域设置可预订天数的最小值和最大值。",
             "sector": "排/区域",
             "date_from": "从",
             "date_to": "至",
-            "min": "最少",
-            "max": "最多"
-          },
-          "field_names": {
-            "supplement_value": "附加费"
+            "min": "最少天数",
+            "max": "最多天数",
+            "missing_sector": "排/区域已不可用"
           },
           "periods": {
             "hint": "点击两个日期以选择一个时间段",
             "selected": "已选日期区间："
-          }
+          },
+          "suspended": "平台已暂停在线销售：您可以更改选项，但客户无法在线预订。"
         },
         "services_options": {
           "title": "服务在线预订选项",
@@ -501,11 +543,8 @@
             "percentage": "百分比",
             "fixed": "固定"
           },
-          "supplement_value": "附加费金额",
+          "supplement_value": "附加费数值",
           "confirmation_required": "需要确认预订",
-          "field_names": {
-            "supplement_value": "附加费"
-          },
           "payment_methods": {
             "title": "接受的付款方式",
             "pay_now": "立即付款",
@@ -610,7 +649,7 @@
           },
           "smtp_port": {
             "title": "SMTP 端口：",
-            "description": "SMTP 服务器的端口。常用端口：25（不安全）465（SSL）587（TLS）SMTP 认证："
+            "description": "SMTP 服务器的端口。常用端口：25（不安全）465（SSL）587（STARTTLS）SMTP 认证："
           },
           "smtp_username": {
             "title": "用户名：",
@@ -619,18 +658,37 @@
           "smtp_password": {
             "title": "密码：",
             "description": "该用户名对应的密码。",
-            "saved": "已设置密码：输入新密码即可更改",
+            "saved": "已设置：输入新密码",
             "missing": "未设置密码"
           },
           "smtp_security": {
             "title": "安全类型：",
-            "description": "使用的安全类型（无、SSL、TLS）。"
+            "description": "使用的安全类型（无、STARTTLS、SSL）。"
+          },
+          "is_active": {
+            "title": "使用此配置：",
+            "description": "关闭后，邮件由 Summer Booking 发件人发送，数据仍会保留。"
+          },
+          "verify_certificate": {
+            "title": "验证证书：",
+            "description": "检查 SMTP 服务器的证书。仅当服务器使用您了解并信任的证书时才关闭。"
+          },
+          "test_recipients": {
+            "title": "测试邮件收件人：",
+            "description": "接收测试邮件的地址，用逗号分隔。"
           }
         },
         "security": {
           "none": "无",
-          "ssl": "SSL",
-          "tls": "TLS"
+          "starttls": "STARTTLS",
+          "ssl": "SSL"
+        },
+        "verification": {
+          "not_configured": "未保存任何配置：邮件由 Summer Booking 发件人发送。",
+          "off": "配置已关闭：邮件由 Summer Booking 发件人发送。",
+          "never": "该配置从未测试过：请发送测试邮件。",
+          "failed": "最近一次测试（{at, date, medium} {at, time, short}）失败：{detail}",
+          "done": "最近一次成功测试：{at, date, medium} {at, time, short}。"
         },
         "send_test": "发送测试邮件",
         "reset": "重置",
@@ -656,13 +714,20 @@
           "added": "已添加的打印机",
           "table": {
             "name": "名称",
-            "ip": "IP 地址"
+            "ip": "IP 地址",
+            "mode": "模式"
           },
           "delete": {
-            "title": "删除打印机",
-            "text": "要删除打印机 {{name}} 吗？",
             "cancel": "取消",
-            "confirm": "删除"
+            "confirm": "删除",
+            "one": {
+              "title": "删除打印机",
+              "text": "要删除打印机 {{name}} 吗？"
+            },
+            "many": {
+              "title": "删除打印机",
+              "text": "要删除所选的 {{count}} 台打印机吗？"
+            }
           },
           "add": "添加打印机",
           "form": {
@@ -672,13 +737,25 @@
             "port": "端口",
             "model": "型号",
             "ssl": "SSL",
-            "modes": "模式",
-            "fiscal": "税控",
-            "non_fiscal": "非税控",
-            "orders": "订单",
-            "text": "文本",
+            "choose": "请选择",
+            "mode": "模式",
+            "modes": {
+              "fiscal": "税控",
+              "non_fiscal": "非税控",
+              "orders": "订单",
+              "text": "文本"
+            },
+            "models": {
+              "fp_81": "FP-81",
+              "fp_90": "FP-90",
+              "rch": "RCH",
+              "tm_t88": "TM-T88",
+              "tm_t20": "TM-T20",
+              "online": "Online"
+            },
             "departments": "部门",
             "vat_rate": "税率",
+            "no_vat_rate": "无",
             "first_header": "页眉 1",
             "second_header": "页眉 2",
             "footer": "页脚",
@@ -692,7 +769,8 @@
           "accept": "我接受",
           "refuse": "我不接受",
           "send": "发送",
-          "refused_warning": "要使用电子收据，您必须接受使用条款",
+          "refused_warning": "要使用电子收据，您必须接受条款与条件",
+          "no_terms": "条款与条件尚未提供。",
           "account": {
             "title": "账户配置",
             "company_name": "公司名称",
@@ -840,7 +918,9 @@
         },
         "save": "保存",
         "field_names": {
-          "days": "天数"
+          "days": "天数",
+          "credits": "积分数",
+          "credit_value": "积分"
         },
         "saved": {
           "title": "设置已保存",
@@ -2091,6 +2171,14 @@
     "email_configuration": {
       "smtp_password": {
         "retype": "您更改了连接参数：请重新输入密码或输入新密码。"
+      },
+      "security": {
+        "ssl_port": "端口 465 需要 SSL 安全类型。",
+        "start_tls_port": "端口 587 需要 STARTTLS 安全类型。"
+      },
+      "test_recipients": {
+        "wrong": "一个或多个地址无效。",
+        "max": "最多 {{max}} 个地址。"
       }
     },
     "min_items": "必须至少定义 {{count}} 个{{field}}",
@@ -2104,6 +2192,7 @@
     "web_link": "请输入以 http:// 或 https:// 开头的完整链接",
     "email": "电子邮件无效",
     "max_length": "最多 {{max}} 个字符",
+    "max_html_length": "最多 {{max}} 个字符（含格式）",
     "phone_digits": "只能输入数字和空格：区号请填在旁边的字段",
     "phone_digits_without_prefix": "只能输入数字和空格，不含 +",
     "phone_max_length": "号码最多 {{max}} 个字符（含空格）",
@@ -2141,6 +2230,18 @@
       },
       "tables": {
         "seats_taken": "座位数重复"
+      }
+    },
+    "online_booking_configuration": {
+      "periods": {
+        "overlap": "有两个日期区间重叠。",
+        "max": "最多 {{max}} 个日期区间。",
+        "required": "请至少选择一个日期区间。"
+      },
+      "booking_limits": {
+        "days_required": "请至少填写最少天数或最多天数之一。",
+        "max_days": "最多天数不能小于最少天数。",
+        "overlap": "该排/区域在这些日期已有规则。"
       }
     }
   },

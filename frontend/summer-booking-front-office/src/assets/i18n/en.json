@@ -116,14 +116,38 @@
       "role_not_assignable": "This account cannot be managed from the panel.",
       "property_required": "Your account is not linked to a property: sign in with an account of the property."
     },
+    "booking": {
+      "property_required": "Your account is not linked to a property: sign in with an account of the property."
+    },
+    "payment": {
+      "property_required": "Your account is not linked to a property: sign in with an account of the property."
+    },
+    "notification": {
+      "property_required": "Your account is not linked to a property: sign in with an account of the property.",
+      "test_email_failed": "The test email was not sent. Server answer: {{detail}}",
+      "test_email_blocked": "Emails are blocked in this environment: the test email was not sent.",
+      "unavailable": "The email service is not responding. Please try again shortly."
+    },
+    "fiscalprint": {
+      "property_required": "Your account is not linked to a property: sign in with an account of the property.",
+      "printer_not_found": "This printer no longer exists: it may already have been deleted."
+    },
+    "fiskaly": {
+      "property_required": "Your account is not linked to a property: sign in with an account of the property.",
+      "not_enabled": "The electronic receipt is not active for your property.",
+      "terms_not_accepted": "To set up the account you must first accept the terms and conditions.",
+      "unavailable": "The electronic receipt service is not responding. Please try again shortly.",
+      "guide_not_found": "The guide is not available yet."
+    },
     "audit": {
       "property_required": "Your account is not linked to a property: sign in with an account of the property.",
       "export_too_large": "There are {total, number, integer} entries to export, but at most {max, number, integer} can be exported: narrow the period or the filters and try again."
     },
     "map": {
-      "spot_not_found": "The map area is no longer there: it may already have been deleted.",
+      "spot_not_found": "A spot or area of the map is no longer there: it may already have been deleted.",
       "spots_outside_grid": "Some spots are outside these sizes: at least {{rows}} rows and {{columns}} items per row are needed.",
-      "invalid_image": "The image must be PNG, JPEG or WebP and no larger than 5 MB."
+      "invalid_image": "The image must be PNG, JPEG or WebP and no larger than 5 MB.",
+      "icon_not_found": "The icon is no longer there: choose another one."
     },
     "catalog": {
       "sector_in_use": "The sector/row {{sectorName}} is in use and cannot be deleted: spots on the map {{mapSpots}}, price lists {{priceLists}}, stay limits {{stayLimits}}, discounts {{discounts}}, services {{services}}, automatic prices {{automaticPrices}}.",
@@ -136,7 +160,9 @@
       "property_not_found": "The property of your account was not found. Sign out and sign in again; if it happens again, contact support.",
       "country_not_found": "The selected country is no longer available: choose another one.",
       "sector_not_found": "The sector/row is no longer there: it may already have been deleted.",
-      "vat_rate_not_allowed": "This rate is not allowed. Valid rates: {{rates}}."
+      "vat_rate_not_allowed": "This rate is not allowed. Valid rates: {{rates}}.",
+      "stay_limit_not_found": "The booking rule is no longer there: it may already have been deleted.",
+      "stay_limit_overlap": "Two rules of the same row/sector overlap."
     },
     "pricing": {
       "season_required": "Set the season dates first.",
@@ -388,7 +414,12 @@
           "configure": "Set up your Stripe account",
           "how_it_works": "How it works:",
           "step_1": "Sign in or sign up on Stripe",
-          "step_2": "Start receiving and making payments easily"
+          "step_2": "Start receiving and making payments easily",
+          "blocked": {
+            "title": "Connection not started",
+            "text": "The browser blocks the storage of the page: allow it for this site and try again.",
+            "close": "Close"
+          }
         },
         "options": {
           "title": "Manage options",
@@ -399,8 +430,19 @@
           "title": "Iframe code for your website",
           "subtitle": "Let your guests book umbrellas, sunbeds and services directly from your website in a few clicks.",
           "description": "Copy and paste the embed code into the section you want on your site. The widget syncs availability in real time with the map of the management system.",
-          "direct_link": "Direct link",
-          "copy": "Copy link"
+          "direct_link": "Embed code",
+          "copy": "Copy code",
+          "copied": {
+            "title": "Code copied",
+            "text": "Paste it into the page of your website.",
+            "close": "Close"
+          },
+          "copy_failed": {
+            "title": "Code not copied",
+            "text": "Select the code and copy it by hand.",
+            "close": "Close"
+          },
+          "no_address": "The property has no address on the public site yet: the code will appear here once it has one."
         },
         "booking_options": {
           "title": "Online booking options",
@@ -461,8 +503,9 @@
           "legend": {
             "title": "Set up legend",
             "add": "Add item",
-            "name_placeholder": "Item name",
-            "choose_icon": "Choose icon"
+            "choose_icon": "Choose icon",
+            "name": "Item name",
+            "no_icons": "No icons available."
           },
           "payment_methods": {
             "title": "Accepted payment methods",
@@ -475,20 +518,19 @@
           "booking_limits": {
             "title": "Booking limits",
             "add": "Add new rule",
-            "description": "Create booking rules to set a minimum and maximum number of bookable spots in a given period and in a given row/sector.",
+            "description": "Create booking rules to set a minimum and maximum number of bookable days in a given period and in a given row/sector.",
             "sector": "Row/sector",
             "date_from": "From",
             "date_to": "To",
-            "min": "Min",
-            "max": "Max"
-          },
-          "field_names": {
-            "supplement_value": "of the supplement"
+            "min": "Min days",
+            "max": "Max days",
+            "missing_sector": "Row/sector no longer available"
           },
           "periods": {
             "hint": "Click two dates to select a range",
             "selected": "Selected date ranges:"
-          }
+          },
+          "suspended": "Online sales are suspended by the platform: you can change the options, but customers cannot book online."
         },
         "services_options": {
           "title": "Service booking options",
@@ -503,9 +545,6 @@
           },
           "supplement_value": "Supplement value",
           "confirmation_required": "Require booking confirmation",
-          "field_names": {
-            "supplement_value": "of the supplement"
-          },
           "payment_methods": {
             "title": "Accepted payment methods",
             "pay_now": "Pay now",
@@ -610,7 +649,7 @@
           },
           "smtp_port": {
             "title": "SMTP port:",
-            "description": "The port of the SMTP server. Common ports are: 25 (not secure) 465 (SSL) 587 (TLS) SMTP authentication:"
+            "description": "The port of the SMTP server. Common ports are: 25 (not secure) 465 (SSL) 587 (STARTTLS) SMTP authentication:"
           },
           "smtp_username": {
             "title": "Username:",
@@ -624,13 +663,32 @@
           },
           "smtp_security": {
             "title": "Security type:",
-            "description": "The security type used (None, SSL, TLS)."
+            "description": "The security type used (None, STARTTLS, SSL)."
+          },
+          "is_active": {
+            "title": "Use this configuration:",
+            "description": "When off, the emails leave from the Summer Booking sender and the data stays saved."
+          },
+          "verify_certificate": {
+            "title": "Verify the certificate:",
+            "description": "Checks the certificate of the SMTP server. Turn it off only if the server has a certificate you know and trust."
+          },
+          "test_recipients": {
+            "title": "Test email recipients:",
+            "description": "The addresses the test email goes to, separated by commas."
           }
         },
         "security": {
           "none": "None",
-          "ssl": "SSL",
-          "tls": "TLS"
+          "starttls": "STARTTLS",
+          "ssl": "SSL"
+        },
+        "verification": {
+          "not_configured": "No configuration saved: the emails leave from the Summer Booking sender.",
+          "off": "The configuration is off: the emails leave from the Summer Booking sender.",
+          "never": "The configuration has never been tested: send a test email.",
+          "failed": "The last test, on {at, date, medium} at {at, time, short}, failed: {detail}",
+          "done": "Last successful test on {at, date, medium} at {at, time, short}."
         },
         "send_test": "Send test email",
         "reset": "Reset",
@@ -656,13 +714,20 @@
           "added": "Added printers",
           "table": {
             "name": "Name",
-            "ip": "IP address"
+            "ip": "IP address",
+            "mode": "Mode"
           },
           "delete": {
-            "title": "Delete printer",
-            "text": "Do you want to delete the printer {{name}}?",
             "cancel": "Cancel",
-            "confirm": "Delete"
+            "confirm": "Delete",
+            "one": {
+              "title": "Delete printer",
+              "text": "Do you want to delete the printer {{name}}?"
+            },
+            "many": {
+              "title": "Delete printers",
+              "text": "Do you want to delete the {{count}} selected printers?"
+            }
           },
           "add": "Add printer",
           "form": {
@@ -672,13 +737,25 @@
             "port": "Port",
             "model": "Model",
             "ssl": "SSL",
-            "modes": "Modes",
-            "fiscal": "Fiscal",
-            "non_fiscal": "Non-fiscal",
-            "orders": "Orders",
-            "text": "Text",
+            "choose": "Select",
+            "mode": "Mode",
+            "modes": {
+              "fiscal": "Fiscal",
+              "non_fiscal": "Non-fiscal",
+              "orders": "Orders",
+              "text": "Text"
+            },
+            "models": {
+              "fp_81": "FP-81",
+              "fp_90": "FP-90",
+              "rch": "RCH",
+              "tm_t88": "TM-T88",
+              "tm_t20": "TM-T20",
+              "online": "Online"
+            },
             "departments": "Departments",
             "vat_rate": "VAT rate",
+            "no_vat_rate": "None",
             "first_header": "Header no. 1",
             "second_header": "Header no. 2",
             "footer": "Footer",
@@ -692,7 +769,8 @@
           "accept": "I accept",
           "refuse": "I do not accept",
           "send": "Send",
-          "refused_warning": "To use the electronic receipt you must accept the terms of use",
+          "refused_warning": "To use the electronic receipt you must accept the terms and conditions",
+          "no_terms": "The terms and conditions are not available yet.",
           "account": {
             "title": "Account setup",
             "company_name": "Company name",
@@ -840,7 +918,9 @@
         },
         "save": "Save",
         "field_names": {
-          "days": "days"
+          "days": "days",
+          "credits": "credits",
+          "credit_value": "credit"
         },
         "saved": {
           "title": "Settings saved",
@@ -2091,6 +2171,14 @@
     "email_configuration": {
       "smtp_password": {
         "retype": "You changed the connection settings: type the password again or enter a new one."
+      },
+      "security": {
+        "ssl_port": "Port 465 needs SSL security.",
+        "start_tls_port": "Port 587 needs STARTTLS security."
+      },
+      "test_recipients": {
+        "wrong": "One or more addresses are not valid.",
+        "max": "At most {{max}} addresses."
       }
     },
     "min_items": "At least {{count}} {{field}} must be defined",
@@ -2104,6 +2192,7 @@
     "web_link": "Enter a full link starting with http:// or https://",
     "email": "Invalid email",
     "max_length": "At most {{max}} characters",
+    "max_html_length": "At most {{max}} characters, formatting included",
     "phone_digits": "Only digits and spaces: the prefix goes in the field beside",
     "phone_digits_without_prefix": "Only digits and spaces, no +",
     "phone_max_length": "The number can have at most {{max}} characters, spaces included",
@@ -2141,6 +2230,18 @@
       },
       "tables": {
         "seats_taken": "Seats already used"
+      }
+    },
+    "online_booking_configuration": {
+      "periods": {
+        "overlap": "Two date ranges overlap.",
+        "max": "At most {{max}} date ranges.",
+        "required": "Choose at least one date range."
+      },
+      "booking_limits": {
+        "days_required": "Enter at least one of minimum and maximum days.",
+        "max_days": "The maximum number of days cannot be less than the minimum.",
+        "overlap": "This row/sector already has a rule on these dates."
       }
     }
   },

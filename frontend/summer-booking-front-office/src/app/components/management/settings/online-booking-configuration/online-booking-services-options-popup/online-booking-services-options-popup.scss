@@ -84,7 +84,8 @@ app-online-booking-services-options-popup {
   line-height: var(--filled-field-height, 1.625rem);
 }
 
-.online__booking__services__options__popup__error {
+.online__booking__services__options__popup__error,
+.online__booking__services__options__popup__general {
   margin: 0;
   color: var(--color__layout__error);
   font-size: 0.75rem;

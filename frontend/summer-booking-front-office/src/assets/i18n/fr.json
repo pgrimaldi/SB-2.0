@@ -116,14 +116,38 @@
       "role_not_assignable": "Ce compte ne peut pas être géré depuis le panneau.",
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
     },
+    "booking": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
+    },
+    "payment": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
+    },
+    "notification": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
+      "test_email_failed": "L'e-mail de test n'est pas parti. Réponse du serveur : {{detail}}",
+      "test_email_blocked": "Les e-mails sont bloqués dans cet environnement : l'e-mail de test n'est pas parti.",
+      "unavailable": "Le service e-mail ne répond pas. Réessayez dans quelques instants."
+    },
+    "fiscalprint": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
+      "printer_not_found": "Cette imprimante n'existe plus : elle a peut-être déjà été supprimée."
+    },
+    "fiskaly": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
+      "not_enabled": "Le ticket électronique n'est pas activé pour votre établissement.",
+      "terms_not_accepted": "Pour configurer le compte, acceptez d'abord les conditions générales.",
+      "unavailable": "Le service du ticket électronique ne répond pas. Réessayez dans quelques instants.",
+      "guide_not_found": "Le guide n'est pas encore disponible."
+    },
     "audit": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
       "export_too_large": "Il y a {total, number, integer} entrées à exporter, mais on peut en exporter au maximum {max, number, integer} : réduisez la période ou les filtres et réessayez."
     },
     "map": {
-      "spot_not_found": "La zone de la carte n'existe plus : elle a peut-être déjà été supprimée.",
+      "spot_not_found": "Une place ou une zone de la carte n'existe plus : elle a peut-être déjà été supprimée.",
       "spots_outside_grid": "Des emplacements sont hors de ces dimensions : il faut au moins {{rows}} rangées et {{columns}} articles par rangée.",
-      "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo."
+      "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo.",
+      "icon_not_found": "L'icône n'existe plus : choisissez-en une autre."
     },
     "catalog": {
       "sector_in_use": "Le secteur/la rangée {{sectorName}} est utilisé et ne peut pas être supprimé : emplacements sur la carte {{mapSpots}}, tarifs {{priceLists}}, limites de séjour {{stayLimits}}, remises {{discounts}}, services {{services}}, prix automatiques {{automaticPrices}}.",
@@ -136,7 +160,9 @@
       "property_not_found": "L'établissement de votre compte est introuvable. Déconnectez-vous et reconnectez-vous ; si cela se reproduit, contactez l'assistance.",
       "country_not_found": "Le pays choisi n'est plus disponible : choisissez-en un autre.",
       "sector_not_found": "Le secteur/la rangée n'existe plus : il a peut-être déjà été supprimé.",
-      "vat_rate_not_allowed": "Ce taux n'est pas autorisé. Taux valides : {{rates}}."
+      "vat_rate_not_allowed": "Ce taux n'est pas autorisé. Taux valides : {{rates}}.",
+      "stay_limit_not_found": "La règle de réservation n'existe plus : elle a peut-être déjà été supprimée.",
+      "stay_limit_overlap": "Deux règles de la même rangée/du même secteur se chevauchent."
     },
     "pricing": {
       "season_required": "Définissez d'abord les dates de la saison.",
@@ -388,7 +414,12 @@
           "configure": "Configurer le compte Stripe",
           "how_it_works": "Comment ça marche :",
           "step_1": "Connectez-vous ou inscrivez-vous sur Stripe",
-          "step_2": "Recevez et effectuez des paiements facilement"
+          "step_2": "Recevez et effectuez des paiements facilement",
+          "blocked": {
+            "title": "Connexion non démarrée",
+            "text": "Le navigateur bloque le stockage de la page : autorisez-le pour ce site et réessayez.",
+            "close": "Fermer"
+          }
         },
         "options": {
           "title": "Gérer les options",
@@ -399,8 +430,19 @@
           "title": "Code iframe pour votre site web",
           "subtitle": "Permettez à vos clients de réserver parasols, transats et services directement depuis votre site en quelques clics.",
           "description": "Copiez et collez le code d'intégration dans la section souhaitée de votre site. Le widget synchronise les disponibilités en temps réel avec le plan du logiciel.",
-          "direct_link": "Lien direct",
-          "copy": "Copier le lien"
+          "direct_link": "Code d'intégration",
+          "copy": "Copier le code",
+          "copied": {
+            "title": "Code copié",
+            "text": "Collez-le dans la page de votre site.",
+            "close": "Fermer"
+          },
+          "copy_failed": {
+            "title": "Code non copié",
+            "text": "Sélectionnez le code et copiez-le à la main.",
+            "close": "Fermer"
+          },
+          "no_address": "L'établissement n'a pas encore d'adresse sur le site public : le code apparaîtra ici dès qu'il en aura une."
         },
         "booking_options": {
           "title": "Options réservations en ligne",
@@ -461,8 +503,9 @@
           "legend": {
             "title": "Configurer la légende",
             "add": "Ajouter un élément",
-            "name_placeholder": "Nom de l'élément",
-            "choose_icon": "Choisir une icône"
+            "choose_icon": "Choisir une icône",
+            "name": "Nom de l'élément",
+            "no_icons": "Aucune icône disponible."
           },
           "payment_methods": {
             "title": "Moyens de paiement acceptés",
@@ -475,20 +518,19 @@
           "booking_limits": {
             "title": "Limites de réservation",
             "add": "Ajouter une règle",
-            "description": "Créez des règles de réservation pour fixer un nombre minimum et maximum de places réservables sur une période et dans une rangée/un secteur donnés.",
+            "description": "Créez des règles de réservation pour fixer un nombre minimum et maximum de jours réservables sur une période et dans une rangée/un secteur donnés.",
             "sector": "Rangée/secteur",
             "date_from": "Du",
             "date_to": "Au",
-            "min": "Min",
-            "max": "Max"
-          },
-          "field_names": {
-            "supplement_value": "du supplément"
+            "min": "Jours min",
+            "max": "Jours max",
+            "missing_sector": "Rangée/secteur indisponible"
           },
           "periods": {
             "hint": "Cliquez sur deux dates pour choisir une période",
             "selected": "Périodes sélectionnées :"
-          }
+          },
+          "suspended": "La vente en ligne est suspendue par la plateforme : vous pouvez modifier les options, mais les clients ne peuvent pas réserver en ligne."
         },
         "services_options": {
           "title": "Options réservation des services",
@@ -503,9 +545,6 @@
           },
           "supplement_value": "Valeur du supplément",
           "confirmation_required": "Exiger une confirmation",
-          "field_names": {
-            "supplement_value": "du supplément"
-          },
           "payment_methods": {
             "title": "Moyens de paiement acceptés",
             "pay_now": "Payer maintenant",
@@ -610,7 +649,7 @@
           },
           "smtp_port": {
             "title": "Port SMTP :",
-            "description": "Le port du serveur SMTP. Les ports courants sont : 25 (non sécurisé) 465 (SSL) 587 (TLS) Authentification SMTP :"
+            "description": "Le port du serveur SMTP. Les ports courants sont : 25 (non sécurisé) 465 (SSL) 587 (STARTTLS) Authentification SMTP :"
           },
           "smtp_username": {
             "title": "Nom d'utilisateur :",
@@ -619,18 +658,37 @@
           "smtp_password": {
             "title": "Mot de passe :",
             "description": "Le mot de passe associé au nom d'utilisateur.",
-            "saved": "Mot de passe défini : saisissez-en un autre pour le modifier",
+            "saved": "Défini : saisir le nouveau",
             "missing": "Aucun mot de passe défini"
           },
           "smtp_security": {
             "title": "Type de sécurité :",
-            "description": "Le type de sécurité utilisé (Aucune, SSL, TLS)."
+            "description": "Le type de sécurité utilisé (Aucune, STARTTLS, SSL)."
+          },
+          "is_active": {
+            "title": "Utiliser cette configuration :",
+            "description": "Désactivée, les e-mails partent de l'expéditeur Summer Booking et les données restent enregistrées."
+          },
+          "verify_certificate": {
+            "title": "Vérifier le certificat :",
+            "description": "Contrôle le certificat du serveur SMTP. Désactivez-la seulement si le serveur a un certificat que vous connaissez et auquel vous faites confiance."
+          },
+          "test_recipients": {
+            "title": "Destinataires de l'e-mail de test :",
+            "description": "Les adresses qui reçoivent l'e-mail de test, séparées par une virgule."
           }
         },
         "security": {
           "none": "Aucune",
-          "ssl": "SSL",
-          "tls": "TLS"
+          "starttls": "STARTTLS",
+          "ssl": "SSL"
+        },
+        "verification": {
+          "not_configured": "Aucune configuration enregistrée : les e-mails partent de l'expéditeur Summer Booking.",
+          "off": "La configuration est désactivée : les e-mails partent de l'expéditeur Summer Booking.",
+          "never": "La configuration n'a jamais été testée : envoyez un e-mail de test.",
+          "failed": "Le dernier test, le {at, date, medium} à {at, time, short}, a échoué : {detail}",
+          "done": "Dernier test réussi le {at, date, medium} à {at, time, short}."
         },
         "send_test": "Envoyer un e-mail de test",
         "reset": "Réinitialiser",
@@ -656,13 +714,20 @@
           "added": "Imprimantes ajoutées",
           "table": {
             "name": "Nom",
-            "ip": "Adresse IP"
+            "ip": "Adresse IP",
+            "mode": "Mode"
           },
           "delete": {
-            "title": "Supprimer l'imprimante",
-            "text": "Voulez-vous supprimer l'imprimante {{name}} ?",
             "cancel": "Annuler",
-            "confirm": "Supprimer"
+            "confirm": "Supprimer",
+            "one": {
+              "title": "Supprimer l'imprimante",
+              "text": "Voulez-vous supprimer l'imprimante {{name}} ?"
+            },
+            "many": {
+              "title": "Supprimer les imprimantes",
+              "text": "Voulez-vous supprimer les {{count}} imprimantes sélectionnées ?"
+            }
           },
           "add": "Ajouter une imprimante",
           "form": {
@@ -672,13 +737,25 @@
             "port": "Port",
             "model": "Modèle",
             "ssl": "SSL",
-            "modes": "Modes",
-            "fiscal": "Fiscal",
-            "non_fiscal": "Non fiscal",
-            "orders": "Commandes",
-            "text": "Texte",
+            "choose": "Sélectionner",
+            "mode": "Mode",
+            "modes": {
+              "fiscal": "Fiscal",
+              "non_fiscal": "Non fiscal",
+              "orders": "Commandes",
+              "text": "Texte"
+            },
+            "models": {
+              "fp_81": "FP-81",
+              "fp_90": "FP-90",
+              "rch": "RCH",
+              "tm_t88": "TM-T88",
+              "tm_t20": "TM-T20",
+              "online": "Online"
+            },
             "departments": "Rayons",
             "vat_rate": "Taux de TVA",
+            "no_vat_rate": "Aucun",
             "first_header": "En-tête n°1",
             "second_header": "En-tête n°2",
             "footer": "Pied de page",
@@ -687,12 +764,13 @@
         },
         "guide": "Télécharger le guide",
         "receipt": {
-          "title": "Ticket de caisse électronique",
+          "title": "Ticket électronique",
           "terms": "Conditions générales",
           "accept": "J'accepte",
-          "refuse": "Refuser",
+          "refuse": "Je refuse",
           "send": "Envoyer",
-          "refused_warning": "Pour utiliser le ticket électronique, acceptez les conditions d'utilisation",
+          "refused_warning": "Pour utiliser le ticket électronique, acceptez les conditions générales",
+          "no_terms": "Les conditions générales ne sont pas encore disponibles.",
           "account": {
             "title": "Configuration du compte",
             "company_name": "Nom de l'entreprise",
@@ -706,7 +784,7 @@
             "vat_number": "Numéro de TVA",
             "pin": "PIN",
             "password": "Mot de passe",
-            "pin_saved": "PIN défini : saisissez-le pour le modifier",
+            "pin_saved": "PIN défini : saisir pour changer",
             "password_saved": "Mot de passe défini",
             "save": "Enregistrer",
             "saved": "Compte configuré avec succès",
@@ -840,7 +918,9 @@
         },
         "save": "Enregistrer",
         "field_names": {
-          "days": "des jours"
+          "days": "des jours",
+          "credits": "des crédits",
+          "credit_value": "du crédit"
         },
         "saved": {
           "title": "Paramètres enregistrés",
@@ -2091,6 +2171,14 @@
     "email_configuration": {
       "smtp_password": {
         "retype": "Vous avez modifié les paramètres de connexion : saisissez de nouveau le mot de passe ou entrez-en un nouveau."
+      },
+      "security": {
+        "ssl_port": "Le port 465 exige la sécurité SSL.",
+        "start_tls_port": "Le port 587 exige la sécurité STARTTLS."
+      },
+      "test_recipients": {
+        "wrong": "Une ou plusieurs adresses ne sont pas valides.",
+        "max": "{{max}} adresses au maximum."
       }
     },
     "min_items": "Il faut définir au moins {{count}} {{field}}",
@@ -2104,6 +2192,7 @@
     "web_link": "Saisissez un lien complet commençant par http:// ou https://",
     "email": "E-mail non valide",
     "max_length": "{{max}} caractères maximum",
+    "max_html_length": "Au maximum {{max}} caractères, mise en forme comprise",
     "phone_digits": "Chiffres et espaces uniquement : l’indicatif va dans le champ à côté",
     "phone_digits_without_prefix": "Chiffres et espaces uniquement, sans +",
     "phone_max_length": "Le numéro peut contenir au maximum {{max}} caractères, espaces compris",
@@ -2141,6 +2230,18 @@
       },
       "tables": {
         "seats_taken": "Places déjà utilisées"
+      }
+    },
+    "online_booking_configuration": {
+      "periods": {
+        "overlap": "Deux plages de dates se chevauchent.",
+        "max": "Au maximum {{max}} plages de dates.",
+        "required": "Choisissez au moins une plage de dates."
+      },
+      "booking_limits": {
+        "days_required": "Indiquez au moins un minimum ou un maximum de jours.",
+        "max_days": "Le maximum de jours ne peut pas être inférieur au minimum.",
+        "overlap": "Cette rangée/ce secteur a déjà une règle à ces dates."
       }
     }
   },

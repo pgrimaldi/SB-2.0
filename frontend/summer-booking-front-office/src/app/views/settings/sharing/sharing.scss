@@ -54,6 +54,13 @@
     width: max-content;
     max-width: 16rem;
   }
+
+  // Here it runs under the label before the field.
+  .sharing__credits > & {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
 }
 
 // As tall as the field beside, with the text in the middle.
@@ -130,6 +137,13 @@
   }
 }
 
+.sharing__failure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
 .sharing__error {
   margin: 0;
   color: var(--color__layout__error);
@@ -137,7 +151,19 @@
   line-height: 1.125rem;
 }
 
+// No wider than the label and the field together.
+@media (48rem <= width < 64rem) {
+  .sharing__credits .sharing__field ::ng-deep .filled__number__field__error {
+    max-width: 13.375rem;
+  }
+}
+
 @media (width < 48rem) {
+  // On a line of its own, with room for the message.
+  .sharing__amount {
+    flex-basis: 100%;
+  }
+
   .sharing__credits {
     grid-template-columns: minmax(0, 1fr) 6.125rem auto;
     row-gap: 1rem;

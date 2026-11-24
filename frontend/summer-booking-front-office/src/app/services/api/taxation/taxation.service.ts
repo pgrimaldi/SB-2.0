@@ -13,42 +13,46 @@ import { onlyFieldsOf } from '../only-fields-of';
 @Injectable({ providedIn: 'root' })
 export class TaxationService {
   private readonly httpClient = inject(HttpClient);
-  private readonly endpoint = `${environment.apiBaseUrl}/taxation`;
+  private readonly printersEndpoint = `${environment.apiBaseUrl}/fiscalprint/printers`;
+  private readonly receiptEndpoint = `${environment.apiBaseUrl}/fiskaly`;
 
   readonly printerList = (request: PageRequest): Observable<Page<PrinterItemListResponse>> =>
-    this.httpClient.post<Page<PrinterItemListResponse>>(`${this.endpoint}/printer-list`, request);
+    this.httpClient.post<Page<PrinterItemListResponse>>(
+      `${this.printersEndpoint}/printer-list`,
+      request,
+    );
 
   /** The terms and conditions of the electronic receipt as HTML, the body is the text alone. */
   readonly electronicReceipt = (): Observable<string | null> =>
-    this.httpClient.get<string | null>(`${this.endpoint}/electronic-receipt`);
+    this.httpClient.get<string | null>(`${this.receiptEndpoint}/electronic-receipt`);
 
   /** Answers 204 with no body. */
   readonly setPrinterIsActive = (request: SetPrinterIsActiveRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/set-is-active`, request);
+    this.httpClient.post<void>(`${this.printersEndpoint}/set-is-active`, request);
 
   /** Answers 204 with no body. */
   readonly addPrinter = (printer: AddPrinterItemRequest): Observable<void> =>
     this.httpClient.post<void>(
-      `${this.endpoint}/add-printer`,
+      `${this.printersEndpoint}/add-printer`,
       onlyFieldsOf(AddPrinterItemRequest, printer),
     );
 
   /** Answers 204 with no body. */
   readonly activateElectronicReceipt = (isElectronicReceiptAccepted: boolean): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/electronic-receipt-activation`, {
+    this.httpClient.post<void>(`${this.receiptEndpoint}/electronic-receipt-activation`, {
       isElectronicReceiptAccepted,
     });
 
   /** Answers 204 with no body. */
   readonly saveElectronicReceiptAccount = (account: ElectronicReceiptAccount): Observable<void> =>
     this.httpClient.post<void>(
-      `${this.endpoint}/save-electronic-receipt-account`,
+      `${this.receiptEndpoint}/save-electronic-receipt-account`,
       onlyFieldsOf(ElectronicReceiptAccount, account),
     );
 
   /** Answers 204 with no body. */
   readonly deletePrinter = (idPrinter: string): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-printer`, { idPrinter });
+    this.httpClient.post<void>(`${this.printersEndpoint}/delete-printer`, { idPrinter });
 
   /**
    * The guide as a file, of a type not decided yet: the whole answer, whose headers give the file
@@ -56,7 +60,7 @@ export class TaxationService {
    */
   readonly downloadGuideElectronicReceipt = (): Observable<HttpResponse<Blob>> =>
     this.httpClient
-      .post(`${this.endpoint}/download-guide-electronic-receipt`, null, {
+      .post(`${this.receiptEndpoint}/download-guide-electronic-receipt`, null, {
         observe: 'response',
         responseType: 'blob',
       })

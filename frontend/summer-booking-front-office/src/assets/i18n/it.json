@@ -116,14 +116,38 @@
       "role_not_assignable": "Questo account non si può gestire dal pannello.",
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento."
     },
+    "booking": {
+      "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento."
+    },
+    "payment": {
+      "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento."
+    },
+    "notification": {
+      "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
+      "test_email_failed": "L'email di test non è partita. Risposta del server: {{detail}}",
+      "test_email_blocked": "In questo ambiente le email sono bloccate: l'email di test non è partita.",
+      "unavailable": "Il servizio email non risponde. Riprova tra poco."
+    },
+    "fiscalprint": {
+      "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
+      "printer_not_found": "Questa stampante non esiste più: forse è già stata eliminata."
+    },
+    "fiskaly": {
+      "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
+      "not_enabled": "Lo scontrino elettronico non è attivo per il tuo stabilimento.",
+      "terms_not_accepted": "Per configurare l'account devi prima accettare i termini e condizioni.",
+      "unavailable": "Il servizio dello scontrino elettronico non risponde. Riprova tra poco.",
+      "guide_not_found": "La guida non è ancora disponibile."
+    },
     "audit": {
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
       "export_too_large": "Le voci da esportare sono {total, number, integer}, ma se ne possono esportare al massimo {max, number, integer}: restringi il periodo o i filtri e riprova."
     },
     "map": {
-      "spot_not_found": "L'area della mappa non c'è più: forse è già stata eliminata.",
+      "spot_not_found": "Una postazione o un'area della mappa non c'è più: forse è già stata eliminata.",
       "spots_outside_grid": "Ci sono postazioni fuori da queste misure: servono almeno {{rows}} file e {{columns}} articoli per fila.",
-      "invalid_image": "L'immagine deve essere PNG, JPEG o WebP e non superare i 5 MB."
+      "invalid_image": "L'immagine deve essere PNG, JPEG o WebP e non superare i 5 MB.",
+      "icon_not_found": "L'icona non c'è più: scegline un'altra."
     },
     "catalog": {
       "sector_in_use": "Il settore/fila {{sectorName}} è in uso e non si può eliminare: postazioni sulla mappa {{mapSpots}}, listini {{priceLists}}, limiti di soggiorno {{stayLimits}}, sconti {{discounts}}, servizi {{services}}, prezzi automatici {{automaticPrices}}.",
@@ -136,7 +160,9 @@
       "property_not_found": "Lo stabilimento del tuo account non è stato trovato. Esci e accedi di nuovo; se si ripete, contatta l'assistenza.",
       "country_not_found": "La nazione scelta non è più disponibile: scegline un'altra.",
       "sector_not_found": "Il settore/fila non c'è più: forse è già stato eliminato.",
-      "vat_rate_not_allowed": "Aliquota non ammessa. Aliquote valide: {{rates}}."
+      "vat_rate_not_allowed": "Aliquota non ammessa. Aliquote valide: {{rates}}.",
+      "stay_limit_not_found": "La regola di prenotazione non c'è più: forse è già stata eliminata.",
+      "stay_limit_overlap": "Due regole della stessa fila/settore si sovrappongono."
     },
     "pricing": {
       "season_required": "Imposta prima le date della stagione.",
@@ -388,7 +414,12 @@
           "configure": "Configura il tuo account Stripe",
           "how_it_works": "Come funziona:",
           "step_1": "Accedi o registrati su Stripe",
-          "step_2": "Inizia a ricevere ed effettuare pagamenti facilmente"
+          "step_2": "Inizia a ricevere ed effettuare pagamenti facilmente",
+          "blocked": {
+            "title": "Collegamento non avviato",
+            "text": "Il browser blocca la memoria della pagina: abilitala per questo sito e riprova.",
+            "close": "Chiudi"
+          }
         },
         "options": {
           "title": "Gestisci opzioni",
@@ -399,8 +430,19 @@
           "title": "Codice iframe per il tuo sito web",
           "subtitle": "Permetti ai tuoi ospiti di prenotare ombrelloni, lettini e servizi direttamente dal tuo sito web in pochi clic.",
           "description": "Copia e incolla il codice incorporabile nella sezione desiderata del tuo sito. Il widget sincronizza le disponibilità in tempo reale con la mappa del gestionale.",
-          "direct_link": "Link Diretto",
-          "copy": "Copia Link"
+          "direct_link": "Codice da incorporare",
+          "copy": "Copia codice",
+          "copied": {
+            "title": "Codice copiato",
+            "text": "Incollalo nella pagina del tuo sito.",
+            "close": "Chiudi"
+          },
+          "copy_failed": {
+            "title": "Codice non copiato",
+            "text": "Seleziona il codice e copialo a mano.",
+            "close": "Chiudi"
+          },
+          "no_address": "Lo stabilimento non ha ancora un indirizzo sul sito pubblico: il codice comparirà qui quando lo avrà."
         },
         "booking_options": {
           "title": "Opzioni prenotazioni online",
@@ -461,8 +503,9 @@
           "legend": {
             "title": "Imposta legenda",
             "add": "Aggiungi elemento",
-            "name_placeholder": "Nome dell'elemento",
-            "choose_icon": "Seleziona icona"
+            "choose_icon": "Seleziona icona",
+            "name": "Nome dell'elemento",
+            "no_icons": "Nessuna icona disponibile."
           },
           "payment_methods": {
             "title": "Metodi di pagamento accettati",
@@ -475,20 +518,19 @@
           "booking_limits": {
             "title": "Configurazione limiti di booking",
             "add": "Aggiungi nuova regola",
-            "description": "Crea regole di prenotazione per impostare un limite minimo e massimo di postazioni prenotabili in un determinato periodo e in una determinata fila/settore.",
+            "description": "Crea regole di prenotazione per impostare un limite minimo e massimo di giorni prenotabili in un determinato periodo e in una determinata fila/settore.",
             "sector": "Fila/settore",
             "date_from": "Dal",
             "date_to": "Al",
-            "min": "Min",
-            "max": "Max"
-          },
-          "field_names": {
-            "supplement_value": "del supplemento"
+            "min": "Giorni min",
+            "max": "Giorni max",
+            "missing_sector": "Settore/fila non più disponibile"
           },
           "periods": {
             "hint": "Clicca due date per selezionare un intervallo",
             "selected": "Intervalli di date selezionati:"
-          }
+          },
+          "suspended": "La vendita online è sospesa dalla piattaforma: puoi cambiare le opzioni, ma i clienti non possono prenotare online."
         },
         "services_options": {
           "title": "Opzioni prenotazioni online servizi",
@@ -503,9 +545,6 @@
           },
           "supplement_value": "Valore supplemento",
           "confirmation_required": "Richiedi conferma prenotazione",
-          "field_names": {
-            "supplement_value": "del supplemento"
-          },
           "payment_methods": {
             "title": "Metodi di pagamento accettati",
             "pay_now": "Paga ora",
@@ -610,7 +649,7 @@
           },
           "smtp_port": {
             "title": "Porta SMTP:",
-            "description": "La porta del server SMTP. Le porte comuni sono: 25 (non sicura) 465 (SSL) 587 (TLS) Autenticazione SMTP:"
+            "description": "La porta del server SMTP. Le porte comuni sono: 25 (non sicura) 465 (SSL) 587 (STARTTLS) Autenticazione SMTP:"
           },
           "smtp_username": {
             "title": "Nome utente:",
@@ -619,18 +658,37 @@
           "smtp_password": {
             "title": "Password:",
             "description": "La password associata al nome utente.",
-            "saved": "Password impostata: scrivi per cambiarla",
+            "saved": "Impostata: scrivi la nuova",
             "missing": "Nessuna password impostata"
           },
           "smtp_security": {
             "title": "Tipo di Sicurezza:",
-            "description": "Il tipo di sicurezza utilizzata (Nessuna, SSL, TLS)."
+            "description": "Il tipo di sicurezza utilizzata (Nessuna, STARTTLS, SSL)."
+          },
+          "is_active": {
+            "title": "Usa questa configurazione:",
+            "description": "Spenta, le email partono dal mittente di Summer Booking e i dati restano salvati."
+          },
+          "verify_certificate": {
+            "title": "Verifica il certificato:",
+            "description": "Controlla il certificato del server SMTP. Spegnila solo se il server ha un certificato che conosci e di cui ti fidi."
+          },
+          "test_recipients": {
+            "title": "Destinatari dell'email di test:",
+            "description": "Gli indirizzi a cui arriva l'email di test, separati da una virgola."
           }
         },
         "security": {
           "none": "Nessuna",
-          "ssl": "SSL",
-          "tls": "TLS"
+          "starttls": "STARTTLS",
+          "ssl": "SSL"
+        },
+        "verification": {
+          "not_configured": "Nessuna configurazione salvata: le email partono dal mittente di Summer Booking.",
+          "off": "La configurazione è spenta: le email partono dal mittente di Summer Booking.",
+          "never": "La configurazione non è mai stata provata: invia un'email di test.",
+          "failed": "L'ultima prova, del {at, date, medium} alle {at, time, short}, non è riuscita: {detail}",
+          "done": "Ultima prova riuscita il {at, date, medium} alle {at, time, short}."
         },
         "send_test": "Invia email test",
         "reset": "Reset",
@@ -656,13 +714,20 @@
           "added": "Stampanti aggiunte",
           "table": {
             "name": "Nome",
-            "ip": "Indirizzo IP"
+            "ip": "Indirizzo IP",
+            "mode": "Modalità"
           },
           "delete": {
-            "title": "Elimina stampante",
-            "text": "Vuoi eliminare la stampante {{name}}?",
             "cancel": "Annulla",
-            "confirm": "Elimina"
+            "confirm": "Elimina",
+            "one": {
+              "title": "Elimina stampante",
+              "text": "Vuoi eliminare la stampante {{name}}?"
+            },
+            "many": {
+              "title": "Elimina stampanti",
+              "text": "Vuoi eliminare le {{count}} stampanti selezionate?"
+            }
           },
           "add": "Aggiungi stampante",
           "form": {
@@ -672,13 +737,25 @@
             "port": "Porta",
             "model": "Modello",
             "ssl": "SSL",
-            "modes": "Modalità",
-            "fiscal": "Fiscale",
-            "non_fiscal": "Non fiscale",
-            "orders": "Comande",
-            "text": "Testo",
+            "choose": "Seleziona",
+            "mode": "Modalità",
+            "modes": {
+              "fiscal": "Fiscale",
+              "non_fiscal": "Non fiscale",
+              "orders": "Comande",
+              "text": "Testo"
+            },
+            "models": {
+              "fp_81": "FP-81",
+              "fp_90": "FP-90",
+              "rch": "RCH",
+              "tm_t88": "TM-T88",
+              "tm_t20": "TM-T20",
+              "online": "Online"
+            },
             "departments": "Reparti",
             "vat_rate": "Aliquota",
+            "no_vat_rate": "Nessuna",
             "first_header": "Intestazione n°1",
             "second_header": "Intestazione n°2",
             "footer": "Piè di pagina",
@@ -692,7 +769,8 @@
           "accept": "Accetto",
           "refuse": "Non accetto",
           "send": "Invia",
-          "refused_warning": "Per utilizzare lo scontrino elettronico devi accettare i termini di utilizzo",
+          "refused_warning": "Per utilizzare lo scontrino elettronico devi accettare i termini e condizioni",
+          "no_terms": "I termini e condizioni non sono ancora disponibili.",
           "account": {
             "title": "Configurazione account",
             "company_name": "Nome azienda",
@@ -840,7 +918,9 @@
         },
         "save": "Salva",
         "field_names": {
-          "days": "dei giorni"
+          "days": "dei giorni",
+          "credits": "dei crediti",
+          "credit_value": "del credito"
         },
         "saved": {
           "title": "Impostazioni salvate",
@@ -2091,6 +2171,14 @@
     "email_configuration": {
       "smtp_password": {
         "retype": "Hai cambiato i parametri di connessione: riscrivi la password o inseriscine una nuova."
+      },
+      "security": {
+        "ssl_port": "La porta 465 vuole la sicurezza SSL.",
+        "start_tls_port": "La porta 587 vuole la sicurezza STARTTLS."
+      },
+      "test_recipients": {
+        "wrong": "Uno o più indirizzi non sono validi.",
+        "max": "Al massimo {{max}} indirizzi."
       }
     },
     "min_items": "Deve essere definito almeno {{count}} {{field}}",
@@ -2104,6 +2192,7 @@
     "web_link": "Inserisci un link completo, che inizi con http:// o https://",
     "email": "Email non valida",
     "max_length": "Al massimo {{max}} caratteri",
+    "max_html_length": "Al massimo {{max}} caratteri, formattazione compresa",
     "phone_digits": "Solo numeri e spazi: il prefisso va nel campo accanto",
     "phone_digits_without_prefix": "Solo numeri e spazi, senza +",
     "phone_max_length": "Il numero può avere al massimo {{max}} caratteri, spazi compresi",
@@ -2141,6 +2230,18 @@
       },
       "tables": {
         "seats_taken": "Posti già usati"
+      }
+    },
+    "online_booking_configuration": {
+      "periods": {
+        "overlap": "Due intervalli di date si sovrappongono.",
+        "max": "Al massimo {{max}} intervalli di date.",
+        "required": "Scegli almeno un intervallo di date."
+      },
+      "booking_limits": {
+        "days_required": "Indica almeno uno fra minimo e massimo di giorni.",
+        "max_days": "Il massimo di giorni non può essere minore del minimo.",
+        "overlap": "Questa fila/settore ha già una regola in queste date."
       }
     }
   },

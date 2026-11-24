@@ -1,40 +1,6 @@
-import { OnlineBookingAudience } from '../../enums/online-booking-audience';
-import { OnlineBookingBlock } from '../../enums/online-booking-block';
-import { SupplementType } from '../../enums/supplement-type';
-import { BookingLimitRule } from './booking-limit-rule';
-import { LegendItem } from './legend-item';
-import { OnlineBookingPeriod } from './online-booking-period';
+import { OnlineBookingOptionsUpdateRequest } from './online-booking-options-update-request';
 
-export class OnlineBookingOptions {
-  isOnlineBookingEnabled = false;
-  isMapSpotChoiceEnabled = false;
-  isSelectedPeriodsOnlyEnabled = false;
-  selectedPeriods: OnlineBookingPeriod[] = [];
-  isSelectedSpotsOnlyEnabled = false;
-  isHalfDayBookingEnabled = false;
-  morningStartTime: string | null = null;
-  morningEndTime: string | null = null;
-  afternoonStartTime: string | null = null;
-  afternoonEndTime: string | null = null;
-  isAfternoonConversionTimeEnabled = false;
-  isCurrentDayBookingEnabled = false;
-  isSeasonalBookingEnabled = false;
-  isSharingEnabled = false;
-  supplementType = SupplementType.None;
-  supplementValue: number | null = null;
-  onlineBookingBlock: OnlineBookingBlock | null = null;
-  maxSpotPerBookingQuantity: number | null = null;
-  maxAdvanceBookingDayQuantity: number | null = null;
-  isBookingConfirmationRequired = false;
-  onlineBookingAudience = OnlineBookingAudience.All;
-  maxBookingPerDayQuantity: number | null = null;
-  bookingLimitRules: BookingLimitRule[] = [];
-  isPayNowAccepted = false;
-  isPayAtPropertyAccepted = false;
-  isPayAtPropertyWithoutCardAccepted = false;
-  isDepositAccepted = false;
-  isPrepaidCardAccepted = false;
-  legendItems: LegendItem[] = [];
-  goodToKnow: string | null = null;
-  usefulInformation: string | null = null;
+export class OnlineBookingOptions extends OnlineBookingOptionsUpdateRequest {
+  isSuspendedByPlatform = false;
+  version: string | null = null;
 }

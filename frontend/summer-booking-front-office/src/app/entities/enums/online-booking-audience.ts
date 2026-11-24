@@ -1,4 +1,4 @@
 export enum OnlineBookingAudience {
-  All = 'All',
-  ContactsOnly = 'ContactsOnly',
+  All = 'all',
+  ContactsOnly = 'contacts_only',
 }

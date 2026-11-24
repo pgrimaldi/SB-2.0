@@ -66,7 +66,8 @@ immagini stanno nell'app: al backend manda il nome e dal backend vuole indietro 
   (`template_asset_id`, `umbrella_free_asset_id`, `umbrella_occupied_asset_id`, `media_asset_id`, quest'ultimo non
   nullo), non nomi. Le strade possibili sono due:
   - **colonne nuove con il nome** (sfondo e due icone dell'ombrellone in `catalog.map_layouts`, le icone degli articoli
-    in `catalog.map_layout_special_icons` o in una tabella nuova), con la loro migration; il catalogo non serve;
+    in `catalog.map_layout_special_icons` o in una tabella nuova), con la loro migration; il catalogo non serve alla pagina
+    (serve però alla legenda di Prenotazioni online: `Prenotazioni online - Frontend requests.md`, sezione 3);
   - **legame con il catalogo**: per ogni nome del frontend un'icona attiva di `catalog.map_icons` con lo stesso `name`
     (`varchar(255)`, oggi non unico), della categoria e dello stato giusti; si salva il suo `media_asset_id` come oggi e
     si restituisce il suo `name`. Funziona solo se il catalogo contiene già, una volta sola, tutti i nomi degli elenchi:

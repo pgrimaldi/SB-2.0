@@ -1,5 +1,5 @@
 export enum SupplementType {
-  None = 'None',
-  Percentage = 'Percentage',
-  Fixed = 'Fixed',
+  None = 'disable',
+  Percentage = 'percentage',
+  Fixed = 'fixed',
 }

@@ -2,450 +2,541 @@
   [title]="'management.settings.online_booking_configuration.booking_options.title' | translate"
   [texts]="'management.settings.online_booking_configuration.booking_options' | translate"
   [pathIcon]="pathIcon()"
+  [isLoading]="isSaving()"
+  [isSaveDisabled]="isSaveDisabled()"
   [(open)]="open"
   (closeRequest)="leave()"
+  (save)="save()"
 >
-  <section class="online__booking__options__panel__section">
-    <app-toggle [formField]="draftForm.isOnlineBookingEnabled">
-      {{
-        'management.settings.online_booking_configuration.booking_options.online_booking_enabled'
-          | translate
-      }}
-    </app-toggle>
-    <app-toggle [formField]="draftForm.isMapSpotChoiceEnabled">
-      {{
-        'management.settings.online_booking_configuration.booking_options.map_spot_choice_enabled'
-          | translate
-      }}
-    </app-toggle>
-    <app-toggle [formField]="draftForm.isSelectedPeriodsOnlyEnabled">
-      {{
-        'management.settings.online_booking_configuration.booking_options.selected_periods_only_enabled'
-          | translate
-      }}
-    </app-toggle>
-    @if (draftForm.isSelectedPeriodsOnlyEnabled().value()) {
-      <app-period-calendar
-        [texts]="
-          'management.settings.online_booking_configuration.booking_options.periods' | translate
-        "
-        [pathIcon]="calendarIcons"
-        [formField]="draftForm.selectedPeriods"
-      />
-    }
-    <div class="online__booking__options__panel__row">
-      <app-toggle [formField]="draftForm.isSelectedSpotsOnlyEnabled">
+  <div #content [attr.inert]="isReading() ? '' : null">
+    @if (isSuspended()) {
+      <p class="online__booking__options__panel__notice">
         {{
-          'management.settings.online_booking_configuration.booking_options.selected_spots_only_enabled'
+          'management.settings.online_booking_configuration.booking_options.suspended' | translate
+        }}
+      </p>
+    }
+    <section class="online__booking__options__panel__section">
+      <app-toggle [formField]="draftForm.isEnabled" [error]="fieldErrors.isEnabled()">
+        {{
+          'management.settings.online_booking_configuration.booking_options.online_booking_enabled'
             | translate
         }}
       </app-toggle>
-      <app-button
-        [size]="ButtonSize.Small"
-        [disabled]="!draftForm.isSelectedSpotsOnlyEnabled().value()"
-      >
+      <app-toggle [formField]="draftForm.isMapPick" [error]="fieldErrors.isMapPick()">
         {{
-          'management.settings.online_booking_configuration.booking_options.view_spots' | translate
-        }}
-      </app-button>
-    </div>
-  </section>
-  <section class="online__booking__options__panel__section">
-    <app-toggle [formField]="draftForm.isHalfDayBookingEnabled">
-      {{
-        'management.settings.online_booking_configuration.booking_options.half_day_enabled'
-          | translate
-      }}
-    </app-toggle>
-    @if (draftForm.isHalfDayBookingEnabled().value()) {
-      <div class="online__booking__options__panel__times">
-        @for (halfDay of halfDays; track halfDay.label) {
-          <app-form-row>
-            <span appFormRowLabel>{{ halfDay.label | translate }}</span>
-            <div class="online__booking__options__panel__pair">
-              <span class="online__booking__options__panel__word">
-                {{
-                  'management.settings.online_booking_configuration.booking_options.time_from'
-                    | translate
-                }}
-              </span>
-              <app-filled-time-field
-                class="online__booking__options__panel__time"
-                [pathIcon]="clockIcon"
-                [error]="validationText.text(halfDay.start)"
-                [formField]="halfDay.start"
-              />
-            </div>
-            <div class="online__booking__options__panel__pair">
-              <span class="online__booking__options__panel__word">
-                {{
-                  'management.settings.online_booking_configuration.booking_options.time_to'
-                    | translate
-                }}
-              </span>
-              <app-filled-time-field
-                class="online__booking__options__panel__time"
-                [pathIcon]="clockIcon"
-                [error]="validationText.text(halfDay.end)"
-                [formField]="halfDay.end"
-              />
-            </div>
-          </app-form-row>
-        }
-      </div>
-    }
-    <app-toggle [formField]="draftForm.isAfternoonConversionTimeEnabled">
-      {{
-        'management.settings.online_booking_configuration.booking_options.afternoon_conversion_enabled'
-          | translate
-      }}
-    </app-toggle>
-    <app-toggle [formField]="draftForm.isCurrentDayBookingEnabled">
-      {{
-        'management.settings.online_booking_configuration.booking_options.current_day_booking_enabled'
-          | translate
-      }}
-    </app-toggle>
-    <app-toggle [formField]="draftForm.isSeasonalBookingEnabled">
-      {{
-        'management.settings.online_booking_configuration.booking_options.seasonal_booking_enabled'
-          | translate
-      }}
-    </app-toggle>
-    <app-toggle [formField]="draftForm.isSharingEnabled">
-      {{
-        'management.settings.online_booking_configuration.booking_options.sharing_enabled'
-          | translate
-      }}
-    </app-toggle>
-    <app-form-row>
-      <span appFormRowLabel>
-        {{
-          'management.settings.online_booking_configuration.booking_options.supplement_type'
+          'management.settings.online_booking_configuration.booking_options.map_spot_choice_enabled'
             | translate
         }}
-      </span>
-      <app-filled-select
-        class="online__booking__options__panel__field"
-        [options]="supplementTypeOptions()"
-        [formField]="draftForm.supplementType"
-      />
-    </app-form-row>
-    @if (hasSupplement()) {
+      </app-toggle>
+      <app-toggle
+        [formField]="draftForm.isPeriodRestricted"
+        [error]="fieldErrors.isPeriodRestricted()"
+      >
+        {{
+          'management.settings.online_booking_configuration.booking_options.selected_periods_only_enabled'
+            | translate
+        }}
+      </app-toggle>
+      @if (draftForm.isPeriodRestricted().value()) {
+        <app-period-calendar
+          [texts]="
+            'management.settings.online_booking_configuration.booking_options.periods' | translate
+          "
+          [pathIcon]="calendarIcons"
+          [disabledPeriods]="draftForm.allowedPeriods().value()"
+          [formField]="draftForm.allowedPeriods"
+        />
+        @if (fieldErrors.allowedPeriods(); as error) {
+          <p class="online__booking__options__panel__error">{{ error }}</p>
+        }
+      }
+      <div class="online__booking__options__panel__row">
+        <app-toggle
+          [formField]="draftForm.isLocationRestricted"
+          [error]="fieldErrors.isLocationRestricted()"
+        >
+          {{
+            'management.settings.online_booking_configuration.booking_options.selected_spots_only_enabled'
+              | translate
+          }}
+        </app-toggle>
+        <app-button
+          [size]="ButtonSize.Small"
+          [disabled]="!draftForm.isLocationRestricted().value()"
+        >
+          {{
+            'management.settings.online_booking_configuration.booking_options.view_spots'
+              | translate
+          }}
+        </app-button>
+      </div>
+    </section>
+    <section class="online__booking__options__panel__section">
+      <app-toggle [formField]="draftForm.allowsHalfDay" [error]="fieldErrors.allowsHalfDay()">
+        {{
+          'management.settings.online_booking_configuration.booking_options.half_day_enabled'
+            | translate
+        }}
+      </app-toggle>
+      @if (draftForm.allowsHalfDay().value()) {
+        <div class="online__booking__options__panel__times">
+          @for (halfDay of halfDays; track halfDay.label) {
+            <app-form-row>
+              <span appFormRowLabel>{{ halfDay.label | translate }}</span>
+              <div class="online__booking__options__panel__pair">
+                <span class="online__booking__options__panel__word">
+                  {{
+                    'management.settings.online_booking_configuration.booking_options.time_from'
+                      | translate
+                  }}
+                </span>
+                <app-filled-time-field
+                  class="online__booking__options__panel__time"
+                  [pathIcon]="clockIcon"
+                  [error]="validationText.text(halfDay.start)"
+                  [formField]="halfDay.start"
+                />
+              </div>
+              <div class="online__booking__options__panel__pair">
+                <span class="online__booking__options__panel__word">
+                  {{
+                    'management.settings.online_booking_configuration.booking_options.time_to'
+                      | translate
+                  }}
+                </span>
+                <app-filled-time-field
+                  class="online__booking__options__panel__time"
+                  [pathIcon]="clockIcon"
+                  [error]="validationText.text(halfDay.end)"
+                  [formField]="halfDay.end"
+                />
+              </div>
+            </app-form-row>
+          }
+        </div>
+      }
+      <div class="online__booking__options__panel__row">
+        <app-toggle [formField]="draftForm.isAfternoonConversionEnabled">
+          {{
+            'management.settings.online_booking_configuration.booking_options.afternoon_conversion_enabled'
+              | translate
+          }}
+        </app-toggle>
+        @if (draftForm.isAfternoonConversionEnabled().value()) {
+          <app-filled-time-field
+            class="online__booking__options__panel__conversion"
+            [pathIcon]="clockIcon"
+            [error]="fieldErrors.afternoonConversionTime()"
+            [formField]="draftForm.afternoonConversionTime"
+          />
+        }
+      </div>
+      <app-toggle
+        [formField]="draftForm.allowsSameDayBooking"
+        [error]="fieldErrors.allowsSameDayBooking()"
+      >
+        {{
+          'management.settings.online_booking_configuration.booking_options.current_day_booking_enabled'
+            | translate
+        }}
+      </app-toggle>
+      <app-toggle [formField]="draftForm.allowsSeasonal" [error]="fieldErrors.allowsSeasonal()">
+        {{
+          'management.settings.online_booking_configuration.booking_options.seasonal_booking_enabled'
+            | translate
+        }}
+      </app-toggle>
+      <app-toggle [formField]="draftForm.allowsSharing" [error]="fieldErrors.allowsSharing()">
+        {{
+          'management.settings.online_booking_configuration.booking_options.sharing_enabled'
+            | translate
+        }}
+      </app-toggle>
       <app-form-row>
         <span appFormRowLabel>
           {{
-            'management.settings.online_booking_configuration.booking_options.supplement_value'
+            'management.settings.online_booking_configuration.booking_options.supplement_type'
+              | translate
+          }}
+        </span>
+        <app-filled-select
+          class="online__booking__options__panel__field"
+          [options]="supplementTypeOptions()"
+          [formField]="draftForm.surchargeType"
+          [error]="fieldErrors.surchargeType()"
+        />
+      </app-form-row>
+      @if (hasSupplement()) {
+        <app-form-row>
+          <span appFormRowLabel>
+            {{
+              'management.settings.online_booking_configuration.booking_options.supplement_value'
+                | translate
+            }}
+          </span>
+          <app-filled-number-field
+            class="online__booking__options__panel__value"
+            [isDecimal]="true"
+            [isCurrency]="!isPercentage()"
+            [maxDecimals]="2"
+            [formField]="draftForm.surchargeValue"
+            [error]="fieldErrors.surchargeValue()"
+          />
+          <span class="online__booking__options__panel__unit">
+            {{ isPercentage() ? '%' : '€' }}
+          </span>
+        </app-form-row>
+      }
+      <app-form-row>
+        <span appFormRowLabel>
+          {{
+            'management.settings.online_booking_configuration.booking_options.online_booking_block'
+              | translate
+          }}
+        </span>
+        <app-filled-select
+          class="online__booking__options__panel__field"
+          [placeholder]="
+            'management.settings.online_booking_configuration.booking_options.choose' | translate
+          "
+          [options]="onlineBookingBlockOptions()"
+          [formField]="draftForm.onlineBookingBlock"
+          [error]="fieldErrors.onlineBookingBlock()"
+        />
+      </app-form-row>
+      <app-form-row>
+        <span appFormRowLabel>
+          {{
+            'management.settings.online_booking_configuration.booking_options.max_spot_per_booking'
               | translate
           }}
         </span>
         <app-filled-number-field
-          class="online__booking__options__panel__value"
-          [isDecimal]="!isPercentage()"
-          [isCurrency]="!isPercentage()"
-          [formField]="draftForm.supplementValue"
-          [error]="supplementValueError()"
+          class="online__booking__options__panel__field"
+          [formField]="draftForm.maxSpotsPerBooking"
+          [error]="fieldErrors.maxSpotsPerBooking()"
         />
-        <span class="online__booking__options__panel__unit">
-          {{ isPercentage() ? '%' : '€' }}
-        </span>
       </app-form-row>
-    }
-    <app-form-row>
-      <span appFormRowLabel>
-        {{
-          'management.settings.online_booking_configuration.booking_options.online_booking_block'
-            | translate
-        }}
-      </span>
-      <app-filled-select
-        class="online__booking__options__panel__field"
-        [placeholder]="
-          'management.settings.online_booking_configuration.booking_options.choose' | translate
-        "
-        [options]="onlineBookingBlockOptions()"
-        [formField]="draftForm.onlineBookingBlock"
-      />
-    </app-form-row>
-    <app-form-row>
-      <span appFormRowLabel>
-        {{
-          'management.settings.online_booking_configuration.booking_options.max_spot_per_booking'
-            | translate
-        }}
-      </span>
-      <app-filled-number-field
-        class="online__booking__options__panel__field"
-        [formField]="draftForm.maxSpotPerBookingQuantity"
-      />
-    </app-form-row>
-    <app-form-row>
-      <span appFormRowLabel>
-        {{
-          'management.settings.online_booking_configuration.booking_options.max_advance_booking_days'
-            | translate
-        }}
-      </span>
-      <app-filled-number-field
-        class="online__booking__options__panel__field"
-        [formField]="draftForm.maxAdvanceBookingDayQuantity"
-      />
-    </app-form-row>
-    <app-form-row>
-      <span appFormRowLabel>
-        {{
-          'management.settings.online_booking_configuration.booking_options.booking_confirmation_required'
-            | translate
-        }}
-      </span>
-      <app-filled-select
-        class="online__booking__options__panel__field"
-        [options]="answerOptions()"
-        [value]="bookingConfirmation()"
-        (valueChange)="setBookingConfirmation($event)"
-      />
-    </app-form-row>
-    <app-form-row>
-      <span appFormRowLabel>
-        {{
-          'management.settings.online_booking_configuration.booking_options.online_booking_audience'
-            | translate
-        }}
-      </span>
-      <app-filled-select
-        class="online__booking__options__panel__field"
-        [options]="onlineBookingAudienceOptions()"
-        [formField]="draftForm.onlineBookingAudience"
-      />
-    </app-form-row>
-    <app-form-row>
-      <span appFormRowLabel>
-        {{
-          'management.settings.online_booking_configuration.booking_options.max_bookings_per_day'
-            | translate
-        }}
-      </span>
-      <app-filled-number-field
-        class="online__booking__options__panel__field"
-        [formField]="draftForm.maxBookingPerDayQuantity"
-      />
-    </app-form-row>
-  </section>
-  <section class="online__booking__options__panel__section">
-    <app-section-title
-      [text]="
-        'management.settings.online_booking_configuration.booking_options.booking_limits.title'
-          | translate
-      "
-    >
-      <app-button
-        [appearance]="ButtonAppearance.Light"
-        [size]="ButtonSize.Small"
-        [pathIcon]="addIcon"
-        (clicked)="addBookingLimitRule()"
-      >
-        {{
-          'management.settings.online_booking_configuration.booking_options.booking_limits.add'
-            | translate
-        }}
-      </app-button>
-    </app-section-title>
-    <p class="online__booking__options__panel__description">
-      {{
-        'management.settings.online_booking_configuration.booking_options.booking_limits.description'
-          | translate
-      }}
-    </p>
-    @for (rule of draftForm.bookingLimitRules; track rule; let ruleIndex = $index) {
-      <div class="online__booking__options__panel__rule">
-        <app-filled-select
-          class="online__booking__options__panel__sector"
-          [label]="
-            'management.settings.online_booking_configuration.booking_options.booking_limits.sector'
+      <app-form-row>
+        <span appFormRowLabel>
+          {{
+            'management.settings.online_booking_configuration.booking_options.max_advance_booking_days'
               | translate
-          "
-          [placeholder]="
-            sectors.loadError()
-              ? ''
-              : ('management.settings.online_booking_configuration.booking_options.choose'
-                | translate)
-          "
-          [options]="sectorOptions()"
-          [formField]="rule.idSector"
-          [error]="sectors.loadError()"
-          (openRequest)="sectors.retry()"
+          }}
+        </span>
+        <app-filled-number-field
+          class="online__booking__options__panel__field"
+          [formField]="draftForm.bookingHorizonDays"
+          [error]="fieldErrors.bookingHorizonDays()"
         />
-        <div class="online__booking__options__panel__rule__dates">
-          <app-filled-date-field
-            class="online__booking__options__panel__date"
-            [label]="
-              'management.settings.online_booking_configuration.booking_options.booking_limits.date_from'
-                | translate
-            "
-            [pathIcon]="calendarIcon"
-            [formField]="rule.dateFrom"
-          />
-          <app-filled-date-field
-            class="online__booking__options__panel__date"
-            [label]="
-              'management.settings.online_booking_configuration.booking_options.booking_limits.date_to'
-                | translate
-            "
-            [pathIcon]="calendarIcon"
-            [minDate]="rule.dateFrom().value()"
-            [formField]="rule.dateTo"
-          />
-        </div>
-        <div class="online__booking__options__panel__rule__quantities">
-          <app-filled-number-field
-            class="online__booking__options__panel__quantity"
-            [label]="
-              'management.settings.online_booking_configuration.booking_options.booking_limits.min'
-                | translate
-            "
-            [formField]="rule.minSpotQuantity"
-          />
-          <app-filled-number-field
-            class="online__booking__options__panel__quantity"
-            [label]="
-              'management.settings.online_booking_configuration.booking_options.booking_limits.max'
-                | translate
-            "
-            [formField]="rule.maxSpotQuantity"
-          />
-          <app-icon-button [pathIcon]="removeIcon" (click)="removeBookingLimitRule(ruleIndex)" />
-        </div>
-      </div>
-    }
-  </section>
-  <section class="online__booking__options__panel__section">
-    <app-section-title
-      [text]="
-        'management.settings.online_booking_configuration.booking_options.payment_methods.title'
-          | translate
-      "
-    />
-    <div class="online__booking__options__panel__choices">
-      <app-checkbox [formField]="draftForm.isPayNowAccepted">
-        {{
-          'management.settings.online_booking_configuration.booking_options.payment_methods.pay_now'
+      </app-form-row>
+      <app-form-row>
+        <span appFormRowLabel>
+          {{
+            'management.settings.online_booking_configuration.booking_options.booking_confirmation_required'
+              | translate
+          }}
+        </span>
+        <app-filled-select
+          class="online__booking__options__panel__field"
+          [options]="answerOptions()"
+          [value]="bookingConfirmation()"
+          [error]="fieldErrors.requiresManualConfirmation()"
+          (valueChange)="setBookingConfirmation($event)"
+        />
+      </app-form-row>
+      <app-form-row>
+        <span appFormRowLabel>
+          {{
+            'management.settings.online_booking_configuration.booking_options.online_booking_audience'
+              | translate
+          }}
+        </span>
+        <app-filled-select
+          class="online__booking__options__panel__field"
+          [options]="onlineBookingAudienceOptions()"
+          [formField]="draftForm.scope"
+          [error]="fieldErrors.scope()"
+        />
+      </app-form-row>
+      <app-form-row>
+        <span appFormRowLabel>
+          {{
+            'management.settings.online_booking_configuration.booking_options.max_bookings_per_day'
+              | translate
+          }}
+        </span>
+        <app-filled-number-field
+          class="online__booking__options__panel__field"
+          [formField]="draftForm.maxBookingsPerDay"
+          [error]="fieldErrors.maxBookingsPerDay()"
+        />
+      </app-form-row>
+    </section>
+    <section class="online__booking__options__panel__section">
+      <app-section-title
+        [text]="
+          'management.settings.online_booking_configuration.booking_options.booking_limits.title'
             | translate
-        }}
-      </app-checkbox>
-      <app-checkbox [formField]="draftForm.isPayAtPropertyAccepted">
-        {{
-          'management.settings.online_booking_configuration.booking_options.payment_methods.pay_at_property'
-            | translate
-        }}
-      </app-checkbox>
-      <app-checkbox [formField]="draftForm.isPayAtPropertyWithoutCardAccepted">
-        {{
-          'management.settings.online_booking_configuration.booking_options.payment_methods.pay_at_property_without_card'
-            | translate
-        }}
-      </app-checkbox>
-      <app-checkbox [formField]="draftForm.isDepositAccepted">
-        {{
-          'management.settings.online_booking_configuration.booking_options.payment_methods.deposit'
-            | translate
-        }}
-      </app-checkbox>
-      <app-checkbox [formField]="draftForm.isPrepaidCardAccepted">
-        {{
-          'management.settings.online_booking_configuration.booking_options.payment_methods.prepaid_card'
-            | translate
-        }}
-      </app-checkbox>
-    </div>
-  </section>
-  <section class="online__booking__options__panel__section">
-    <app-section-title
-      [text]="
-        'management.settings.online_booking_configuration.booking_options.legend.title' | translate
-      "
-    >
-      <app-button
-        [appearance]="ButtonAppearance.Light"
-        [size]="ButtonSize.Small"
-        [pathIcon]="addIcon"
-        (clicked)="addLegendItem()"
+        "
       >
+        <app-button
+          [appearance]="ButtonAppearance.Light"
+          [size]="ButtonSize.Small"
+          [pathIcon]="addIcon"
+          (clicked)="addBookingLimitRule()"
+        >
+          {{
+            'management.settings.online_booking_configuration.booking_options.booking_limits.add'
+              | translate
+          }}
+        </app-button>
+      </app-section-title>
+      <p class="online__booking__options__panel__description">
         {{
-          'management.settings.online_booking_configuration.booking_options.legend.add' | translate
+          'management.settings.online_booking_configuration.booking_options.booking_limits.description'
+            | translate
         }}
-      </app-button>
-    </app-section-title>
-    @if (draftForm.legendItems().value().length) {
-      <div class="online__booking__options__panel__legend__list">
-        @for (item of draftForm.legendItems; track item; let itemIndex = $index) {
-          @let icon = item.iconUrl().value();
-          <div class="online__booking__options__panel__legend">
-            <app-filled-text-field
-              class="online__booking__options__panel__legend__name"
-              [placeholder]="
-                'management.settings.online_booking_configuration.booking_options.legend.name_placeholder'
+      </p>
+      @if (fieldErrors.stayLimits(); as error) {
+        <p class="online__booking__options__panel__error">{{ error }}</p>
+      }
+      @for (rule of draftForm.stayLimits; track rule; let ruleIndex = $index) {
+        <div class="online__booking__options__panel__rule">
+          <app-filled-select
+            class="online__booking__options__panel__sector"
+            [label]="
+              'management.settings.online_booking_configuration.booking_options.booking_limits.sector'
+                | translate
+            "
+            [isMandatory]="true"
+            [placeholder]="
+              sectors.loadError()
+                ? ''
+                : ('management.settings.online_booking_configuration.booking_options.choose'
+                  | translate)
+            "
+            [options]="sectorOptions()"
+            [formField]="rule.sectorId"
+            [error]="sectors.loadError() || validationText.text(rule.sectorId)"
+            (openRequest)="sectors.retry()"
+          />
+          <div class="online__booking__options__panel__rule__dates">
+            <app-filled-date-field
+              class="online__booking__options__panel__date"
+              [label]="
+                'management.settings.online_booking_configuration.booking_options.booking_limits.date_from'
                   | translate
               "
-              [formField]="item.name"
+              [isMandatory]="true"
+              [pathIcon]="calendarIcon"
+              [disabledPeriods]="takenPeriods()[ruleIndex] ?? []"
+              [error]="validationText.text(rule.startsOn)"
+              [formField]="rule.startsOn"
             />
-            <app-button
-              class="online__booking__options__panel__legend__icon"
-              [appearance]="ButtonAppearance.Light"
-              [size]="ButtonSize.Small"
-              [isFullWidth]="true"
-              [pathIcon]="icon ? [icon] : null"
-            >
-              {{
-                'management.settings.online_booking_configuration.booking_options.legend.choose_icon'
+            <app-filled-date-field
+              class="online__booking__options__panel__date"
+              [label]="
+                'management.settings.online_booking_configuration.booking_options.booking_limits.date_to'
                   | translate
-              }}
-            </app-button>
-            <app-icon-button
-              class="online__booking__options__panel__legend__remove"
-              [pathIcon]="removeIcon"
-              (click)="removeLegendItem(itemIndex)"
+              "
+              [isMandatory]="true"
+              [pathIcon]="calendarIcon"
+              [minDate]="rule.startsOn().value()"
+              [disabledPeriods]="takenPeriods()[ruleIndex] ?? []"
+              [error]="validationText.text(rule.endsOn)"
+              [formField]="rule.endsOn"
             />
           </div>
+          <div class="online__booking__options__panel__rule__quantities">
+            <app-filled-number-field
+              class="online__booking__options__panel__quantity"
+              [label]="
+                'management.settings.online_booking_configuration.booking_options.booking_limits.min'
+                  | translate
+              "
+              [error]="validationText.text(rule.minDays)"
+              [formField]="rule.minDays"
+            />
+            <app-filled-number-field
+              class="online__booking__options__panel__quantity"
+              [label]="
+                'management.settings.online_booking_configuration.booking_options.booking_limits.max'
+                  | translate
+              "
+              [error]="validationText.text(rule.maxDays)"
+              [formField]="rule.maxDays"
+            />
+            <app-icon-button
+              class="online__booking__options__panel__rule__remove"
+              [pathIcon]="removeIcon"
+              (click)="removeBookingLimitRule(ruleIndex)"
+            />
+          </div>
+          @if (validationText.text(rule); as error) {
+            <p class="online__booking__options__panel__error">{{ error }}</p>
+          }
+        </div>
+      }
+    </section>
+    <section class="online__booking__options__panel__section">
+      <app-section-title
+        [text]="
+          'management.settings.online_booking_configuration.booking_options.payment_methods.title'
+            | translate
+        "
+      />
+      <div class="online__booking__options__panel__choices">
+        @for (payment of paymentMethods; track payment.method) {
+          <app-checkbox
+            [checked]="isAccepted(payment.method)"
+            (checkedChange)="accept(payment.method, $event)"
+          >
+            {{ payment.label | translate }}
+          </app-checkbox>
         }
       </div>
+      @if (fieldErrors.paymentMethods(); as error) {
+        <p class="online__booking__options__panel__error">{{ error }}</p>
+      }
+    </section>
+    <section class="online__booking__options__panel__section">
+      <app-section-title
+        [text]="
+          'management.settings.online_booking_configuration.booking_options.legend.title'
+            | translate
+        "
+      >
+        <app-button
+          [appearance]="ButtonAppearance.Light"
+          [size]="ButtonSize.Small"
+          [pathIcon]="addIcon"
+          [disabled]="!canAddLegendItem()"
+          (clicked)="addLegendItem()"
+        >
+          {{
+            'management.settings.online_booking_configuration.booking_options.legend.add'
+              | translate
+          }}
+        </app-button>
+      </app-section-title>
+      @if (fieldErrors.legend(); as error) {
+        <p class="online__booking__options__panel__error">{{ error }}</p>
+      }
+      @if (draftForm.legend().value().length) {
+        <div class="online__booking__options__panel__legend__list">
+          @for (item of draftForm.legend; track item; let itemIndex = $index) {
+            @let icon = iconUrlOf(item);
+            <div class="online__booking__options__panel__legend">
+              <app-filled-text-field
+                class="online__booking__options__panel__legend__name"
+                [label]="
+                  'management.settings.online_booking_configuration.booking_options.legend.name'
+                    | translate
+                "
+                [isMandatory]="true"
+                [error]="validationText.text(item.label)"
+                [formField]="item.label"
+              />
+              <span class="online__booking__options__panel__legend__icon">
+                <app-button
+                  [appearance]="ButtonAppearance.Light"
+                  [size]="ButtonSize.Small"
+                  [isFullWidth]="true"
+                  [pathIcon]="icon ? [icon] : null"
+                  [disabled]="isFetchingIcons() && pickingItem() !== itemIndex"
+                  [isLoading]="isFetchingIcons() && pickingItem() === itemIndex"
+                  (clicked)="pickIcon(itemIndex)"
+                >
+                  {{
+                    'management.settings.online_booking_configuration.booking_options.legend.choose_icon'
+                      | translate
+                  }}
+                </app-button>
+                @if (item.iconUrl().value()) {
+                  <app-icon-button
+                    class="online__booking__options__panel__legend__empty"
+                    [pathIcon]="emptyIconIcon"
+                    (click)="emptyIcon(item)"
+                  />
+                }
+              </span>
+              <app-icon-button
+                class="online__booking__options__panel__legend__remove"
+                [pathIcon]="removeIcon"
+                (click)="removeLegendItem(itemIndex)"
+              />
+            </div>
+          }
+        </div>
+      }
+      @if (icons.loadError(); as error) {
+        <p class="online__booking__options__panel__icons__error">{{ error }}</p>
+      }
+    </section>
+    <section class="online__booking__options__panel__section">
+      <app-section-title
+        [text]="
+          'management.settings.online_booking_configuration.booking_options.good_to_know.title'
+            | translate
+        "
+      />
+      <p class="online__booking__options__panel__description">
+        {{
+          'management.settings.online_booking_configuration.booking_options.good_to_know.description'
+            | translate
+        }}
+      </p>
+      <app-rich-text-field
+        [texts]="'rich_text' | translate"
+        [pathIcon]="richTextIcons"
+        [formField]="draftForm.goodToKnow"
+        [error]="fieldErrors.goodToKnow()"
+      />
+    </section>
+    <section class="online__booking__options__panel__section">
+      <app-section-title
+        [text]="
+          'management.settings.online_booking_configuration.booking_options.useful_information.title'
+            | translate
+        "
+      />
+      <p class="online__booking__options__panel__description">
+        {{
+          'management.settings.online_booking_configuration.booking_options.useful_information.description'
+            | translate
+        }}
+      </p>
+      <app-rich-text-field
+        [texts]="'rich_text' | translate"
+        [pathIcon]="richTextIcons"
+        [formField]="draftForm.usefulInfo"
+        [error]="fieldErrors.usefulInfo()"
+      />
+    </section>
+    @if (errorMessage(); as errorMessage) {
+      <p class="online__booking__options__panel__general">{{ errorMessage }}</p>
     }
-  </section>
-  <section class="online__booking__options__panel__section">
-    <app-section-title
-      [text]="
-        'management.settings.online_booking_configuration.booking_options.good_to_know.title'
-          | translate
-      "
-    />
-    <p class="online__booking__options__panel__description">
-      {{
-        'management.settings.online_booking_configuration.booking_options.good_to_know.description'
-          | translate
-      }}
-    </p>
-    <app-rich-text-field
-      [texts]="'rich_text' | translate"
-      [pathIcon]="richTextIcons"
-      [formField]="draftForm.goodToKnow"
-    />
-  </section>
-  <section class="online__booking__options__panel__section">
-    <app-section-title
-      [text]="
-        'management.settings.online_booking_configuration.booking_options.useful_information.title'
-          | translate
-      "
-    />
-    <p class="online__booking__options__panel__description">
-      {{
-        'management.settings.online_booking_configuration.booking_options.useful_information.description'
-          | translate
-      }}
-    </p>
-    <app-rich-text-field
-      [texts]="'rich_text' | translate"
-      [pathIcon]="richTextIcons"
-      [formField]="draftForm.usefulInformation"
-    />
-  </section>
+  </div>
 </app-side-panel>
+<app-icon-picker-popup
+  [title]="
+    'management.settings.online_booking_configuration.booking_options.legend.choose_icon'
+      | translate
+  "
+  [pathIcon]="pathIcon()"
+  [text]="
+    iconChoices().length
+      ? ''
+      : ('management.settings.online_booking_configuration.booking_options.legend.no_icons'
+        | translate)
+  "
+  [choices]="iconChoices()"
+  [chosenIcon]="pickedIcon()"
+  [open]="isPickerOpen()"
+  (openChange)="pickerChanged($event)"
+  (iconChosen)="chooseIcon($event)"
+/>
+<app-read-error-popup [pathIcon]="pathIcon()" [(problem)]="readError" (retry)="retryRead()" />
+<app-version-conflict-popup [pathIcon]="pathIcon()" [(open)]="isConflictShown" />

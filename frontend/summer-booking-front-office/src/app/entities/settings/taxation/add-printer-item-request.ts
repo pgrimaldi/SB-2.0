@@ -1,19 +1,24 @@
-/** Rates of the five departments shown by the popup "Aggiungi nuova stampante". */
-export const PRINTER_DEPARTMENTS_COUNT = 5;
+import { PrinterMode } from '../../enums/printer-mode';
+import { PrinterModel } from '../../enums/printer-model';
 
-export const VAT_RATES = ['0', '4', '5', '10', '22'];
+export const PRINTER_DEPARTMENTS_COUNT = 5;
+export const VAT_RATES = [0, 4, 5, 10, 22] as const;
+export const MAX_PRINTER_NAME_LENGTH = 120;
+export const MAX_PRINTER_IP_LENGTH = 255;
+export const MAX_PRINTER_PORT = 65_535;
+export const MAX_PRINTER_LINE_LENGTH = 160;
 
 export class AddPrinterItemRequest {
   printerName: string | null = null;
   printerIP: string | null = null;
   printerPort: number | null = null;
-  printerModel: string | null = null;
+  printerModel: PrinterModel | null = null;
+  printerMode: PrinterMode | null = null;
   isSsl = false;
-  isFiscalMode = false;
-  isNonFiscalMode = false;
-  isOrderMode = false;
-  isTextMode = false;
-  departmentVatRates: string[] = Array.from({ length: PRINTER_DEPARTMENTS_COUNT }, () => '0');
+  departmentVatRates: (number | null)[] = Array.from(
+    { length: PRINTER_DEPARTMENTS_COUNT },
+    () => null,
+  );
   firstHeader: string | null = null;
   secondHeader: string | null = null;
   footer: string | null = null;

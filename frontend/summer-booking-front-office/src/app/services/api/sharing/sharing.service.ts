@@ -10,19 +10,19 @@ import { ifMatch, versionOf } from '../versions/version-headers';
 @Injectable({ providedIn: 'root' })
 export class SharingService {
   private readonly httpClient = inject(HttpClient);
-  private readonly endpoint = `${environment.apiBaseUrl}/sharing`;
+  private readonly endpoint = `${environment.apiBaseUrl}/booking/sharing/settings`;
 
   readonly generalInformation = (): Observable<SharingGeneralInformation> =>
-    this.httpClient.get<SharingGeneralInformation>(`${this.endpoint}/general-information`);
+    this.httpClient.get<SharingGeneralInformation>(this.endpoint);
 
-  /** Every setting of the page, changed or not. Answers 204 with no body and the new version. */
+  /** Every setting of the page, changed or not. Gives back the new version. */
   readonly saveInformation = (
     information: SharingSaveInformationRequest,
     version: string | null,
   ): Observable<string | null> =>
     this.httpClient
-      .post<void>(
-        `${this.endpoint}/save-information`,
+      .put<SharingGeneralInformation>(
+        this.endpoint,
         onlyFieldsOf(SharingSaveInformationRequest, information),
         { headers: ifMatch(version), observe: 'response' },
       )

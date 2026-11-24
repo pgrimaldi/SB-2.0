@@ -38,6 +38,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - `maxRichTextLength(path, massimo)`: un testo di `app-rich-text-field` (HTML) con più di `massimo` caratteri visibili;
   la formattazione non conta (`invalidate.max_length`, "Al massimo {{max}} caratteri"). L'editor non blocca la
   scrittura: l'errore va sotto il campo e Salva si spegne.
+- `maxHtmlLength(path, massimo)`: lo stesso testo con più di `massimo` caratteri contando anche la formattazione, quando
+  il backend conta l'HTML e il limite è basso (`invalidate.max_html_length`, "Al massimo {{max}} caratteri, formattazione
+  compresa").
 - Lunghezza massima di un campo di testo: `metadata(path, MAX_LENGTH, () => LIMITE)`, con il limite del backend in una
   costante dell'entità. Il wrapper riceve `maxLength` e il campo non accetta caratteri oltre il limite.
 - `noOverlap(path, altri)` / `noOverlaps(path, altri)`: un intervallo di giorni (o una lista di intervalli) che ha un
@@ -54,8 +57,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   testo tradotto del primo errore (chiave `invalidate.<kind>`, con i valori dell'errore e il nome del campo, es.
   `management.settings.warehouse.form.field_names.quantity` = "della quantità").
 - Il messaggio compare solo dopo che l'utente ha cambiato o lasciato il campo e segue la lingua. Un'eccezione: nei pannelli
-  di modifica di Servizi e Listino, premendo Modifica, i campi letti già sbagliati si segnano subito
-  (`draftForm().markAsTouched()` in `startEdit`), perché tengono spento Salva.
+  di modifica di Servizi e Listino, premendo Modifica, e in Sharing, nel pannello e nel popup di Prenotazioni online, che
+  sono sempre modificabili, dopo la lettura, i campi letti già sbagliati si segnano subito (`markAsTouched()` sul form),
+  perché tengono spento Salva.
 - Per i campi di una lista, dove non si può tenere un signal per campo, il template legge lo stesso testo con
   `text(field, chiaveNomeCampo)`.
 - Il wrapper riceve il testo con `[error]`: bordo rosso da 2px, sfondo rosato e messaggio rosso
@@ -68,6 +72,13 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   bottone che salva è spento finché il form non è valido. Un'eccezione: nei due popup di Sconti e voucher Salva resta
   acceso, e premendolo il popup scorre fino al primo errore (`showFirstError`,
   `components/shared/forms/first-error.ts`).
+- Nei form lunghi, dopo un salvataggio non riuscito, si scorre fino al primo errore: `showFirstError` trova i campi, gli
+  interruttori, le caselle e i testi formattati sbagliati e i messaggi propri del form; `showMessage` solo il messaggio dato
+  (es. l'errore generale in fondo).
+- I testi che il backend salva senza spazi ai lati partono già così: `trimmedText`
+  (`components/shared/forms/text-comparison.ts`), che dà `null` per un testo vuoto.
+- Un form che resta nella pagina toglie gli errori del backend rimasti sotto i campi quando si riapre (o con Annulla):
+  `clearApiFieldErrors` (`behaviours/validation/api-field-errors.ts`), che lascia i valori come sono.
 - Anche gli errori del backend su un campo (`errors[]` di Problem Details, con `field` uguale al nome nella richiesta)
   vanno sotto quel campo: si invia con `submit()` dei Signal Forms e, se la chiamata fallisce, l'azione restituisce
   `apiFieldErrorsOrGeneral(problem, form, …)` (`behaviours/validation/api-field-errors.ts`; questi errori hanno
@@ -225,6 +236,6 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   `app-period-calendar`, i `disabledPeriods` di `app-period-calendar` e `app-filled-date-field`, `DayRange` di
   `noOverlap` / `noOverlaps` (`components/shared/forms/validators.ts`) e le entità che li usano (es.
   `SeasonPeriodInterval`, `PackageReducedSeasonalPrice`, `OnlineBookingPeriod`). Le altre coppie usano i nomi della loro
-  API (es. `validFrom` / `validTo` dei voucher, `dateFrom` / `dateTo` di Servizi e Prenotazioni online).
+  API (es. `validFrom` / `validTo` dei voucher, `dateFrom` / `dateTo` di Servizi).
 - Formato delle date mostrate e adattatore nativo: vedi `traduzioni-e-lingue.md`; date UTC nelle API: vedi
   `api-e-mock.md`.
