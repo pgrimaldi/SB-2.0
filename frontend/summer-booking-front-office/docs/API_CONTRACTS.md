@@ -9381,11 +9381,11 @@ Assistenza: messaggio al supporto.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `firstName` | string | `Mario` |
-| `lastName` | string | `Rossi` |
-| `email` | string | `mario.rossi@example.com` |
-| `mobilePhone` | string \| null | `333 123 4567` |
-| `message` | string | `Buongiorno, vorrei sapere come esportare il listino.` |
+| `firstName` | string (al massimo 100 caratteri) | `Mario` |
+| `lastName` | string (al massimo 100 caratteri) | `Rossi` |
+| `email` | string (email, al massimo 255 caratteri) | `mario.rossi@example.com` |
+| `mobilePhone` | string \| null (solo cifre e spazi, al massimo 32 caratteri) | `333 123 4567` |
+| `message` | string (al massimo 2000 caratteri) | `Buongiorno, vorrei sapere come esportare il listino.` |
 
 #### Response
 

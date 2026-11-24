@@ -83,7 +83,7 @@
       "invalid_credentials": "Invalid credentials",
       "session_expired": "Your session has expired. Please sign in again.",
       "app_not_allowed": "Not authorized",
-      "too_many_attempts": "Too many attempts",
+      "too_many_attempts": "Too many attempts. Please try again in a few minutes.",
       "unauthenticated": "The session is no longer valid. Sign in again.",
       "forbidden": "You are not allowed to do this."
     },

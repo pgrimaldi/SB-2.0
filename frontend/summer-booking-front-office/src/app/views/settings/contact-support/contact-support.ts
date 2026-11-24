@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DOCUMENT,
   OnDestroy,
   computed,
   effect,
@@ -42,11 +43,11 @@ import { FilledTextarea } from '../../../components/shared/ui/inputs/filled-text
 import { ApiProblem } from '../../../entities/errors/api-problem';
 import {
   ContactSupportRequest,
-  MAX_CONTACT_EMAIL_LENGTH,
   MAX_CONTACT_MESSAGE_LENGTH,
   MAX_CONTACT_NAME_LENGTH,
   MAX_CONTACT_PHONE_LENGTH,
 } from '../../../entities/settings/contact-support/contact-support-request';
+import { MAX_EMAIL_LENGTH } from '../../../entities/shared/email-address';
 import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { NotificationService } from '../../../services/api/notification/notification.service';
@@ -69,6 +70,7 @@ import { NotificationService } from '../../../services/api/notification/notifica
 export class ContactSupport implements UnsavedChanges, OnDestroy {
   private readonly notification = inject(NotificationService);
   private readonly auth = inject(AuthBehaviour);
+  private readonly document = inject(DOCUMENT);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
@@ -98,7 +100,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
     metadata(path.lastName, MAX_LENGTH, () => MAX_CONTACT_NAME_LENGTH);
     requiredText(path.email);
     emailAddress(path.email);
-    metadata(path.email, MAX_LENGTH, () => MAX_CONTACT_EMAIL_LENGTH);
+    metadata(path.email, MAX_LENGTH, () => MAX_EMAIL_LENGTH);
     phoneNumberWithoutPrefix(path.mobilePhone, MAX_CONTACT_PHONE_LENGTH);
     requiredText(path.message);
     metadata(path.message, MAX_LENGTH, () => MAX_CONTACT_MESSAGE_LENGTH);
@@ -155,7 +157,6 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
       try {
         await firstValueFrom(
           this.notification.contactSupport({
-            ...contact,
             firstName: trimmedText(contact.firstName),
             lastName: trimmedText(contact.lastName),
             email: trimmedText(contact.email),
@@ -163,6 +164,8 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
             message: trimmedText(contact.message),
           }),
         );
+        // Or the popup takes the focus from the emptied field, which would show as missing.
+        (this.document.activeElement as HTMLElement | null)?.blur();
         this.contact.set(new ContactSupportRequest());
         this.contactForm().reset();
         this.sent.set(true);

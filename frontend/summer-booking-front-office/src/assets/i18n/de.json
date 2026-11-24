@@ -83,7 +83,7 @@
       "invalid_credentials": "Ungültige Zugangsdaten",
       "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
       "app_not_allowed": "Nicht berechtigt",
-      "too_many_attempts": "Zu viele Versuche",
+      "too_many_attempts": "Zu viele Versuche. Bitte versuche es in einigen Minuten erneut.",
       "unauthenticated": "Die Sitzung ist nicht mehr gültig. Bitte erneut anmelden.",
       "forbidden": "Du hast keine Berechtigung für diesen Vorgang."
     },
@@ -613,13 +613,13 @@
       },
       "contact_support": {
         "help": {
-          "title": "Brauchen Sie Hilfe?",
+          "title": "Brauchst du Hilfe?",
           "phone": "Telefon",
           "email": "E-Mail",
           "hours": "Supportzeiten"
         },
         "form": {
-          "title": "Kontaktieren Sie uns",
+          "title": "Kontaktiere uns",
           "first_name": "Vorname",
           "last_name": "Nachname",
           "email": "E-Mail",
@@ -635,7 +635,7 @@
         },
         "sent": {
           "title": "Nachricht erfolgreich gesendet",
-          "text": "Vielen Dank für Ihre Nachricht, wir melden uns so schnell wie möglich bei Ihnen",
+          "text": "Vielen Dank für deine Nachricht, wir melden uns so schnell wie möglich bei dir",
           "close": "Schließen"
         }
       },

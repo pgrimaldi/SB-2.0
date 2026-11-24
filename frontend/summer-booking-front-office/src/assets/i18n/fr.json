@@ -83,7 +83,7 @@
       "invalid_credentials": "Identifiants non valides",
       "session_expired": "Votre session a expiré. Reconnectez-vous.",
       "app_not_allowed": "Non autorisé",
-      "too_many_attempts": "Trop de tentatives",
+      "too_many_attempts": "Trop de tentatives. Réessayez dans quelques minutes.",
       "unauthenticated": "La session n'est plus valide. Reconnectez-vous.",
       "forbidden": "Vous n'avez pas les droits pour cette opération."
     },

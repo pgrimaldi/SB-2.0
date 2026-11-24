@@ -23,11 +23,12 @@ Rotta `/settings/contact-support`, vista `views/settings/contact-support/` (`Con
   riuscito.
 - Nome, Cognome, Email e Messaggio sono obbligatori (`requiredText`, che conta come vuoto anche un testo di soli spazi;
   messaggio generico "Campo obbligatorio", `invalidate.required`); il Cellulare è facoltativo.
-- I limiti sono quelli del backend: Nome e Cognome 100 caratteri, Email 255 e con il formato di un indirizzo
-  (`emailAddress`), Cellulare 32 e solo cifre e spazi (`phoneNumberWithoutPrefix`; il riempimento automatico è
-  `tel-national`, senza `+`), Messaggio 2000.
+- I limiti sono quelli del backend: Nome e Cognome 100 caratteri, Email `MAX_EMAIL_LENGTH` (255) e con il formato di
+  un indirizzo (`emailAddress`), Cellulare 32 e solo cifre e spazi (`phoneNumberWithoutPrefix`; il riempimento
+  automatico è `tel-national`, senza `+`), Messaggio 2000.
 - "Invia messaggio" è attivo solo con il form valido e chiama l'invio con lo spinner sul bottone.
-- Se riesce, il form si svuota e compare `app-message-popup` "Messaggio inviato con successo" con Chiudi.
+- Se riesce, il form si svuota (senza cursore nei campi, altrimenti il popup segnerebbe quel campo come obbligatorio) e
+  compare `app-message-popup` "Messaggio inviato con successo" con Chiudi.
 - Se fallisce, i dati restano: l'errore di un campo va sotto quel campo, gli altri sopra il bottone.
 - L'invio della mail lo gestisce il backend: 429 `auth.too_many_attempts` con troppi messaggi dello stesso utente, 503
   `notification.unavailable` se non può partire.

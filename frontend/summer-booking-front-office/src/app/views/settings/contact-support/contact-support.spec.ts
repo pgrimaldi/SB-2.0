@@ -152,15 +152,17 @@ describe('ContactSupport', () => {
   });
 
   it('should keep what was typed and show the error when the message is not sent', async () => {
-    const { fixture, element, fields, send, fill, contactSupport } = await setup();
+    const { element, fields, send, settle, fill, contactSupport } = await setup();
     contactSupport.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 0, statusText: 'Unknown Error' })),
     );
     await fill();
 
     send().click();
-    await fixture.whenStable();
-    expect(element.querySelector('.contact__support__error')?.textContent?.trim()).not.toBe('');
+    await settle();
+    expect(element.querySelector('.contact__support__error')?.textContent?.trim()).toBe(
+      'error.unknown',
+    );
     expect(fields()[1].value).toBe('Bianchi');
     expect(document.querySelector('.message__popup')).toBeNull();
   });
@@ -180,8 +182,8 @@ describe('ContactSupport', () => {
 
     expect(element.querySelectorAll('.contact__support__box').length).toBe(3);
     expect(element.querySelector('.contact__support__box a')).toBeNull();
-    expect(element.querySelector('.contact__support__info__error')?.textContent?.trim()).not.toBe(
-      '',
+    expect(element.querySelector('.contact__support__info__error')?.textContent?.trim()).toBe(
+      'error.unknown',
     );
   });
 

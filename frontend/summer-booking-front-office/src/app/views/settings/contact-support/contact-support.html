@@ -22,7 +22,7 @@
           {{ 'management.settings.contact_support.help.email' | translate }}
         </h2>
         @if (info) {
-          <a class="contact__support__box__value" [href]="'mailto:' + info.mailAddress">{{
+          <a class="contact__support__box__value" dir="ltr" [href]="'mailto:' + info.mailAddress">{{
             info.mailAddress
           }}</a>
         }
@@ -68,6 +68,7 @@
       />
       <app-filled-text-field
         autocomplete="email"
+        [isCodeField]="true"
         [label]="'management.settings.contact_support.form.email' | translate"
         [isMandatory]="true"
         [placeholder]="'management.settings.contact_support.form.examples.email' | translate"

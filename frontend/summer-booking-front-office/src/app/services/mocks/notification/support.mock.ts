@@ -5,11 +5,11 @@ import { isEmailAddress } from '../../../components/shared/forms/validators';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import {
   ContactSupportRequest,
-  MAX_CONTACT_EMAIL_LENGTH,
   MAX_CONTACT_MESSAGE_LENGTH,
   MAX_CONTACT_NAME_LENGTH,
   MAX_CONTACT_PHONE_LENGTH,
 } from '../../../entities/settings/contact-support/contact-support-request';
+import { MAX_EMAIL_LENGTH } from '../../../entities/shared/email-address';
 import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
@@ -17,7 +17,7 @@ import { MockFieldError, problem } from '../errors/problem.mock';
 const MAX_LENGTHS: Readonly<Record<keyof ContactSupportRequest, number>> = {
   firstName: MAX_CONTACT_NAME_LENGTH,
   lastName: MAX_CONTACT_NAME_LENGTH,
-  email: MAX_CONTACT_EMAIL_LENGTH,
+  email: MAX_EMAIL_LENGTH,
   mobilePhone: MAX_CONTACT_PHONE_LENGTH,
   message: MAX_CONTACT_MESSAGE_LENGTH,
 };
@@ -51,8 +51,8 @@ export const supportInfoMock = (request: HttpRequest<unknown>): Observable<HttpE
 };
 
 /**
- * `POST /api/notification/support/contact`: the mock only checks the message. One that starts with
- * "attesa" finds too many sent, one with "spento" a service that does not answer.
+ * `POST /api/notification/support/contact`: the mock only checks the fields. A message that starts
+ * with "attesa" finds too many sent, one with "spento" a service that does not answer.
  */
 export const contactSupportMock = (
   request: HttpRequest<unknown>,

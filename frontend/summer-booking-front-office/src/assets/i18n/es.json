@@ -83,7 +83,7 @@
       "invalid_credentials": "Credenciales no válidas",
       "session_expired": "La sesión ha caducado. Vuelve a iniciar sesión.",
       "app_not_allowed": "No autorizado",
-      "too_many_attempts": "Demasiados intentos",
+      "too_many_attempts": "Demasiados intentos. Inténtalo de nuevo en unos minutos.",
       "unauthenticated": "La sesión ya no es válida. Vuelve a acceder.",
       "forbidden": "No tienes permisos para esta operación."
     },

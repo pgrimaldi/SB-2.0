@@ -83,7 +83,7 @@
       "invalid_credentials": "凭据无效",
       "session_expired": "会话已过期，请重新登录。",
       "app_not_allowed": "未授权",
-      "too_many_attempts": "尝试次数过多",
+      "too_many_attempts": "尝试次数过多，请几分钟后重试。",
       "unauthenticated": "会话已失效，请重新登录。",
       "forbidden": "你无权执行此操作。"
     },

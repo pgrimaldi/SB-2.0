@@ -8404,11 +8404,11 @@ Nessun payload.
 
 ```json
 {
-  "firstName": "string",
-  "lastName": "string",
-  "email": "string",
-  "mobilePhone": "string | null",
-  "message": "string"
+  "firstName": "string (al massimo 100 caratteri)",
+  "lastName": "string (al massimo 100 caratteri)",
+  "email": "string (email, al massimo 255 caratteri)",
+  "mobilePhone": "string | null (solo cifre e spazi, al massimo 32 caratteri)",
+  "message": "string (al massimo 2000 caratteri)"
 }
 ```
 
@@ -8420,11 +8420,11 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `firstName` | string |
-| `lastName` | string |
-| `email` | string |
-| `mobilePhone` | string \| null |
-| `message` | string |
+| `firstName` | string (al massimo 100 caratteri) |
+| `lastName` | string (al massimo 100 caratteri) |
+| `email` | string (email, al massimo 255 caratteri) |
+| `mobilePhone` | string \| null (solo cifre e spazi, al massimo 32 caratteri) |
+| `message` | string (al massimo 2000 caratteri) |
 
 **Response tabella**
 

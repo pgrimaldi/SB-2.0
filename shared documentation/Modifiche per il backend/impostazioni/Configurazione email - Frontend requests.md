@@ -81,8 +81,9 @@ Sono tutte API nuove.
 - **Stabilimento**: lo prende dal token (`ICurrentUser.PropertyId`): nessuna richiesta lo contiene. Ogni API legge e cambia solo la
   riga di quello stabilimento. Token senza stabilimento: 403 `notification.property_required` (nuovo, come
   `payment.property_required`). Che lo stabilimento esista ancora non si controlla, come in `Module.Payment`: nessun 404.
-- **Permesso** di tutte, anche della lettura: `catalog.settings` (`Permissions.CatalogSettings`: superadmin, admin, user1). Senza: 403
-  `auth.forbidden`. Senza token valido: 401 `auth.unauthenticated`.
+- **Permesso** di tutte e tre, anche della lettura, sulla singola rotta (nel gruppo ci sono anche quelle di
+  `Assistenza e guide - Frontend requests.md`, che non lo chiedono): `catalog.settings` (`Permissions.CatalogSettings`: superadmin, admin,
+  user1). Senza: 403 `auth.forbidden`. Senza token valido: 401 `auth.unauthenticated`.
 - **JSON** in camelCase, con i nomi esatti di questo documento (sono quelli delle colonne). Le date sono istanti UTC in ISO 8601.
 - **`security`**: i codici `none`, `starttls`, `ssl` (`Codes.Of(SmtpSecurity)`, uguali ai valori dell'enum del database).
 - **Errori** nel formato Problem Details del backend (`Boot/Web/ProblemDetailsWriter.cs`), con `code`, `traceId` ed
@@ -90,9 +91,9 @@ Sono tutte API nuove.
 - **Ordine dei controlli**: 401, 403 `auth.forbidden`, 400 sulle sole regole del corpo, 403 `notification.property_required`, poi gli
   errori della sezione nell'ordine della sua tabella. Si valida prima di leggere lo stabilimento, come `InventoryService.ListAsync`
   (`EnsureValid` e poi `IdAsync`): di `PropertyOf` (`Module.Payment/Endpoints/Endpoints.cs`) si copia solo il 403.
-- **Sessione impersonata** dal systemadmin: le sezioni 2 e 3 rispondono 403 `auth.forbidden` (`ICurrentUser.IsImpersonated`, come
-  `ForbidWhenImpersonated` in `MeService`): usano e cambiano le credenziali dello stabilimento, come il conto Stripe e Fisconline. La
-  lettura resta permessa.
+- **Sessione impersonata** dal systemadmin: le sezioni 2 e 3 rispondono 403 `auth.forbidden` (`ICurrentUser.ImpersonatorUserId`
+  valorizzato, come `ForbidWhenImpersonated` in `MeService`): usano e cambiano le credenziali dello stabilimento, come il conto Stripe e
+  Fisconline. La lettura resta permessa.
 - **Valori che non si leggono**: un numero che non entra in un intero a 32 bit, un tipo sbagliato o un corpo non JSON non arrivano ai
   validatori: in Development 400 `validation.failed` senza `errors[]` (`BadHttpRequestException`), negli altri ambienti 400 senza corpo
   (`Boot/Program.cs` non imposta `RouteHandlerOptions.ThrowOnBadRequest`). Nei DTO i campi sono nullable (`string?`, `int?`, `bool?`,
