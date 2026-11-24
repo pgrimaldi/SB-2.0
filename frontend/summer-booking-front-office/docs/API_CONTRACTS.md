@@ -1270,7 +1270,7 @@ Il corpo è solo il testo dei termini e condizioni in HTML, come stringa JSON (t
 
 ## /sharing
 
-### GET `/api/booking/sharing/general-information`
+### GET `/api/booking/sharing/settings`
 
 Sharing: impostazioni generali.
 
@@ -1284,41 +1284,39 @@ Stato: 200 OK.
 
 ```json
 {
-  "isSharingEnabled": true,
-  "isMinimumBookingDayEnabled": true,
-  "minimumBookingDayQuantity": 3,
-  "isOnlySeasonalEnabled": false,
-  "isEnabledOnAllArticles": true,
-  "isScheduledAbsenceSharing": true,
-  "isManualCreditAssignmentEnabled": false,
-  "resoldDayCreditQuantity": 1,
-  "manualCreditValue": 2.5,
-  "isAutomaticVoucherEnabled": true,
-  "voucherCreditValue": 5.5,
-  "isPrepaidCardTopUpEnabled": false,
-  "prepaidCardCreditValue": 10,
+  "isEnabled": true,
+  "minBookingDays": 3,
+  "seasonalOnly": false,
+  "allArticles": true,
+  "absencesAsSharing": true,
+  "manualCreditEnabled": false,
+  "manualCreditUnitsPerDay": 1,
+  "manualCreditAmount": 2.5,
+  "voucherCreditEnabled": true,
+  "voucherCreditAmount": 5.5,
+  "cardTopUpEnabled": false,
+  "cardTopUpAmount": 10,
   "version": "106cb2d0"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `isSharingEnabled` | boolean | `true` |
-| `isMinimumBookingDayEnabled` | boolean | `true` |
-| `minimumBookingDayQuantity` | number (intero, 1-2.147.483.647) \| null | `3` |
-| `isOnlySeasonalEnabled` | boolean | `false` |
-| `isEnabledOnAllArticles` | boolean | `true` |
-| `isScheduledAbsenceSharing` | boolean | `true` |
-| `isManualCreditAssignmentEnabled` | boolean | `false` |
-| `resoldDayCreditQuantity` | number (intero, 0-2.147.483.647) | `1` |
-| `manualCreditValue` | number (decimale, €, 0-100.000) | `2.5` |
-| `isAutomaticVoucherEnabled` | boolean | `true` |
-| `voucherCreditValue` | number (decimale, €, 0-100.000) | `5.5` |
-| `isPrepaidCardTopUpEnabled` | boolean | `false` |
-| `prepaidCardCreditValue` | number (decimale, €, 0-100.000) | `10` |
+| `isEnabled` | boolean | `true` |
+| `minBookingDays` | number (intero, 1-366) \| null | `3` |
+| `seasonalOnly` | boolean | `false` |
+| `allArticles` | boolean | `true` |
+| `absencesAsSharing` | boolean | `true` |
+| `manualCreditEnabled` | boolean | `false` |
+| `manualCreditUnitsPerDay` | number (intero, 0-1000) | `1` |
+| `manualCreditAmount` | number (decimale, €, 0-100.000) | `2.5` |
+| `voucherCreditEnabled` | boolean | `true` |
+| `voucherCreditAmount` | number (decimale, €, 0-100.000) | `5.5` |
+| `cardTopUpEnabled` | boolean | `false` |
+| `cardTopUpAmount` | number (decimale, €, 0-100.000) | `10` |
 | `version` | string | `106cb2d0` |
 
-### POST `/api/booking/sharing/save-information`
+### PUT `/api/booking/sharing/settings`
 
 Sharing: salvataggio delle impostazioni.
 
@@ -1326,43 +1324,73 @@ Sharing: salvataggio delle impostazioni.
 
 ```json
 {
-  "isSharingEnabled": true,
-  "isMinimumBookingDayEnabled": true,
-  "minimumBookingDayQuantity": 3,
-  "isOnlySeasonalEnabled": false,
-  "isEnabledOnAllArticles": true,
-  "isScheduledAbsenceSharing": true,
-  "isManualCreditAssignmentEnabled": false,
-  "resoldDayCreditQuantity": 1,
-  "manualCreditValue": 2.5,
-  "isAutomaticVoucherEnabled": true,
-  "voucherCreditValue": 5.5,
-  "isPrepaidCardTopUpEnabled": false,
-  "prepaidCardCreditValue": 10
+  "isEnabled": true,
+  "minBookingDays": 3,
+  "seasonalOnly": false,
+  "allArticles": true,
+  "absencesAsSharing": true,
+  "manualCreditEnabled": false,
+  "manualCreditUnitsPerDay": 1,
+  "manualCreditAmount": 2.5,
+  "voucherCreditEnabled": true,
+  "voucherCreditAmount": 5.5,
+  "cardTopUpEnabled": false,
+  "cardTopUpAmount": 10
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `isSharingEnabled` | boolean | `true` |
-| `isMinimumBookingDayEnabled` | boolean | `true` |
-| `minimumBookingDayQuantity` | number (intero, 1-2.147.483.647) \| null | `3` |
-| `isOnlySeasonalEnabled` | boolean | `false` |
-| `isEnabledOnAllArticles` | boolean | `true` |
-| `isScheduledAbsenceSharing` | boolean | `true` |
-| `isManualCreditAssignmentEnabled` | boolean | `false` |
-| `resoldDayCreditQuantity` | number (intero, 0-2.147.483.647) | `1` |
-| `manualCreditValue` | number (decimale, €, 0-100.000) | `2.5` |
-| `isAutomaticVoucherEnabled` | boolean | `true` |
-| `voucherCreditValue` | number (decimale, €, 0-100.000) | `5.5` |
-| `isPrepaidCardTopUpEnabled` | boolean | `false` |
-| `prepaidCardCreditValue` | number (decimale, €, 0-100.000) | `10` |
+| `isEnabled` | boolean | `true` |
+| `minBookingDays` | number (intero, 1-366) \| null | `3` |
+| `seasonalOnly` | boolean | `false` |
+| `allArticles` | boolean | `true` |
+| `absencesAsSharing` | boolean | `true` |
+| `manualCreditEnabled` | boolean | `false` |
+| `manualCreditUnitsPerDay` | number (intero, 0-1000) | `1` |
+| `manualCreditAmount` | number (decimale, €, 0-100.000) | `2.5` |
+| `voucherCreditEnabled` | boolean | `true` |
+| `voucherCreditAmount` | number (decimale, €, 0-100.000) | `5.5` |
+| `cardTopUpEnabled` | boolean | `false` |
+| `cardTopUpAmount` | number (decimale, €, 0-100.000) | `10` |
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 200 OK (le impostazioni salvate).
 
-Nessun corpo.
+```json
+{
+  "isEnabled": true,
+  "minBookingDays": 3,
+  "seasonalOnly": false,
+  "allArticles": true,
+  "absencesAsSharing": true,
+  "manualCreditEnabled": false,
+  "manualCreditUnitsPerDay": 1,
+  "manualCreditAmount": 2.5,
+  "voucherCreditEnabled": true,
+  "voucherCreditAmount": 5.5,
+  "cardTopUpEnabled": false,
+  "cardTopUpAmount": 10,
+  "version": "6b0c41e7"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `minBookingDays` | number (intero, 1-366) \| null | `3` |
+| `seasonalOnly` | boolean | `false` |
+| `allArticles` | boolean | `true` |
+| `absencesAsSharing` | boolean | `true` |
+| `manualCreditEnabled` | boolean | `false` |
+| `manualCreditUnitsPerDay` | number (intero, 0-1000) | `1` |
+| `manualCreditAmount` | number (decimale, €, 0-100.000) | `2.5` |
+| `voucherCreditEnabled` | boolean | `true` |
+| `voucherCreditAmount` | number (decimale, €, 0-100.000) | `5.5` |
+| `cardTopUpEnabled` | boolean | `false` |
+| `cardTopUpAmount` | number (decimale, €, 0-100.000) | `10` |
+| `version` | string | `6b0c41e7` |
 
 ## /vouchers
 

@@ -137,6 +137,13 @@
   }
 }
 
+.sharing__failure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
 .sharing__error {
   margin: 0;
   color: var(--color__layout__error);
@@ -152,6 +159,11 @@
 }
 
 @media (width < 48rem) {
+  // On a line of its own, with room for the message.
+  .sharing__amount {
+    flex-basis: 100%;
+  }
+
   .sharing__credits {
     grid-template-columns: minmax(0, 1fr) 6.125rem auto;
     row-gap: 1rem;

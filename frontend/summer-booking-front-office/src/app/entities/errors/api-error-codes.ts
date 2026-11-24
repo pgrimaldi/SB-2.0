@@ -41,6 +41,7 @@ export enum ApiErrorCode {
   MapSpotsOutsideGrid = 'map.spots_outside_grid',
   MapSpotNotFound = 'map.spot_not_found',
   MapInvalidImage = 'map.invalid_image',
+  BookingPropertyRequired = 'booking.property_required',
   CatalogSectorInUse = 'catalog.sector_in_use',
   CatalogSectorNameTaken = 'catalog.sector_name_taken',
   CatalogInvalidImage = 'catalog.invalid_image',

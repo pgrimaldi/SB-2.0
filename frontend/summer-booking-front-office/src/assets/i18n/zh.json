@@ -116,6 +116,9 @@
       "role_not_assignable": "无法在面板中管理此账户。",
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
     },
+    "booking": {
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
+    },
     "audit": {
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
       "export_too_large": "要导出的记录有 {total, number, integer} 条，但最多只能导出 {max, number, integer} 条：请缩小时间范围或筛选条件后重试。"

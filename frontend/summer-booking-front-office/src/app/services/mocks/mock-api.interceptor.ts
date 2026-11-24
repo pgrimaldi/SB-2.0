@@ -128,7 +128,7 @@ import {
   seasonPeriodListMock,
   updateSeasonPeriodMock,
 } from './seasons/seasons.mock';
-import { saveSharingInformationMock, sharingGeneralInformationMock } from './sharing/sharing.mock';
+import { saveSharingSettingsMock, sharingSettingsMock } from './sharing/sharing.mock';
 import {
   addVoucherItemMock,
   deleteVoucherItemsMock,
@@ -490,16 +490,16 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/booking/sharing/general-information`
+    request.url === `${environment.apiBaseUrl}/booking/sharing/settings`
   ) {
-    return sharingGeneralInformationMock(request);
+    return sharingSettingsMock(request);
   }
 
   if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/booking/sharing/save-information`
+    request.method === 'PUT' &&
+    request.url === `${environment.apiBaseUrl}/booking/sharing/settings`
   ) {
-    return saveSharingInformationMock(request);
+    return saveSharingSettingsMock(request);
   }
 
   if (

@@ -116,6 +116,9 @@
       "role_not_assignable": "Ce compte ne peut pas être géré depuis le panneau.",
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
     },
+    "booking": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
+    },
     "audit": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
       "export_too_large": "Il y a {total, number, integer} entrées à exporter, mais on peut en exporter au maximum {max, number, integer} : réduisez la période ou les filtres et réessayez."

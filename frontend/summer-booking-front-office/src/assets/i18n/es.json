@@ -116,6 +116,9 @@
       "role_not_assignable": "Esta cuenta no se puede gestionar desde el panel.",
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento."
     },
+    "booking": {
+      "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento."
+    },
     "audit": {
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento.",
       "export_too_large": "Hay {total, number, integer} registros que exportar, pero se pueden exportar como máximo {max, number, integer}: reduce el periodo o los filtros y vuelve a intentarlo."

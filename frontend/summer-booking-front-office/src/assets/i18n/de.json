@@ -116,6 +116,9 @@
       "role_not_assignable": "Dieses Konto kann nicht über das Panel verwaltet werden.",
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
     },
+    "booking": {
+      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
+    },
     "audit": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
       "export_too_large": "Es gibt {total, number, integer} Einträge zum Exportieren, aber höchstens {max, number, integer} können exportiert werden: Schränke den Zeitraum oder die Filter ein und versuche es erneut."

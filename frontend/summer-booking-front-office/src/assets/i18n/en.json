@@ -116,6 +116,9 @@
       "role_not_assignable": "This account cannot be managed from the panel.",
       "property_required": "Your account is not linked to a property: sign in with an account of the property."
     },
+    "booking": {
+      "property_required": "Your account is not linked to a property: sign in with an account of the property."
+    },
     "audit": {
       "property_required": "Your account is not linked to a property: sign in with an account of the property.",
       "export_too_large": "There are {total, number, integer} entries to export, but at most {max, number, integer} can be exported: narrow the period or the filters and try again."

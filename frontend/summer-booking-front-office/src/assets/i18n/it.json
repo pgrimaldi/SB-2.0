@@ -116,6 +116,9 @@
       "role_not_assignable": "Questo account non si può gestire dal pannello.",
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento."
     },
+    "booking": {
+      "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento."
+    },
     "audit": {
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
       "export_too_large": "Le voci da esportare sono {total, number, integer}, ma se ne possono esportare al massimo {max, number, integer}: restringi il periodo o i filtri e riprova."

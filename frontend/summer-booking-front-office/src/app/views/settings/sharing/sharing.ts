@@ -20,7 +20,7 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { firstValueFrom, of, switchMap } from 'rxjs';
+import { Subscription, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import {
@@ -42,30 +42,35 @@ import { FilledNumberField } from '../../../components/shared/ui/inputs/filled-n
 import { Toggle } from '../../../components/shared/ui/toggles/toggle/toggle';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../entities/errors/api-problem';
+import { SharingDraft } from '../../../entities/settings/sharing/sharing-draft';
 import {
-  MAX_SHARING_CREDIT_VALUE,
-  MAX_SHARING_QUANTITY,
+  MAX_SHARING_BOOKING_DAYS,
+  MAX_SHARING_CREDIT_AMOUNT,
+  MAX_SHARING_CREDIT_UNITS,
   SharingSaveInformationRequest,
 } from '../../../entities/settings/sharing/sharing-save-information-request';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { onlyFieldsOf } from '../../../services/api/only-fields-of';
 import { SharingService } from '../../../services/api/sharing/sharing.service';
 
-const FIELD_NAMES: Partial<Record<keyof SharingSaveInformationRequest, string>> = {
-  minimumBookingDayQuantity: 'management.settings.sharing.field_names.days',
-  resoldDayCreditQuantity: 'management.settings.sharing.field_names.credits',
-  manualCreditValue: 'management.settings.sharing.field_names.credit_value',
-  voucherCreditValue: 'management.settings.sharing.field_names.credit_value',
-  prepaidCardCreditValue: 'management.settings.sharing.field_names.credit_value',
+const FIELD_NAMES: Partial<Record<keyof SharingDraft, string>> = {
+  minBookingDays: 'management.settings.sharing.field_names.days',
+  manualCreditUnitsPerDay: 'management.settings.sharing.field_names.credits',
+  manualCreditAmount: 'management.settings.sharing.field_names.credit_value',
+  voucherCreditAmount: 'management.settings.sharing.field_names.credit_value',
+  cardTopUpAmount: 'management.settings.sharing.field_names.credit_value',
 };
 
 /** The values wanted by each option while it is on. */
 const OPTION_VALUES = [
-  ['isMinimumBookingDayEnabled', ['minimumBookingDayQuantity']],
-  ['isManualCreditAssignmentEnabled', ['resoldDayCreditQuantity', 'manualCreditValue']],
-  ['isAutomaticVoucherEnabled', ['voucherCreditValue']],
-  ['isPrepaidCardTopUpEnabled', ['prepaidCardCreditValue']],
+  ['isMinBookingDaysEnabled', ['minBookingDays']],
+  ['manualCreditEnabled', ['manualCreditUnitsPerDay', 'manualCreditAmount']],
+  ['voucherCreditEnabled', ['voucherCreditAmount']],
+  ['cardTopUpEnabled', ['cardTopUpAmount']],
 ] as const;
+
+/** With the minimum off the days have no place for their error. */
+const HIDDEN_DAYS: readonly (keyof SharingDraft)[] = ['minBookingDays'];
 
 @Component({
   selector: 'app-sharing',
@@ -96,20 +101,21 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   protected readonly ButtonSize = ButtonSize;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
 
-  private readonly information = signal(new SharingSaveInformationRequest());
-  private savedInformation = new SharingSaveInformationRequest();
+  private readonly draft = signal(new SharingDraft());
+  private savedDraft = new SharingDraft();
   private version: string | null = null;
-  private readonly loaded = signal(false);
-  /** Asked again after a version conflict: the effect that loads the settings reads it. */
+  /** Goes up with every save that succeeds: a reading started before it answers older values. */
+  private savesDone = 0;
+  private isConflictPending = false;
+  private readonly idProperty = computed(() => this.auth.user()?.propertyId ?? null);
+  protected readonly loaded = signal(false);
+  /** Asked again after a version conflict or a failed reading: the effect that loads the settings reads it. */
   private readonly reloads = signal(0);
   protected readonly isSaving = signal(false);
   protected readonly saved = signal(false);
-  protected readonly informationForm = form(this.information, (path) => {
+  protected readonly informationForm = form(this.draft, (path) => {
     disabled(path, () => !this.loaded() || this.isSaving());
-    disabled(
-      path.minimumBookingDayQuantity,
-      ({ valueOf }) => !valueOf(path.isMinimumBookingDayEnabled),
-    );
+    disabled(path.minBookingDays, ({ valueOf }) => !valueOf(path.isMinBookingDaysEnabled));
     for (const [option, values] of OPTION_VALUES) {
       applyWhen(
         path,
@@ -117,18 +123,18 @@ export class Sharing implements UnsavedChanges, OnDestroy {
         (chosen) => values.forEach((name) => greaterThan(chosen[name], 0)),
       );
     }
-    max(path.minimumBookingDayQuantity, MAX_SHARING_QUANTITY);
-    max(path.resoldDayCreditQuantity, MAX_SHARING_QUANTITY);
-    max(path.manualCreditValue, MAX_SHARING_CREDIT_VALUE);
-    max(path.voucherCreditValue, MAX_SHARING_CREDIT_VALUE);
-    max(path.prepaidCardCreditValue, MAX_SHARING_CREDIT_VALUE);
+    max(path.minBookingDays, MAX_SHARING_BOOKING_DAYS);
+    max(path.manualCreditUnitsPerDay, MAX_SHARING_CREDIT_UNITS);
+    max(path.manualCreditAmount, MAX_SHARING_CREDIT_AMOUNT);
+    max(path.voucherCreditAmount, MAX_SHARING_CREDIT_AMOUNT);
+    max(path.cardTopUpAmount, MAX_SHARING_CREDIT_AMOUNT);
   });
   protected readonly fieldErrors = Object.fromEntries(
-    (Object.keys(this.information()) as (keyof SharingSaveInformationRequest)[]).map((name) => [
+    (Object.keys(this.draft()) as (keyof SharingDraft)[]).map((name) => [
       name,
       this.validationText.message(this.informationForm[name], FIELD_NAMES[name]),
     ]),
-  ) as Readonly<Record<keyof SharingSaveInformationRequest, Signal<string | null>>>;
+  ) as Readonly<Record<keyof SharingDraft, Signal<string | null>>>;
   protected readonly canSave = computed(() => this.loaded() && !this.isSaving());
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly isConflictShown = signal(false);
@@ -153,67 +159,88 @@ export class Sharing implements UnsavedChanges, OnDestroy {
     effect((onCleanup) => {
       this.reloads();
       this.dataReload?.();
-      if (!this.auth.user()?.propertyId) {
+      if (this.idProperty() === null) {
         return;
       }
-      const subscription = untracked(() => {
-        this.error.set(null);
-        this.loaded.set(false);
-        return this.sharing.generalInformation().subscribe({
-          next: (information) => {
-            const read = onlyFieldsOf(SharingSaveInformationRequest, information);
-            this.version = information.version;
-            this.savedInformation = read;
-            this.information.set(read);
-            this.informationForm().reset();
-            this.loaded.set(true);
-            this.informationForm().markAsTouched();
-          },
-          error: (error: unknown) => {
-            this.loaded.set(false);
-            this.error.set(toApiProblem(error));
-          },
-        });
-      });
+      const subscription = untracked(() => this.load());
       onCleanup(() => subscription.unsubscribe());
     });
   }
 
   hasUnsavedChanges(): boolean {
-    return (
-      comparableJson(asSaved(this.information())) !== comparableJson(asSaved(this.savedInformation))
-    );
+    return comparable(this.draft()) !== comparable(this.savedDraft);
   }
 
   protected save(): void {
-    if (!this.canSave() || !this.auth.user()?.propertyId) {
+    if (!this.canSave() || this.idProperty() === null) {
       return;
     }
     void submit(this.informationForm, async (): Promise<TreeValidationResult> => {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        const sent = asSaved(this.information());
+        const sent = savedOf(this.draft());
         this.version = await firstValueFrom(this.sharing.saveInformation(sent, this.version));
+        this.savesDone++;
         // The new version goes with what was sent, even if a reading changed the form meanwhile.
-        this.savedInformation = sent;
-        this.information.set(sent);
-        this.informationForm().reset();
+        this.show(sent);
         this.saved.set(true);
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         if (problem.code === ApiErrorCode.ResourceVersionConflict) {
-          this.isConflictShown.set(true);
-          this.reloads.update((reloads) => reloads + 1);
+          this.isConflictPending = true;
+          this.draft.set(this.savedDraft);
+          this.informationForm().reset();
+          this.reload();
           return undefined;
         }
-        return apiFieldErrorsOrGeneral(problem, this.informationForm, (general) =>
-          this.error.set(general),
+        return apiFieldErrorsOrGeneral(
+          problem,
+          this.informationForm,
+          (general) => this.error.set(general),
+          this.draft().isMinBookingDaysEnabled ? [] : HIDDEN_DAYS,
         );
       } finally {
         this.isSaving.set(false);
       }
     });
+  }
+
+  protected reload(): void {
+    this.reloads.update((reloads) => reloads + 1);
+  }
+
+  private load(): Subscription {
+    const savesAtStart = this.savesDone;
+    this.error.set(null);
+    this.loaded.set(false);
+    return this.sharing.generalInformation().subscribe({
+      next: (information) => {
+        if (savesAtStart === this.savesDone) {
+          this.version = information.version;
+          this.show(onlyFieldsOf(SharingSaveInformationRequest, information));
+        }
+        this.loaded.set(true);
+        this.informationForm().markAsTouched();
+        if (this.isConflictPending) {
+          this.isConflictPending = false;
+          this.isConflictShown.set(true);
+        }
+      },
+      error: (error: unknown) => {
+        this.loaded.set(false);
+        this.error.set(toApiProblem(error));
+      },
+    });
+  }
+
+  private show(information: SharingSaveInformationRequest): void {
+    this.savedDraft = {
+      ...information,
+      isMinBookingDaysEnabled: information.minBookingDays !== null,
+    };
+    this.draft.set(this.savedDraft);
+    this.informationForm().reset();
   }
 
   ngOnDestroy(): void {
@@ -222,15 +249,20 @@ export class Sharing implements UnsavedChanges, OnDestroy {
 }
 
 /** As the backend keeps them: no days with the minimum off, 0 for an empty number. */
-function asSaved(information: SharingSaveInformationRequest): SharingSaveInformationRequest {
+function savedOf({
+  isMinBookingDaysEnabled,
+  ...information
+}: SharingDraft): SharingSaveInformationRequest {
   return {
     ...information,
-    minimumBookingDayQuantity: information.isMinimumBookingDayEnabled
-      ? information.minimumBookingDayQuantity
-      : null,
-    resoldDayCreditQuantity: information.resoldDayCreditQuantity ?? 0,
-    manualCreditValue: information.manualCreditValue ?? 0,
-    voucherCreditValue: information.voucherCreditValue ?? 0,
-    prepaidCardCreditValue: information.prepaidCardCreditValue ?? 0,
+    minBookingDays: isMinBookingDaysEnabled ? information.minBookingDays : null,
+    manualCreditUnitsPerDay: information.manualCreditUnitsPerDay ?? 0,
+    manualCreditAmount: information.manualCreditAmount ?? 0,
+    voucherCreditAmount: information.voucherCreditAmount ?? 0,
+    cardTopUpAmount: information.cardTopUpAmount ?? 0,
   };
+}
+
+function comparable(draft: SharingDraft): string {
+  return comparableJson([savedOf(draft), draft.isMinBookingDaysEnabled]);
 }

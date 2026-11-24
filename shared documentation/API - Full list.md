@@ -7002,7 +7002,7 @@ Nessun corpo (204).
 
 ## Sharing
 
-### GET `/api/booking/sharing/general-information`
+### GET `/api/booking/sharing/settings`
 
 **Payload JSON**
 
@@ -7012,19 +7012,18 @@ Nessun payload.
 
 ```json
 {
-  "isSharingEnabled": "boolean",
-  "isMinimumBookingDayEnabled": "boolean",
-  "minimumBookingDayQuantity": "number (intero, 1-2.147.483.647) | null",
-  "isOnlySeasonalEnabled": "boolean",
-  "isEnabledOnAllArticles": "boolean",
-  "isScheduledAbsenceSharing": "boolean",
-  "isManualCreditAssignmentEnabled": "boolean",
-  "resoldDayCreditQuantity": "number (intero, 0-2.147.483.647)",
-  "manualCreditValue": "number (decimale, €, 0-100.000)",
-  "isAutomaticVoucherEnabled": "boolean",
-  "voucherCreditValue": "number (decimale, €, 0-100.000)",
-  "isPrepaidCardTopUpEnabled": "boolean",
-  "prepaidCardCreditValue": "number (decimale, €, 0-100.000)",
+  "isEnabled": "boolean",
+  "minBookingDays": "number (intero, 1-366) | null",
+  "seasonalOnly": "boolean",
+  "allArticles": "boolean",
+  "absencesAsSharing": "boolean",
+  "manualCreditEnabled": "boolean",
+  "manualCreditUnitsPerDay": "number (intero, 0-1000)",
+  "manualCreditAmount": "number (decimale, €, 0-100.000)",
+  "voucherCreditEnabled": "boolean",
+  "voucherCreditAmount": "number (decimale, €, 0-100.000)",
+  "cardTopUpEnabled": "boolean",
+  "cardTopUpAmount": "number (decimale, €, 0-100.000)",
   "version": "string"
 }
 ```
@@ -7037,68 +7036,95 @@ Nessun payload.
 
 | Campo | Tipo |
 |---|---|
-| `isSharingEnabled` | boolean |
-| `isMinimumBookingDayEnabled` | boolean |
-| `minimumBookingDayQuantity` | number (intero, 1-2.147.483.647) \| null |
-| `isOnlySeasonalEnabled` | boolean |
-| `isEnabledOnAllArticles` | boolean |
-| `isScheduledAbsenceSharing` | boolean |
-| `isManualCreditAssignmentEnabled` | boolean |
-| `resoldDayCreditQuantity` | number (intero, 0-2.147.483.647) |
-| `manualCreditValue` | number (decimale, €, 0-100.000) |
-| `isAutomaticVoucherEnabled` | boolean |
-| `voucherCreditValue` | number (decimale, €, 0-100.000) |
-| `isPrepaidCardTopUpEnabled` | boolean |
-| `prepaidCardCreditValue` | number (decimale, €, 0-100.000) |
+| `isEnabled` | boolean |
+| `minBookingDays` | number (intero, 1-366) \| null |
+| `seasonalOnly` | boolean |
+| `allArticles` | boolean |
+| `absencesAsSharing` | boolean |
+| `manualCreditEnabled` | boolean |
+| `manualCreditUnitsPerDay` | number (intero, 0-1000) |
+| `manualCreditAmount` | number (decimale, €, 0-100.000) |
+| `voucherCreditEnabled` | boolean |
+| `voucherCreditAmount` | number (decimale, €, 0-100.000) |
+| `cardTopUpEnabled` | boolean |
+| `cardTopUpAmount` | number (decimale, €, 0-100.000) |
 | `version` | string |
 
-### POST `/api/booking/sharing/save-information`
+### PUT `/api/booking/sharing/settings`
 
 **Payload JSON**
 
 ```json
 {
-  "isSharingEnabled": "boolean",
-  "isMinimumBookingDayEnabled": "boolean",
-  "minimumBookingDayQuantity": "number (intero, 1-2.147.483.647) | null",
-  "isOnlySeasonalEnabled": "boolean",
-  "isEnabledOnAllArticles": "boolean",
-  "isScheduledAbsenceSharing": "boolean",
-  "isManualCreditAssignmentEnabled": "boolean",
-  "resoldDayCreditQuantity": "number (intero, 0-2.147.483.647)",
-  "manualCreditValue": "number (decimale, €, 0-100.000)",
-  "isAutomaticVoucherEnabled": "boolean",
-  "voucherCreditValue": "number (decimale, €, 0-100.000)",
-  "isPrepaidCardTopUpEnabled": "boolean",
-  "prepaidCardCreditValue": "number (decimale, €, 0-100.000)"
+  "isEnabled": "boolean",
+  "minBookingDays": "number (intero, 1-366) | null",
+  "seasonalOnly": "boolean",
+  "allArticles": "boolean",
+  "absencesAsSharing": "boolean",
+  "manualCreditEnabled": "boolean",
+  "manualCreditUnitsPerDay": "number (intero, 0-1000)",
+  "manualCreditAmount": "number (decimale, €, 0-100.000)",
+  "voucherCreditEnabled": "boolean",
+  "voucherCreditAmount": "number (decimale, €, 0-100.000)",
+  "cardTopUpEnabled": "boolean",
+  "cardTopUpAmount": "number (decimale, €, 0-100.000)"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "isEnabled": "boolean",
+  "minBookingDays": "number (intero, 1-366) | null",
+  "seasonalOnly": "boolean",
+  "allArticles": "boolean",
+  "absencesAsSharing": "boolean",
+  "manualCreditEnabled": "boolean",
+  "manualCreditUnitsPerDay": "number (intero, 0-1000)",
+  "manualCreditAmount": "number (decimale, €, 0-100.000)",
+  "voucherCreditEnabled": "boolean",
+  "voucherCreditAmount": "number (decimale, €, 0-100.000)",
+  "cardTopUpEnabled": "boolean",
+  "cardTopUpAmount": "number (decimale, €, 0-100.000)",
+  "version": "string"
+}
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `isSharingEnabled` | boolean |
-| `isMinimumBookingDayEnabled` | boolean |
-| `minimumBookingDayQuantity` | number (intero, 1-2.147.483.647) \| null |
-| `isOnlySeasonalEnabled` | boolean |
-| `isEnabledOnAllArticles` | boolean |
-| `isScheduledAbsenceSharing` | boolean |
-| `isManualCreditAssignmentEnabled` | boolean |
-| `resoldDayCreditQuantity` | number (intero, 0-2.147.483.647) |
-| `manualCreditValue` | number (decimale, €, 0-100.000) |
-| `isAutomaticVoucherEnabled` | boolean |
-| `voucherCreditValue` | number (decimale, €, 0-100.000) |
-| `isPrepaidCardTopUpEnabled` | boolean |
-| `prepaidCardCreditValue` | number (decimale, €, 0-100.000) |
+| `isEnabled` | boolean |
+| `minBookingDays` | number (intero, 1-366) \| null |
+| `seasonalOnly` | boolean |
+| `allArticles` | boolean |
+| `absencesAsSharing` | boolean |
+| `manualCreditEnabled` | boolean |
+| `manualCreditUnitsPerDay` | number (intero, 0-1000) |
+| `manualCreditAmount` | number (decimale, €, 0-100.000) |
+| `voucherCreditEnabled` | boolean |
+| `voucherCreditAmount` | number (decimale, €, 0-100.000) |
+| `cardTopUpEnabled` | boolean |
+| `cardTopUpAmount` | number (decimale, €, 0-100.000) |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `isEnabled` | boolean |
+| `minBookingDays` | number (intero, 1-366) \| null |
+| `seasonalOnly` | boolean |
+| `allArticles` | boolean |
+| `absencesAsSharing` | boolean |
+| `manualCreditEnabled` | boolean |
+| `manualCreditUnitsPerDay` | number (intero, 0-1000) |
+| `manualCreditAmount` | number (decimale, €, 0-100.000) |
+| `voucherCreditEnabled` | boolean |
+| `voucherCreditAmount` | number (decimale, €, 0-100.000) |
+| `cardTopUpEnabled` | boolean |
+| `cardTopUpAmount` | number (decimale, €, 0-100.000) |
+| `version` | string |
 
 ## Prenotazioni online
 

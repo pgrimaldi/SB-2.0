@@ -1,43 +1,34 @@
 <main class="sharing">
   <section class="sharing__panel">
     <app-section-title [text]="'management.settings.sharing.title' | translate" />
-    <app-toggle
-      [formField]="informationForm.isSharingEnabled"
-      [error]="fieldErrors.isSharingEnabled()"
-    >
+    <app-toggle [formField]="informationForm.isEnabled" [error]="fieldErrors.isEnabled()">
       <span appI18nText="management.settings.sharing.enabled"></span>
     </app-toggle>
     <div class="sharing__row">
       <app-toggle
-        [formField]="informationForm.isMinimumBookingDayEnabled"
-        [error]="fieldErrors.isMinimumBookingDayEnabled()"
+        [formField]="informationForm.isMinBookingDaysEnabled"
+        [error]="fieldErrors.isMinBookingDaysEnabled()"
       >
         <span appI18nText="management.settings.sharing.minimum_booking_days"></span>
       </app-toggle>
       <div class="sharing__amount">
         <app-filled-number-field
           class="sharing__field"
-          [formField]="informationForm.minimumBookingDayQuantity"
-          [error]="fieldErrors.minimumBookingDayQuantity()"
+          [formField]="informationForm.minBookingDays"
+          [error]="fieldErrors.minBookingDays()"
         />
         <span class="sharing__unit" appI18nText="management.settings.sharing.days"></span>
       </div>
     </div>
-    <app-toggle
-      [formField]="informationForm.isOnlySeasonalEnabled"
-      [error]="fieldErrors.isOnlySeasonalEnabled()"
-    >
+    <app-toggle [formField]="informationForm.seasonalOnly" [error]="fieldErrors.seasonalOnly()">
       <span appI18nText="management.settings.sharing.only_seasonal"></span>
     </app-toggle>
-    <app-toggle
-      [formField]="informationForm.isEnabledOnAllArticles"
-      [error]="fieldErrors.isEnabledOnAllArticles()"
-    >
+    <app-toggle [formField]="informationForm.allArticles" [error]="fieldErrors.allArticles()">
       <span appI18nText="management.settings.sharing.all_articles"></span>
     </app-toggle>
     <app-toggle
-      [formField]="informationForm.isScheduledAbsenceSharing"
-      [error]="fieldErrors.isScheduledAbsenceSharing()"
+      [formField]="informationForm.absencesAsSharing"
+      [error]="fieldErrors.absencesAsSharing()"
     >
       <span appI18nText="management.settings.sharing.scheduled_absences"></span>
     </app-toggle>
@@ -48,8 +39,8 @@
     <div class="sharing__credits">
       <div class="sharing__credit__option">
         <app-checkbox
-          [formField]="informationForm.isManualCreditAssignmentEnabled"
-          [error]="fieldErrors.isManualCreditAssignmentEnabled()"
+          [formField]="informationForm.manualCreditEnabled"
+          [error]="fieldErrors.manualCreditEnabled()"
         >
           <span
             class="sharing__credit__name"
@@ -63,8 +54,8 @@
       ></span>
       <app-filled-number-field
         class="sharing__field"
-        [formField]="informationForm.resoldDayCreditQuantity"
-        [error]="fieldErrors.resoldDayCreditQuantity()"
+        [formField]="informationForm.manualCreditUnitsPerDay"
+        [error]="fieldErrors.manualCreditUnitsPerDay()"
       />
       <span
         class="sharing__credit__label sharing__credit__label__end"
@@ -74,15 +65,15 @@
         class="sharing__field"
         [isDecimal]="true"
         [isCurrency]="true"
-        [formField]="informationForm.manualCreditValue"
-        [error]="fieldErrors.manualCreditValue()"
+        [formField]="informationForm.manualCreditAmount"
+        [error]="fieldErrors.manualCreditAmount()"
       />
       <span class="sharing__unit">€</span>
 
       <div class="sharing__credit__option">
         <app-checkbox
-          [formField]="informationForm.isAutomaticVoucherEnabled"
-          [error]="fieldErrors.isAutomaticVoucherEnabled()"
+          [formField]="informationForm.voucherCreditEnabled"
+          [error]="fieldErrors.voucherCreditEnabled()"
         >
           <span
             class="sharing__credit__name"
@@ -102,15 +93,15 @@
         class="sharing__field"
         [isDecimal]="true"
         [isCurrency]="true"
-        [formField]="informationForm.voucherCreditValue"
-        [error]="fieldErrors.voucherCreditValue()"
+        [formField]="informationForm.voucherCreditAmount"
+        [error]="fieldErrors.voucherCreditAmount()"
       />
       <span class="sharing__unit">€</span>
 
       <div class="sharing__credit__option">
         <app-checkbox
-          [formField]="informationForm.isPrepaidCardTopUpEnabled"
-          [error]="fieldErrors.isPrepaidCardTopUpEnabled()"
+          [formField]="informationForm.cardTopUpEnabled"
+          [error]="fieldErrors.cardTopUpEnabled()"
         >
           <span
             class="sharing__credit__name"
@@ -130,15 +121,22 @@
         class="sharing__field"
         [isDecimal]="true"
         [isCurrency]="true"
-        [formField]="informationForm.prepaidCardCreditValue"
-        [error]="fieldErrors.prepaidCardCreditValue()"
+        [formField]="informationForm.cardTopUpAmount"
+        [error]="fieldErrors.cardTopUpAmount()"
       />
       <span class="sharing__unit">€</span>
     </div>
   </section>
 
   @if (errorMessage(); as errorMessage) {
-    <p class="sharing__error">{{ errorMessage }}</p>
+    <div class="sharing__failure">
+      <p class="sharing__error">{{ errorMessage }}</p>
+      @if (!loaded()) {
+        <app-button [size]="ButtonSize.Small" (clicked)="reload()">
+          <span appI18nText="table.load_error.retry"></span>
+        </app-button>
+      }
+    </div>
   }
   <div class="sharing__actions">
     <app-button
