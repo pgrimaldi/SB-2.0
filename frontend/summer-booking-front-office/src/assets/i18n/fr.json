@@ -122,6 +122,16 @@
     "payment": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
     },
+    "fiscalprint": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
+      "printer_not_found": "Cette imprimante n'existe plus : elle a peut-être déjà été supprimée."
+    },
+    "fiskaly": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
+      "not_enabled": "Le ticket électronique n'est pas activé pour votre établissement.",
+      "terms_not_accepted": "Pour configurer le compte, acceptez d'abord les conditions générales.",
+      "unavailable": "Le service du ticket électronique ne répond pas. Réessayez dans quelques instants."
+    },
     "audit": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
       "export_too_large": "Il y a {total, number, integer} entrées à exporter, mais on peut en exporter au maximum {max, number, integer} : réduisez la période ou les filtres et réessayez."
@@ -678,7 +688,8 @@
           "added": "Imprimantes ajoutées",
           "table": {
             "name": "Nom",
-            "ip": "Adresse IP"
+            "ip": "Adresse IP",
+            "mode": "Mode"
           },
           "delete": {
             "title": "Supprimer l'imprimante",
@@ -694,13 +705,25 @@
             "port": "Port",
             "model": "Modèle",
             "ssl": "SSL",
-            "modes": "Modes",
-            "fiscal": "Fiscal",
-            "non_fiscal": "Non fiscal",
-            "orders": "Commandes",
-            "text": "Texte",
+            "choose": "Sélectionner",
+            "mode": "Mode",
+            "modes": {
+              "fiscal": "Fiscal",
+              "non_fiscal": "Non fiscal",
+              "orders": "Commandes",
+              "text": "Texte"
+            },
+            "models": {
+              "fp_81": "FP-81",
+              "fp_90": "FP-90",
+              "rch": "RCH",
+              "tm_t88": "TM-T88",
+              "tm_t20": "TM-T20",
+              "online": "Online"
+            },
             "departments": "Rayons",
             "vat_rate": "Taux de TVA",
+            "no_vat_rate": "Aucun",
             "first_header": "En-tête n°1",
             "second_header": "En-tête n°2",
             "footer": "Pied de page",

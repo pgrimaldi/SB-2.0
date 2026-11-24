@@ -79,11 +79,12 @@ app-add-printer-item-popup {
   line-height: 1.25rem;
 }
 
-// Two per row on every screen: Fiscale and Non fiscale, then Comande and Testo.
-.add__printer__item__popup__choices {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem 1rem;
+.add__printer__item__popup__mandatory {
+  color: var(--color__layout__error);
+}
+
+.add__printer__item__popup__lines {
+  margin-top: 1.5rem;
 }
 
 .add__printer__item__popup__rates {

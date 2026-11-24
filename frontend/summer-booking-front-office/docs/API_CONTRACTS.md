@@ -1000,7 +1000,7 @@ Nessun corpo.
 
 ## /taxation
 
-### POST `/api/taxation/printer-list`
+### POST `/api/fiscalprint/printers/printer-list`
 
 Fiscalizzazione: stampanti.
 
@@ -1010,17 +1010,9 @@ Fiscalizzazione: stampanti.
 {
   "page": 1,
   "pageSize": 5,
-  "search": "epson",
-  "filters": [
-    {
-      "field": "isEnabled",
-      "value": [
-        "true",
-        "false"
-      ]
-    }
-  ],
-  "sortField": "printerName",
+  "search": "",
+  "filters": [],
+  "sortField": "",
   "sortDirection": "Ascending"
 }
 ```
@@ -1029,11 +1021,9 @@ Fiscalizzazione: stampanti.
 |---|---|---|
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `5` |
-| `search` | string | `epson` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "isEnabled", "value": ["true", "false"]}]` |
-| `filters[].field` | string | `isEnabled` |
-| `filters[].value` | string[] (array di stringhe, almeno una) | `["true", "false"]` |
-| `sortField` | string | `printerName` |
+| `search` | string | `""` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
+| `sortField` | string | `""` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
 #### Response
@@ -1048,12 +1038,14 @@ Stato: 200 OK.
       "idPrinter": "5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60",
       "printerName": "EPSON - 1",
       "printerIP": "192.0.2.10",
+      "printerMode": "fiscal",
       "isEnabled": false
     },
     {
       "idPrinter": "9a4e6b2c-1d3f-4e5a-8b7c-2f6d1e3a4b50",
       "printerName": "EPSON - 2",
       "printerIP": "192.0.2.11",
+      "printerMode": "orders",
       "isEnabled": true
     }
   ]
@@ -1063,13 +1055,14 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | PrinterItemListResponse[] (array di oggetti) | `[{"idPrinter": "5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60", "printerName": "EPSON - 1", "printerIP": "192.0.2.10", "isEnabled": false}, {"idPrinter": "9a4e6b2c-1d3f-4e5a-8b7c-2f6d1e3a4b50", "printerName": "EPSON - 2", "printerIP": "192.0.2.11", "isEnabled": true}]` |
+| `rows[]` | PrinterItemListResponse[] (array di oggetti) | `[{"idPrinter": "5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60", "printerName": "EPSON - 1", "printerIP": "192.0.2.10", "printerMode": "fiscal", "isEnabled": false}, {"idPrinter": "9a4e6b2c-1d3f-4e5a-8b7c-2f6d1e3a4b50", "printerName": "EPSON - 2", "printerIP": "192.0.2.11", "printerMode": "orders", "isEnabled": true}]` |
 | `rows[].idPrinter` | string (UUID) | `5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60` |
 | `rows[].printerName` | string | `EPSON - 1` |
-| `rows[].printerIP` | string | `192.0.2.10` |
+| `rows[].printerIP` | string \| null | `192.0.2.10` |
+| `rows[].printerMode` | string (enum PrinterMode) | `fiscal` |
 | `rows[].isEnabled` | boolean | `false` |
 
-### POST `/api/taxation/set-is-active`
+### POST `/api/fiscalprint/printers/set-is-active`
 
 Fiscalizzazione: attivazione di una stampante.
 
@@ -1093,7 +1086,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/taxation/add-printer`
+### POST `/api/fiscalprint/printers/add-printer`
 
 Fiscalizzazione: aggiunta di una stampante.
 
@@ -1104,18 +1097,15 @@ Fiscalizzazione: aggiunta di una stampante.
   "printerName": "EPSON - 3",
   "printerIP": "192.0.2.12",
   "printerPort": 9100,
-  "printerModel": "FP-81 II",
+  "printerModel": "fp_81",
+  "printerMode": "fiscal",
   "isSsl": false,
-  "isFiscalMode": true,
-  "isNonFiscalMode": false,
-  "isOrderMode": false,
-  "isTextMode": false,
   "departmentVatRates": [
-    "22",
-    "10",
-    "4",
-    "0",
-    "0"
+    22,
+    10,
+    null,
+    null,
+    null
   ],
   "firstHeader": "Bagno Esempio",
   "secondHeader": "Via del Mare 1",
@@ -1125,19 +1115,16 @@ Fiscalizzazione: aggiunta di una stampante.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `printerName` | string | `EPSON - 3` |
-| `printerIP` | string \| null | `192.0.2.12` |
-| `printerPort` | number (intero) \| null | `9100` |
-| `printerModel` | string \| null | `FP-81 II` |
+| `printerName` | string (al massimo 120 caratteri) | `EPSON - 3` |
+| `printerIP` | string (al massimo 255 caratteri) | `192.0.2.12` |
+| `printerPort` | number (intero, 1-65535) | `9100` |
+| `printerModel` | string (enum PrinterModel) | `fp_81` |
+| `printerMode` | string (enum PrinterMode) | `fiscal` |
 | `isSsl` | boolean | `false` |
-| `isFiscalMode` | boolean | `true` |
-| `isNonFiscalMode` | boolean | `false` |
-| `isOrderMode` | boolean | `false` |
-| `isTextMode` | boolean | `false` |
-| `departmentVatRates` | string[] (5 elementi) | `["22", "10", "4", "0", "0"]` |
-| `firstHeader` | string \| null | `Bagno Esempio` |
-| `secondHeader` | string \| null | `Via del Mare 1` |
-| `footer` | string \| null | `Grazie e arrivederci` |
+| `departmentVatRates` | (number \| null)[] (5 elementi) | `[22, 10, null, null, null]` |
+| `firstHeader` | string \| null (al massimo 160 caratteri) | `Bagno Esempio` |
+| `secondHeader` | string \| null (al massimo 160 caratteri) | `Via del Mare 1` |
+| `footer` | string \| null (al massimo 160 caratteri) | `Grazie e arrivederci` |
 
 #### Response
 
@@ -1145,7 +1132,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/taxation/delete-printer`
+### POST `/api/fiscalprint/printers/delete-printer`
 
 Fiscalizzazione: eliminazione di una stampante.
 
@@ -1167,7 +1154,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/taxation/download-guide-electronic-receipt`
+### POST `/api/fiskaly/download-guide-electronic-receipt`
 
 Fiscalizzazione: guida dello scontrino elettronico.
 
@@ -1186,7 +1173,7 @@ Il corpo è il file della guida (binario), non JSON.
 | `Content-Type` | `application/pdf` |
 | `Content-Disposition` | `attachment; filename="guida-scontrino-elettronico.pdf"` |
 
-### POST `/api/taxation/electronic-receipt-activation`
+### POST `/api/fiskaly/electronic-receipt-activation`
 
 Fiscalizzazione: attivazione dello scontrino elettronico.
 
@@ -1208,7 +1195,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/taxation/save-electronic-receipt-account`
+### POST `/api/fiskaly/save-electronic-receipt-account`
 
 Fiscalizzazione: account dello scontrino elettronico.
 
@@ -1250,7 +1237,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### GET `/api/taxation/electronic-receipt`
+### GET `/api/fiskaly/electronic-receipt`
 
 Fiscalizzazione: scontrino elettronico.
 

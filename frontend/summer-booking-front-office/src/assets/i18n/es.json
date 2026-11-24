@@ -122,6 +122,16 @@
     "payment": {
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento."
     },
+    "fiscalprint": {
+      "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento.",
+      "printer_not_found": "Esta impresora ya no existe: puede que ya se haya eliminado."
+    },
+    "fiskaly": {
+      "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento.",
+      "not_enabled": "El ticket electrónico no está activo para tu establecimiento.",
+      "terms_not_accepted": "Para configurar la cuenta, primero debes aceptar los términos y condiciones.",
+      "unavailable": "El servicio del ticket electrónico no responde. Inténtalo de nuevo en breve."
+    },
     "audit": {
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento.",
       "export_too_large": "Hay {total, number, integer} registros que exportar, pero se pueden exportar como máximo {max, number, integer}: reduce el periodo o los filtros y vuelve a intentarlo."
@@ -678,7 +688,8 @@
           "added": "Impresoras añadidas",
           "table": {
             "name": "Nombre",
-            "ip": "Dirección IP"
+            "ip": "Dirección IP",
+            "mode": "Modo"
           },
           "delete": {
             "title": "Eliminar impresora",
@@ -694,13 +705,25 @@
             "port": "Puerto",
             "model": "Modelo",
             "ssl": "SSL",
-            "modes": "Modos",
-            "fiscal": "Fiscal",
-            "non_fiscal": "No fiscal",
-            "orders": "Comandas",
-            "text": "Texto",
+            "choose": "Seleccionar",
+            "mode": "Modo",
+            "modes": {
+              "fiscal": "Fiscal",
+              "non_fiscal": "No fiscal",
+              "orders": "Comandas",
+              "text": "Texto"
+            },
+            "models": {
+              "fp_81": "FP-81",
+              "fp_90": "FP-90",
+              "rch": "RCH",
+              "tm_t88": "TM-T88",
+              "tm_t20": "TM-T20",
+              "online": "Online"
+            },
             "departments": "Departamentos",
             "vat_rate": "Tipo de IVA",
+            "no_vat_rate": "Ninguno",
             "first_header": "Encabezado n.º 1",
             "second_header": "Encabezado n.º 2",
             "footer": "Pie de página",

@@ -7663,7 +7663,7 @@ Nessun payload.
 
 ## Fiscalizzazione
 
-### POST `/api/taxation/printer-list`
+### POST `/api/fiscalprint/printers/printer-list`
 
 **Payload JSON**
 
@@ -7692,7 +7692,8 @@ Nessun payload.
     {
       "idPrinter": "string (UUID)",
       "printerName": "string",
-      "printerIP": "string",
+      "printerIP": "string | null",
+      "printerMode": "string (enum PrinterMode)",
       "isEnabled": "boolean"
     }
   ]
@@ -7720,10 +7721,11 @@ Nessun payload.
 | `rows[]` | PrinterItemListResponse[] (array di oggetti) |
 | `rows[].idPrinter` | string (UUID) |
 | `rows[].printerName` | string |
-| `rows[].printerIP` | string |
+| `rows[].printerIP` | string \| null |
+| `rows[].printerMode` | string (enum PrinterMode) |
 | `rows[].isEnabled` | boolean |
 
-### POST `/api/taxation/set-is-active`
+### POST `/api/fiscalprint/printers/set-is-active`
 
 **Payload JSON**
 
@@ -7749,25 +7751,22 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/taxation/add-printer`
+### POST `/api/fiscalprint/printers/add-printer`
 
 **Payload JSON**
 
 ```json
 {
-  "printerName": "string",
-  "printerIP": "string | null",
-  "printerPort": "number (intero) | null",
-  "printerModel": "string | null",
+  "printerName": "string (al massimo 120 caratteri)",
+  "printerIP": "string (al massimo 255 caratteri)",
+  "printerPort": "number (intero, 1-65535)",
+  "printerModel": "string (enum PrinterModel)",
+  "printerMode": "string (enum PrinterMode)",
   "isSsl": "boolean",
-  "isFiscalMode": "boolean",
-  "isNonFiscalMode": "boolean",
-  "isOrderMode": "boolean",
-  "isTextMode": "boolean",
-  "departmentVatRates": "string[] (5 elementi)",
-  "firstHeader": "string | null",
-  "secondHeader": "string | null",
-  "footer": "string | null"
+  "departmentVatRates": "(number | null)[] (5 elementi)",
+  "firstHeader": "string | null (al massimo 160 caratteri)",
+  "secondHeader": "string | null (al massimo 160 caratteri)",
+  "footer": "string | null (al massimo 160 caratteri)"
 }
 ```
 
@@ -7779,25 +7778,22 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `printerName` | string |
-| `printerIP` | string \| null |
-| `printerPort` | number (intero) \| null |
-| `printerModel` | string \| null |
+| `printerName` | string (al massimo 120 caratteri) |
+| `printerIP` | string (al massimo 255 caratteri) |
+| `printerPort` | number (intero, 1-65535) |
+| `printerModel` | string (enum PrinterModel) |
+| `printerMode` | string (enum PrinterMode) |
 | `isSsl` | boolean |
-| `isFiscalMode` | boolean |
-| `isNonFiscalMode` | boolean |
-| `isOrderMode` | boolean |
-| `isTextMode` | boolean |
-| `departmentVatRates` | string[] (5 elementi) |
-| `firstHeader` | string \| null |
-| `secondHeader` | string \| null |
-| `footer` | string \| null |
+| `departmentVatRates` | (number \| null)[] (5 elementi) |
+| `firstHeader` | string \| null (al massimo 160 caratteri) |
+| `secondHeader` | string \| null (al massimo 160 caratteri) |
+| `footer` | string \| null (al massimo 160 caratteri) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/taxation/delete-printer`
+### POST `/api/fiscalprint/printers/delete-printer`
 
 **Payload JSON**
 
@@ -7821,7 +7817,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### GET `/api/taxation/electronic-receipt`
+### GET `/api/fiskaly/electronic-receipt`
 
 **Payload JSON**
 
@@ -7843,7 +7839,7 @@ Nessun payload.
 |---|---|
 | `(corpo)` | string (HTML) |
 
-### POST `/api/taxation/electronic-receipt-activation`
+### POST `/api/fiskaly/electronic-receipt-activation`
 
 **Payload JSON**
 
@@ -7867,7 +7863,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/taxation/download-guide-electronic-receipt`
+### POST `/api/fiskaly/download-guide-electronic-receipt`
 
 **Payload JSON**
 
@@ -7885,7 +7881,7 @@ Nessun payload.
 
 File (binario), non JSON.
 
-### POST `/api/taxation/save-electronic-receipt-account`
+### POST `/api/fiskaly/save-electronic-receipt-account`
 
 **Payload JSON**
 

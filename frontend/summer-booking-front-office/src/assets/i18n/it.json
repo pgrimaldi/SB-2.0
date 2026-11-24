@@ -122,6 +122,16 @@
     "payment": {
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento."
     },
+    "fiscalprint": {
+      "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
+      "printer_not_found": "Questa stampante non esiste più: forse è già stata eliminata."
+    },
+    "fiskaly": {
+      "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
+      "not_enabled": "Lo scontrino elettronico non è attivo per il tuo stabilimento.",
+      "terms_not_accepted": "Per configurare l'account devi prima accettare i termini e condizioni.",
+      "unavailable": "Il servizio dello scontrino elettronico non risponde. Riprova tra poco."
+    },
     "audit": {
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
       "export_too_large": "Le voci da esportare sono {total, number, integer}, ma se ne possono esportare al massimo {max, number, integer}: restringi il periodo o i filtri e riprova."
@@ -678,7 +688,8 @@
           "added": "Stampanti aggiunte",
           "table": {
             "name": "Nome",
-            "ip": "Indirizzo IP"
+            "ip": "Indirizzo IP",
+            "mode": "Modalità"
           },
           "delete": {
             "title": "Elimina stampante",
@@ -694,13 +705,25 @@
             "port": "Porta",
             "model": "Modello",
             "ssl": "SSL",
-            "modes": "Modalità",
-            "fiscal": "Fiscale",
-            "non_fiscal": "Non fiscale",
-            "orders": "Comande",
-            "text": "Testo",
+            "choose": "Seleziona",
+            "mode": "Modalità",
+            "modes": {
+              "fiscal": "Fiscale",
+              "non_fiscal": "Non fiscale",
+              "orders": "Comande",
+              "text": "Testo"
+            },
+            "models": {
+              "fp_81": "FP-81",
+              "fp_90": "FP-90",
+              "rch": "RCH",
+              "tm_t88": "TM-T88",
+              "tm_t20": "TM-T20",
+              "online": "Online"
+            },
             "departments": "Reparti",
             "vat_rate": "Aliquota",
+            "no_vat_rate": "Nessuna",
             "first_header": "Intestazione n°1",
             "second_header": "Intestazione n°2",
             "footer": "Piè di pagina",

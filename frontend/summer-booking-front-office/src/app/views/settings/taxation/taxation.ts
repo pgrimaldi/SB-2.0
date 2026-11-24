@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, firstValueFrom, of, switchMap, tap } from 'rxjs';
+import { Observable, firstValueFrom, map, of, switchMap, tap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { AddPrinterItemPopup } from '../../../components/management/settings/taxation/add-printer-item-popup/add-printer-item-popup';
 import { ElectronicReceiptAccountForm } from '../../../components/management/settings/taxation/electronic-receipt-account-form/electronic-receipt-account-form';
@@ -33,8 +33,9 @@ import {
   TableRowAction,
   TableRowToggle,
 } from '../../../components/shared/ui/tables/table/table';
+import { PrinterMode } from '../../../entities/enums/printer-mode';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../entities/errors/api-problem';
-import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { TaxationService } from '../../../services/api/taxation/taxation.service';
 
@@ -45,6 +46,15 @@ const GUIDE_FALLBACK_NAME = 'electronic-receipt-guide';
 interface PrinterTableHeaders {
   name: string;
   ip: string;
+  mode: string;
+}
+
+interface PrinterRow {
+  idPrinter: string | null;
+  printerName: string | null;
+  printerIP: string | null;
+  printerMode: string | null;
+  isEnabled: boolean;
 }
 
 @Component({
@@ -97,7 +107,7 @@ export class Taxation {
   protected readonly isPrinterActionRunning = signal(false);
   protected readonly isDeletePrinterAsked = signal(false);
   protected readonly isAddPrinterOpen = signal(false);
-  protected readonly printerToDelete = signal<PrinterItemListResponse | null>(null);
+  protected readonly printerToDelete = signal<PrinterRow | null>(null);
   private readonly printersTable = viewChild.required(Table);
   protected readonly printersPerPage = 5;
   protected readonly printerParams = computed<object | null>(() =>
@@ -107,27 +117,24 @@ export class Taxation {
     this.translateService.stream(
       'management.settings.taxation.printer.table',
     ) as Observable<PrinterTableHeaders>,
-    { initialValue: { name: '', ip: '' } },
+    { initialValue: { name: '', ip: '', mode: '' } },
   );
-  protected readonly printerColumns = computed<readonly TableColumn<PrinterItemListResponse>[]>(
-    () => [
-      { field: 'printerName', header: this.printerHeaders().name },
-      { field: 'printerIP', header: this.printerHeaders().ip },
-    ],
-  );
+  protected readonly printerColumns = computed<readonly TableColumn<PrinterRow>[]>(() => [
+    { field: 'printerName', header: this.printerHeaders().name },
+    { field: 'printerIP', header: this.printerHeaders().ip },
+    { field: 'printerMode', header: this.printerHeaders().mode },
+  ]);
   private readonly deleteLabel = toSignal(
     this.translateService.stream('table.actions.delete') as Observable<string>,
     { initialValue: '' },
   );
-  protected readonly printerActions = computed<readonly TableRowAction<PrinterItemListResponse>[]>(
-    () => [
-      {
-        label: this.deleteLabel(),
-        icon: this.deletePrinterIcon,
-        action: (printer) => this.askDeletePrinter(printer),
-      },
-    ],
-  );
+  protected readonly printerActions = computed<readonly TableRowAction<PrinterRow>[]>(() => [
+    {
+      label: this.deleteLabel(),
+      icon: this.deletePrinterIcon,
+      action: (printer) => this.askDeletePrinter(printer),
+    },
+  ]);
   protected readonly termsAndConditions = signal<string | null>(null);
   protected readonly printersLoadFailed = signal(false);
   protected readonly isGuideDownloading = signal(false);
@@ -150,6 +157,10 @@ export class Taxation {
     '/assets/images/GeneralIcon_Warning.svg',
   ] as const;
   private readonly receiptError = signal<ApiProblem | null>(null);
+  /** The electronic receipt is off for the property: nothing to accept. */
+  protected readonly isReceiptOff = computed(
+    () => this.receiptError()?.code === ApiErrorCode.FiskalyNotEnabled,
+  );
   protected readonly actionErrorMessage = this.messageOf(this.actionError);
   protected readonly receiptErrorMessage = this.messageOf(this.receiptError);
 
@@ -166,28 +177,39 @@ export class Taxation {
             this.termsAndConditions.set(termsAndConditions);
             this.receiptError.set(null);
           },
-          error: (error: unknown) => {
-            this.termsAndConditions.set(null);
-            this.receiptError.set(toApiProblem(error));
-          },
+          error: (error: unknown) => this.showReceiptError(toApiProblem(error)),
         }),
       );
       onCleanup(() => subscription.unsubscribe());
     });
   }
 
-  protected readonly loadPrinters: TableLoad<object, PrinterItemListResponse> = (request) =>
+  protected readonly loadPrinters: TableLoad<object, PrinterRow> = (request) =>
     this.taxation.printerList(request).pipe(
+      switchMap((page) =>
+        (
+          this.translateService.get(
+            'management.settings.taxation.printer.form.modes',
+          ) as Observable<Record<PrinterMode, string>>
+        ).pipe(
+          map((modes) => ({
+            total: page.total,
+            rows: page.rows.map((printer): PrinterRow => ({
+              ...printer,
+              printerMode: printer.printerMode
+                ? (modes[printer.printerMode] ?? printer.printerMode)
+                : null,
+            })),
+          })),
+        ),
+      ),
       tap({
         next: (page) => this.hasPrinters.set(page.total > 0),
         error: () => this.hasPrinters.set(false),
       }),
     );
 
-  protected readonly setPrinterEnabled: TableRowToggle<PrinterItemListResponse> = (
-    { idPrinter },
-    isEnabled,
-  ) =>
+  protected readonly setPrinterEnabled: TableRowToggle<PrinterRow> = ({ idPrinter }, isEnabled) =>
     void this.changePrinter(idPrinter, (id) =>
       this.taxation.setPrinterIsActive({ idPrinter: id, isEnabled }),
     );
@@ -228,13 +250,17 @@ export class Taxation {
       this.isReceiptActivated.set(true);
       this.isReceiptAccountShown.set(true);
     } catch (error: unknown) {
+      const problem = toApiProblem(error);
+      if (problem.code === ApiErrorCode.FiskalyNotEnabled) {
+        this.showReceiptError(problem);
+      }
       this.showActionError(error);
     } finally {
       this.isSendingReceiptChoice.set(false);
     }
   }
 
-  private askDeletePrinter(printer: PrinterItemListResponse): void {
+  private askDeletePrinter(printer: PrinterRow): void {
     this.printerToDelete.set(printer);
     this.isDeletePrinterAsked.set(true);
   }
@@ -258,6 +284,11 @@ export class Taxation {
       }
     }
     this.printersTable().reload();
+  }
+
+  private showReceiptError(problem: ApiProblem): void {
+    this.termsAndConditions.set(null);
+    this.receiptError.set(problem);
   }
 
   private showActionError(error: unknown): void {

@@ -1,11 +1,13 @@
 import { HttpEvent, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
+import { PrinterMode } from '../../../entities/enums/printer-mode';
 import { AddPrinterItemRequest } from '../../../entities/settings/taxation/add-printer-item-request';
 import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
 import { SetPrinterIsActiveRequest } from '../../../entities/settings/taxation/set-printer-is-active-request';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { resourceNotFound } from '../errors/problem.mock';
+import { problem } from '../errors/problem.mock';
 
 /** Invented printers, with documentation IP addresses (RFC 5737); changed by the mock calls. */
 let printers: PrinterItemListResponse[] = [
@@ -14,12 +16,21 @@ let printers: PrinterItemListResponse[] = [
     printerName: 'EPSON - 1',
     printerIP: '192.0.2.10',
     isEnabled: false,
+    printerMode: PrinterMode.Fiscal,
   },
   {
     idPrinter: '9a4e6b2c-1d3f-4e5a-8b7c-2f6d1e3a4b50',
     printerName: 'EPSON - 2',
     printerIP: '192.0.2.11',
     isEnabled: true,
+    printerMode: PrinterMode.Fiscal,
+  },
+  {
+    idPrinter: '7c3d9e1f-2a4b-4c5d-8e6f-0a1b2c3d4e5f',
+    printerName: 'Comande bar',
+    printerIP: '192.0.2.12',
+    isEnabled: true,
+    printerMode: PrinterMode.Orders,
   },
 ];
 
@@ -48,7 +59,7 @@ const TERMS: Record<'it' | 'en', string> = {
 };
 
 /**
- * `POST /api/taxation/printer-list` with `PageRequest`: one page of the printers of the property;
+ * `POST /api/fiscalprint/printers/printer-list` with `PageRequest`: one page of the printers of the property;
  * search, filters and sorting are not read. 401 without a valid access token.
  */
 export const printerListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
@@ -71,8 +82,8 @@ function positiveInteger(value: unknown, fallback: number): number {
 }
 
 /**
- * `POST /api/taxation/set-is-active` with `SetPrinterIsActiveRequest`: switches the printer on or
- * off. 204 without a body; 401 without a valid access token; 404 for an unknown printer.
+ * `POST /api/fiscalprint/printers/set-is-active` with `SetPrinterIsActiveRequest`: switches the printer on or
+ * off; switched on, the other one of its mode goes off. 204 without a body; 401 without a valid access token; 404 for an unknown printer.
  */
 export const setPrinterIsActiveMock = (
   request: HttpRequest<unknown>,
@@ -83,14 +94,19 @@ export const setPrinterIsActiveMock = (
   const body = (request.body ?? {}) as Partial<SetPrinterIsActiveRequest>;
   const printer = printers.find(({ idPrinter }) => idPrinter === body.idPrinter);
   if (!printer) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.FiscalPrintPrinterNotFound);
+  }
+  if (body.isEnabled === true) {
+    printers
+      .filter(({ printerMode }) => printerMode === printer.printerMode)
+      .forEach((other) => (other.isEnabled = false));
   }
   printer.isEnabled = body.isEnabled === true;
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
 /**
- * `POST /api/taxation/delete-printer` with `{ idPrinter }`. 204 without a body; 401 without a valid
+ * `POST /api/fiscalprint/printers/delete-printer` with `{ idPrinter }`. 204 without a body; 401 without a valid
  * access token; 404 for an unknown printer.
  */
 export const deletePrinterMock = (
@@ -101,14 +117,14 @@ export const deletePrinterMock = (
   }
   const body = (request.body ?? {}) as { idPrinter?: string };
   if (!printers.some(({ idPrinter }) => idPrinter === body.idPrinter)) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.FiscalPrintPrinterNotFound);
   }
   printers = printers.filter(({ idPrinter }) => idPrinter !== body.idPrinter);
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
 /**
- * `GET /api/taxation/electronic-receipt`: the terms of the electronic receipt as HTML, in the
+ * `GET /api/fiskaly/electronic-receipt`: the terms of the electronic receipt as HTML, in the
  * language of `Accept-Language` (Italian when it is not English). 401 without a valid access token.
  */
 export const electronicReceiptMock = (
@@ -124,7 +140,7 @@ export const electronicReceiptMock = (
 };
 
 /**
- * `POST /api/taxation/download-guide-electronic-receipt` without a body: the guide as a file. The
+ * `POST /api/fiskaly/download-guide-electronic-receipt` without a body: the guide as a file. The
  * real document and its type are not known yet: the mock sends an invented text file. 401 without a
  * valid access token.
  */
@@ -147,7 +163,7 @@ export const downloadGuideElectronicReceiptMock = (
 };
 
 /**
- * `POST /api/taxation/add-printer` with `AddPrinterItemRequest`: the new printer is added switched
+ * `POST /api/fiscalprint/printers/add-printer` with `AddPrinterItemRequest`: the new printer is added switched
  * off. 204 without a body; 401 without a valid access token.
  */
 export const addPrinterMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
@@ -162,13 +178,14 @@ export const addPrinterMock = (request: HttpRequest<unknown>): Observable<HttpEv
       printerName: body.printerName ?? null,
       printerIP: body.printerIP ?? null,
       isEnabled: false,
+      printerMode: body.printerMode ?? null,
     },
   ];
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
 /**
- * `POST /api/taxation/electronic-receipt-activation` with `{ isElectronicReceiptAccepted }`. 204
+ * `POST /api/fiskaly/electronic-receipt-activation` with `{ isElectronicReceiptAccepted }`. 204
  * without a body; 401 without a valid access token.
  */
 export const electronicReceiptActivationMock = (
@@ -181,7 +198,7 @@ export const electronicReceiptActivationMock = (
 };
 
 /**
- * `POST /api/taxation/save-electronic-receipt-account` with `ElectronicReceiptAccount`. 204 without
+ * `POST /api/fiskaly/save-electronic-receipt-account` with `ElectronicReceiptAccount`. 204 without
  * a body; 401 without a valid access token.
  */
 export const saveElectronicReceiptAccountMock = (

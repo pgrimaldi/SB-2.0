@@ -122,6 +122,16 @@
     "payment": {
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
     },
+    "fiscalprint": {
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
+      "printer_not_found": "该打印机已不存在：可能已被删除。"
+    },
+    "fiskaly": {
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
+      "not_enabled": "您的浴场尚未启用电子收据。",
+      "terms_not_accepted": "要配置账户，您必须先接受条款与条件。",
+      "unavailable": "电子收据服务没有响应，请稍后重试。"
+    },
     "audit": {
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
       "export_too_large": "要导出的记录有 {total, number, integer} 条，但最多只能导出 {max, number, integer} 条：请缩小时间范围或筛选条件后重试。"
@@ -678,7 +688,8 @@
           "added": "已添加的打印机",
           "table": {
             "name": "名称",
-            "ip": "IP 地址"
+            "ip": "IP 地址",
+            "mode": "模式"
           },
           "delete": {
             "title": "删除打印机",
@@ -694,13 +705,25 @@
             "port": "端口",
             "model": "型号",
             "ssl": "SSL",
-            "modes": "模式",
-            "fiscal": "税控",
-            "non_fiscal": "非税控",
-            "orders": "订单",
-            "text": "文本",
+            "choose": "请选择",
+            "mode": "模式",
+            "modes": {
+              "fiscal": "税控",
+              "non_fiscal": "非税控",
+              "orders": "订单",
+              "text": "文本"
+            },
+            "models": {
+              "fp_81": "FP-81",
+              "fp_90": "FP-90",
+              "rch": "RCH",
+              "tm_t88": "TM-T88",
+              "tm_t20": "TM-T20",
+              "online": "Online"
+            },
             "departments": "部门",
             "vat_rate": "税率",
+            "no_vat_rate": "无",
             "first_header": "页眉 1",
             "second_header": "页眉 2",
             "footer": "页脚",

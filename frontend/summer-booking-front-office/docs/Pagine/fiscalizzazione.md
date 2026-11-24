@@ -13,8 +13,9 @@ Rotta `/settings/taxation`, vista `views/settings/taxation/` (`Taxation`).
 ## Riquadro "Stampante"
 
 - Le stampanti stanno sotto "Stampanti aggiunte" in un `app-table` con lo stile di default, senza ricerca, caselle e
-  bottone crea. Righe con `idPrinter`, `printerName`, `printerIP`, `isEnabled`.
-- Colonne Nome e Indirizzo IP (`management.settings.taxation.printer.table.*`) e la colonna Azioni con l'interruttore
+  bottone crea. Righe con `idPrinter`, `printerName`, `printerIP`, `printerMode`, `isEnabled`.
+- Colonne Nome, Indirizzo IP e Modalità (`management.settings.taxation.printer.table.*`; la modalità con i testi di
+  `printer.form.modes`) e la colonna Azioni con l'interruttore
   `rowToggle`, che mostra `isEnabled`, e il cestino `GeneralIcon_Delete.svg` con il tooltip "Elimina" di
   `table.actions`.
 - 5 stampanti alla volta, numero fisso senza selettore (`isPageSizeSelectorHidden`): il paginatore compare solo oltre 5
@@ -24,7 +25,8 @@ Rotta `/settings/taxation`, vista `views/settings/taxation/` (`Taxation`).
 
 ### Interruttore e cestino
 
-- L'interruttore manda il nuovo stato della stampante.
+- L'interruttore manda il nuovo stato della stampante. Accendendone una il backend spegne quella attiva con la stessa modalità;
+  la tabella riletta le mostra tutte com'è il server.
 - Il cestino chiede conferma (`app-confirm-popup` rossa, "Vuoi eliminare la stampante EPSON - 1?", testi
   `management.settings.taxation.printer.delete.*`) e poi elimina la stampante.
 - Durante la chiamata la pagina è coperta da `app-page-spinner` e un'altra azione non parte.
@@ -35,30 +37,32 @@ Rotta `/settings/taxation`, vista `views/settings/taxation/` (`Taxation`).
 
 - `app-add-printer-item-popup` (`components/management/settings/taxation/add-printer-item-popup/`, testi
   `management.settings.taxation.printer.form.*`).
-- Campi: Nome, Indirizzo IP, Porta (numero), Modello, SSL; "Modalità" con le caselle Fiscale, Non fiscale, Comande e
-  Testo; "Reparti" con cinque tendine Aliquota (valori provvisori 0, 4, 5, 10 e 22%, `VAT_RATES` in
-  `entities/settings/taxation/add-printer-item-request.ts`, partono da 0%), Intestazione n°1, Intestazione n°2 e Piè di
-  pagina; in basso "Salva".
-- Il form è `AddPrinterItemRequest` (`entities/settings/taxation/`, nomi dei campi provvisori finché l'API non è
-  definita).
+- Campi: Nome, Modello (tendina con i 6 valori di `PrinterModel`), Indirizzo IP, Porta (numero), SSL; "Modalità" (scelta unica,
+  `app-radio-group` sui valori di `PrinterMode`: Fiscale, Non fiscale, Comande, Testo); "Reparti"; Intestazione n°1,
+  Intestazione n°2 e Piè di pagina; in basso "Salva".
+- Obbligatori Nome (al massimo 120 caratteri), Modello, Indirizzo IP (255), Porta (1-65535) e Modalità; le tre righe di testo al
+  massimo 160 caratteri. I limiti sono nelle costanti `MAX_PRINTER_*` e Salva resta spento finché il form non è valido. Le
+  stampanti USB non si aggiungono.
+- "Reparti" compare solo con Fiscale: cinque tendine Aliquota (0, 4, 5, 10 e 22%, `VAT_RATES`) che partono da "Nessuna"; un'aliquota
+  già scelta non compare nelle altre. Cambiando modalità si svuotano.
+- Il form è `AddPrinterItemRequest` (`entities/settings/taxation/`).
 - Popup largo 32rem, alto al massimo il 90% dello schermo, con lo scorrimento dentro.
 - Da 1280px in su: Nome e Modello sulla stessa riga (metà ciascuno), sotto Indirizzo IP, Porta e SSL (60%, 20% e 20%);
   le aliquote tre nella prima riga e due, centrate, nella seconda.
 - Sotto i 1280px i campi stanno uno sotto l'altro, ma Porta e SSL condividono una riga, che occupano tutta: SSL prende
   solo il suo spazio e Porta il resto.
-- Le modalità stanno sempre due per riga: Fiscale e Non fiscale, sotto Comande e Testo.
 - "Salva" chiama l'aggiunta con lo spinner sul bottone e i campi bloccati. Se riesce il popup si chiude ed emette
   `added`, con cui la pagina ricarica la tabella.
-- Se fallisce resta aperto: l'errore di un campo va sotto quel campo (anche sotto le caselle, con `[error]` di
-  `app-checkbox`, e sotto le aliquote per `departmentVatRates`), gli altri sopra "Salva" (`submit()` +
-  `apiFieldErrorsOrGeneral`).
-- Il frontend non fa ancora validazioni.
+- Se fallisce resta aperto: l'errore di un campo va sotto quel campo (anche sotto SSL, la modalità e le aliquote), gli altri
+  sopra "Salva" (`submit()` + `apiFieldErrorsOrGeneral`); gli errori rimasti si tolgono a ogni apertura.
 - Chiede prima di perdere i dati scritti (vedi `form-e-validazioni.md`).
 
 ## Riquadro "Scontrino elettronico"
 
 ### Termini e condizioni
 
+- Se lo scontrino elettronico non è abilitato per lo stabilimento (403 `fiskaly.not_enabled` dalla lettura dei termini o da "Invia")
+  al posto dei termini c'è il messaggio, senza caselle né "Invia"; "Scarica la guida" resta.
 - I termini sono HTML nella lingua di `Accept-Language`, ricaricati al cambio lingua, mostrati con `[innerHTML]` (Angular
   toglie script, attributi di evento e link `javascript:`) sotto "Termini e condizioni".
 - Sotto, le caselle "Accetto" e "Non accetto" (etichetta prima della casella) e, sulla stessa riga in fondo a destra, il
@@ -86,7 +90,7 @@ Rotta `/settings/taxation`, vista `views/settings/taxation/` (`Taxation`).
 - Tutti obbligatori (`requiredText`, asterisco, "Campo obbligatorio" sotto il campo, Salva spento finché ne manca uno);
   PIN e Password solo finché il server non ne ha uno salvato.
 - Non c'è ancora una lettura dell'account: il form parte vuoto e Salva scrive senza controllo di versione. Lettura e
-  versione sono chieste al backend (`Fiscalizzazione - Frontend requests.md`, sezione 1); il punto è in `docs/TODO.md`.
+  versione sono chieste al backend (`Fiscalizzazione - Frontend requests.md`, sezione 7); il punto è in `docs/TODO.md`.
 - "Salva" in basso a destra, con lo spinner sul bottone e i campi bloccati. Se riesce:
   - sulla riga del titolo, al centro del riquadro, compare l'etichetta "Account configurato con successo" con la spunta
     (`management.settings.taxation.receipt.account.saved`, icona `Taxation_AccountSaved.svg`; sotto i 1280px va sotto il
@@ -120,15 +124,20 @@ Rotta `/settings/taxation`, vista `views/settings/taxation/` (`Taxation`).
 
 In `TaxationService` (lo stabilimento lo prende il backend dal token):
 
-- `POST /api/taxation/printer-list` (`printerList`): corpo di tutte le tabelle, risposta `Page<PrinterItemListResponse>`.
-- `GET /api/taxation/electronic-receipt` (`electronicReceipt`), senza parametri: i termini e condizioni come HTML,
+- `POST /api/fiscalprint/printers/printer-list` (`printerList`): corpo di tutte le tabelle, risposta `Page<PrinterItemListResponse>`.
+- `GET /api/fiskaly/electronic-receipt` (`electronicReceipt`), senza parametri: i termini e condizioni come HTML,
   risposta `string | null` (il corpo è il testo da solo).
-- `POST /api/taxation/set-is-active` (`setPrinterIsActive`): corpo `{ idPrinter, isEnabled }` con il nuovo stato.
-- `POST /api/taxation/delete-printer` (`deletePrinter`): corpo `{ idPrinter }`.
-- `POST /api/taxation/add-printer` (`addPrinter`): corpo `AddPrinterItemRequest`.
-- `POST /api/taxation/electronic-receipt-activation` (`activateElectronicReceipt`): corpo
+- `POST /api/fiscalprint/printers/set-is-active` (`setPrinterIsActive`): corpo `{ idPrinter, isEnabled }` con il nuovo stato.
+- `POST /api/fiscalprint/printers/delete-printer` (`deletePrinter`): corpo `{ idPrinter }`.
+- `POST /api/fiscalprint/printers/add-printer` (`addPrinter`): corpo `AddPrinterItemRequest`.
+- `POST /api/fiskaly/electronic-receipt-activation` (`activateElectronicReceipt`): corpo
   `{ isElectronicReceiptAccepted }`.
-- `POST /api/taxation/save-electronic-receipt-account` (`saveElectronicReceiptAccount`): corpo
+- `POST /api/fiskaly/save-electronic-receipt-account` (`saveElectronicReceiptAccount`): corpo
   `ElectronicReceiptAccount`.
-- `POST /api/taxation/download-guide-electronic-receipt` (`downloadGuideElectronicReceipt`): POST senza corpo, risposta
+- `POST /api/fiskaly/download-guide-electronic-receipt` (`downloadGuideElectronicReceipt`): POST senza corpo, risposta
   un file (nome in `Content-Disposition`).
+
+Sono tutte API nuove, chieste in `shared documentation/Modifiche per il backend/impostazioni/Fiscalizzazione - Frontend
+requests.md` sotto le radici dei due moduli del backend: `/api/fiscalprint` (stampanti) e `/api/fiskaly` (scontrino
+elettronico). Errori propri: `fiscalprint.printer_not_found`, `fiskaly.not_enabled`,
+`fiskaly.terms_not_accepted`, `fiskaly.unavailable`.

@@ -5,6 +5,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Observable, Subject, map, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { PrinterMode } from '../../../entities/enums/printer-mode';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { PageRequest } from '../../../entities/pagination/page';
 import { FileDownloadBehaviour } from '../../../behaviours/files/file-download.behaviour';
@@ -19,8 +20,20 @@ const settle = async (fixture: ComponentFixture<unknown>) => {
 
 describe('Taxation', () => {
   const PRINTERS = [
-    { idPrinter: 'pr1', printerName: 'EPSON - 1', printerIP: '192.0.2.10', isEnabled: false },
-    { idPrinter: 'pr2', printerName: 'EPSON - 2', printerIP: '192.0.2.11', isEnabled: true },
+    {
+      idPrinter: 'pr1',
+      printerName: 'EPSON - 1',
+      printerIP: '192.0.2.10',
+      printerMode: PrinterMode.Fiscal,
+      isEnabled: false,
+    },
+    {
+      idPrinter: 'pr2',
+      printerName: 'EPSON - 2',
+      printerIP: '192.0.2.11',
+      printerMode: PrinterMode.Orders,
+      isEnabled: true,
+    },
   ];
 
   const setup = async (
@@ -101,11 +114,11 @@ describe('Taxation', () => {
     expect(electronicReceipt).toHaveBeenCalledWith();
     expect(
       [...element.querySelectorAll('.taxation__printers tbody tr.table__row')].map((row) =>
-        [...row.querySelectorAll('td')].slice(0, 2).map((cell) => cell.textContent?.trim()),
+        [...row.querySelectorAll('td')].slice(0, 3).map((cell) => cell.textContent?.trim()),
       ),
     ).toEqual([
-      ['EPSON - 1', '192.0.2.10'],
-      ['EPSON - 2', '192.0.2.11'],
+      ['EPSON - 1', '192.0.2.10', 'fiscal'],
+      ['EPSON - 2', '192.0.2.11', 'orders'],
     ]);
     expect(element.querySelector('.taxation__terms p')?.textContent).toBe('Termini');
   });
@@ -126,6 +139,7 @@ describe('Taxation', () => {
       idPrinter: `pr${index + 1}`,
       printerName: `EPSON - ${index + 1}`,
       printerIP: `192.0.2.${index + 1}`,
+      printerMode: PrinterMode.Fiscal,
       isEnabled: false,
     }));
     const { fixture, element, printerList } = await setup('<p>Termini</p>', of(printers));
@@ -180,7 +194,7 @@ describe('Taxation', () => {
     answer.error(
       new HttpErrorResponse({
         status: 404,
-        error: { status: 404, code: ApiErrorCode.ResourceNotFound, title: 'Resource not found' },
+        error: { status: 404, code: ApiErrorCode.FiscalPrintPrinterNotFound },
       }),
     );
     await settle(fixture);
@@ -342,5 +356,34 @@ describe('Taxation', () => {
     element.querySelector<HTMLButtonElement>('.taxation__to__account')!.click();
     await fixture.whenStable();
     expect(formBox().hidden).toBe(false);
+  });
+
+  it('should show only the message when the electronic receipt is off for the property', async () => {
+    const { fixture, element, electronicReceipt, activateElectronicReceipt } =
+      await setup('<p>Termini</p>');
+    const off = () =>
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 403,
+            error: { status: 403, code: ApiErrorCode.FiskalyNotEnabled },
+          }),
+      );
+    expect(element.querySelector('.taxation__choices')).not.toBeNull();
+
+    activateElectronicReceipt.mockImplementation(off as never);
+    const page = fixture.componentInstance as unknown as {
+      chooseReceipt: (isAccepted: boolean, isChecked: boolean) => void;
+      sendReceiptChoice: () => Promise<void>;
+    };
+    page.chooseReceipt(true, true);
+    await page.sendReceiptChoice();
+    await settle(fixture);
+
+    expect(electronicReceipt).toHaveBeenCalledTimes(1);
+    expect(element.querySelector('.taxation__choices')).toBeNull();
+    expect(element.querySelector('.taxation__terms')).toBeNull();
+    expect(element.querySelector('.taxation__error')).not.toBeNull();
+    expect(element.querySelector('.taxation__guide')).not.toBeNull();
   });
 });

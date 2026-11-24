@@ -384,56 +384,56 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/printer-list`
+    request.url === `${environment.apiBaseUrl}/fiscalprint/printers/printer-list`
   ) {
     return printerListMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/taxation/electronic-receipt`
+    request.url === `${environment.apiBaseUrl}/fiskaly/electronic-receipt`
   ) {
     return electronicReceiptMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/set-is-active`
+    request.url === `${environment.apiBaseUrl}/fiscalprint/printers/set-is-active`
   ) {
     return setPrinterIsActiveMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/electronic-receipt-activation`
+    request.url === `${environment.apiBaseUrl}/fiskaly/electronic-receipt-activation`
   ) {
     return electronicReceiptActivationMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/save-electronic-receipt-account`
+    request.url === `${environment.apiBaseUrl}/fiskaly/save-electronic-receipt-account`
   ) {
     return saveElectronicReceiptAccountMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/add-printer`
+    request.url === `${environment.apiBaseUrl}/fiscalprint/printers/add-printer`
   ) {
     return addPrinterMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/delete-printer`
+    request.url === `${environment.apiBaseUrl}/fiscalprint/printers/delete-printer`
   ) {
     return deletePrinterMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/taxation/download-guide-electronic-receipt`
+    request.url === `${environment.apiBaseUrl}/fiskaly/download-guide-electronic-receipt`
   ) {
     return downloadGuideElectronicReceiptMock(request);
   }

@@ -122,6 +122,16 @@
     "payment": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
     },
+    "fiscalprint": {
+      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
+      "printer_not_found": "Dieser Drucker ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht."
+    },
+    "fiskaly": {
+      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
+      "not_enabled": "Der elektronische Kassenbeleg ist für Ihr Strandbad nicht aktiv.",
+      "terms_not_accepted": "Um das Konto einzurichten, akzeptieren Sie zuerst die Nutzungsbedingungen.",
+      "unavailable": "Der Dienst für den elektronischen Kassenbeleg antwortet nicht. Bitte versuchen Sie es in Kürze erneut."
+    },
     "audit": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
       "export_too_large": "Es gibt {total, number, integer} Einträge zum Exportieren, aber höchstens {max, number, integer} können exportiert werden: Schränke den Zeitraum oder die Filter ein und versuche es erneut."
@@ -678,7 +688,8 @@
           "added": "Hinzugefügte Drucker",
           "table": {
             "name": "Name",
-            "ip": "IP-Adresse"
+            "ip": "IP-Adresse",
+            "mode": "Modus"
           },
           "delete": {
             "title": "Drucker löschen",
@@ -694,13 +705,25 @@
             "port": "Port",
             "model": "Modell",
             "ssl": "SSL",
-            "modes": "Modi",
-            "fiscal": "Fiskal",
-            "non_fiscal": "Nicht fiskal",
-            "orders": "Bestellungen",
-            "text": "Text",
+            "choose": "Auswählen",
+            "mode": "Modus",
+            "modes": {
+              "fiscal": "Fiskal",
+              "non_fiscal": "Nicht fiskal",
+              "orders": "Bestellungen",
+              "text": "Text"
+            },
+            "models": {
+              "fp_81": "FP-81",
+              "fp_90": "FP-90",
+              "rch": "RCH",
+              "tm_t88": "TM-T88",
+              "tm_t20": "TM-T20",
+              "online": "Online"
+            },
             "departments": "Abteilungen",
             "vat_rate": "MwSt.-Satz",
+            "no_vat_rate": "Keiner",
             "first_header": "Kopfzeile Nr. 1",
             "second_header": "Kopfzeile Nr. 2",
             "footer": "Fußzeile",
