@@ -1,37 +1,31 @@
-import { SmtpSecurity } from './email-configuration-data';
+import { SmtpSecurity } from '../../enums/smtp-security';
+
+export const MAX_SMTP_EMAIL_LENGTH = 320;
+export const MAX_SMTP_NAME_LENGTH = 160;
+export const MAX_SMTP_HOST_LENGTH = 255;
+export const MAX_SMTP_PORT = 65_535;
+export const SMTP_SSL_PORT = 465;
+export const SMTP_START_TLS_PORT = 587;
+export const MAX_TEST_RECIPIENT_QUANTITY = 10;
 
 export class EmailConfigurationRequest {
-  senderMailAddress: string | null = null;
-  senderName: string | null = null;
-  smtpServerAddress: string | null = null;
+  fromEmail: string | null = null;
+  fromName: string | null = null;
+  smtpHost: string | null = null;
   smtpPort: number | null = null;
   smtpUsername: string | null = null;
   smtpPassword: string | null = null;
-  smtpSecurity: SmtpSecurity | null = null;
+  security: SmtpSecurity | null = null;
+  verifyCertificate = true;
+  testRecipients: string[] = [];
+  isActive = true;
 }
 
-export type EmailConfigurationMaskedField =
-  | {
-      name:
-        'senderMailAddress' | 'senderName' | 'smtpServerAddress' | 'smtpUsername' | 'smtpPassword';
-      key: string;
-    }
-  | { name: 'smtpPort'; key: string };
-
-export const EMAIL_CONFIGURATION_MASKED_FIELDS: readonly EmailConfigurationMaskedField[] = [
-  { name: 'senderMailAddress', key: 'from_email' },
-  { name: 'senderName', key: 'from_name' },
-  { name: 'smtpServerAddress', key: 'smtp_server' },
-  { name: 'smtpPort', key: 'smtp_port' },
-  { name: 'smtpUsername', key: 'smtp_username' },
-  { name: 'smtpPassword', key: 'smtp_password' },
-];
-
-export const MAX_SMTP_PORT = 65535;
-
+/** The saved password goes only where it was saved for: any of these changed asks to type it again. */
 export const SMTP_CONNECTION_FIELDS = [
-  'smtpServerAddress',
+  'smtpHost',
   'smtpPort',
   'smtpUsername',
-  'smtpSecurity',
+  'security',
+  'verifyCertificate',
 ] as const;

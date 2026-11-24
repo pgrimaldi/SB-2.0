@@ -7927,7 +7927,7 @@ Nessun corpo (204).
 
 ## Configurazione email
 
-### GET `/api/system/email-configuration`
+### GET `/api/notification/email-configuration`
 
 **Payload JSON**
 
@@ -7937,13 +7937,18 @@ Nessun payload.
 
 ```json
 {
-  "senderMailAddress": "string",
-  "senderName": "string",
-  "smtpServerAddress": "string",
+  "fromEmail": "string | null",
+  "fromName": "string | null",
+  "smtpHost": "string | null",
   "smtpPort": "number (intero)",
-  "smtpUsername": "string",
+  "smtpUsername": "string | null",
   "hasSmtpPassword": "boolean",
-  "smtpSecurity": "string (enum SmtpSecurity)",
+  "security": "string (enum SmtpSecurity)",
+  "verifyCertificate": "boolean",
+  "testRecipients": "string[] (anche vuoto)",
+  "isActive": "boolean",
+  "lastVerificationAt": "string (data e ora UTC) | null",
+  "lastVerificationError": "string | null",
   "version": "string"
 }
 ```
@@ -7956,28 +7961,36 @@ Nessun payload.
 
 | Campo | Tipo |
 |---|---|
-| `senderMailAddress` | string |
-| `senderName` | string |
-| `smtpServerAddress` | string |
+| `fromEmail` | string \| null |
+| `fromName` | string \| null |
+| `smtpHost` | string \| null |
 | `smtpPort` | number (intero) |
-| `smtpUsername` | string |
+| `smtpUsername` | string \| null |
 | `hasSmtpPassword` | boolean |
-| `smtpSecurity` | string (enum SmtpSecurity) |
+| `security` | string (enum SmtpSecurity) |
+| `verifyCertificate` | boolean |
+| `testRecipients` | string[] (anche vuoto) |
+| `isActive` | boolean |
+| `lastVerificationAt` | string (data e ora UTC) \| null |
+| `lastVerificationError` | string \| null |
 | `version` | string |
 
-### POST `/api/system/send-test-email`
+### POST `/api/notification/send-test-email`
 
 **Payload JSON**
 
 ```json
 {
-  "senderMailAddress": "string",
-  "senderName": "string",
-  "smtpServerAddress": "string",
+  "fromEmail": "string (email, al massimo 320 caratteri)",
+  "fromName": "string (al massimo 160 caratteri) | null",
+  "smtpHost": "string (al massimo 255 caratteri)",
   "smtpPort": "number (intero 1–65535)",
-  "smtpUsername": "string",
+  "smtpUsername": "string (al massimo 320 caratteri)",
   "smtpPassword": "string | null",
-  "smtpSecurity": "string (enum SmtpSecurity) | null"
+  "security": "string (enum SmtpSecurity)",
+  "verifyCertificate": "boolean",
+  "testRecipients": "string[] (email di al massimo 320 caratteri, al massimo 10, anche vuoto)",
+  "isActive": "boolean"
 }
 ```
 
@@ -7989,31 +8002,37 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `senderMailAddress` | string |
-| `senderName` | string |
-| `smtpServerAddress` | string |
+| `fromEmail` | string (email, al massimo 320 caratteri) |
+| `fromName` | string (al massimo 160 caratteri) \| null |
+| `smtpHost` | string (al massimo 255 caratteri) |
 | `smtpPort` | number (intero 1–65535) |
-| `smtpUsername` | string |
+| `smtpUsername` | string (al massimo 320 caratteri) |
 | `smtpPassword` | string \| null |
-| `smtpSecurity` | string (enum SmtpSecurity) \| null |
+| `security` | string (enum SmtpSecurity) |
+| `verifyCertificate` | boolean |
+| `testRecipients` | string[] (email di al massimo 320 caratteri, al massimo 10, anche vuoto) |
+| `isActive` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/system/save-email-configuration`
+### POST `/api/notification/save-email-configuration`
 
 **Payload JSON**
 
 ```json
 {
-  "senderMailAddress": "string",
-  "senderName": "string",
-  "smtpServerAddress": "string",
+  "fromEmail": "string (email, al massimo 320 caratteri)",
+  "fromName": "string (al massimo 160 caratteri) | null",
+  "smtpHost": "string (al massimo 255 caratteri)",
   "smtpPort": "number (intero 1–65535)",
-  "smtpUsername": "string",
+  "smtpUsername": "string (al massimo 320 caratteri)",
   "smtpPassword": "string | null",
-  "smtpSecurity": "string (enum SmtpSecurity) | null"
+  "security": "string (enum SmtpSecurity)",
+  "verifyCertificate": "boolean",
+  "testRecipients": "string[] (email di al massimo 320 caratteri, al massimo 10, anche vuoto)",
+  "isActive": "boolean"
 }
 ```
 
@@ -8025,13 +8044,16 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `senderMailAddress` | string |
-| `senderName` | string |
-| `smtpServerAddress` | string |
+| `fromEmail` | string (email, al massimo 320 caratteri) |
+| `fromName` | string (al massimo 160 caratteri) \| null |
+| `smtpHost` | string (al massimo 255 caratteri) |
 | `smtpPort` | number (intero 1–65535) |
-| `smtpUsername` | string |
+| `smtpUsername` | string (al massimo 320 caratteri) |
 | `smtpPassword` | string \| null |
-| `smtpSecurity` | string (enum SmtpSecurity) \| null |
+| `security` | string (enum SmtpSecurity) |
+| `verifyCertificate` | boolean |
+| `testRecipients` | string[] (email di al massimo 320 caratteri, al massimo 10, anche vuoto) |
+| `isActive` | boolean |
 
 **Response tabella**
 

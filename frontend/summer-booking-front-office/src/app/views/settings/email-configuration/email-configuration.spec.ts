@@ -5,21 +5,32 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { SmtpSecurity } from '../../../entities/enums/smtp-security';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
-import { SystemService } from '../../../services/api/system/system.service';
+import { EmailConfigurationData } from '../../../entities/settings/email-configuration/email-configuration-data';
+import { NotificationService } from '../../../services/api/notification/notification.service';
 import { EmailConfiguration } from './email-configuration';
 
 describe('EmailConfiguration', () => {
   const FIELDS = {
-    senderMailAddress: 'prenotazioni@lido-demo.example',
-    senderName: 'Lido Demo',
-    smtpServerAddress: 'smtp.lido-demo.example',
+    fromEmail: 'prenotazioni@lido-demo.example',
+    fromName: 'Lido Demo',
+    smtpHost: 'smtp.lido-demo.example',
     smtpPort: 587,
     smtpUsername: 'prenotazioni@lido-demo.example',
-    smtpSecurity: 'Tls' as const,
+    security: SmtpSecurity.StartTls,
+    verifyCertificate: true,
+    testRecipients: ['prova@lido-demo.example', 'info@lido-demo.example'],
+    isActive: true,
   };
   /** The server never sends the SMTP password: only that one is saved. */
-  const CONFIGURATION = { ...FIELDS, hasSmtpPassword: true, version: 'v1' };
+  const CONFIGURATION: EmailConfigurationData = {
+    ...FIELDS,
+    hasSmtpPassword: true,
+    lastVerificationAt: '2026-11-20T10:00:00Z',
+    lastVerificationError: null,
+    version: 'v1',
+  };
   /** Without a new password typed, the saved one is kept (null). */
   const SENT = { ...FIELDS, smtpPassword: null };
 
@@ -33,7 +44,7 @@ describe('EmailConfiguration', () => {
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
         {
-          provide: SystemService,
+          provide: NotificationService,
           useValue: { emailConfiguration, sendTestEmail, saveEmailConfiguration },
         },
         { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
@@ -43,7 +54,9 @@ describe('EmailConfiguration', () => {
     translate.setTranslation('it', {
       management: {
         settings: {
-          email_configuration: { security: { none: 'Nessuna', ssl: 'SSL', tls: 'TLS' } },
+          email_configuration: {
+            security: { none: 'Nessuna', starttls: 'STARTTLS', ssl: 'SSL' },
+          },
         },
       },
     });
@@ -98,8 +111,9 @@ describe('EmailConfiguration', () => {
       '587',
       'prenotazioni@lido-demo.example',
       '',
+      'prova@lido-demo.example, info@lido-demo.example',
     ]);
-    expect(element.querySelector('.mat-mdc-select-value')?.textContent?.trim()).toBe('TLS');
+    expect(element.querySelector('.mat-mdc-select-value')?.textContent?.trim()).toBe('STARTTLS');
   });
 
   it('should show the error when the configuration does not arrive, and send nothing', async () => {
@@ -126,7 +140,7 @@ describe('EmailConfiguration', () => {
 
     buttons()[0].click();
     await fixture.whenStable();
-    expect(sendTestEmail).toHaveBeenCalledWith({ ...SENT, senderName: 'Lido Prova' });
+    expect(sendTestEmail).toHaveBeenCalledWith({ ...SENT, fromName: 'Lido Prova' });
     expect(element.querySelector('mat-progress-spinner')).not.toBeNull();
 
     answer.next();
@@ -174,7 +188,7 @@ describe('EmailConfiguration', () => {
               status: 400,
               code: ApiErrorCode.ValidationFailed,
               title: 'Invalid request',
-              errors: [{ field: 'senderName', code: ApiErrorCode.ValidationInvalid }],
+              errors: [{ field: 'fromName', code: ApiErrorCode.ValidationInvalid }],
             },
           }),
       ),
@@ -216,7 +230,7 @@ describe('EmailConfiguration', () => {
     expect(saveEmailConfiguration).toHaveBeenCalledWith(
       {
         ...SENT,
-        senderName: 'Lido Nuovo',
+        fromName: 'Lido Nuovo',
       },
       'v1',
     );
@@ -406,5 +420,116 @@ describe('EmailConfiguration', () => {
     await type(4, ' prenotazioni@lido-demo.example ');
     expect(passwordError()).toBeNull();
     expect(buttons()[2].disabled).toBe(false);
+  });
+
+  it('should keep Salva off while what the backend wants is missing or not valid', async () => {
+    const { element, buttons, inputs, type, allowChanges } = await setup();
+    await allowChanges();
+
+    for (const [index, wrong] of [
+      [0, ''],
+      [0, 'senza chiocciola'],
+      [2, '   '],
+      [4, ''],
+      [6, 'prova@lido-demo.example, sbagliato'],
+      [6, Array.from({ length: 11 }, (_, number) => `p${number}@lido-demo.example`).join(',')],
+    ] as const) {
+      const right = inputs()[index].value;
+      await type(index, wrong);
+      expect(buttons()[2].disabled, `${index} ${wrong}`).toBe(true);
+      await type(index, right);
+      expect(buttons()[2].disabled).toBe(false);
+    }
+    await type(1, ''); // the name may be missing
+    expect(buttons()[2].disabled).toBe(false);
+    expect(element.querySelector('.email__configuration__error')).toBeNull();
+    expect(inputs().map((input) => input.maxLength)).toEqual([320, 160, 255, -1, 320, -1, -1]);
+  });
+
+  it('should want SSL on 465 and STARTTLS on 587', async () => {
+    const { element, buttons, type, allowChanges } = await setup();
+    const securityError = () =>
+      element.querySelector('app-filled-select .filled__select__error')?.textContent?.trim();
+    await allowChanges();
+
+    await type(3, '465');
+    await type(5, 'password-attuale');
+    expect(buttons()[2].disabled).toBe(true);
+    expect(securityError()).toBe('invalidate.email_configuration.security.ssl_port');
+    await type(3, '2525');
+    expect(buttons()[2].disabled).toBe(false);
+  });
+
+  it('should keep the test email off without recipients, and send them as a list', async () => {
+    const { fixture, buttons, type, allowChanges, sendTestEmail } = await setup();
+    sendTestEmail.mockReturnValue(new Subject<void>());
+    await allowChanges();
+
+    await type(6, '');
+    expect(buttons()[0].disabled).toBe(true);
+    await type(6, ' uno@lido-demo.example;due@lido-demo.example ');
+    buttons()[0].click();
+    await fixture.whenStable();
+    expect(sendTestEmail).toHaveBeenCalledWith({
+      ...SENT,
+      testRecipients: ['uno@lido-demo.example', 'due@lido-demo.example'],
+    });
+  });
+
+  it('should say how the saved configuration stands, and read it again after a test of it', async () => {
+    const standing = async (changes: Partial<EmailConfigurationData>) => {
+      TestBed.resetTestingModule();
+      const page = await setup(vi.fn(() => of({ ...CONFIGURATION, ...changes })));
+      return {
+        ...page,
+        text: () =>
+          page.element.querySelector('.email__configuration__verification')?.textContent?.trim(),
+      };
+    };
+    const key = (name: string) => `management.settings.email_configuration.verification.${name}`;
+
+    expect((await standing({ fromEmail: null })).text()).toBe(key('not_configured'));
+    expect((await standing({ isActive: false })).text()).toBe(key('off'));
+    expect((await standing({ lastVerificationAt: null })).text()).toBe(key('never'));
+    expect((await standing({})).text()).toBe(key('done'));
+
+    const { buttons, settle, text, emailConfiguration, sendTestEmail } = await standing({});
+    sendTestEmail.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 422,
+            error: { status: 422, code: ApiErrorCode.NotificationTestEmailFailed },
+          }),
+      ),
+    );
+    emailConfiguration.mockReturnValue(
+      of({ ...CONFIGURATION, lastVerificationError: '535 Authentication failed' }),
+    );
+    buttons()[0].click();
+    await settle();
+    expect(emailConfiguration).toHaveBeenCalledTimes(2);
+    expect(text()).toBe(key('failed'));
+  });
+
+  it('should save the switches too, changed only after Sì', async () => {
+    const { fixture, element, buttons, type, settle, allowChanges, saveEmailConfiguration } =
+      await setup();
+    saveEmailConfiguration.mockReturnValue(of('v2'));
+    const switches = () => [...element.querySelectorAll<HTMLButtonElement>('app-toggle button')];
+    expect(switches().every((toggle) => toggle.disabled)).toBe(true);
+
+    await allowChanges();
+    switches().forEach((toggle) => toggle.click());
+    await fixture.whenStable();
+    expect(buttons()[2].disabled).toBe(true); // the password is asked again: no certificate check
+    await type(5, 'password-attuale');
+    buttons()[2].click();
+    await settle();
+    expect(saveEmailConfiguration).toHaveBeenCalledWith(
+      { ...SENT, smtpPassword: 'password-attuale', isActive: false, verifyCertificate: false },
+      'v1',
+    );
+    document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
   });
 });

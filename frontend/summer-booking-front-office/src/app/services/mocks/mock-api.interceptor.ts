@@ -146,12 +146,11 @@ import {
   voucherListMock,
 } from './vouchers/vouchers.mock';
 import {
-  contactSupportMock,
   emailConfigurationMock,
   saveEmailConfigurationMock,
   sendTestEmailMock,
-  supportInfoMock,
-} from './system/system.mock';
+} from './notification/notification.mock';
+import { contactSupportMock, supportInfoMock } from './system/system.mock';
 import {
   addPrinterMock,
   deletePrinterMock,
@@ -305,21 +304,21 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/system/email-configuration`
+    request.url === `${environment.apiBaseUrl}/notification/email-configuration`
   ) {
     return emailConfigurationMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/system/save-email-configuration`
+    request.url === `${environment.apiBaseUrl}/notification/save-email-configuration`
   ) {
     return saveEmailConfigurationMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/system/send-test-email`
+    request.url === `${environment.apiBaseUrl}/notification/send-test-email`
   ) {
     return sendTestEmailMock(request);
   }

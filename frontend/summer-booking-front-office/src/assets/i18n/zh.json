@@ -122,6 +122,12 @@
     "payment": {
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
     },
+    "notification": {
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
+      "test_email_failed": "测试邮件未发送。服务器答复：{{detail}}",
+      "test_email_blocked": "此环境中邮件已被阻止：测试邮件未发送。",
+      "unavailable": "邮件服务没有响应，请稍后重试。"
+    },
     "fiscalprint": {
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
       "printer_not_found": "该打印机已不存在：可能已被删除。"
@@ -643,7 +649,7 @@
           },
           "smtp_port": {
             "title": "SMTP 端口：",
-            "description": "SMTP 服务器的端口。常用端口：25（不安全）465（SSL）587（TLS）SMTP 认证："
+            "description": "SMTP 服务器的端口。常用端口：25（不安全）465（SSL）587（STARTTLS）SMTP 认证："
           },
           "smtp_username": {
             "title": "用户名：",
@@ -652,18 +658,37 @@
           "smtp_password": {
             "title": "密码：",
             "description": "该用户名对应的密码。",
-            "saved": "已设置密码：输入新密码即可更改",
+            "saved": "已设置：输入新密码",
             "missing": "未设置密码"
           },
           "smtp_security": {
             "title": "安全类型：",
-            "description": "使用的安全类型（无、SSL、TLS）。"
+            "description": "使用的安全类型（无、STARTTLS、SSL）。"
+          },
+          "is_active": {
+            "title": "使用此配置：",
+            "description": "关闭后，邮件由 Summer Booking 发件人发送，数据仍会保留。"
+          },
+          "verify_certificate": {
+            "title": "验证证书：",
+            "description": "检查 SMTP 服务器的证书。仅当服务器使用您了解并信任的证书时才关闭。"
+          },
+          "test_recipients": {
+            "title": "测试邮件收件人：",
+            "description": "接收测试邮件的地址，用逗号分隔。"
           }
         },
         "security": {
           "none": "无",
-          "ssl": "SSL",
-          "tls": "TLS"
+          "starttls": "STARTTLS",
+          "ssl": "SSL"
+        },
+        "verification": {
+          "not_configured": "未保存任何配置：邮件由 Summer Booking 发件人发送。",
+          "off": "配置已关闭：邮件由 Summer Booking 发件人发送。",
+          "never": "该配置从未测试过：请发送测试邮件。",
+          "failed": "最近一次测试（{at, date, medium} {at, time, short}）失败：{detail}",
+          "done": "最近一次成功测试：{at, date, medium} {at, time, short}。"
         },
         "send_test": "发送测试邮件",
         "reset": "重置",
@@ -2146,6 +2171,14 @@
     "email_configuration": {
       "smtp_password": {
         "retype": "您更改了连接参数：请重新输入密码或输入新密码。"
+      },
+      "security": {
+        "ssl_port": "端口 465 需要 SSL 安全类型。",
+        "start_tls_port": "端口 587 需要 STARTTLS 安全类型。"
+      },
+      "test_recipients": {
+        "wrong": "一个或多个地址无效。",
+        "max": "最多 {{max}} 个地址。"
       }
     },
     "min_items": "必须至少定义 {{count}} 个{{field}}",

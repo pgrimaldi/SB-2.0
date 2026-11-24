@@ -9133,9 +9133,9 @@ Il corpo è solo l'id del conto Stripe collegato, come stringa JSON (tra virgole
 "acct_1QmDemo4Fz8Lw2Xc"
 ```
 
-## /system
+## /notification
 
-### GET `/api/system/email-configuration`
+### GET `/api/notification/email-configuration`
 
 Configurazione email: lettura.
 
@@ -9149,29 +9149,41 @@ Stato: 200 OK.
 
 ```json
 {
-  "senderMailAddress": "prenotazioni@lido-demo.example",
-  "senderName": "Lido Demo",
-  "smtpServerAddress": "smtp.lido-demo.example",
+  "fromEmail": "prenotazioni@lido-demo.example",
+  "fromName": "Lido Demo",
+  "smtpHost": "smtp.lido-demo.example",
   "smtpPort": 587,
   "smtpUsername": "prenotazioni@lido-demo.example",
   "hasSmtpPassword": true,
-  "smtpSecurity": "Tls",
+  "security": "starttls",
+  "verifyCertificate": true,
+  "testRecipients": [
+    "prova@lido-demo.example"
+  ],
+  "isActive": true,
+  "lastVerificationAt": "2026-11-20T10:15:00Z",
+  "lastVerificationError": null,
   "version": "9e40274f"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `senderMailAddress` | string | `prenotazioni@lido-demo.example` |
-| `senderName` | string | `Lido Demo` |
-| `smtpServerAddress` | string | `smtp.lido-demo.example` |
+| `fromEmail` | string \| null | `prenotazioni@lido-demo.example` |
+| `fromName` | string \| null | `Lido Demo` |
+| `smtpHost` | string \| null | `smtp.lido-demo.example` |
 | `smtpPort` | number (intero) | `587` |
-| `smtpUsername` | string | `prenotazioni@lido-demo.example` |
+| `smtpUsername` | string \| null | `prenotazioni@lido-demo.example` |
 | `hasSmtpPassword` | boolean | `true` |
-| `smtpSecurity` | string (enum SmtpSecurity) | `Tls` |
+| `security` | string (enum SmtpSecurity) | `starttls` |
+| `verifyCertificate` | boolean | `true` |
+| `testRecipients` | string[] (anche vuoto) | `["prova@lido-demo.example"]` |
+| `isActive` | boolean | `true` |
+| `lastVerificationAt` | string (data e ora UTC) \| null | `2026-11-20T10:15:00Z` |
+| `lastVerificationError` | string \| null | `null` |
 | `version` | string | `9e40274f` |
 
-### POST `/api/system/send-test-email`
+### POST `/api/notification/send-test-email`
 
 Configurazione email: invio di prova.
 
@@ -9179,25 +9191,33 @@ Configurazione email: invio di prova.
 
 ```json
 {
-  "senderMailAddress": "prenotazioni@lido-demo.example",
-  "senderName": "Lido Demo",
-  "smtpServerAddress": "smtp.lido-demo.example",
+  "fromEmail": "prenotazioni@lido-demo.example",
+  "fromName": "Lido Demo",
+  "smtpHost": "smtp.lido-demo.example",
   "smtpPort": 587,
   "smtpUsername": "prenotazioni@lido-demo.example",
-  "smtpPassword": "password-smtp-digitata",
-  "smtpSecurity": "Tls"
+  "smtpPassword": null,
+  "security": "starttls",
+  "verifyCertificate": true,
+  "testRecipients": [
+    "prova@lido-demo.example"
+  ],
+  "isActive": true
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `senderMailAddress` | string | `prenotazioni@lido-demo.example` |
-| `senderName` | string | `Lido Demo` |
-| `smtpServerAddress` | string | `smtp.lido-demo.example` |
+| `fromEmail` | string (email, al massimo 320 caratteri) | `prenotazioni@lido-demo.example` |
+| `fromName` | string (al massimo 160 caratteri) \| null | `Lido Demo` |
+| `smtpHost` | string (al massimo 255 caratteri) | `smtp.lido-demo.example` |
 | `smtpPort` | number (intero 1–65535) | `587` |
-| `smtpUsername` | string | `prenotazioni@lido-demo.example` |
-| `smtpPassword` | string \| null | `password-smtp-digitata` |
-| `smtpSecurity` | string (enum SmtpSecurity) \| null | `Tls` |
+| `smtpUsername` | string (al massimo 320 caratteri) | `prenotazioni@lido-demo.example` |
+| `smtpPassword` | string \| null | `null` |
+| `security` | string (enum SmtpSecurity) | `starttls` |
+| `verifyCertificate` | boolean | `true` |
+| `testRecipients` | string[] (email di al massimo 320 caratteri, al massimo 10, anche vuoto) | `["prova@lido-demo.example"]` |
+| `isActive` | boolean | `true` |
 
 #### Response
 
@@ -9205,7 +9225,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/system/save-email-configuration`
+### POST `/api/notification/save-email-configuration`
 
 Configurazione email: salvataggio.
 
@@ -9213,31 +9233,41 @@ Configurazione email: salvataggio.
 
 ```json
 {
-  "senderMailAddress": "prenotazioni@lido-demo.example",
-  "senderName": "Lido Demo",
-  "smtpServerAddress": "smtp.lido-demo.example",
+  "fromEmail": "prenotazioni@lido-demo.example",
+  "fromName": "Lido Demo",
+  "smtpHost": "smtp.lido-demo.example",
   "smtpPort": 465,
   "smtpUsername": "prenotazioni@lido-demo.example",
   "smtpPassword": "password-smtp-digitata",
-  "smtpSecurity": "Ssl"
+  "security": "ssl",
+  "verifyCertificate": true,
+  "testRecipients": [
+    "prova@lido-demo.example"
+  ],
+  "isActive": true
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `senderMailAddress` | string | `prenotazioni@lido-demo.example` |
-| `senderName` | string | `Lido Demo` |
-| `smtpServerAddress` | string | `smtp.lido-demo.example` |
+| `fromEmail` | string (email, al massimo 320 caratteri) | `prenotazioni@lido-demo.example` |
+| `fromName` | string (al massimo 160 caratteri) \| null | `Lido Demo` |
+| `smtpHost` | string (al massimo 255 caratteri) | `smtp.lido-demo.example` |
 | `smtpPort` | number (intero 1–65535) | `465` |
-| `smtpUsername` | string | `prenotazioni@lido-demo.example` |
+| `smtpUsername` | string (al massimo 320 caratteri) | `prenotazioni@lido-demo.example` |
 | `smtpPassword` | string \| null | `password-smtp-digitata` |
-| `smtpSecurity` | string (enum SmtpSecurity) \| null | `Ssl` |
+| `security` | string (enum SmtpSecurity) | `ssl` |
+| `verifyCertificate` | boolean | `true` |
+| `testRecipients` | string[] (email di al massimo 320 caratteri, al massimo 10, anche vuoto) | `["prova@lido-demo.example"]` |
+| `isActive` | boolean | `true` |
 
 #### Response
 
 Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
+
+## /system
 
 ### POST `/api/system/info-support`
 

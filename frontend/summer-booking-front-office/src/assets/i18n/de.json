@@ -122,6 +122,12 @@
     "payment": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
     },
+    "notification": {
+      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
+      "test_email_failed": "Die Test-E-Mail wurde nicht gesendet. Antwort des Servers: {{detail}}",
+      "test_email_blocked": "In dieser Umgebung sind E-Mails gesperrt: Die Test-E-Mail wurde nicht gesendet.",
+      "unavailable": "Der E-Mail-Dienst antwortet nicht. Bitte versuche es in Kürze erneut."
+    },
     "fiscalprint": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
       "printer_not_found": "Dieser Drucker ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht."
@@ -643,7 +649,7 @@
           },
           "smtp_port": {
             "title": "SMTP-Port:",
-            "description": "Der Port des SMTP-Servers. Übliche Ports sind: 25 (nicht sicher) 465 (SSL) 587 (TLS) SMTP-Authentifizierung:"
+            "description": "Der Port des SMTP-Servers. Übliche Ports sind: 25 (nicht sicher) 465 (SSL) 587 (STARTTLS) SMTP-Authentifizierung:"
           },
           "smtp_username": {
             "title": "Benutzername:",
@@ -652,18 +658,37 @@
           "smtp_password": {
             "title": "Passwort:",
             "description": "Das Passwort des Benutzernamens.",
-            "saved": "Passwort festgelegt: zum Ändern neu eingeben",
+            "saved": "Festgelegt: neues eingeben",
             "missing": "Kein Passwort festgelegt"
           },
           "smtp_security": {
             "title": "Sicherheitstyp:",
-            "description": "Der verwendete Sicherheitstyp (Keine, SSL, TLS)."
+            "description": "Der verwendete Sicherheitstyp (Keine, STARTTLS, SSL)."
+          },
+          "is_active": {
+            "title": "Diese Konfiguration verwenden:",
+            "description": "Wenn sie aus ist, gehen die E-Mails vom Absender Summer Booking aus und die Daten bleiben gespeichert."
+          },
+          "verify_certificate": {
+            "title": "Zertifikat prüfen:",
+            "description": "Prüft das Zertifikat des SMTP-Servers. Schalte sie nur aus, wenn der Server ein Zertifikat hat, das du kennst und dem du vertraust."
+          },
+          "test_recipients": {
+            "title": "Empfänger der Test-E-Mail:",
+            "description": "Die Adressen, an die die Test-E-Mail geht, durch Kommas getrennt."
           }
         },
         "security": {
           "none": "Keine",
-          "ssl": "SSL",
-          "tls": "TLS"
+          "starttls": "STARTTLS",
+          "ssl": "SSL"
+        },
+        "verification": {
+          "not_configured": "Keine Konfiguration gespeichert: Die E-Mails gehen vom Absender Summer Booking aus.",
+          "off": "Die Konfiguration ist aus: Die E-Mails gehen vom Absender Summer Booking aus.",
+          "never": "Die Konfiguration wurde noch nie getestet: Sende eine Test-E-Mail.",
+          "failed": "Der letzte Test am {at, date, medium} um {at, time, short} ist fehlgeschlagen: {detail}",
+          "done": "Letzter erfolgreicher Test am {at, date, medium} um {at, time, short}."
         },
         "send_test": "Test-E-Mail senden",
         "reset": "Zurücksetzen",
@@ -2146,6 +2171,14 @@
     "email_configuration": {
       "smtp_password": {
         "retype": "Sie haben die Verbindungsparameter geändert: Geben Sie das Passwort erneut ein oder legen Sie ein neues fest."
+      },
+      "security": {
+        "ssl_port": "Port 465 braucht die Sicherheit SSL.",
+        "start_tls_port": "Port 587 braucht die Sicherheit STARTTLS."
+      },
+      "test_recipients": {
+        "wrong": "Eine oder mehrere Adressen sind ungültig.",
+        "max": "Höchstens {{max}} Adressen."
       }
     },
     "min_items": "Mindestens {{count}} {{field}} erforderlich",

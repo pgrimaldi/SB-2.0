@@ -122,6 +122,12 @@
     "payment": {
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento."
     },
+    "notification": {
+      "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento.",
+      "test_email_failed": "El correo de prueba no se ha enviado. Respuesta del servidor: {{detail}}",
+      "test_email_blocked": "En este entorno los correos están bloqueados: el correo de prueba no se ha enviado.",
+      "unavailable": "El servicio de correo no responde. Inténtalo de nuevo en breve."
+    },
     "fiscalprint": {
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento.",
       "printer_not_found": "Esta impresora ya no existe: puede que ya se haya eliminado."
@@ -643,7 +649,7 @@
           },
           "smtp_port": {
             "title": "Puerto SMTP:",
-            "description": "El puerto del servidor SMTP. Los puertos habituales son: 25 (no seguro) 465 (SSL) 587 (TLS) Autenticación SMTP:"
+            "description": "El puerto del servidor SMTP. Los puertos habituales son: 25 (no seguro) 465 (SSL) 587 (STARTTLS) Autenticación SMTP:"
           },
           "smtp_username": {
             "title": "Nombre de usuario:",
@@ -652,18 +658,37 @@
           "smtp_password": {
             "title": "Contraseña:",
             "description": "La contraseña asociada al nombre de usuario.",
-            "saved": "Contraseña establecida: escribe para cambiarla",
+            "saved": "Guardada: escribe la nueva",
             "missing": "No hay ninguna contraseña establecida"
           },
           "smtp_security": {
             "title": "Tipo de seguridad:",
-            "description": "El tipo de seguridad utilizado (Ninguna, SSL, TLS)."
+            "description": "El tipo de seguridad utilizado (Ninguna, STARTTLS, SSL)."
+          },
+          "is_active": {
+            "title": "Usar esta configuración:",
+            "description": "Desactivada, los correos salen del remitente de Summer Booking y los datos quedan guardados."
+          },
+          "verify_certificate": {
+            "title": "Verificar el certificado:",
+            "description": "Comprueba el certificado del servidor SMTP. Desactívala solo si el servidor tiene un certificado que conoces y en el que confías."
+          },
+          "test_recipients": {
+            "title": "Destinatarios del correo de prueba:",
+            "description": "Las direcciones que reciben el correo de prueba, separadas por comas."
           }
         },
         "security": {
           "none": "Ninguna",
-          "ssl": "SSL",
-          "tls": "TLS"
+          "starttls": "STARTTLS",
+          "ssl": "SSL"
+        },
+        "verification": {
+          "not_configured": "No hay ninguna configuración guardada: los correos salen del remitente de Summer Booking.",
+          "off": "La configuración está desactivada: los correos salen del remitente de Summer Booking.",
+          "never": "La configuración nunca se ha probado: envía un correo de prueba.",
+          "failed": "La última prueba, del {at, date, medium} a las {at, time, short}, ha fallado: {detail}",
+          "done": "Última prueba correcta el {at, date, medium} a las {at, time, short}."
         },
         "send_test": "Enviar correo de prueba",
         "reset": "Restablecer",
@@ -2146,6 +2171,14 @@
     "email_configuration": {
       "smtp_password": {
         "retype": "Has cambiado los parámetros de conexión: vuelve a escribir la contraseña o introduce una nueva."
+      },
+      "security": {
+        "ssl_port": "El puerto 465 requiere seguridad SSL.",
+        "start_tls_port": "El puerto 587 requiere seguridad STARTTLS."
+      },
+      "test_recipients": {
+        "wrong": "Una o más direcciones no son válidas.",
+        "max": "Máximo {{max}} direcciones."
       }
     },
     "min_items": "Debe definirse al menos {{count}} {{field}}",

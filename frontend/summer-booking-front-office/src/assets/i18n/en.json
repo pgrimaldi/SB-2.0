@@ -122,6 +122,12 @@
     "payment": {
       "property_required": "Your account is not linked to a property: sign in with an account of the property."
     },
+    "notification": {
+      "property_required": "Your account is not linked to a property: sign in with an account of the property.",
+      "test_email_failed": "The test email was not sent. Server answer: {{detail}}",
+      "test_email_blocked": "Emails are blocked in this environment: the test email was not sent.",
+      "unavailable": "The email service is not responding. Please try again shortly."
+    },
     "fiscalprint": {
       "property_required": "Your account is not linked to a property: sign in with an account of the property.",
       "printer_not_found": "This printer no longer exists: it may already have been deleted."
@@ -643,7 +649,7 @@
           },
           "smtp_port": {
             "title": "SMTP port:",
-            "description": "The port of the SMTP server. Common ports are: 25 (not secure) 465 (SSL) 587 (TLS) SMTP authentication:"
+            "description": "The port of the SMTP server. Common ports are: 25 (not secure) 465 (SSL) 587 (STARTTLS) SMTP authentication:"
           },
           "smtp_username": {
             "title": "Username:",
@@ -657,13 +663,32 @@
           },
           "smtp_security": {
             "title": "Security type:",
-            "description": "The security type used (None, SSL, TLS)."
+            "description": "The security type used (None, STARTTLS, SSL)."
+          },
+          "is_active": {
+            "title": "Use this configuration:",
+            "description": "When off, the emails leave from the Summer Booking sender and the data stays saved."
+          },
+          "verify_certificate": {
+            "title": "Verify the certificate:",
+            "description": "Checks the certificate of the SMTP server. Turn it off only if the server has a certificate you know and trust."
+          },
+          "test_recipients": {
+            "title": "Test email recipients:",
+            "description": "The addresses the test email goes to, separated by commas."
           }
         },
         "security": {
           "none": "None",
-          "ssl": "SSL",
-          "tls": "TLS"
+          "starttls": "STARTTLS",
+          "ssl": "SSL"
+        },
+        "verification": {
+          "not_configured": "No configuration saved: the emails leave from the Summer Booking sender.",
+          "off": "The configuration is off: the emails leave from the Summer Booking sender.",
+          "never": "The configuration has never been tested: send a test email.",
+          "failed": "The last test, on {at, date, medium} at {at, time, short}, failed: {detail}",
+          "done": "Last successful test on {at, date, medium} at {at, time, short}."
         },
         "send_test": "Send test email",
         "reset": "Reset",
@@ -2146,6 +2171,14 @@
     "email_configuration": {
       "smtp_password": {
         "retype": "You changed the connection settings: type the password again or enter a new one."
+      },
+      "security": {
+        "ssl_port": "Port 465 needs SSL security.",
+        "start_tls_port": "Port 587 needs STARTTLS security."
+      },
+      "test_recipients": {
+        "wrong": "One or more addresses are not valid.",
+        "max": "At most {{max}} addresses."
       }
     },
     "min_items": "At least {{count}} {{field}} must be defined",

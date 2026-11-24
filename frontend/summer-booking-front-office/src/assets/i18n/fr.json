@@ -122,6 +122,12 @@
     "payment": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
     },
+    "notification": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
+      "test_email_failed": "L'e-mail de test n'est pas parti. Réponse du serveur : {{detail}}",
+      "test_email_blocked": "Les e-mails sont bloqués dans cet environnement : l'e-mail de test n'est pas parti.",
+      "unavailable": "Le service e-mail ne répond pas. Réessayez dans quelques instants."
+    },
     "fiscalprint": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
       "printer_not_found": "Cette imprimante n'existe plus : elle a peut-être déjà été supprimée."
@@ -643,7 +649,7 @@
           },
           "smtp_port": {
             "title": "Port SMTP :",
-            "description": "Le port du serveur SMTP. Les ports courants sont : 25 (non sécurisé) 465 (SSL) 587 (TLS) Authentification SMTP :"
+            "description": "Le port du serveur SMTP. Les ports courants sont : 25 (non sécurisé) 465 (SSL) 587 (STARTTLS) Authentification SMTP :"
           },
           "smtp_username": {
             "title": "Nom d'utilisateur :",
@@ -652,18 +658,37 @@
           "smtp_password": {
             "title": "Mot de passe :",
             "description": "Le mot de passe associé au nom d'utilisateur.",
-            "saved": "Mot de passe défini : saisissez-en un autre pour le modifier",
+            "saved": "Défini : saisir le nouveau",
             "missing": "Aucun mot de passe défini"
           },
           "smtp_security": {
             "title": "Type de sécurité :",
-            "description": "Le type de sécurité utilisé (Aucune, SSL, TLS)."
+            "description": "Le type de sécurité utilisé (Aucune, STARTTLS, SSL)."
+          },
+          "is_active": {
+            "title": "Utiliser cette configuration :",
+            "description": "Désactivée, les e-mails partent de l'expéditeur Summer Booking et les données restent enregistrées."
+          },
+          "verify_certificate": {
+            "title": "Vérifier le certificat :",
+            "description": "Contrôle le certificat du serveur SMTP. Désactivez-la seulement si le serveur a un certificat que vous connaissez et auquel vous faites confiance."
+          },
+          "test_recipients": {
+            "title": "Destinataires de l'e-mail de test :",
+            "description": "Les adresses qui reçoivent l'e-mail de test, séparées par une virgule."
           }
         },
         "security": {
           "none": "Aucune",
-          "ssl": "SSL",
-          "tls": "TLS"
+          "starttls": "STARTTLS",
+          "ssl": "SSL"
+        },
+        "verification": {
+          "not_configured": "Aucune configuration enregistrée : les e-mails partent de l'expéditeur Summer Booking.",
+          "off": "La configuration est désactivée : les e-mails partent de l'expéditeur Summer Booking.",
+          "never": "La configuration n'a jamais été testée : envoyez un e-mail de test.",
+          "failed": "Le dernier test, le {at, date, medium} à {at, time, short}, a échoué : {detail}",
+          "done": "Dernier test réussi le {at, date, medium} à {at, time, short}."
         },
         "send_test": "Envoyer un e-mail de test",
         "reset": "Réinitialiser",
@@ -2146,6 +2171,14 @@
     "email_configuration": {
       "smtp_password": {
         "retype": "Vous avez modifié les paramètres de connexion : saisissez de nouveau le mot de passe ou entrez-en un nouveau."
+      },
+      "security": {
+        "ssl_port": "Le port 465 exige la sécurité SSL.",
+        "start_tls_port": "Le port 587 exige la sécurité STARTTLS."
+      },
+      "test_recipients": {
+        "wrong": "Une ou plusieurs adresses ne sont pas valides.",
+        "max": "{{max}} adresses au maximum."
       }
     },
     "min_items": "Il faut définir au moins {{count}} {{field}}",

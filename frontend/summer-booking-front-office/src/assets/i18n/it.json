@@ -122,6 +122,12 @@
     "payment": {
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento."
     },
+    "notification": {
+      "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
+      "test_email_failed": "L'email di test non è partita. Risposta del server: {{detail}}",
+      "test_email_blocked": "In questo ambiente le email sono bloccate: l'email di test non è partita.",
+      "unavailable": "Il servizio email non risponde. Riprova tra poco."
+    },
     "fiscalprint": {
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
       "printer_not_found": "Questa stampante non esiste più: forse è già stata eliminata."
@@ -643,7 +649,7 @@
           },
           "smtp_port": {
             "title": "Porta SMTP:",
-            "description": "La porta del server SMTP. Le porte comuni sono: 25 (non sicura) 465 (SSL) 587 (TLS) Autenticazione SMTP:"
+            "description": "La porta del server SMTP. Le porte comuni sono: 25 (non sicura) 465 (SSL) 587 (STARTTLS) Autenticazione SMTP:"
           },
           "smtp_username": {
             "title": "Nome utente:",
@@ -652,18 +658,37 @@
           "smtp_password": {
             "title": "Password:",
             "description": "La password associata al nome utente.",
-            "saved": "Password impostata: scrivi per cambiarla",
+            "saved": "Impostata: scrivi la nuova",
             "missing": "Nessuna password impostata"
           },
           "smtp_security": {
             "title": "Tipo di Sicurezza:",
-            "description": "Il tipo di sicurezza utilizzata (Nessuna, SSL, TLS)."
+            "description": "Il tipo di sicurezza utilizzata (Nessuna, STARTTLS, SSL)."
+          },
+          "is_active": {
+            "title": "Usa questa configurazione:",
+            "description": "Spenta, le email partono dal mittente di Summer Booking e i dati restano salvati."
+          },
+          "verify_certificate": {
+            "title": "Verifica il certificato:",
+            "description": "Controlla il certificato del server SMTP. Spegnila solo se il server ha un certificato che conosci e di cui ti fidi."
+          },
+          "test_recipients": {
+            "title": "Destinatari dell'email di test:",
+            "description": "Gli indirizzi a cui arriva l'email di test, separati da una virgola."
           }
         },
         "security": {
           "none": "Nessuna",
-          "ssl": "SSL",
-          "tls": "TLS"
+          "starttls": "STARTTLS",
+          "ssl": "SSL"
+        },
+        "verification": {
+          "not_configured": "Nessuna configurazione salvata: le email partono dal mittente di Summer Booking.",
+          "off": "La configurazione è spenta: le email partono dal mittente di Summer Booking.",
+          "never": "La configurazione non è mai stata provata: invia un'email di test.",
+          "failed": "L'ultima prova, del {at, date, medium} alle {at, time, short}, non è riuscita: {detail}",
+          "done": "Ultima prova riuscita il {at, date, medium} alle {at, time, short}."
         },
         "send_test": "Invia email test",
         "reset": "Reset",
@@ -2146,6 +2171,14 @@
     "email_configuration": {
       "smtp_password": {
         "retype": "Hai cambiato i parametri di connessione: riscrivi la password o inseriscine una nuova."
+      },
+      "security": {
+        "ssl_port": "La porta 465 vuole la sicurezza SSL.",
+        "start_tls_port": "La porta 587 vuole la sicurezza STARTTLS."
+      },
+      "test_recipients": {
+        "wrong": "Uno o più indirizzi non sono validi.",
+        "max": "Al massimo {{max}} indirizzi."
       }
     },
     "min_items": "Deve essere definito almeno {{count}} {{field}}",
