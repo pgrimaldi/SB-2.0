@@ -657,7 +657,7 @@ Stato: 200 OK.
 
 ## /database
 
-### POST `/api/database/existing-booking-list`
+### POST `/api/booking/reservations/reservation-list`
 
 Database: elenco prenotazioni.
 
@@ -705,8 +705,8 @@ Database: elenco prenotazioni.
     {
       "field": "paymentStatus",
       "value": [
-        "FullyPaid",
-        "PartiallyPaid"
+        "paid",
+        "partial"
       ]
     }
   ],
@@ -720,7 +720,7 @@ Database: elenco prenotazioni.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `rossi` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-07-01T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-08-31T23:59:59.999Z"]}, {"field": "bookingTypology", "value": ["Daily", "SevenDays"]}, {"field": "agreementBooking", "value": ["Yes", "No"]}, {"field": "idAffiliatedHotel", "value": ["5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41", "5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a42"]}, {"field": "paymentStatus", "value": ["FullyPaid", "PartiallyPaid"]}]` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-07-01T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-08-31T23:59:59.999Z"]}, {"field": "bookingTypology", "value": ["Daily", "SevenDays"]}, {"field": "agreementBooking", "value": ["Yes", "No"]}, {"field": "idAffiliatedHotel", "value": ["5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41", "5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a42"]}, {"field": "paymentStatus", "value": ["paid", "partial"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
 | `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-07-01T00:00:00.000Z"]` |
 | `sortField` | string | `dateFrom` |
@@ -737,21 +737,21 @@ Stato: 200 OK.
     {
       "idBooking": "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70",
       "customerName": "Mario Rossi",
-      "reservationKind": "Spot",
+      "reservationKind": "spot",
       "dateFrom": "2026-07-05T00:00:00.000Z",
       "dateTo": "2026-07-12T00:00:00.000Z",
       "agreementName": "Hotel Esempio",
-      "reservationStatus": "Confirmed",
+      "reservationStatus": "confirmed",
       "isTrashed": false
     },
     {
       "idBooking": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01",
       "customerName": "Anna Rossi",
-      "reservationKind": "Service",
+      "reservationKind": "service",
       "dateFrom": "2026-08-02T00:00:00.000Z",
       "dateTo": "2026-08-02T00:00:00.000Z",
       "agreementName": "Hotel Miramare",
-      "reservationStatus": "Pending",
+      "reservationStatus": "pending",
       "isTrashed": false
     }
   ]
@@ -761,17 +761,17 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | ExistingBookingItem[] (array di oggetti) | `[{"idBooking": "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70", "customerName": "Mario Rossi", "reservationKind": "Spot", "dateFrom": "2026-07-05T00:00:00.000Z", "dateTo": "2026-07-12T00:00:00.000Z", "agreementName": "Hotel Esempio", "reservationStatus": "Confirmed", "isTrashed": false}, {"idBooking": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01", "customerName": "Anna Rossi", "reservationKind": "Service", "dateFrom": "2026-08-02T00:00:00.000Z", "dateTo": "2026-08-02T00:00:00.000Z", "agreementName": "Hotel Miramare", "reservationStatus": "Pending", "isTrashed": false}]` |
+| `rows[]` | ExistingBookingItem[] (array di oggetti) | `[{"idBooking": "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70", "customerName": "Mario Rossi", "reservationKind": "spot", "dateFrom": "2026-07-05T00:00:00.000Z", "dateTo": "2026-07-12T00:00:00.000Z", "agreementName": "Hotel Esempio", "reservationStatus": "confirmed", "isTrashed": false}, {"idBooking": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01", "customerName": "Anna Rossi", "reservationKind": "service", "dateFrom": "2026-08-02T00:00:00.000Z", "dateTo": "2026-08-02T00:00:00.000Z", "agreementName": "Hotel Miramare", "reservationStatus": "pending", "isTrashed": false}]` |
 | `rows[].idBooking` | string (UUID) | `3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70` |
 | `rows[].customerName` | string \| null | `Mario Rossi` |
-| `rows[].reservationKind` | string (enum ReservationKind) \| null | `Spot` |
+| `rows[].reservationKind` | string (enum ReservationKind) \| null | `spot` |
 | `rows[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-07-05T00:00:00.000Z` |
 | `rows[].dateTo` | string (ISO 8601, UTC) \| null | `2026-07-12T00:00:00.000Z` |
 | `rows[].agreementName` | string \| null | `Hotel Esempio` |
-| `rows[].reservationStatus` | string (enum ReservationStatus) \| null | `Confirmed` |
+| `rows[].reservationStatus` | string (enum ReservationStatus) \| null | `confirmed` |
 | `rows[].isTrashed` | boolean | `false` |
 
-### POST `/api/database/affiliated-hotel-combobox`
+### POST `/api/catalog/agreement-partners/agreement-partner-combobox`
 
 Database: hotel convenzionati per la tendina.
 
@@ -809,7 +809,7 @@ Stato: 200 OK.
 | `id` | string (UUID) | `5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41` |
 | `value` | string | `Hotel Miramare` |
 
-### POST `/api/database/move-to-trash`
+### POST `/api/booking/cleanup/move-to-trash`
 
 Database: conferma della cancellazione con la password.
 
@@ -817,7 +817,7 @@ Database: conferma della cancellazione con la password.
 
 ```json
 {
-  "idBookings": [
+  "ids": [
     "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70",
     "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01"
   ],
@@ -827,16 +827,35 @@ Database: conferma della cancellazione con la password.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idBookings` | string[] (UUID, almeno uno) | `["3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70", "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01"]` |
-| `password` | string | `password-digitata` |
+| `ids` | string[] (UUID, da 1 a 300) | `["3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70", "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01"]` |
+| `password` | string (al massimo 256 caratteri) | `password-digitata` |
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 200 OK.
 
-Nessun corpo.
+```json
+{
+  "succeeded": [
+    "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70"
+  ],
+  "failed": [
+    {
+      "id": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01",
+      "code": "booking.reservation_not_found"
+    }
+  ]
+}
+```
 
-### POST `/api/database/trash-item-list`
+| Property | Tipo | Esempio |
+|---|---|---|
+| `succeeded` | string[] (UUID) | `["3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70"]` |
+| `failed[]` | BulkFailure[] (array di oggetti, anche vuoto) | `[{"id": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01", "code": "booking.reservation_not_found"}]` |
+| `failed[].id` | string (UUID) | `7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01` |
+| `failed[].code` | string | `booking.reservation_not_found` |
+
+### POST `/api/booking/trash/trash-list`
 
 Database: elenco del cestino.
 
@@ -881,7 +900,7 @@ Database: elenco del cestino.
     {
       "field": "paymentStatus",
       "value": [
-        "AwaitingPayment"
+        "unpaid"
       ]
     }
   ],
@@ -895,7 +914,7 @@ Database: elenco del cestino.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `lilla` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-06-01T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-06-30T23:59:59.999Z"]}, {"field": "bookingTypology", "value": ["MultiDay"]}, {"field": "agreementBooking", "value": ["Yes"]}, {"field": "idAffiliatedHotel", "value": ["5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41"]}, {"field": "paymentStatus", "value": ["AwaitingPayment"]}]` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-06-01T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-06-30T23:59:59.999Z"]}, {"field": "bookingTypology", "value": ["MultiDay"]}, {"field": "agreementBooking", "value": ["Yes"]}, {"field": "idAffiliatedHotel", "value": ["5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41"]}, {"field": "paymentStatus", "value": ["unpaid"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
 | `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-06-01T00:00:00.000Z"]` |
 | `sortField` | string | `customerName` |
@@ -912,11 +931,11 @@ Stato: 200 OK.
     {
       "idBooking": "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
       "customerName": "Roberto Lilla",
-      "reservationKind": "Spot",
+      "reservationKind": "spot",
       "dateFrom": "2026-06-05T00:00:00.000Z",
       "dateTo": "2026-06-07T00:00:00.000Z",
       "agreementName": "Hotel Miramare",
-      "reservationStatus": "Cancelled",
+      "reservationStatus": "cancelled",
       "isTrashed": true
     }
   ]
@@ -926,17 +945,17 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `1` |
-| `rows[]` | ExistingBookingItem[] (array di oggetti) | `[{"idBooking": "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d", "customerName": "Roberto Lilla", "reservationKind": "Spot", "dateFrom": "2026-06-05T00:00:00.000Z", "dateTo": "2026-06-07T00:00:00.000Z", "agreementName": "Hotel Miramare", "reservationStatus": "Cancelled", "isTrashed": true}]` |
+| `rows[]` | ExistingBookingItem[] (array di oggetti) | `[{"idBooking": "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d", "customerName": "Roberto Lilla", "reservationKind": "spot", "dateFrom": "2026-06-05T00:00:00.000Z", "dateTo": "2026-06-07T00:00:00.000Z", "agreementName": "Hotel Miramare", "reservationStatus": "cancelled", "isTrashed": true}]` |
 | `rows[].idBooking` | string (UUID) | `9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d` |
 | `rows[].customerName` | string \| null | `Roberto Lilla` |
-| `rows[].reservationKind` | string (enum ReservationKind) \| null | `Spot` |
+| `rows[].reservationKind` | string (enum ReservationKind) \| null | `spot` |
 | `rows[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-05T00:00:00.000Z` |
 | `rows[].dateTo` | string (ISO 8601, UTC) \| null | `2026-06-07T00:00:00.000Z` |
 | `rows[].agreementName` | string \| null | `Hotel Miramare` |
-| `rows[].reservationStatus` | string (enum ReservationStatus) \| null | `Cancelled` |
+| `rows[].reservationStatus` | string (enum ReservationStatus) \| null | `cancelled` |
 | `rows[].isTrashed` | boolean | `true` |
 
-### POST `/api/database/empty-trash`
+### POST `/api/booking/trash/empty`
 
 Database: svuota il cestino.
 
@@ -946,11 +965,19 @@ Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 200 OK.
 
-Nessun corpo.
+```json
+{
+  "purged": 3
+}
+```
 
-### POST `/api/database/restore-booking-item`
+| Property | Tipo | Esempio |
+|---|---|---|
+| `purged` | number (intero) | `3` |
+
+### POST `/api/booking/trash/restore`
 
 Database: ripristina dal cestino.
 
@@ -958,23 +985,43 @@ Database: ripristina dal cestino.
 
 ```json
 {
-  "idBookings": [
-    "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"
+  "ids": [
+    "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70",
+    "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01"
   ]
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idBookings` | string[] (UUID, almeno uno) | `["9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"]` |
+| `ids` | string[] (UUID, da 1 a 300) | `["3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70", "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01"]` |
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 200 OK.
 
-Nessun corpo.
+```json
+{
+  "succeeded": [
+    "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70"
+  ],
+  "failed": [
+    {
+      "id": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01",
+      "code": "booking.restore_window_expired"
+    }
+  ]
+}
+```
 
-### POST `/api/database/delete-selected-item`
+| Property | Tipo | Esempio |
+|---|---|---|
+| `succeeded` | string[] (UUID) | `["3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70"]` |
+| `failed[]` | BulkFailure[] (array di oggetti, anche vuoto) | `[{"id": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01", "code": "booking.restore_window_expired"}]` |
+| `failed[].id` | string (UUID) | `7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01` |
+| `failed[].code` | string | `booking.restore_window_expired` |
+
+### POST `/api/booking/trash/purge`
 
 Database: elimina definitivamente dal cestino.
 
@@ -982,21 +1029,41 @@ Database: elimina definitivamente dal cestino.
 
 ```json
 {
-  "idBookings": [
-    "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"
+  "ids": [
+    "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70",
+    "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01"
   ]
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idBookings` | string[] (UUID, almeno uno) | `["9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"]` |
+| `ids` | string[] (UUID, da 1 a 300) | `["3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70", "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01"]` |
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 200 OK.
 
-Nessun corpo.
+```json
+{
+  "succeeded": [
+    "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70"
+  ],
+  "failed": [
+    {
+      "id": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01",
+      "code": "booking.reservation_not_in_trash"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `succeeded` | string[] (UUID) | `["3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70"]` |
+| `failed[]` | BulkFailure[] (array di oggetti, anche vuoto) | `[{"id": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01", "code": "booking.reservation_not_in_trash"}]` |
+| `failed[].id` | string (UUID) | `7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01` |
+| `failed[].code` | string | `booking.reservation_not_in_trash` |
 
 ## /taxation
 

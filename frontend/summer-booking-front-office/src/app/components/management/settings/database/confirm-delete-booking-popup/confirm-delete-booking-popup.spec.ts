@@ -6,6 +6,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
+import { BulkResult } from '../../../../../entities/shared/bulk-result';
 import { DatabaseService } from '../../../../../services/api/database/database.service';
 import { ConfirmDeleteBookingPopup } from './confirm-delete-booking-popup';
 
@@ -20,7 +21,7 @@ import { ConfirmDeleteBookingPopup } from './confirm-delete-booking-popup';
 class ConfirmDeleteBookingPopupHost {
   readonly open = signal(true);
   readonly idBookings = ['b1', 'b2'];
-  readonly confirmed: (readonly string[])[] = [];
+  readonly confirmed: BulkResult[] = [];
 }
 
 describe('ConfirmDeleteBookingPopup', () => {
@@ -66,7 +67,8 @@ describe('ConfirmDeleteBookingPopup', () => {
 
   it('should send the chosen bookings and the password, then close and tell the page', async () => {
     const { host, popup, input, confirm, settle, type, moveToTrash } = await setup();
-    const answer = new Subject<void>();
+    const answer = new Subject<BulkResult>();
+    const result: BulkResult = { succeeded: ['b1'], failed: [{ id: 'b2', code: 'x.y' }] };
     moveToTrash.mockReturnValue(answer);
 
     confirm().click();
@@ -77,18 +79,18 @@ describe('ConfirmDeleteBookingPopup', () => {
     confirm().click();
     await settle();
     expect(moveToTrash).toHaveBeenCalledWith({
-      idBookings: ['b1', 'b2'],
+      ids: ['b1', 'b2'],
       password: 'segreta',
     });
     expect(input().readOnly).toBe(true);
     confirm().click();
     expect(moveToTrash).toHaveBeenCalledTimes(1);
 
-    answer.next();
+    answer.next(result);
     answer.complete();
     await settle();
     expect(host.open()).toBe(false);
-    expect(host.confirmed).toEqual([['b1', 'b2']]);
+    expect(host.confirmed).toEqual([result]);
     expect(popup()).toBeNull();
   });
 
@@ -98,12 +100,8 @@ describe('ConfirmDeleteBookingPopup', () => {
       throwError(
         () =>
           new HttpErrorResponse({
-            status: 400,
-            error: {
-              status: 400,
-              code: ApiErrorCode.ValidationFailed,
-              errors: [{ field: 'password', code: ApiErrorCode.AuthInvalidCredentials }],
-            },
+            status: 422,
+            error: { status: 422, code: ApiErrorCode.BookingPasswordInvalid },
           }),
       ),
     );

@@ -11,9 +11,11 @@ Rotta `/settings/database`, vista `views/settings/database/` (`Database`). Il Ce
 - Sotto, `app-table` con la ricerca, le caselle delle righe (`[isSelectable]="true"` senza i bottoni duplica ed elimina,
   righe scelte in `idSelectedBookings`) e le colonne ordinabili Cliente, Tipologia prenotazione, Dal, al, Convenzioni,
   Stato.
-- La ricerca cerca nel nome del cliente, in qualunque punto ("gia" trova Gianni Riva e Marco Giallo).
+- La ricerca trova, in qualunque punto, il nome del cliente ("gia" trova Gianni Riva e Marco Giallo); il backend cerca anche numero
+  di prenotazione, email e telefono del cliente e nome della postazione.
 - La pagina scrive le date (giorni a mezzanotte UTC, mostrati in UTC nel formato della lingua) e traduce gli enum
-  `ReservationKind` e `ReservationStatus` prima di darli alla tabella.
+  `ReservationKind` (`spot`, `service`) e `ReservationStatus` (`pending`, `confirmed`, `cancelled`), che hanno i codici del backend,
+  prima di darli alla tabella.
 - Errore di caricamento in `app-table-error-popup`.
 
 ## Periodo
@@ -34,7 +36,7 @@ Rotta `/settings/database`, vista `views/settings/database/` (`Database`). Il Ce
 - Quattro tendine a scelta multipla (`app-filled-multi-select`):
   - Tipologia prenotazioni (Giornaliera, Più giorni, 7 giorni, 14 giorni, Mensile, Stagionale);
   - Prenotazioni con convenzioni (Sì, No);
-  - Strutture convenzionate, dall'API `affiliated-hotel-combobox`, chiesta a ogni apertura del popup annullando la
+  - Strutture convenzionate, dall'API `agreement-partner-combobox`, chiesta a ogni apertura del popup annullando la
     richiesta precedente, con la tendina vuota finché arriva la risposta;
   - Stato pagamento (In attesa di pagamento, Pagato totalmente, Pagato parzialmente).
 - Gli enum delle tendine fisse stanno in `entities/database/existing-booking-filters.ts`; il backend li controllerà.
@@ -56,23 +58,34 @@ Rotta `/settings/database`, vista `views/settings/database/` (`Database`). Il Ce
 
 ## Cancella dati
 
-- In fondo alla riga della ricerca, a destra, il bottone rosso "Cancella dati" (`app-button` nello spazio
-  `appTableHeadingAction`, spinto a destra con `order` e `margin-inline-start: auto`; rosso `--color__layout__error`,
-  alto quanto la ricerca).
+- In fondo alla riga della ricerca, a destra, il bottone rosso "Cancella dati" (rosso `--color__layout__error`, alto quanto la
+  ricerca). Sta con "Annulla selezione" (nel Cestino con "Ripristina" ed "Elimina definitivamente") in un blocco solo
+  (`database__actions`, nello spazio `appTableHeadingAction`, spinto a destra con `order` e `margin-inline-start: auto`): se non
+  c'è posto vanno a capo tutti insieme, allineati a destra.
 - Alla sua sinistra "Annulla selezione" (`app-button` chiaro con il bordo blu), che svuota le righe scelte.
 - Entrambi sono spenti e sbiaditi (rosso al 40% per "Cancella dati") finché non si sceglie almeno una riga.
 - Il clic su "Cancella dati" apre `app-confirm-delete-booking-popup` (`components/management/settings/database/`), cioè
   `app-confirm-popup` con la X e il campo password (`app-filled-text-field`, `autocomplete="current-password"`,
   obbligatorio): titolo "Inserisci password per completare l'operazione", Annulla e Conferma (rosso).
 - Conferma chiama lo spostamento nel cestino con lo spinner su Conferma e il popup bloccato. Password sbagliata sotto il
-  campo (`auth.invalid_credentials` in `errors[]`), altri errori sopra i bottoni.
-- Con 2xx il popup si chiude ed emette `confirmed`: la pagina svuota la selezione, ricarica la tabella e mostra
-  `app-message-popup` senza titolo, "Gli elementi selezionati sono stati spostati nel cestino", con il solo bottone Ok.
+  campo (`booking.password_invalid`), altri errori sopra i bottoni.
+- Con 2xx il popup si chiude ed emette `confirmed` con il risultato: la pagina svuota la selezione, ricarica la tabella e
+  mostra `app-message-popup` senza titolo, "Gli elementi selezionati sono stati spostati nel cestino", con il solo bottone Ok.
 - Chiudendo il popup la password si cancella.
 - Nel popup c'è un campo nome utente nascosto e in sola lettura (`autocomplete="username"`, con l'email dell'utente
   collegato, mai inviato), come consiglia Chrome per i moduli di sola password: senza, il gestore delle password del
   browser scrive l'email nella ricerca della tabella. Per lo stesso motivo i campi di ricerca hanno
   `autocomplete="off"`.
+
+## Azioni sulle righe scelte
+
+- Cancella dati, Ripristina ed Elimina definitivamente fanno quello che si può: se qualche prenotazione non riesce, il primo
+  motivo compare in "Operazione non riuscita" (`showFailure`), la selezione si svuota e la tabella si ricarica. Motivi:
+  `booking.reservation_not_found`, `booking.reservation_not_in_trash`, `booking.restore_window_expired` (più di 30 giorni nel
+  cestino), `booking.spot_unavailable` (postazione non più libera).
+- Il backend accetta al massimo 300 prenotazioni per volta (`MAX_BOOKING_IDS`): con più righe scelte i tre bottoni sono spenti e
+  sopra la tabella compare "Puoi scegliere al massimo 300 prenotazioni per volta.".
+- Nei mock Tommaso Ruggine, nel cestino, non si ripristina (più di 30 giorni).
 
 ## Cestino
 
@@ -80,7 +93,8 @@ Rotta `/settings/database`, vista `views/settings/database/` (`Database`). Il Ce
   `isTrash`). Nel menu resta attiva la voce Database.
 - Carica la tabella dall'API della lista del cestino (stesso corpo e stessa risposta della lista della pagina Database).
 - Cambiano solo:
-  - la riga del titolo: freccia che torna alla pagina Database, titolo "Cestino" in azzurro, bottone rosso "Svuota
+  - la riga del titolo: freccia che torna alla pagina Database, titolo "Cestino" in azzurro, "Dopo 30 giorni nel cestino le
+    prenotazioni si eliminano da sole." (lo fa il backend ogni notte; sul telefono è sotto il titolo), bottone rosso "Svuota
     cestino";
   - i bottoni a destra della ricerca: "Annulla selezione", poi "Ripristina" ed "Elimina definitivamente" (azzurri con
     icona), tutti spenti e sbiaditi senza righe scelte.
@@ -101,9 +115,8 @@ Rotta `/settings/database`, vista `views/settings/database/` (`Database`). Il Ce
 
 ### Ripristina ed Elimina definitivamente
 
-- Ripristina chiama il ripristino delle righe scelte: spinner su tutta la pagina, poi la tabella si ricarica. Se riesce
-  le righe scelte si svuotano e le prenotazioni tornano nella pagina Database; se fallisce, il messaggio compare nel
-  popup "Operazione non riuscita".
+- Ripristina chiama il ripristino delle righe scelte: spinner su tutta la pagina, poi la tabella si ricarica e le
+  prenotazioni tornano nella pagina Database.
 - Elimina definitivamente apre lo stesso popup di Svuota cestino (titolo "Elimina definitiva", testo "Stai eliminando
   definitivamente gli elementi selezionati.", Annulla e Conferma); Conferma chiama la cancellazione definitiva, con
   spinner, ricarica ed errori come Ripristina.
@@ -114,20 +127,20 @@ Rotta `/settings/database`, vista `views/settings/database/` (`Database`). Il Ce
 - Sotto il titolo tre righe intere: periodo (si allarga) con Filtri, la ricerca, "Annulla selezione" e "Cancella dati" a
   metà ciascuno.
 
-## Da fare
-
-- Il paginatore in alto.
-
 ## API
 
 In `DatabaseService` (lo stabilimento lo prende il backend dal token):
 
-- `POST /api/database/existing-booking-list` (`existingBookingList`): corpo `PageRequest` come tutte le tabelle,
-  risposta `Page<ExistingBookingItem>`.
-- `POST /api/database/trash-item-list` (`trashItemList`): stesso corpo e stessa risposta.
-- `POST /api/database/affiliated-hotel-combobox` (`affiliatedHotelCombobox`): POST senza corpo, `ComboboxItem[]`.
-- `POST /api/database/move-to-trash` (`moveToTrash`): corpo `{ idBookings, password }`.
-- `POST /api/database/empty-trash` (`emptyTrash`): POST senza corpo.
-- `POST /api/database/restore-booking-item` (`restoreBookingItem`): corpo `{ idBookings }`, l'array degli id delle
-  righe scelte.
-- `POST /api/database/delete-selected-item` (`deleteSelectedItem`): stesso corpo `{ idBookings }` di Ripristina.
+- `POST /api/booking/reservations/reservation-list` (`existingBookingList`): corpo `PageRequest` come tutte le tabelle,
+  risposta `Page<ExistingBookingItem>`. Chiesta al backend, come le due dopo, in
+  `Modifiche per il backend/impostazioni/Database - Frontend requests.md`.
+- `POST /api/booking/trash/trash-list` (`trashItemList`): stesso corpo e stessa risposta.
+- `POST /api/catalog/agreement-partners/agreement-partner-combobox` (`affiliatedHotelCombobox`): POST senza corpo,
+  `ComboboxItem[]`.
+- `POST /api/booking/cleanup/move-to-trash` (`moveToTrash`): corpo `{ ids, password }`, risposta `BulkResult`.
+- `POST /api/booking/trash/restore` (`restoreBookingItem`): corpo `{ ids }`, l'array degli id delle righe scelte, risposta
+  `BulkResult`.
+- `POST /api/booking/trash/purge` (`deleteSelectedItem`): stesso corpo e stessa risposta di Ripristina.
+
+`BulkResult` (`entities/shared/bulk-result.ts`) è la risposta del backend alle azioni su più elementi: `succeeded` con gli id
+riusciti e `failed` con gli altri e il codice del motivo.

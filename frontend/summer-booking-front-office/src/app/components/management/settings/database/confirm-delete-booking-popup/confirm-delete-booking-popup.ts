@@ -15,10 +15,15 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldError,
+  apiFieldErrorsOrGeneral,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { MoveToTrashRequest } from '../../../../../entities/database/move-to-trash-request';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
+import { BulkResult } from '../../../../../entities/shared/bulk-result';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { DatabaseService } from '../../../../../services/api/database/database.service';
 import { requiredText } from '../../../../shared/forms/validators';
@@ -35,7 +40,7 @@ import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/
 export class ConfirmDeleteBookingPopup {
   readonly open = model(false);
   readonly idBookings = input<readonly string[]>([]);
-  readonly confirmed = output<readonly string[]>();
+  readonly confirmed = output<BulkResult>();
 
   private readonly database = inject(DatabaseService);
   private readonly auth = inject(AuthBehaviour);
@@ -68,22 +73,28 @@ export class ConfirmDeleteBookingPopup {
   }
 
   protected confirm(): void {
-    const idBookings = [...this.idBookings()];
-    if (this.isLoading() || !this.auth.user()?.propertyId || !idBookings.length) {
+    const ids = [...this.idBookings()];
+    if (this.isLoading() || !this.auth.user()?.propertyId || !ids.length) {
       return;
     }
     void submit(this.requestForm, async (): Promise<TreeValidationResult> => {
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.database.moveToTrash({ ...this.request(), idBookings }));
+        const result = await firstValueFrom(this.database.moveToTrash({ ...this.request(), ids }));
         this.isLoading.set(false);
         this.open.set(false);
-        this.confirmed.emit(idBookings);
+        this.confirmed.emit(result);
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.requestForm, (problem) =>
-          this.error.set(problem),
-        );
+        const problem = toApiProblem(error);
+        return problem.code === ApiErrorCode.BookingPasswordInvalid
+          ? apiFieldError(this.requestForm.password, problem.code)
+          : apiFieldErrorsOrGeneral(
+              problem,
+              this.requestForm,
+              (general) => this.error.set(general),
+              ['ids'],
+            );
       } finally {
         this.isLoading.set(false);
       }

@@ -1,4 +1,6 @@
+export const MAX_BOOKING_IDS = 300;
+
 export class MoveToTrashRequest {
-  idBookings: string[] = [];
+  ids: string[] = [];
   password: string | null = null;
 }

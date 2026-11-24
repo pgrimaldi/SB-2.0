@@ -117,7 +117,12 @@
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento."
     },
     "booking": {
-      "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento."
+      "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
+      "password_invalid": "Password non corretta.",
+      "reservation_not_found": "Una o più prenotazioni non ci sono più.",
+      "reservation_not_in_trash": "Una o più prenotazioni non sono più nel cestino.",
+      "restore_window_expired": "Una o più prenotazioni non si possono più ripristinare: sono nel cestino da più di 30 giorni.",
+      "spot_unavailable": "Una o più postazioni non sono più libere nei giorni della prenotazione."
     },
     "payment": {
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento."
@@ -811,8 +816,7 @@
         "reservation_status": {
           "pending": "In attesa",
           "confirmed": "Confermata",
-          "cancelled": "Annullata",
-          "no_show": "Non presentato"
+          "cancelled": "Annullata"
         },
         "date_filter": {
           "all": "Tutte le date",
@@ -853,9 +857,9 @@
           "payment_status": {
             "label": "Stato pagamento",
             "options": {
-              "awaiting_payment": "In attesa di pagamento",
-              "fully_paid": "Pagato totalmente",
-              "partially_paid": "Pagato parzialmente"
+              "unpaid": "In attesa di pagamento",
+              "paid": "Pagato totalmente",
+              "partial": "Pagato parzialmente"
             }
           },
           "chips": {
@@ -869,6 +873,7 @@
         },
         "delete": "Cancella dati",
         "clear_selection": "Annulla selezione",
+        "limit": "Puoi scegliere al massimo {{max}} prenotazioni per volta.",
         "trash": "Cestino",
         "confirm_delete": {
           "title": "Inserisci password per completare l'operazione",
@@ -882,6 +887,7 @@
         },
         "trash_page": {
           "title": "Cestino",
+          "expiry": "Dopo 30 giorni nel cestino le prenotazioni si eliminano da sole.",
           "empty": "Svuota cestino",
           "restore": "Ripristina",
           "delete_forever": "Elimina definitivamente"

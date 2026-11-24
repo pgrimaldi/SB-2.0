@@ -117,7 +117,12 @@
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
     },
     "booking": {
-      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
+      "password_invalid": "Mot de passe incorrect.",
+      "reservation_not_found": "Une ou plusieurs réservations n'existent plus.",
+      "reservation_not_in_trash": "Une ou plusieurs réservations ne sont plus dans la corbeille.",
+      "restore_window_expired": "Une ou plusieurs réservations ne peuvent plus être restaurées : elles sont dans la corbeille depuis plus de 30 jours.",
+      "spot_unavailable": "Un ou plusieurs emplacements ne sont plus libres aux jours de la réservation."
     },
     "payment": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
@@ -811,8 +816,7 @@
         "reservation_status": {
           "pending": "En attente",
           "confirmed": "Confirmée",
-          "cancelled": "Annulée",
-          "no_show": "Non présenté"
+          "cancelled": "Annulée"
         },
         "date_filter": {
           "all": "Toutes les dates",
@@ -853,9 +857,9 @@
           "payment_status": {
             "label": "État du paiement",
             "options": {
-              "awaiting_payment": "En attente de paiement",
-              "fully_paid": "Payée intégralement",
-              "partially_paid": "Payée partiellement"
+              "unpaid": "En attente de paiement",
+              "paid": "Payée intégralement",
+              "partial": "Payée partiellement"
             }
           },
           "chips": {
@@ -869,6 +873,7 @@
         },
         "delete": "Supprimer",
         "clear_selection": "Désélectionner",
+        "limit": "Vous pouvez choisir au maximum {{max}} réservations à la fois.",
         "trash": "Corbeille",
         "confirm_delete": {
           "title": "Saisissez votre mot de passe pour terminer l'opération",
@@ -882,6 +887,7 @@
         },
         "trash_page": {
           "title": "Corbeille",
+          "expiry": "Après 30 jours dans la corbeille, les réservations sont supprimées automatiquement.",
           "empty": "Tout vider",
           "restore": "Rétablir",
           "delete_forever": "Effacer définitivement"

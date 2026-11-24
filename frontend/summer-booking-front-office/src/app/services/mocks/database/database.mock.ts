@@ -1,7 +1,8 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Observable, delay, from, map, of, switchMap } from 'rxjs';
+import { Observable, delay, from, of, switchMap } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
+import { MAX_BOOKING_IDS } from '../../../entities/database/move-to-trash-request';
 import { FilterField } from '../../../entities/enums/filter-field';
 import { ReservationKind } from '../../../entities/enums/reservation-kind';
 import { ReservationStatus } from '../../../entities/enums/reservation-status';
@@ -12,8 +13,9 @@ import {
   PageFilter,
   PageRequest,
 } from '../../../entities/pagination/page';
+import { BulkResult } from '../../../entities/shared/bulk-result';
 import { isAuthorized, isMockPassword, unauthorized } from '../auth/auth.mock';
-import { problem, resourceNotFound } from '../errors/problem.mock';
+import { problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 type ReservationRow = Omit<ExistingBookingItem, 'isTrashed'> & { propertyId: number };
@@ -72,7 +74,7 @@ const RESERVATIONS: ReservationRow[] = [
     dateFrom: '2026-07-10T00:00:00.000Z',
     dateTo: '2026-07-10T00:00:00.000Z',
     agreementName: null,
-    reservationStatus: ReservationStatus.NoShow,
+    reservationStatus: ReservationStatus.Confirmed,
   },
   {
     propertyId: 1,
@@ -152,7 +154,7 @@ const RESERVATIONS: ReservationRow[] = [
     dateFrom: '2026-08-15T00:00:00.000Z',
     dateTo: '2026-08-15T00:00:00.000Z',
     agreementName: null,
-    reservationStatus: ReservationStatus.NoShow,
+    reservationStatus: ReservationStatus.Confirmed,
   },
   {
     propertyId: 1,
@@ -202,7 +204,7 @@ const RESERVATIONS: ReservationRow[] = [
     dateFrom: '2026-07-18T00:00:00.000Z',
     dateTo: '2026-07-18T00:00:00.000Z',
     agreementName: 'Hotel Esempio',
-    reservationStatus: ReservationStatus.NoShow,
+    reservationStatus: ReservationStatus.Cancelled,
   },
   {
     propertyId: 1,
@@ -232,6 +234,9 @@ const trashedBookings = new Set<string>([
   '0b6f1c2e-3a4d-4e5f-8a9b-1c2d3e4f5a19',
 ]);
 
+/** In the trash for more than 30 days: it cannot be restored. */
+const EXPIRED_BOOKING = '0b6f1c2e-3a4d-4e5f-8a9b-1c2d3e4f5a19';
+
 const MAX_PAGE_SIZE = 100;
 const SORT_FIELDS = [
   'customerName',
@@ -243,14 +248,14 @@ const SORT_FIELDS = [
 ] as const;
 
 /**
- * `POST /api/database/existing-booking-list`: one page of the bookings of the property of the token
+ * `POST /api/booking/reservations/reservation-list`: one page of the bookings of the property of the token
  * (never of other properties) that are not in the trash. 401 without a valid access token.
  */
 export const existingBookingListMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => bookingPageMock(request, false);
 
-/** `POST /api/database/trash-item-list`: the same, for the bookings in the trash. */
+/** `POST /api/booking/trash/trash-list`: the same, for the bookings in the trash. */
 export const trashItemListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> =>
   bookingPageMock(request, true);
 
@@ -303,7 +308,7 @@ function bookingPageMock(
 }
 
 /**
- * `POST /api/database/affiliated-hotel-combobox` without a body: the hotels of the property, id and
+ * `POST /api/catalog/agreement-partners/agreement-partner-combobox` without a body: the hotels of the property, id and
  * name. 401 without a valid access token.
  */
 export const affiliatedHotelComboboxMock = (
@@ -320,118 +325,104 @@ export const affiliatedHotelComboboxMock = (
 };
 
 /**
- * `POST /api/database/move-to-trash` with `{ idBookings, password }`: checks the password of the
- * user (the one of the test account), then moves the bookings to the trash: they leave the list.
- * 204 without a body; 401 without a valid access token; 404 when a booking is not one of the
- * property; 400 with an error on `password` when it is wrong.
+ * `POST /api/booking/cleanup/move-to-trash` with `{ ids, password }`: checks the password of the user
+ * (the one of the test account), then moves the bookings to the trash: they leave the list.
  */
 export const moveToTrashMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as {
-    idBookings?: unknown;
-    password?: unknown;
-  };
-  const property = DEMO_PROPERTY;
-  const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
-  const known = RESERVATIONS.filter(
-    (row) => row.propertyId === property.id && !trashedBookings.has(row.idBooking ?? ''),
-  ).map((row) => row.idBooking);
-  if (!idBookings.length || idBookings.some((id) => !known.includes(id as string))) {
-    return resourceNotFound(request);
-  }
-  return from(isMockPassword(body.password)).pipe(
+  const { password } = (request.body ?? {}) as { password?: unknown };
+  return from(isMockPassword(password)).pipe(
     delay(600),
     switchMap((isRight) =>
       isRight
-        ? of(trashBookings(idBookings as string[])).pipe(
-            map(() => new HttpResponse({ status: 204, url: request.url })),
+        ? bulkResult(request, false, ApiErrorCode.BookingReservationNotFound, (id) =>
+            trashedBookings.add(id),
           )
-        : problem(request, 400, ApiErrorCode.ValidationFailed, {
-            errors: [{ field: 'password', code: ApiErrorCode.AuthInvalidCredentials }],
-          }),
+        : problem(request, 422, ApiErrorCode.BookingPasswordInvalid),
     ),
   );
 };
 
 /**
- * `POST /api/database/empty-trash` without a body: deletes for good every booking of the property
- * in the trash (until the page is reloaded). 204 without a body; 401 without a valid access token.
+ * `POST /api/booking/trash/empty` without a body: deletes for good every booking of the property
+ * in the trash (until the page is reloaded) and says how many; 401 without a valid access token.
  */
 export const emptyTrashMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const property = DEMO_PROPERTY;
+  let purged = 0;
   for (let index = RESERVATIONS.length - 1; index >= 0; index--) {
     const row = RESERVATIONS[index];
     if (row.propertyId === property.id && trashedBookings.delete(row.idBooking ?? '')) {
       RESERVATIONS.splice(index, 1);
+      purged++;
     }
   }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return of(new HttpResponse({ status: 200, url: request.url, body: { purged } })).pipe(delay(600));
 };
 
-/**
- * `POST /api/database/restore-booking-item` with `{ idBookings }`: takes the bookings out of the
- * trash, back to the bookings list. 204 without a body; 401 without a valid access token; 404 when
- * a booking is not in the trash of the property.
- */
+/** `POST /api/booking/trash/restore` with `{ ids }`: back to the bookings list. */
 export const restoreBookingItemMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idBookings?: unknown };
-  const property = DEMO_PROPERTY;
-  const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
-  const known = RESERVATIONS.filter(
-    (row) => row.propertyId === property.id && trashedBookings.has(row.idBooking ?? ''),
-  ).map((row) => row.idBooking);
-  if (!idBookings.length || idBookings.some((id) => !known.includes(id as string))) {
-    return resourceNotFound(request);
-  }
-  for (const id of idBookings as string[]) {
-    trashedBookings.delete(id);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  isAuthorized(request)
+    ? bulkResult(request, true, ApiErrorCode.BookingReservationNotInTrash, (id) =>
+        trashedBookings.delete(id),
+      )
+    : unauthorized(request);
 
-/**
- * `POST /api/database/delete-selected-item` with `{ idBookings }`: deletes for good the bookings in
- * the trash (until the page is reloaded). 204 without a body; 401 without a valid access token; 404
- * when a booking is not in the trash of the property.
- */
+/** `POST /api/booking/trash/purge` with `{ ids }`: deletes the bookings in the trash for good. */
 export const deleteSelectedItemMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
+): Observable<HttpEvent<unknown>> =>
+  isAuthorized(request)
+    ? bulkResult(request, true, ApiErrorCode.BookingReservationNotInTrash, (id) => {
+        RESERVATIONS.splice(
+          RESERVATIONS.findIndex((row) => row.idBooking === id),
+          1,
+        );
+        trashedBookings.delete(id);
+      })
+    : unauthorized(request);
+
+/** What can be done is done, the others come back with the reason, as the backend does. */
+function bulkResult(
+  request: HttpRequest<unknown>,
+  isTrash: boolean,
+  missing: ApiErrorCode,
+  act: (id: string) => void,
+): Observable<HttpEvent<unknown>> {
+  const { ids } = (request.body ?? {}) as { ids?: unknown };
+  if (!Array.isArray(ids) || !ids.length || ids.length > MAX_BOOKING_IDS) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors: [{ field: 'ids', code: ApiErrorCode.ValidationInvalid }],
+    });
   }
-  const body = (request.body ?? {}) as { idBookings?: unknown };
-  const property = DEMO_PROPERTY;
-  const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
-  const known = RESERVATIONS.filter(
-    (row) => row.propertyId === property.id && trashedBookings.has(row.idBooking ?? ''),
-  ).map((row) => row.idBooking);
-  if (!idBookings.length || idBookings.some((id) => !known.includes(id as string))) {
-    return resourceNotFound(request);
-  }
-  for (let index = RESERVATIONS.length - 1; index >= 0; index--) {
-    const idBooking = RESERVATIONS[index].idBooking ?? '';
-    if (idBookings.includes(idBooking) && trashedBookings.delete(idBooking)) {
-      RESERVATIONS.splice(index, 1);
+  const body: BulkResult = { succeeded: [], failed: [] };
+  for (const id of ids as string[]) {
+    const isKnown = RESERVATIONS.some(
+      (row) =>
+        row.propertyId === DEMO_PROPERTY.id &&
+        row.idBooking === id &&
+        trashedBookings.has(id) === isTrash,
+    );
+    const code = !isKnown
+      ? missing
+      : request.url.endsWith('/restore') && id === EXPIRED_BOOKING
+        ? ApiErrorCode.BookingRestoreWindowExpired
+        : null;
+    if (code) {
+      body.failed.push({ id, code });
+    } else {
+      act(id);
+      body.succeeded.push(id);
     }
   }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
-
-function trashBookings(idBookings: readonly string[]): void {
-  for (const id of idBookings) {
-    trashedBookings.add(id);
-  }
+  return of(new HttpResponse({ status: 200, url: request.url, body })).pipe(delay(600));
 }
 
 /** Texts alphabetically, ignoring case; a missing value first ascending, last descending. */

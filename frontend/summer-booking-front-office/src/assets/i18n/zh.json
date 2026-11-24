@@ -117,7 +117,12 @@
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
     },
     "booking": {
-      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
+      "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
+      "password_invalid": "密码不正确。",
+      "reservation_not_found": "一个或多个预订已不存在。",
+      "reservation_not_in_trash": "一个或多个预订已不在回收站中。",
+      "restore_window_expired": "一个或多个预订无法再恢复：它们在回收站中已超过 30 天。",
+      "spot_unavailable": "一个或多个位置在预订日期内已不再空闲。"
     },
     "payment": {
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
@@ -811,8 +816,7 @@
         "reservation_status": {
           "pending": "待定",
           "confirmed": "已确认",
-          "cancelled": "已取消",
-          "no_show": "未到"
+          "cancelled": "已取消"
         },
         "date_filter": {
           "all": "所有日期",
@@ -853,9 +857,9 @@
           "payment_status": {
             "label": "付款状态",
             "options": {
-              "awaiting_payment": "待付款",
-              "fully_paid": "已全额付款",
-              "partially_paid": "已部分付款"
+              "unpaid": "待付款",
+              "paid": "已全额付款",
+              "partial": "已部分付款"
             }
           },
           "chips": {
@@ -869,6 +873,7 @@
         },
         "delete": "删除数据",
         "clear_selection": "取消选择",
+        "limit": "每次最多可选择 {{max}} 个预订。",
         "trash": "回收站",
         "confirm_delete": {
           "title": "输入密码以完成操作",
@@ -882,6 +887,7 @@
         },
         "trash_page": {
           "title": "回收站",
+          "expiry": "预订在回收站中 30 天后会自动删除。",
           "empty": "清空回收站",
           "restore": "恢复",
           "delete_forever": "永久删除"

@@ -14,6 +14,7 @@
       }
     </div>
     @if (isTrash) {
+      <p class="database__expiry" appI18nText="management.settings.database.trash_page.expiry"></p>
       <app-button
         class="database__empty__trash"
         [size]="ButtonSize.Small"
@@ -33,6 +34,13 @@
       </app-button>
     }
   </div>
+  @if (isOverLimit()) {
+    <p
+      class="database__limit"
+      appI18nText="management.settings.database.limit"
+      [params]="{ max: maxBookings }"
+    ></p>
+  }
   <app-table
     #table
     [columns]="columns()"
@@ -67,51 +75,46 @@
         <span class="database__filters__count">{{ chips().length }}</span>
       }
     </button>
-    <app-button
-      appTableHeadingAction
-      class="database__clear__selection"
-      [appearance]="ButtonAppearance.Light"
-      [size]="ButtonSize.Small"
-      [disabled]="!idSelectedBookings().length"
-      (clicked)="idSelectedBookings.set([])"
-    >
-      <span appI18nText="management.settings.database.clear_selection"></span>
-    </app-button>
-    @if (isTrash) {
+    <div appTableHeadingAction class="database__actions">
       <app-button
-        appTableHeadingAction
-        class="database__restore"
-        [size]="ButtonSize.Small"
-        [pathIcon]="restoreIcon"
-        [disabled]="!idSelectedBookings().length"
-        (clicked)="restore(table)"
-      >
-        {{ 'management.settings.database.trash_page.restore' | translate }}
-      </app-button>
-    }
-    @if (isTrash) {
-      <app-button
-        appTableHeadingAction
-        class="database__delete__forever"
-        [size]="ButtonSize.Small"
-        [pathIcon]="trashIcon"
-        [disabled]="!idSelectedBookings().length"
-        (clicked)="isDeleteForeverAsked.set(true)"
-      >
-        <span appI18nText="management.settings.database.trash_page.delete_forever"></span>
-      </app-button>
-    }
-    @if (!isTrash) {
-      <app-button
-        appTableHeadingAction
-        class="database__delete"
+        class="database__clear__selection"
+        [appearance]="ButtonAppearance.Light"
         [size]="ButtonSize.Small"
         [disabled]="!idSelectedBookings().length"
-        (clicked)="isDeleteAsked.set(true)"
+        (clicked)="idSelectedBookings.set([])"
       >
-        <span appI18nText="management.settings.database.delete"></span>
+        <span appI18nText="management.settings.database.clear_selection"></span>
       </app-button>
-    }
+      @if (isTrash) {
+        <app-button
+          class="database__restore"
+          [size]="ButtonSize.Small"
+          [pathIcon]="restoreIcon"
+          [disabled]="!canAct()"
+          (clicked)="restore(table)"
+        >
+          {{ 'management.settings.database.trash_page.restore' | translate }}
+        </app-button>
+        <app-button
+          class="database__delete__forever"
+          [size]="ButtonSize.Small"
+          [pathIcon]="trashIcon"
+          [disabled]="!canAct()"
+          (clicked)="isDeleteForeverAsked.set(true)"
+        >
+          <span appI18nText="management.settings.database.trash_page.delete_forever"></span>
+        </app-button>
+      } @else {
+        <app-button
+          class="database__delete"
+          [size]="ButtonSize.Small"
+          [disabled]="!canAct()"
+          (clicked)="isDeleteAsked.set(true)"
+        >
+          <span appI18nText="management.settings.database.delete"></span>
+        </app-button>
+      }
+    </div>
     @if (chips().length) {
       <app-filter-chips
         appTableFilterBar
@@ -128,7 +131,7 @@
 <app-confirm-delete-booking-popup
   [idBookings]="idBookings()"
   [(open)]="isDeleteAsked"
-  (confirmed)="afterTrash(); table.reload()"
+  (confirmed)="afterTrash($event); table.reload()"
 />
 
 <app-message-popup

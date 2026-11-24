@@ -117,7 +117,12 @@
       "property_required": "Your account is not linked to a property: sign in with an account of the property."
     },
     "booking": {
-      "property_required": "Your account is not linked to a property: sign in with an account of the property."
+      "property_required": "Your account is not linked to a property: sign in with an account of the property.",
+      "password_invalid": "Wrong password.",
+      "reservation_not_found": "One or more bookings no longer exist.",
+      "reservation_not_in_trash": "One or more bookings are no longer in the trash.",
+      "restore_window_expired": "One or more bookings can no longer be restored: they have been in the trash for more than 30 days.",
+      "spot_unavailable": "One or more spots are no longer free on the days of the booking."
     },
     "payment": {
       "property_required": "Your account is not linked to a property: sign in with an account of the property."
@@ -811,8 +816,7 @@
         "reservation_status": {
           "pending": "Pending",
           "confirmed": "Confirmed",
-          "cancelled": "Cancelled",
-          "no_show": "No show"
+          "cancelled": "Cancelled"
         },
         "date_filter": {
           "all": "All dates",
@@ -853,9 +857,9 @@
           "payment_status": {
             "label": "Payment status",
             "options": {
-              "awaiting_payment": "Awaiting payment",
-              "fully_paid": "Fully paid",
-              "partially_paid": "Partially paid"
+              "unpaid": "Awaiting payment",
+              "paid": "Fully paid",
+              "partial": "Partially paid"
             }
           },
           "chips": {
@@ -869,6 +873,7 @@
         },
         "delete": "Delete data",
         "clear_selection": "Clear selection",
+        "limit": "You can choose at most {{max}} bookings at a time.",
         "trash": "Trash",
         "confirm_delete": {
           "title": "Enter your password to complete the operation",
@@ -882,6 +887,7 @@
         },
         "trash_page": {
           "title": "Trash",
+          "expiry": "After 30 days in the trash, bookings are deleted automatically.",
           "empty": "Empty trash",
           "restore": "Restore",
           "delete_forever": "Delete permanently"

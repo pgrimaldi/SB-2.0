@@ -8061,7 +8061,7 @@ Nessun corpo (204).
 
 ## Database
 
-### POST `/api/database/existing-booking-list`
+### POST `/api/booking/reservations/reservation-list`
 
 **Payload JSON**
 
@@ -8129,7 +8129,7 @@ Nessun corpo (204).
 | `rows[].reservationStatus` | string (enum ReservationStatus) \| null |
 | `rows[].isTrashed` | boolean |
 
-### POST `/api/database/affiliated-hotel-combobox`
+### POST `/api/catalog/agreement-partners/agreement-partner-combobox`
 
 **Payload JSON**
 
@@ -8157,33 +8157,48 @@ Nessun payload.
 | `[].id` | string (UUID) |
 | `[].value` | string |
 
-### POST `/api/database/move-to-trash`
+### POST `/api/booking/cleanup/move-to-trash`
 
 **Payload JSON**
 
 ```json
 {
-  "idBookings": "string[] (UUID, almeno uno)",
-  "password": "string"
+  "ids": "string[] (UUID, da 1 a 300)",
+  "password": "string (al massimo 256 caratteri)"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "succeeded": "string[] (UUID)",
+  "failed": [
+    {
+      "id": "string (UUID)",
+      "code": "string"
+    }
+  ]
+}
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idBookings` | string[] (UUID, almeno uno) |
-| `password` | string |
+| `ids` | string[] (UUID, da 1 a 300) |
+| `password` | string (al massimo 256 caratteri) |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `succeeded` | string[] (UUID) |
+| `failed[]` | BulkFailure[] (array di oggetti, anche vuoto) |
+| `failed[].id` | string (UUID) |
+| `failed[].code` | string |
 
-### POST `/api/database/trash-item-list`
+### POST `/api/booking/trash/trash-list`
 
 **Payload JSON**
 
@@ -8251,7 +8266,7 @@ Nessun corpo (204).
 | `rows[].reservationStatus` | string (enum ReservationStatus) \| null |
 | `rows[].isTrashed` | boolean |
 
-### POST `/api/database/empty-trash`
+### POST `/api/booking/trash/empty`
 
 **Payload JSON**
 
@@ -8259,7 +8274,11 @@ Nessun payload.
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "purged": "number (intero)"
+}
+```
 
 **Payload tabella**
 
@@ -8267,55 +8286,87 @@ Nessun payload.
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `purged` | number (intero) |
 
-### POST `/api/database/restore-booking-item`
+### POST `/api/booking/trash/restore`
 
 **Payload JSON**
 
 ```json
 {
-  "idBookings": "string[] (UUID, almeno uno)"
+  "ids": "string[] (UUID, da 1 a 300)"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "succeeded": "string[] (UUID)",
+  "failed": [
+    {
+      "id": "string (UUID)",
+      "code": "string"
+    }
+  ]
+}
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idBookings` | string[] (UUID, almeno uno) |
+| `ids` | string[] (UUID, da 1 a 300) |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `succeeded` | string[] (UUID) |
+| `failed[]` | BulkFailure[] (array di oggetti, anche vuoto) |
+| `failed[].id` | string (UUID) |
+| `failed[].code` | string |
 
-### POST `/api/database/delete-selected-item`
+### POST `/api/booking/trash/purge`
 
 **Payload JSON**
 
 ```json
 {
-  "idBookings": "string[] (UUID, almeno uno)"
+  "ids": "string[] (UUID, da 1 a 300)"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "succeeded": "string[] (UUID)",
+  "failed": [
+    {
+      "id": "string (UUID)",
+      "code": "string"
+    }
+  ]
+}
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idBookings` | string[] (UUID, almeno uno) |
+| `ids` | string[] (UUID, da 1 a 300) |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `succeeded` | string[] (UUID) |
+| `failed[]` | BulkFailure[] (array di oggetti, anche vuoto) |
+| `failed[].id` | string (UUID) |
+| `failed[].code` | string |
 
 ## Assistenza e guide
 

@@ -117,7 +117,12 @@
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento."
     },
     "booking": {
-      "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento."
+      "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento.",
+      "password_invalid": "Contraseña incorrecta.",
+      "reservation_not_found": "Una o más reservas ya no existen.",
+      "reservation_not_in_trash": "Una o más reservas ya no están en la papelera.",
+      "restore_window_expired": "Una o más reservas ya no se pueden restaurar: llevan más de 30 días en la papelera.",
+      "spot_unavailable": "Una o más plazas ya no están libres en los días de la reserva."
     },
     "payment": {
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento."
@@ -811,8 +816,7 @@
         "reservation_status": {
           "pending": "Pendiente",
           "confirmed": "Confirmada",
-          "cancelled": "Cancelada",
-          "no_show": "No presentado"
+          "cancelled": "Cancelada"
         },
         "date_filter": {
           "all": "Todas las fechas",
@@ -853,9 +857,9 @@
           "payment_status": {
             "label": "Estado del pago",
             "options": {
-              "awaiting_payment": "Pendiente de pago",
-              "fully_paid": "Pagada totalmente",
-              "partially_paid": "Pagada parcialmente"
+              "unpaid": "Pendiente de pago",
+              "paid": "Pagada totalmente",
+              "partial": "Pagada parcialmente"
             }
           },
           "chips": {
@@ -869,6 +873,7 @@
         },
         "delete": "Borrar datos",
         "clear_selection": "Anular selección",
+        "limit": "Puedes elegir como máximo {{max}} reservas a la vez.",
         "trash": "Papelera",
         "confirm_delete": {
           "title": "Introduce la contraseña para completar la operación",
@@ -882,6 +887,7 @@
         },
         "trash_page": {
           "title": "Papelera",
+          "expiry": "Tras 30 días en la papelera, las reservas se eliminan automáticamente.",
           "empty": "Vaciar todo",
           "restore": "Restaurar",
           "delete_forever": "Borrar definitivamente"

@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  WritableSignal,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -58,11 +65,13 @@ import {
   PaymentStatusFilter,
 } from '../../../entities/database/existing-booking-filters';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
+import { MAX_BOOKING_IDS } from '../../../entities/database/move-to-trash-request';
 import { FilterField } from '../../../entities/enums/filter-field';
 import { ReservationKind } from '../../../entities/enums/reservation-kind';
 import { ReservationStatus } from '../../../entities/enums/reservation-status';
 import { ApiProblem } from '../../../entities/errors/api-problem';
-import { PageFilter } from '../../../entities/pagination/page';
+import { DEFAULT_PAGE_SIZE, PageFilter } from '../../../entities/pagination/page';
+import { BulkResult } from '../../../entities/shared/bulk-result';
 import { DateRange } from '../../../entities/shared/date-range';
 import { DatabaseService } from '../../../services/api/database/database.service';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
@@ -76,8 +85,8 @@ interface DatabaseTexts {
     agreement: string;
     reservation_status: string;
   };
-  reservation_kind: { spot: string; service: string };
-  reservation_status: { pending: string; confirmed: string; cancelled: string; no_show: string };
+  reservation_kind: Record<ReservationKind, string>;
+  reservation_status: Record<ReservationStatus, string>;
   date_filter: {
     all: string;
     today: string;
@@ -103,21 +112,6 @@ interface ExistingBookingRow {
   agreementName: string | null;
   reservationStatus: string | null;
 }
-
-const RESERVATION_KIND_KEYS: Record<ReservationKind, keyof DatabaseTexts['reservation_kind']> = {
-  [ReservationKind.Spot]: 'spot',
-  [ReservationKind.Service]: 'service',
-};
-
-const RESERVATION_STATUS_KEYS: Record<
-  ReservationStatus,
-  keyof DatabaseTexts['reservation_status']
-> = {
-  [ReservationStatus.Pending]: 'pending',
-  [ReservationStatus.Confirmed]: 'confirmed',
-  [ReservationStatus.Cancelled]: 'cancelled',
-  [ReservationStatus.NoShow]: 'no_show',
-};
 
 @Component({
   selector: 'app-database',
@@ -163,6 +157,9 @@ export class Database {
   protected readonly backIcon = '/assets/images/GeneralIcon_Previous.svg';
   protected readonly idSelectedBookings = signal<readonly TableRowId[]>([]);
   protected readonly idBookings = computed(() => this.idSelectedBookings().map(String));
+  protected readonly maxBookings = MAX_BOOKING_IDS;
+  protected readonly isOverLimit = computed(() => this.idBookings().length > MAX_BOOKING_IDS);
+  protected readonly canAct = computed(() => !!this.idBookings().length && !this.isOverLimit());
   protected readonly isDeleteAsked = signal(false);
   protected readonly isTrashedShown = signal(false);
   protected readonly isEmptyingTrash = signal(false);
@@ -347,14 +344,10 @@ export class Database {
   ): ExistingBookingRow {
     return {
       ...item,
-      reservationKind: item.reservationKind
-        ? texts.reservation_kind[RESERVATION_KIND_KEYS[item.reservationKind]]
-        : null,
+      reservationKind: item.reservationKind && texts.reservation_kind[item.reservationKind],
       dateFrom: item.dateFrom ? day.format(new Date(item.dateFrom)) : null,
       dateTo: item.dateTo ? day.format(new Date(item.dateTo)) : null,
-      reservationStatus: item.reservationStatus
-        ? texts.reservation_status[RESERVATION_STATUS_KEYS[item.reservationStatus]]
-        : null,
+      reservationStatus: item.reservationStatus && texts.reservation_status[item.reservationStatus],
     };
   }
 
@@ -362,74 +355,80 @@ export class Database {
     this.bookingFilters.update((filters) => ({ ...filters, ...chip.emptied }));
   }
 
-  /** The bookings are in the trash now: they leave the list, and the choice with them. */
-  protected afterTrash(): void {
+  protected afterTrash(result: BulkResult): void {
     this.idSelectedBookings.set([]);
-    this.isTrashedShown.set(true);
+    if (!this.showFailure(result)) {
+      this.isTrashedShown.set(true);
+    }
   }
 
   /** The page waits under a spinner; then the table is read again, whatever the answer. */
   protected emptyTrash(table: Table<ExistingBookingRow, object>): void {
-    if (this.isEmptyingTrash() || !this.auth.user()?.propertyId) {
-      return;
-    }
-    this.isEmptyingTrash.set(true);
-    this.database.emptyTrash().subscribe({
-      next: () => {
-        this.isEmptyingTrash.set(false);
-        this.idSelectedBookings.set([]);
-        this.isTrashEmpty.set(true);
-        table.reload();
-      },
-      error: (error: unknown) => {
-        this.isEmptyingTrash.set(false);
-        this.actionError.set(toApiProblem(error));
-        this.isActionErrorShown.set(true);
-        table.reload();
-      },
-    });
+    this.run(this.isEmptyingTrash, this.database.emptyTrash(), table, () =>
+      this.isTrashEmpty.set(true),
+    );
   }
 
   protected restore(table: Table<ExistingBookingRow, object>): void {
-    if (this.isRestoring() || !this.auth.user()?.propertyId) {
+    this.run(
+      this.isRestoring,
+      this.database.restoreBookingItem(this.idBookings()),
+      table,
+      (result) => {
+        this.showFailure(result);
+        this.readIsTrashEmpty();
+      },
+    );
+  }
+
+  protected deleteForever(table: Table<ExistingBookingRow, object>): void {
+    this.run(
+      this.isDeletingForever,
+      this.database.deleteSelectedItem(this.idBookings()),
+      table,
+      (result) => {
+        this.showFailure(result);
+        this.readIsTrashEmpty();
+      },
+    );
+  }
+
+  private run<T>(
+    isRunning: WritableSignal<boolean>,
+    call: Observable<T>,
+    table: Table<ExistingBookingRow, object>,
+    done: (answer: T) => void,
+  ): void {
+    if (isRunning() || !this.auth.user()?.propertyId) {
       return;
     }
-    this.isRestoring.set(true);
-    this.database.restoreBookingItem(this.idBookings()).subscribe({
-      next: () => {
-        this.isRestoring.set(false);
+    isRunning.set(true);
+    call.subscribe({
+      next: (answer) => {
+        isRunning.set(false);
         this.idSelectedBookings.set([]);
-        this.readIsTrashEmpty();
+        done(answer);
         table.reload();
       },
       error: (error: unknown) => {
-        this.isRestoring.set(false);
-        this.actionError.set(toApiProblem(error));
-        this.isActionErrorShown.set(true);
+        isRunning.set(false);
+        this.showError(toApiProblem(error));
         table.reload();
       },
     });
   }
 
-  protected deleteForever(table: Table<ExistingBookingRow, object>): void {
-    if (this.isDeletingForever() || !this.auth.user()?.propertyId) {
-      return;
+  /** The first reason why some of the bookings stayed as they were. */
+  private showFailure({ failed }: BulkResult): boolean {
+    if (failed.length) {
+      this.showError({ status: 0, code: failed[0].code });
     }
-    this.isDeletingForever.set(true);
-    this.database.deleteSelectedItem(this.idBookings()).subscribe({
-      next: () => {
-        this.isDeletingForever.set(false);
-        this.idSelectedBookings.set([]);
-        this.readIsTrashEmpty();
-        table.reload();
-      },
-      error: (error: unknown) => {
-        this.isDeletingForever.set(false);
-        this.actionError.set(toApiProblem(error));
-        this.isActionErrorShown.set(true);
-        table.reload();
-      },
-    });
+    return failed.length > 0;
+  }
+
+  private showError(problem: ApiProblem): void {
+    this.actionError.set(problem);
+    this.isActionErrorShown.set(true);
   }
 
   // The table may be showing a search or filters: its total is not the whole trash.
@@ -437,7 +436,7 @@ export class Database {
     this.database
       .trashItemList({
         page: 1,
-        pageSize: 1,
+        pageSize: DEFAULT_PAGE_SIZE,
         search: '',
         filters: [],
         sortField: '',

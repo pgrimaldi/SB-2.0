@@ -439,49 +439,50 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/database/existing-booking-list`
+    request.url === `${environment.apiBaseUrl}/booking/reservations/reservation-list`
   ) {
     return existingBookingListMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/database/affiliated-hotel-combobox`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/agreement-partners/agreement-partner-combobox`
   ) {
     return affiliatedHotelComboboxMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/database/move-to-trash`
+    request.url === `${environment.apiBaseUrl}/booking/cleanup/move-to-trash`
   ) {
     return moveToTrashMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/database/trash-item-list`
+    request.url === `${environment.apiBaseUrl}/booking/trash/trash-list`
   ) {
     return trashItemListMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/database/empty-trash`
+    request.url === `${environment.apiBaseUrl}/booking/trash/empty`
   ) {
     return emptyTrashMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/database/restore-booking-item`
+    request.url === `${environment.apiBaseUrl}/booking/trash/restore`
   ) {
     return restoreBookingItemMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/database/delete-selected-item`
+    request.url === `${environment.apiBaseUrl}/booking/trash/purge`
   ) {
     return deleteSelectedItemMock(request);
   }

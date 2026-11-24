@@ -117,7 +117,12 @@
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
     },
     "booking": {
-      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
+      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
+      "password_invalid": "Falsches Passwort.",
+      "reservation_not_found": "Eine oder mehrere Buchungen gibt es nicht mehr.",
+      "reservation_not_in_trash": "Eine oder mehrere Buchungen sind nicht mehr im Papierkorb.",
+      "restore_window_expired": "Eine oder mehrere Buchungen können nicht mehr wiederhergestellt werden: Sie sind seit mehr als 30 Tagen im Papierkorb.",
+      "spot_unavailable": "Ein oder mehrere Plätze sind an den Tagen der Buchung nicht mehr frei."
     },
     "payment": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
@@ -811,8 +816,7 @@
         "reservation_status": {
           "pending": "Ausstehend",
           "confirmed": "Bestätigt",
-          "cancelled": "Storniert",
-          "no_show": "Nicht erschienen"
+          "cancelled": "Storniert"
         },
         "date_filter": {
           "all": "Alle Daten",
@@ -853,9 +857,9 @@
           "payment_status": {
             "label": "Zahlungsstatus",
             "options": {
-              "awaiting_payment": "Zahlung ausstehend",
-              "fully_paid": "Vollständig bezahlt",
-              "partially_paid": "Teilweise bezahlt"
+              "unpaid": "Zahlung ausstehend",
+              "paid": "Vollständig bezahlt",
+              "partial": "Teilweise bezahlt"
             }
           },
           "chips": {
@@ -869,6 +873,7 @@
         },
         "delete": "Löschen",
         "clear_selection": "Abwählen",
+        "limit": "Du kannst höchstens {{max}} Buchungen auf einmal auswählen.",
         "trash": "Papierkorb",
         "confirm_delete": {
           "title": "Passwort eingeben, um den Vorgang abzuschließen",
@@ -882,6 +887,7 @@
         },
         "trash_page": {
           "title": "Papierkorb",
+          "expiry": "Nach 30 Tagen im Papierkorb werden die Buchungen automatisch gelöscht.",
           "empty": "Alles leeren",
           "restore": "Zurück",
           "delete_forever": "Endgültig löschen"

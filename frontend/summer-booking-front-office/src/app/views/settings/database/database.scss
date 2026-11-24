@@ -66,6 +66,14 @@
   }
 }
 
+.database__expiry {
+  flex: 1;
+  margin: 0;
+  color: var(--color__main__theme__one);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
 // With the chips under the search, less room under the title (and above it from 1920px), so the
 // page still fits.
 .database:has(app-filter-chips) .database__title {
@@ -88,7 +96,7 @@
   cursor: pointer;
 }
 
-// At the end of the row of the search: "Annulla selezione", then the red "Cancella dati" (in the
+// At the end of the row of the search, or together under it: "Annulla selezione", then the red "Cancella dati" (in the
 // trash "Ripristina" and "Elimina definitivamente"); all off until a row is chosen.
 .database__clear__selection,
 .database__delete,
@@ -99,11 +107,14 @@
   --button-text-size: var(--date-range-select-text-size, 0.75rem);
   --button-padding: 2rem;
   --button-border-color: var(--color__main__theme__one);
-
-  order: 1;
 }
 
-.database__clear__selection {
+.database__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem 0.75rem;
+  order: 1;
   margin-inline-start: auto;
 }
 
@@ -164,6 +175,15 @@
     padding-top: 1rem;
   }
 
+  .database__title {
+    flex-wrap: wrap;
+  }
+
+  .database__expiry {
+    order: 2;
+    flex-basis: 100%;
+  }
+
   .database app-date-range-select {
     --date-range-select-width: 100%;
 
@@ -175,20 +195,17 @@
     flex-basis: 100%;
   }
 
-  .database__clear__selection,
-  .database__delete,
-  .database__restore,
-  .database__delete__forever {
-    flex: 1;
+  .database__actions {
+    flex-basis: 100%;
     order: 2;
+
+    app-button {
+      flex: 1;
+    }
 
     ::ng-deep button {
       width: 100%;
     }
-  }
-
-  .database__clear__selection {
-    margin-inline-start: 0;
   }
 }
 
@@ -205,4 +222,11 @@
     --date-range-select-height: 2.25rem;
     --date-range-select-text-size: 0.875rem;
   }
+}
+
+.database__limit {
+  margin: 0 0 0.5rem;
+  color: var(--color__layout__error);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
 }

@@ -15,9 +15,9 @@ export enum AgreementBookingFilter {
 }
 
 export enum PaymentStatusFilter {
-  AwaitingPayment = 'AwaitingPayment',
-  FullyPaid = 'FullyPaid',
-  PartiallyPaid = 'PartiallyPaid',
+  Unpaid = 'unpaid',
+  Paid = 'paid',
+  Partial = 'partial',
 }
 
 export class ExistingBookingFilters {
