@@ -73,6 +73,24 @@ describe('CatalogService', () => {
     controller.verify();
   });
 
+  it('should take only the address of the public site from the public card of the property', () => {
+    const { catalog, controller } = setup();
+    let slug: string | null | undefined;
+
+    catalog.propertySlug().subscribe((answer) => (slug = answer));
+
+    controller
+      .expectOne(
+        ({ method, url, params }) =>
+          method === 'GET' &&
+          url === `${environment.apiBaseUrl}/catalog/property-info` &&
+          params.keys().length === 0,
+      )
+      .flush({ name: 'Lido Demo', slug: 'lido-demo' });
+    expect(slug).toBe('lido-demo');
+    controller.verify();
+  });
+
   it('should ask for the general information without the property, taken from the token', () => {
     const { catalog, controller } = setup();
 

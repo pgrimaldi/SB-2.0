@@ -6,25 +6,6 @@ import { EmailConfigurationRequest } from '../../../entities/settings/email-conf
 import { SystemService } from './system.service';
 
 describe('SystemService', () => {
-  it('should ask for the Stripe information without the property, taken from the token', () => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    });
-    const system = TestBed.inject(SystemService);
-    const controller = TestBed.inject(HttpTestingController);
-
-    system.stripeInformation().subscribe();
-
-    const request = controller.expectOne(
-      ({ method, url, params }) =>
-        method === 'GET' &&
-        url === `${environment.apiBaseUrl}/system/get-stripe-information` &&
-        params.keys().length === 0,
-    ).request;
-    expect(request.body).toBeNull();
-    controller.verify();
-  });
-
   it('should save the email configuration with the version read in If-Match and give back the new one', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],

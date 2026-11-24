@@ -163,6 +163,10 @@ ol {
   overflow-wrap: anywhere;
 }
 
+.online__booking__configuration__iframe__error {
+  color: var(--color__layout__error);
+}
+
 .online__booking__configuration__iframe__copy {
   --button-border-color: var(--color__main__theme__one);
 }

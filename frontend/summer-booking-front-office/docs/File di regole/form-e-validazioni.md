@@ -38,6 +38,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - `maxRichTextLength(path, massimo)`: un testo di `app-rich-text-field` (HTML) con più di `massimo` caratteri visibili;
   la formattazione non conta (`invalidate.max_length`, "Al massimo {{max}} caratteri"). L'editor non blocca la
   scrittura: l'errore va sotto il campo e Salva si spegne.
+- `maxHtmlLength(path, massimo)`: lo stesso testo con più di `massimo` caratteri contando anche la formattazione, quando
+  il backend conta l'HTML e il limite è basso (`invalidate.max_html_length`, "Al massimo {{max}} caratteri, formattazione
+  compresa").
 - Lunghezza massima di un campo di testo: `metadata(path, MAX_LENGTH, () => LIMITE)`, con il limite del backend in una
   costante dell'entità. Il wrapper riceve `maxLength` e il campo non accetta caratteri oltre il limite.
 - `noOverlap(path, altri)` / `noOverlaps(path, altri)`: un intervallo di giorni (o una lista di intervalli) che ha un

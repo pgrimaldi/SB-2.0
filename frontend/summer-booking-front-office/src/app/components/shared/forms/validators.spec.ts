@@ -5,6 +5,7 @@ import {
   emailAddress,
   greaterThan,
   isTextTaken,
+  maxHtmlLength,
   maxRichTextLength,
   passwordRules,
   requiredText,
@@ -90,6 +91,24 @@ describe('emailAddress', () => {
       model.set({ email });
       expect(emailForm.email().errors()).toEqual([expect.objectContaining({ kind: 'email' })]);
     }
+  });
+});
+
+describe('maxHtmlLength', () => {
+  it('should count the formatting too, as the backend does', () => {
+    const model = signal<{ title: string | null }>({ title: null });
+    const titleForm = TestBed.runInInjectionContext(() =>
+      form(model, (path) => maxHtmlLength(path.title, 10)),
+    );
+
+    for (const title of [null, '', '<p>abc</p>']) {
+      model.set({ title });
+      expect(titleForm.title().valid()).toBe(true);
+    }
+    model.set({ title: '<p>abcd</p>' });
+    expect(titleForm.title().errors()).toEqual([
+      expect.objectContaining({ kind: 'max_html_length', max: 10 }),
+    ]);
   });
 });
 

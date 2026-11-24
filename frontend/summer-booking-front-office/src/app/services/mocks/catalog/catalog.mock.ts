@@ -1284,6 +1284,17 @@ function setDocument(document: BathhouseDocument, url: string | null, name: stri
 }
 
 /** The public card as `property-info` answers it: here only the media, the fields the tab reads. */
+/**
+ * `GET /api/catalog/property-info`: the public card of the property, of which only the address on the
+ * public site is read. 401 without a valid access token.
+ */
+export const propertyInfoMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> =>
+  isAuthorized(request)
+    ? of(new HttpResponse({ status: 200, url: request.url, body: { slug: 'lido-demo' } })).pipe(
+        delay(150),
+      )
+    : unauthorized(request);
+
 function propertyInfoAnswer(request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
   const documentOfLink = (
     url: string | null,

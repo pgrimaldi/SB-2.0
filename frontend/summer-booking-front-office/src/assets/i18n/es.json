@@ -119,6 +119,9 @@
     "booking": {
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento."
     },
+    "payment": {
+      "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento."
+    },
     "audit": {
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento.",
       "export_too_large": "Hay {total, number, integer} registros que exportar, pero se pueden exportar como máximo {max, number, integer}: reduce el periodo o los filtros y vuelve a intentarlo."
@@ -126,7 +129,8 @@
     "map": {
       "spot_not_found": "El área del mapa ya no existe: puede que ya se haya eliminado.",
       "spots_outside_grid": "Hay puestos fuera de estas medidas: se necesitan al menos {{rows}} filas y {{columns}} artículos por fila.",
-      "invalid_image": "La imagen debe ser PNG, JPEG o WebP y no superar los 5 MB."
+      "invalid_image": "La imagen debe ser PNG, JPEG o WebP y no superar los 5 MB.",
+      "icon_not_found": "El icono ya no existe: elige otro."
     },
     "catalog": {
       "sector_in_use": "El sector/fila {{sectorName}} está en uso y no se puede eliminar: puestos en el mapa {{mapSpots}}, tarifas {{priceLists}}, límites de estancia {{stayLimits}}, descuentos {{discounts}}, servicios {{services}}, precios automáticos {{automaticPrices}}.",
@@ -139,7 +143,9 @@
       "property_not_found": "No se ha encontrado el establecimiento de tu cuenta. Cierra sesión y vuelve a entrar; si se repite, contacta con el soporte.",
       "country_not_found": "El país elegido ya no está disponible: elige otro.",
       "sector_not_found": "El sector/fila ya no existe: puede que ya se haya eliminado.",
-      "vat_rate_not_allowed": "Tipo no permitido. Tipos válidos: {{rates}}."
+      "vat_rate_not_allowed": "Tipo no permitido. Tipos válidos: {{rates}}.",
+      "stay_limit_not_found": "La regla de reserva ya no existe: puede que ya se haya eliminado.",
+      "stay_limit_overlap": "Dos reglas de la misma fila/sector se solapan."
     },
     "pricing": {
       "season_required": "Configura primero las fechas de la temporada.",
@@ -403,7 +409,17 @@
           "subtitle": "Permite a tus huéspedes reservar sombrillas, tumbonas y servicios directamente desde tu web en pocos clics.",
           "description": "Copia y pega el código para insertar en la sección que quieras de tu web. El widget sincroniza la disponibilidad en tiempo real con el mapa del programa de gestión.",
           "direct_link": "Enlace directo",
-          "copy": "Copiar enlace"
+          "copy": "Copiar enlace",
+          "copied": {
+            "title": "Código copiado",
+            "text": "Pégalo en la página de tu web.",
+            "close": "Cerrar"
+          },
+          "copy_failed": {
+            "title": "Código no copiado",
+            "text": "Selecciona el código y cópialo a mano.",
+            "close": "Cerrar"
+          }
         },
         "booking_options": {
           "title": "Opciones de reservas online",
@@ -478,20 +494,19 @@
           "booking_limits": {
             "title": "Límites de reserva",
             "add": "Añadir nueva regla",
-            "description": "Crea reglas de reserva para fijar un número mínimo y máximo de puestos reservables en un periodo y en una fila/sector determinados.",
+            "description": "Crea reglas de reserva para fijar un número mínimo y máximo de días reservables en un periodo y en una fila/sector determinados.",
             "sector": "Fila/sector",
             "date_from": "Desde",
             "date_to": "Hasta",
             "min": "Mín",
-            "max": "Máx"
-          },
-          "field_names": {
-            "supplement_value": "del suplemento"
+            "max": "Máx",
+            "missing_sector": "Sector/fila ya no disponible"
           },
           "periods": {
             "hint": "Haz clic en dos fechas para elegir un intervalo",
             "selected": "Intervalos de fechas seleccionados:"
-          }
+          },
+          "suspended": "La venta online está suspendida por la plataforma: puedes cambiar las opciones, pero los clientes no pueden reservar online."
         },
         "services_options": {
           "title": "Opciones de reserva de servicios",
@@ -506,9 +521,6 @@
           },
           "supplement_value": "Valor del suplemento",
           "confirmation_required": "Requerir confirmación",
-          "field_names": {
-            "supplement_value": "del suplemento"
-          },
           "payment_methods": {
             "title": "Métodos de pago aceptados",
             "pay_now": "Pagar ahora",
@@ -2109,6 +2121,7 @@
     "web_link": "Introduce un enlace completo que empiece por http:// o https://",
     "email": "Correo electrónico no válido",
     "max_length": "Máximo {{max}} caracteres",
+    "max_html_length": "Como máximo {{max}} caracteres, formato incluido",
     "phone_digits": "Solo números y espacios: el prefijo va en el campo de al lado",
     "phone_digits_without_prefix": "Solo números y espacios, sin +",
     "phone_max_length": "El número puede tener como máximo {{max}} caracteres, espacios incluidos",
@@ -2146,6 +2159,17 @@
       },
       "tables": {
         "seats_taken": "Plazas ya usadas"
+      }
+    },
+    "online_booking_configuration": {
+      "periods": {
+        "overlap": "Dos intervalos de fechas se solapan.",
+        "max": "Como máximo {{max}} intervalos de fechas."
+      },
+      "booking_limits": {
+        "days_required": "Indica al menos un mínimo o un máximo de días.",
+        "max_days": "El máximo de días no puede ser menor que el mínimo.",
+        "overlap": "Esta fila/sector ya tiene una regla en estas fechas."
       }
     }
   },

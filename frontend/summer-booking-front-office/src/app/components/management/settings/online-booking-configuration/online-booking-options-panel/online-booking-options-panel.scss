@@ -1,3 +1,24 @@
+.online__booking__options__panel__notice {
+  margin: 0 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 0.0625rem solid var(--color__layout__error);
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.online__booking__options__panel__error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+
+  .online__booking__options__panel__section + & {
+    margin-top: 1.25rem;
+  }
+}
+
 // The buttons of the management pages.
 .online__booking__options__panel__section {
   --button-text-size: 0.75rem;
@@ -56,6 +77,11 @@
   min-width: 0;
 }
 
+.online__booking__options__panel__conversion {
+  flex: 0 1 9rem;
+  min-width: 0;
+}
+
 .online__booking__options__panel__row {
   display: flex;
   flex-wrap: wrap;
@@ -94,7 +120,7 @@
 .online__booking__options__panel__rule {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: flex-start;
   align-self: stretch;
   gap: 0.75rem;
 }
@@ -108,7 +134,7 @@
 .online__booking__options__panel__rule__quantities {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 0.75rem;
   min-width: 0;
 }
@@ -120,6 +146,11 @@
 .online__booking__options__panel__rule__quantities {
   flex: 2 1 9rem;
   flex-wrap: nowrap;
+}
+
+// Beside the field, under its label.
+.online__booking__options__panel__rule__remove {
+  margin-top: 1.375rem;
 }
 
 .online__booking__options__panel__date {

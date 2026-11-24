@@ -141,7 +141,7 @@ classi e commenti.
 - **Niente oggetti con un solo valore**: una request o una response fatta di un solo valore semplice (un id, una
   stringa, un numero) non ha un'entità. Il service riceve o restituisce il valore stesso e costruisce da sé il corpo
   o la query string (es. `deleteVoucherItems(idVouchers)` manda `{ idVouchers }`).
-- La pagina tiene quel valore in una sua variabile con il nome del valore (es. `GET api/system/get-stripe-information`
+- La pagina tiene quel valore in una sua variabile con il nome del valore (es. `GET api/payment/get-stripe-information`
   restituisce la stringa e la pagina la tiene in `stripeAccountId`).
 - Le tabelle usano tutte `PageRequest`, senza un'interfaccia propria per ogni API: vedi `tabelle.md`.
 - Le entità di servizio (forme di dati usate da behaviours e service) stanno in `entities`: quelle generali in

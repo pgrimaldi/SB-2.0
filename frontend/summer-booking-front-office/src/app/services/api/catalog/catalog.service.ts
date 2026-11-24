@@ -97,6 +97,12 @@ export class CatalogService {
       `${this.endpoint}/property-info/bathhouse-configuration-services`,
     );
 
+  /** The address of the property on the public site, from its public card; null while it has none. */
+  readonly propertySlug = (): Observable<string | null> =>
+    this.httpClient
+      .get<{ slug: string | null }>(`${this.endpoint}/property-info`)
+      .pipe(map(({ slug }) => slug));
+
   readonly bathhouseConfigurationMedia = (): Observable<BathhouseSelectedMedia> =>
     this.httpClient.get<BathhouseSelectedMedia>(
       `${this.endpoint}/property-info/bathhouse-configuration-media`,

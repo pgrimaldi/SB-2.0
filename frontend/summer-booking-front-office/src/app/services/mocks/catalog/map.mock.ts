@@ -2,9 +2,11 @@ import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { isUploadable } from '../../../behaviours/files/uploadable-file';
 import { MapBackgroundImage } from '../../../entities/enums/map-background-image';
+import { MapIconCategory } from '../../../entities/enums/map-icon-category';
 import { MapMixedSpotIcon } from '../../../entities/enums/map-mixed-spot-icon';
 import { MapUmbrellaIcon } from '../../../entities/enums/map-umbrella-icon';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
+import { MapCatalogIcon } from '../../../entities/settings/map-configuration/map-catalog-icon';
 import {
   MAP_CUSTOM_ARTICLE_QUANTITY,
   MAX_MAP_ROW_ITEM_QUANTITY,
@@ -108,6 +110,47 @@ function answer(request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
     delay(300),
   );
 }
+
+const CATALOG_ICONS: readonly MapCatalogIcon[] = [
+  catalogIcon(0, MapIconCategory.Template, MapBackgroundImage.BackgroundBeach, 'png'),
+  ...Object.values(MapUmbrellaIcon).map((name, index) =>
+    catalogIcon(index + 1, MapIconCategory.Umbrella, name),
+  ),
+];
+
+function catalogIcon(
+  number: number,
+  category: MapIconCategory,
+  name: string,
+  extension = 'svg',
+): MapCatalogIcon {
+  return {
+    id: `2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d${String(number).padStart(2, '0')}`,
+    category,
+    state: 'free',
+    name,
+    url: `/assets/images/MapConfiguration_${name}.${extension}`,
+    isDefault: number === 1,
+  };
+}
+
+/** The icon of the catalogue with this number or id; without a url when there is none. */
+export function mapCatalogIcon(icon: number | string): MapCatalogIcon {
+  return (
+    CATALOG_ICONS.find(({ id }, number) => number === icon || id === icon) ?? new MapCatalogIcon()
+  );
+}
+
+/**
+ * `GET /api/catalog/map/icon-catalog`: the icons of the catalogue, backgrounds included. 401 without
+ * a valid access token.
+ */
+export const mapIconCatalogMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  isAuthorized(request)
+    ? of(new HttpResponse({ status: 200, url: request.url, body: CATALOG_ICONS })).pipe(delay(300))
+    : unauthorized(request);
 
 /**
  * `GET /api/catalog/map/settings`: everything the page shows, icons and backgrounds as names of the

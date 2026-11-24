@@ -119,6 +119,9 @@
     "booking": {
       "property_required": "Your account is not linked to a property: sign in with an account of the property."
     },
+    "payment": {
+      "property_required": "Your account is not linked to a property: sign in with an account of the property."
+    },
     "audit": {
       "property_required": "Your account is not linked to a property: sign in with an account of the property.",
       "export_too_large": "There are {total, number, integer} entries to export, but at most {max, number, integer} can be exported: narrow the period or the filters and try again."
@@ -126,7 +129,8 @@
     "map": {
       "spot_not_found": "The map area is no longer there: it may already have been deleted.",
       "spots_outside_grid": "Some spots are outside these sizes: at least {{rows}} rows and {{columns}} items per row are needed.",
-      "invalid_image": "The image must be PNG, JPEG or WebP and no larger than 5 MB."
+      "invalid_image": "The image must be PNG, JPEG or WebP and no larger than 5 MB.",
+      "icon_not_found": "The icon is no longer there: choose another one."
     },
     "catalog": {
       "sector_in_use": "The sector/row {{sectorName}} is in use and cannot be deleted: spots on the map {{mapSpots}}, price lists {{priceLists}}, stay limits {{stayLimits}}, discounts {{discounts}}, services {{services}}, automatic prices {{automaticPrices}}.",
@@ -139,7 +143,9 @@
       "property_not_found": "The property of your account was not found. Sign out and sign in again; if it happens again, contact support.",
       "country_not_found": "The selected country is no longer available: choose another one.",
       "sector_not_found": "The sector/row is no longer there: it may already have been deleted.",
-      "vat_rate_not_allowed": "This rate is not allowed. Valid rates: {{rates}}."
+      "vat_rate_not_allowed": "This rate is not allowed. Valid rates: {{rates}}.",
+      "stay_limit_not_found": "The booking rule is no longer there: it may already have been deleted.",
+      "stay_limit_overlap": "Two rules of the same row/sector overlap."
     },
     "pricing": {
       "season_required": "Set the season dates first.",
@@ -403,7 +409,17 @@
           "subtitle": "Let your guests book umbrellas, sunbeds and services directly from your website in a few clicks.",
           "description": "Copy and paste the embed code into the section you want on your site. The widget syncs availability in real time with the map of the management system.",
           "direct_link": "Direct link",
-          "copy": "Copy link"
+          "copy": "Copy link",
+          "copied": {
+            "title": "Code copied",
+            "text": "Paste it into the page of your website.",
+            "close": "Close"
+          },
+          "copy_failed": {
+            "title": "Code not copied",
+            "text": "Select the code and copy it by hand.",
+            "close": "Close"
+          }
         },
         "booking_options": {
           "title": "Online booking options",
@@ -478,20 +494,19 @@
           "booking_limits": {
             "title": "Booking limits",
             "add": "Add new rule",
-            "description": "Create booking rules to set a minimum and maximum number of bookable spots in a given period and in a given row/sector.",
+            "description": "Create booking rules to set a minimum and maximum number of bookable days in a given period and in a given row/sector.",
             "sector": "Row/sector",
             "date_from": "From",
             "date_to": "To",
             "min": "Min",
-            "max": "Max"
-          },
-          "field_names": {
-            "supplement_value": "of the supplement"
+            "max": "Max",
+            "missing_sector": "Sector/row no longer available"
           },
           "periods": {
             "hint": "Click two dates to select a range",
             "selected": "Selected date ranges:"
-          }
+          },
+          "suspended": "Online sales are suspended by the platform: you can change the options, but customers cannot book online."
         },
         "services_options": {
           "title": "Service booking options",
@@ -506,9 +521,6 @@
           },
           "supplement_value": "Supplement value",
           "confirmation_required": "Require booking confirmation",
-          "field_names": {
-            "supplement_value": "of the supplement"
-          },
           "payment_methods": {
             "title": "Accepted payment methods",
             "pay_now": "Pay now",
@@ -2109,6 +2121,7 @@
     "web_link": "Enter a full link starting with http:// or https://",
     "email": "Invalid email",
     "max_length": "At most {{max}} characters",
+    "max_html_length": "At most {{max}} characters, formatting included",
     "phone_digits": "Only digits and spaces: the prefix goes in the field beside",
     "phone_digits_without_prefix": "Only digits and spaces, no +",
     "phone_max_length": "The number can have at most {{max}} characters, spaces included",
@@ -2146,6 +2159,17 @@
       },
       "tables": {
         "seats_taken": "Seats already used"
+      }
+    },
+    "online_booking_configuration": {
+      "periods": {
+        "overlap": "Two date ranges overlap.",
+        "max": "At most {{max}} date ranges."
+      },
+      "booking_limits": {
+        "days_required": "Enter at least one of minimum and maximum days.",
+        "max_days": "The maximum number of days cannot be less than the minimum.",
+        "overlap": "This row/sector already has a rule on these dates."
       }
     }
   },

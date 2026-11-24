@@ -2,7 +2,6 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { entriesListMock } from './audit/audit.mock';
 import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
-import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
   automaticPriceListMock,
   automaticPriceGeneralInfoMock,
@@ -68,6 +67,7 @@ import {
   saveBathhouseConfigurationServicesMock,
   standardServiceListMock,
   tableServiceListMock,
+  propertyInfoMock,
 } from './catalog/catalog.mock';
 import {
   mapSettingsMock,
@@ -76,6 +76,7 @@ import {
   updateMapBackgroundMock,
   updateMapConfigurationMock,
   uploadMapBackgroundMock,
+  mapIconCatalogMock,
 } from './catalog/map.mock';
 import {
   addSectorMock,
@@ -86,6 +87,12 @@ import {
   sectorListMock,
   updateSectorMock,
 } from './catalog/sectors.mock';
+import {
+  onlineBookingOptionsMock,
+  onlineServicesOptionsMock,
+  updateOnlineBookingOptionsMock,
+  updateOnlineServicesOptionsMock,
+} from './catalog/online-settings.mock';
 import {
   additionalItemListMock,
   createAdditionalItemMock,
@@ -128,6 +135,7 @@ import {
   seasonPeriodListMock,
   updateSeasonPeriodMock,
 } from './seasons/seasons.mock';
+import { stripeInformationMock } from './payment/payment.mock';
 import { saveSharingSettingsMock, sharingSettingsMock } from './sharing/sharing.mock';
 import {
   addVoucherItemMock,
@@ -142,7 +150,6 @@ import {
   emailConfigurationMock,
   saveEmailConfigurationMock,
   sendTestEmailMock,
-  stripeInformationMock,
   supportInfoMock,
 } from './system/system.mock';
 import {
@@ -333,21 +340,44 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/system/get-stripe-information`
+    request.url === `${environment.apiBaseUrl}/payment/get-stripe-information`
   ) {
     return stripeInformationMock(request);
   }
 
+  if (request.url === `${environment.apiBaseUrl}/catalog/online-settings`) {
+    if (request.method === 'GET') {
+      return onlineBookingOptionsMock(request);
+    }
+    if (request.method === 'PUT') {
+      return updateOnlineBookingOptionsMock(request);
+    }
+  }
+
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/booking/get-online-services-options`
+    request.url === `${environment.apiBaseUrl}/catalog/map/icon-catalog`
+  ) {
+    return mapIconCatalogMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/property-info`
+  ) {
+    return propertyInfoMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/online-settings/services`
   ) {
     return onlineServicesOptionsMock(request);
   }
 
   if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/booking/update-online-services-options`
+    request.method === 'PUT' &&
+    request.url === `${environment.apiBaseUrl}/catalog/online-settings/services`
   ) {
     return updateOnlineServicesOptionsMock(request);
   }

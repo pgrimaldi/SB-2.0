@@ -7128,7 +7128,7 @@ Nessun payload.
 
 ## Prenotazioni online
 
-### GET `/api/system/get-stripe-information`
+### GET `/api/payment/get-stripe-information`
 
 **Payload JSON**
 
@@ -7150,7 +7150,7 @@ Nessun payload.
 |---|---|
 | `(corpo)` | string \| null |
 
-### GET `/api/booking/get-online-services-options`
+### GET `/api/catalog/online-settings`
 
 **Payload JSON**
 
@@ -7160,17 +7160,57 @@ Nessun payload.
 
 ```json
 {
-  "isServicesOnlineBookingEnabled": "boolean",
-  "supplementType": "string (enum SupplementType)",
-  "supplementValue": "number (decimale) | null",
-  "isBookingConfirmationRequired": "boolean",
-  "isPayNowAccepted": "boolean",
-  "isPayAtPropertyAccepted": "boolean",
-  "isPayAtPropertyWithoutCardAccepted": "boolean",
-  "isDepositAccepted": "boolean",
-  "isPrepaidCardAccepted": "boolean",
-  "bookingPanelTitle": "string (HTML) | null",
-  "usefulInformation": "string (HTML) | null",
+  "isEnabled": "boolean",
+  "isSuspendedByPlatform": "boolean",
+  "isMapPick": "boolean",
+  "isLocationRestricted": "boolean",
+  "allowedSpotIds": "string[] (UUID)",
+  "isPeriodRestricted": "boolean",
+  "allowedPeriods": [
+    {
+      "startsOn": "string (giorno AAAA-MM-GG)",
+      "endsOn": "string (giorno AAAA-MM-GG)"
+    }
+  ],
+  "surchargeType": "string (enum SupplementType)",
+  "surchargeValue": "number (decimale)",
+  "isBlocked": "boolean",
+  "onlineBookingBlock": "string (enum OnlineBookingBlock)",
+  "requiresManualConfirmation": "boolean",
+  "allowsSameDayBooking": "boolean",
+  "allowsHalfDay": "boolean",
+  "morningFrom": "string (HH:mm:ss in lettura, HH:mm in salvataggio) | null",
+  "morningTo": "string (come morningFrom) | null",
+  "afternoonFrom": "string (come morningFrom) | null",
+  "afternoonTo": "string (come morningFrom) | null",
+  "afternoonConversionTime": "string (come morningFrom) | null",
+  "allowsSeasonal": "boolean",
+  "allowsSharing": "boolean",
+  "maxSpotsPerBooking": "number (intero da 1) | null",
+  "bookingHorizonDays": "number (intero 0-730) | null",
+  "scope": "string (enum OnlineBookingAudience)",
+  "maxBookingsPerDay": "number (intero da 1) | null",
+  "paymentMethods": "string[] (enum OnlinePaymentMethod, anche vuoto)",
+  "stayLimits": [
+    {
+      "id": "string (UUID) | null",
+      "sectorId": "string (UUID)",
+      "startsOn": "string (giorno AAAA-MM-GG)",
+      "endsOn": "string (giorno AAAA-MM-GG)",
+      "minDays": "number (intero 1-366) | null",
+      "maxDays": "number (intero 1-366) | null"
+    }
+  ],
+  "legend": [
+    {
+      "id": "string (UUID) | null",
+      "label": "string (al massimo 100 caratteri)",
+      "iconId": "string (UUID) | null",
+      "iconUrl": "string (URL) | null"
+    }
+  ],
+  "goodToKnow": "string (HTML, al massimo 10.000 caratteri) | null",
+  "usefulInfo": "string (HTML, al massimo 10.000 caratteri) | null",
   "version": "string"
 }
 ```
@@ -7183,62 +7223,353 @@ Nessun payload.
 
 | Campo | Tipo |
 |---|---|
-| `isServicesOnlineBookingEnabled` | boolean |
-| `supplementType` | string (enum SupplementType) |
-| `supplementValue` | number (decimale) \| null |
-| `isBookingConfirmationRequired` | boolean |
-| `isPayNowAccepted` | boolean |
-| `isPayAtPropertyAccepted` | boolean |
-| `isPayAtPropertyWithoutCardAccepted` | boolean |
-| `isDepositAccepted` | boolean |
-| `isPrepaidCardAccepted` | boolean |
-| `bookingPanelTitle` | string (HTML) \| null |
-| `usefulInformation` | string (HTML) \| null |
+| `isEnabled` | boolean |
+| `isSuspendedByPlatform` | boolean |
+| `isMapPick` | boolean |
+| `isLocationRestricted` | boolean |
+| `allowedSpotIds` | string[] (UUID) |
+| `isPeriodRestricted` | boolean |
+| `allowedPeriods[]` | OnlineBookingPeriod[] (array di oggetti, al massimo 50) |
+| `allowedPeriods[].startsOn` | string (giorno AAAA-MM-GG) |
+| `allowedPeriods[].endsOn` | string (giorno AAAA-MM-GG) |
+| `surchargeType` | string (enum SupplementType) |
+| `surchargeValue` | number (decimale) |
+| `isBlocked` | boolean |
+| `onlineBookingBlock` | string (enum OnlineBookingBlock) |
+| `requiresManualConfirmation` | boolean |
+| `allowsSameDayBooking` | boolean |
+| `allowsHalfDay` | boolean |
+| `morningFrom` | string (HH:mm:ss in lettura, HH:mm in salvataggio) \| null |
+| `morningTo` | string (come morningFrom) \| null |
+| `afternoonFrom` | string (come morningFrom) \| null |
+| `afternoonTo` | string (come morningFrom) \| null |
+| `afternoonConversionTime` | string (come morningFrom) \| null |
+| `allowsSeasonal` | boolean |
+| `allowsSharing` | boolean |
+| `maxSpotsPerBooking` | number (intero da 1) \| null |
+| `bookingHorizonDays` | number (intero 0-730) \| null |
+| `scope` | string (enum OnlineBookingAudience) |
+| `maxBookingsPerDay` | number (intero da 1) \| null |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) |
+| `stayLimits[]` | BookingLimitRule[] (array di oggetti) |
+| `stayLimits[].id` | string (UUID) \| null |
+| `stayLimits[].sectorId` | string (UUID) |
+| `stayLimits[].startsOn` | string (giorno AAAA-MM-GG) |
+| `stayLimits[].endsOn` | string (giorno AAAA-MM-GG) |
+| `stayLimits[].minDays` | number (intero 1-366) \| null |
+| `stayLimits[].maxDays` | number (intero 1-366) \| null |
+| `legend[]` | LegendItem[] (array di oggetti, al massimo 30) |
+| `legend[].id` | string (UUID) \| null |
+| `legend[].label` | string (al massimo 100 caratteri) |
+| `legend[].iconId` | string (UUID) \| null |
+| `legend[].iconUrl` | string (URL) \| null |
+| `goodToKnow` | string (HTML, al massimo 10.000 caratteri) \| null |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null |
 | `version` | string |
 
-### POST `/api/booking/update-online-services-options`
+### PUT `/api/catalog/online-settings`
 
 **Payload JSON**
 
 ```json
 {
-  "isServicesOnlineBookingEnabled": "boolean",
-  "supplementType": "string (enum SupplementType)",
-  "supplementValue": "number (decimale) | null",
-  "isBookingConfirmationRequired": "boolean",
-  "isPayNowAccepted": "boolean",
-  "isPayAtPropertyAccepted": "boolean",
-  "isPayAtPropertyWithoutCardAccepted": "boolean",
-  "isDepositAccepted": "boolean",
-  "isPrepaidCardAccepted": "boolean",
-  "bookingPanelTitle": "string (HTML) | null",
-  "usefulInformation": "string (HTML) | null"
+  "isEnabled": "boolean",
+  "isMapPick": "boolean",
+  "isLocationRestricted": "boolean",
+  "allowedSpotIds": "string[] (UUID)",
+  "isPeriodRestricted": "boolean",
+  "allowedPeriods": [
+    {
+      "startsOn": "string (giorno AAAA-MM-GG)",
+      "endsOn": "string (giorno AAAA-MM-GG)"
+    }
+  ],
+  "surchargeType": "string (enum SupplementType)",
+  "surchargeValue": "number (decimale)",
+  "isBlocked": "boolean",
+  "onlineBookingBlock": "string (enum OnlineBookingBlock)",
+  "requiresManualConfirmation": "boolean",
+  "allowsSameDayBooking": "boolean",
+  "allowsHalfDay": "boolean",
+  "morningFrom": "string (HH:mm:ss in lettura, HH:mm in salvataggio) | null",
+  "morningTo": "string (come morningFrom) | null",
+  "afternoonFrom": "string (come morningFrom) | null",
+  "afternoonTo": "string (come morningFrom) | null",
+  "afternoonConversionTime": "string (come morningFrom) | null",
+  "allowsSeasonal": "boolean",
+  "allowsSharing": "boolean",
+  "maxSpotsPerBooking": "number (intero da 1) | null",
+  "bookingHorizonDays": "number (intero 0-730) | null",
+  "scope": "string (enum OnlineBookingAudience)",
+  "maxBookingsPerDay": "number (intero da 1) | null",
+  "paymentMethods": "string[] (enum OnlinePaymentMethod, anche vuoto)",
+  "stayLimits": [
+    {
+      "id": "string (UUID) | null",
+      "sectorId": "string (UUID)",
+      "startsOn": "string (giorno AAAA-MM-GG)",
+      "endsOn": "string (giorno AAAA-MM-GG)",
+      "minDays": "number (intero 1-366) | null",
+      "maxDays": "number (intero 1-366) | null"
+    }
+  ],
+  "legend": [
+    {
+      "id": "string (UUID) | null",
+      "label": "string (al massimo 100 caratteri)",
+      "iconId": "string (UUID) | null"
+    }
+  ],
+  "goodToKnow": "string (HTML, al massimo 10.000 caratteri) | null",
+  "usefulInfo": "string (HTML, al massimo 10.000 caratteri) | null"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "isEnabled": "boolean",
+  "isSuspendedByPlatform": "boolean",
+  "isMapPick": "boolean",
+  "isLocationRestricted": "boolean",
+  "allowedSpotIds": "string[] (UUID)",
+  "isPeriodRestricted": "boolean",
+  "allowedPeriods": [
+    {
+      "startsOn": "string (giorno AAAA-MM-GG)",
+      "endsOn": "string (giorno AAAA-MM-GG)"
+    }
+  ],
+  "surchargeType": "string (enum SupplementType)",
+  "surchargeValue": "number (decimale)",
+  "isBlocked": "boolean",
+  "onlineBookingBlock": "string (enum OnlineBookingBlock)",
+  "requiresManualConfirmation": "boolean",
+  "allowsSameDayBooking": "boolean",
+  "allowsHalfDay": "boolean",
+  "morningFrom": "string (HH:mm:ss in lettura, HH:mm in salvataggio) | null",
+  "morningTo": "string (come morningFrom) | null",
+  "afternoonFrom": "string (come morningFrom) | null",
+  "afternoonTo": "string (come morningFrom) | null",
+  "afternoonConversionTime": "string (come morningFrom) | null",
+  "allowsSeasonal": "boolean",
+  "allowsSharing": "boolean",
+  "maxSpotsPerBooking": "number (intero da 1) | null",
+  "bookingHorizonDays": "number (intero 0-730) | null",
+  "scope": "string (enum OnlineBookingAudience)",
+  "maxBookingsPerDay": "number (intero da 1) | null",
+  "paymentMethods": "string[] (enum OnlinePaymentMethod, anche vuoto)",
+  "stayLimits": [
+    {
+      "id": "string (UUID) | null",
+      "sectorId": "string (UUID)",
+      "startsOn": "string (giorno AAAA-MM-GG)",
+      "endsOn": "string (giorno AAAA-MM-GG)",
+      "minDays": "number (intero 1-366) | null",
+      "maxDays": "number (intero 1-366) | null"
+    }
+  ],
+  "legend": [
+    {
+      "id": "string (UUID) | null",
+      "label": "string (al massimo 100 caratteri)",
+      "iconId": "string (UUID) | null",
+      "iconUrl": "string (URL) | null"
+    }
+  ],
+  "goodToKnow": "string (HTML, al massimo 10.000 caratteri) | null",
+  "usefulInfo": "string (HTML, al massimo 10.000 caratteri) | null",
+  "version": "string"
+}
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `isServicesOnlineBookingEnabled` | boolean |
-| `supplementType` | string (enum SupplementType) |
-| `supplementValue` | number (decimale) \| null |
-| `isBookingConfirmationRequired` | boolean |
-| `isPayNowAccepted` | boolean |
-| `isPayAtPropertyAccepted` | boolean |
-| `isPayAtPropertyWithoutCardAccepted` | boolean |
-| `isDepositAccepted` | boolean |
-| `isPrepaidCardAccepted` | boolean |
-| `bookingPanelTitle` | string (HTML) \| null |
-| `usefulInformation` | string (HTML) \| null |
+| `isEnabled` | boolean |
+| `isMapPick` | boolean |
+| `isLocationRestricted` | boolean |
+| `allowedSpotIds` | string[] (UUID) |
+| `isPeriodRestricted` | boolean |
+| `allowedPeriods[]` | OnlineBookingPeriod[] (array di oggetti, al massimo 50) |
+| `allowedPeriods[].startsOn` | string (giorno AAAA-MM-GG) |
+| `allowedPeriods[].endsOn` | string (giorno AAAA-MM-GG) |
+| `surchargeType` | string (enum SupplementType) |
+| `surchargeValue` | number (decimale) |
+| `isBlocked` | boolean |
+| `onlineBookingBlock` | string (enum OnlineBookingBlock) |
+| `requiresManualConfirmation` | boolean |
+| `allowsSameDayBooking` | boolean |
+| `allowsHalfDay` | boolean |
+| `morningFrom` | string (HH:mm:ss in lettura, HH:mm in salvataggio) \| null |
+| `morningTo` | string (come morningFrom) \| null |
+| `afternoonFrom` | string (come morningFrom) \| null |
+| `afternoonTo` | string (come morningFrom) \| null |
+| `afternoonConversionTime` | string (come morningFrom) \| null |
+| `allowsSeasonal` | boolean |
+| `allowsSharing` | boolean |
+| `maxSpotsPerBooking` | number (intero da 1) \| null |
+| `bookingHorizonDays` | number (intero 0-730) \| null |
+| `scope` | string (enum OnlineBookingAudience) |
+| `maxBookingsPerDay` | number (intero da 1) \| null |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) |
+| `stayLimits[]` | BookingLimitRule[] (array di oggetti) |
+| `stayLimits[].id` | string (UUID) \| null |
+| `stayLimits[].sectorId` | string (UUID) |
+| `stayLimits[].startsOn` | string (giorno AAAA-MM-GG) |
+| `stayLimits[].endsOn` | string (giorno AAAA-MM-GG) |
+| `stayLimits[].minDays` | number (intero 1-366) \| null |
+| `stayLimits[].maxDays` | number (intero 1-366) \| null |
+| `legend[]` | LegendItemRequest[] (array di oggetti, al massimo 30) |
+| `legend[].id` | string (UUID) \| null |
+| `legend[].label` | string (al massimo 100 caratteri) |
+| `legend[].iconId` | string (UUID) \| null |
+| `goodToKnow` | string (HTML, al massimo 10.000 caratteri) \| null |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `isEnabled` | boolean |
+| `isSuspendedByPlatform` | boolean |
+| `isMapPick` | boolean |
+| `isLocationRestricted` | boolean |
+| `allowedSpotIds` | string[] (UUID) |
+| `isPeriodRestricted` | boolean |
+| `allowedPeriods[]` | OnlineBookingPeriod[] (array di oggetti, al massimo 50) |
+| `allowedPeriods[].startsOn` | string (giorno AAAA-MM-GG) |
+| `allowedPeriods[].endsOn` | string (giorno AAAA-MM-GG) |
+| `surchargeType` | string (enum SupplementType) |
+| `surchargeValue` | number (decimale) |
+| `isBlocked` | boolean |
+| `onlineBookingBlock` | string (enum OnlineBookingBlock) |
+| `requiresManualConfirmation` | boolean |
+| `allowsSameDayBooking` | boolean |
+| `allowsHalfDay` | boolean |
+| `morningFrom` | string (HH:mm:ss in lettura, HH:mm in salvataggio) \| null |
+| `morningTo` | string (come morningFrom) \| null |
+| `afternoonFrom` | string (come morningFrom) \| null |
+| `afternoonTo` | string (come morningFrom) \| null |
+| `afternoonConversionTime` | string (come morningFrom) \| null |
+| `allowsSeasonal` | boolean |
+| `allowsSharing` | boolean |
+| `maxSpotsPerBooking` | number (intero da 1) \| null |
+| `bookingHorizonDays` | number (intero 0-730) \| null |
+| `scope` | string (enum OnlineBookingAudience) |
+| `maxBookingsPerDay` | number (intero da 1) \| null |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) |
+| `stayLimits[]` | BookingLimitRule[] (array di oggetti) |
+| `stayLimits[].id` | string (UUID) \| null |
+| `stayLimits[].sectorId` | string (UUID) |
+| `stayLimits[].startsOn` | string (giorno AAAA-MM-GG) |
+| `stayLimits[].endsOn` | string (giorno AAAA-MM-GG) |
+| `stayLimits[].minDays` | number (intero 1-366) \| null |
+| `stayLimits[].maxDays` | number (intero 1-366) \| null |
+| `legend[]` | LegendItem[] (array di oggetti, al massimo 30) |
+| `legend[].id` | string (UUID) \| null |
+| `legend[].label` | string (al massimo 100 caratteri) |
+| `legend[].iconId` | string (UUID) \| null |
+| `legend[].iconUrl` | string (URL) \| null |
+| `goodToKnow` | string (HTML, al massimo 10.000 caratteri) \| null |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null |
+| `version` | string |
+
+### GET `/api/catalog/online-settings/services`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "isEnabled": "boolean",
+  "surchargeType": "string (enum SupplementType)",
+  "surchargeValue": "number (decimale)",
+  "requiresManualConfirmation": "boolean",
+  "sectionTitle": "string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) | null",
+  "usefulInfo": "string (HTML, al massimo 10.000 caratteri) | null",
+  "paymentMethods": "string[] (enum OnlinePaymentMethod, anche vuoto)",
+  "version": "string"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `isEnabled` | boolean |
+| `surchargeType` | string (enum SupplementType) |
+| `surchargeValue` | number (decimale) |
+| `requiresManualConfirmation` | boolean |
+| `sectionTitle` | string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) \| null |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) |
+| `version` | string |
+
+### PUT `/api/catalog/online-settings/services`
+
+**Payload JSON**
+
+```json
+{
+  "isEnabled": "boolean",
+  "surchargeType": "string (enum SupplementType)",
+  "surchargeValue": "number (decimale)",
+  "requiresManualConfirmation": "boolean",
+  "sectionTitle": "string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) | null",
+  "usefulInfo": "string (HTML, al massimo 10.000 caratteri) | null",
+  "paymentMethods": "string[] (enum OnlinePaymentMethod, anche vuoto)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "isEnabled": "boolean",
+  "surchargeType": "string (enum SupplementType)",
+  "surchargeValue": "number (decimale)",
+  "requiresManualConfirmation": "boolean",
+  "sectionTitle": "string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) | null",
+  "usefulInfo": "string (HTML, al massimo 10.000 caratteri) | null",
+  "paymentMethods": "string[] (enum OnlinePaymentMethod, anche vuoto)",
+  "version": "string"
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `isEnabled` | boolean |
+| `surchargeType` | string (enum SupplementType) |
+| `surchargeValue` | number (decimale) |
+| `requiresManualConfirmation` | boolean |
+| `sectionTitle` | string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) \| null |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `isEnabled` | boolean |
+| `surchargeType` | string (enum SupplementType) |
+| `surchargeValue` | number (decimale) |
+| `requiresManualConfirmation` | boolean |
+| `sectionTitle` | string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) \| null |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) |
+| `version` | string |
 
 ### POST `/api/catalog/sectors/sector-combobox`
 
@@ -7267,6 +7598,66 @@ Nessun payload.
 |---|---|
 | `[].id` | string (UUID) |
 | `[].value` | string |
+
+### GET `/api/catalog/map/icon-catalog`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "category": "string (enum MapIconCategory)",
+    "state": "string",
+    "name": "string",
+    "url": "string (URL) | null",
+    "isDefault": "boolean"
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].category` | string (enum MapIconCategory) |
+| `[].state` | string |
+| `[].name` | string |
+| `[].url` | string (URL) \| null |
+| `[].isDefault` | boolean |
+
+### GET `/api/catalog/property-info`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "slug": "string | null"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `slug` | string \| null |
 
 ## Fiscalizzazione
 

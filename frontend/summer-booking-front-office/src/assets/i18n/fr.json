@@ -119,6 +119,9 @@
     "booking": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
     },
+    "payment": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
+    },
     "audit": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
       "export_too_large": "Il y a {total, number, integer} entrées à exporter, mais on peut en exporter au maximum {max, number, integer} : réduisez la période ou les filtres et réessayez."
@@ -126,7 +129,8 @@
     "map": {
       "spot_not_found": "La zone de la carte n'existe plus : elle a peut-être déjà été supprimée.",
       "spots_outside_grid": "Des emplacements sont hors de ces dimensions : il faut au moins {{rows}} rangées et {{columns}} articles par rangée.",
-      "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo."
+      "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo.",
+      "icon_not_found": "L'icône n'existe plus : choisissez-en une autre."
     },
     "catalog": {
       "sector_in_use": "Le secteur/la rangée {{sectorName}} est utilisé et ne peut pas être supprimé : emplacements sur la carte {{mapSpots}}, tarifs {{priceLists}}, limites de séjour {{stayLimits}}, remises {{discounts}}, services {{services}}, prix automatiques {{automaticPrices}}.",
@@ -139,7 +143,9 @@
       "property_not_found": "L'établissement de votre compte est introuvable. Déconnectez-vous et reconnectez-vous ; si cela se reproduit, contactez l'assistance.",
       "country_not_found": "Le pays choisi n'est plus disponible : choisissez-en un autre.",
       "sector_not_found": "Le secteur/la rangée n'existe plus : il a peut-être déjà été supprimé.",
-      "vat_rate_not_allowed": "Ce taux n'est pas autorisé. Taux valides : {{rates}}."
+      "vat_rate_not_allowed": "Ce taux n'est pas autorisé. Taux valides : {{rates}}.",
+      "stay_limit_not_found": "La règle de réservation n'existe plus : elle a peut-être déjà été supprimée.",
+      "stay_limit_overlap": "Deux règles de la même rangée/du même secteur se chevauchent."
     },
     "pricing": {
       "season_required": "Définissez d'abord les dates de la saison.",
@@ -403,7 +409,17 @@
           "subtitle": "Permettez à vos clients de réserver parasols, transats et services directement depuis votre site en quelques clics.",
           "description": "Copiez et collez le code d'intégration dans la section souhaitée de votre site. Le widget synchronise les disponibilités en temps réel avec le plan du logiciel.",
           "direct_link": "Lien direct",
-          "copy": "Copier le lien"
+          "copy": "Copier le lien",
+          "copied": {
+            "title": "Code copié",
+            "text": "Collez-le dans la page de votre site.",
+            "close": "Fermer"
+          },
+          "copy_failed": {
+            "title": "Code non copié",
+            "text": "Sélectionnez le code et copiez-le à la main.",
+            "close": "Fermer"
+          }
         },
         "booking_options": {
           "title": "Options réservations en ligne",
@@ -478,20 +494,19 @@
           "booking_limits": {
             "title": "Limites de réservation",
             "add": "Ajouter une règle",
-            "description": "Créez des règles de réservation pour fixer un nombre minimum et maximum de places réservables sur une période et dans une rangée/un secteur donnés.",
+            "description": "Créez des règles de réservation pour fixer un nombre minimum et maximum de jours réservables sur une période et dans une rangée/un secteur donnés.",
             "sector": "Rangée/secteur",
             "date_from": "Du",
             "date_to": "Au",
             "min": "Min",
-            "max": "Max"
-          },
-          "field_names": {
-            "supplement_value": "du supplément"
+            "max": "Max",
+            "missing_sector": "Secteur/rangée n'est plus disponible"
           },
           "periods": {
             "hint": "Cliquez sur deux dates pour choisir une période",
             "selected": "Périodes sélectionnées :"
-          }
+          },
+          "suspended": "La vente en ligne est suspendue par la plateforme : vous pouvez modifier les options, mais les clients ne peuvent pas réserver en ligne."
         },
         "services_options": {
           "title": "Options réservation des services",
@@ -506,9 +521,6 @@
           },
           "supplement_value": "Valeur du supplément",
           "confirmation_required": "Exiger une confirmation",
-          "field_names": {
-            "supplement_value": "du supplément"
-          },
           "payment_methods": {
             "title": "Moyens de paiement acceptés",
             "pay_now": "Payer maintenant",
@@ -2109,6 +2121,7 @@
     "web_link": "Saisissez un lien complet commençant par http:// ou https://",
     "email": "E-mail non valide",
     "max_length": "{{max}} caractères maximum",
+    "max_html_length": "Au maximum {{max}} caractères, mise en forme comprise",
     "phone_digits": "Chiffres et espaces uniquement : l’indicatif va dans le champ à côté",
     "phone_digits_without_prefix": "Chiffres et espaces uniquement, sans +",
     "phone_max_length": "Le numéro peut contenir au maximum {{max}} caractères, espaces compris",
@@ -2146,6 +2159,17 @@
       },
       "tables": {
         "seats_taken": "Places déjà utilisées"
+      }
+    },
+    "online_booking_configuration": {
+      "periods": {
+        "overlap": "Deux plages de dates se chevauchent.",
+        "max": "Au maximum {{max}} plages de dates."
+      },
+      "booking_limits": {
+        "days_required": "Indiquez au moins un minimum ou un maximum de jours.",
+        "max_days": "Le maximum de jours ne peut pas être inférieur au minimum.",
+        "overlap": "Cette rangée/ce secteur a déjà une règle à ces dates."
       }
     }
   },

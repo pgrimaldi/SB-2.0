@@ -17,6 +17,8 @@ import {
   applyWhen,
   form,
   max,
+  min,
+  required,
   submit,
 } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
@@ -30,14 +32,21 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { OnlinePaymentMethod } from '../../../../../entities/enums/online-payment-method';
 import { SupplementType } from '../../../../../entities/enums/supplement-type';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { OnlineBookingServicesOptionsUpdateRequest } from '../../../../../entities/settings/online-booking-configuration/online-booking-services-options-update-request';
-import { BookingService } from '../../../../../services/api/booking/booking.service';
+import {
+  MAX_ONLINE_USEFUL_INFO_LENGTH,
+  MAX_SERVICES_SECTION_TITLE_LENGTH,
+  MAX_SURCHARGE_AMOUNT,
+  MAX_SURCHARGE_PERCENTAGE,
+  OnlineBookingServicesOptionsUpdateRequest,
+} from '../../../../../entities/settings/online-booking-configuration/online-booking-services-options-update-request';
+import { OnlineSettingsService } from '../../../../../services/api/catalog/online-settings.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { onlyFieldsOf } from '../../../../../services/api/only-fields-of';
-import { greaterThan } from '../../../../shared/forms/validators';
+import { maxHtmlLength } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
@@ -49,11 +58,17 @@ import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
 import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 interface ServicesOptionsTexts {
   supplement_types: Record<'none' | 'percentage' | 'fixed', string>;
 }
+
+/** With no supplement its value has no place for an error. */
+const HIDDEN_VALUE: readonly (keyof OnlineBookingServicesOptionsUpdateRequest)[] = [
+  'surchargeValue',
+];
 
 @Component({
   selector: 'app-online-booking-services-options-popup',
@@ -64,6 +79,7 @@ interface ServicesOptionsTexts {
     FilledSelect,
     FormField,
     FormRow,
+    ReadErrorPopup,
     RichTextField,
     SectionTitle,
     Toggle,
@@ -81,7 +97,7 @@ export class OnlineBookingServicesOptionsPopup
   implements UnsavedChanges, OnDestroy
 {
   private readonly auth = inject(AuthBehaviour);
-  private readonly booking = inject(BookingService);
+  private readonly onlineSettings = inject(OnlineSettingsService);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly translateService = inject(TranslateService);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
@@ -89,6 +105,33 @@ export class OnlineBookingServicesOptionsPopup
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
+  protected readonly paymentMethods = [
+    {
+      method: OnlinePaymentMethod.PayNow,
+      label:
+        'management.settings.online_booking_configuration.services_options.payment_methods.pay_now',
+    },
+    {
+      method: OnlinePaymentMethod.PayAtProperty,
+      label:
+        'management.settings.online_booking_configuration.services_options.payment_methods.pay_at_property',
+    },
+    {
+      method: OnlinePaymentMethod.PayAtPropertyWithoutCard,
+      label:
+        'management.settings.online_booking_configuration.services_options.payment_methods.pay_at_property_without_card',
+    },
+    {
+      method: OnlinePaymentMethod.Deposit,
+      label:
+        'management.settings.online_booking_configuration.services_options.payment_methods.deposit',
+    },
+    {
+      method: OnlinePaymentMethod.PrepaidCard,
+      label:
+        'management.settings.online_booking_configuration.services_options.payment_methods.prepaid_card',
+    },
+  ] as const;
   /** [bold, italic, underline, bulleted list, numbered list, link]. */
   protected readonly richTextIcons = [
     '/assets/images/GeneralIcon_Bold.svg',
@@ -102,41 +145,41 @@ export class OnlineBookingServicesOptionsPopup
   private readonly draft = signal(new OnlineBookingServicesOptionsUpdateRequest());
   private loaded: OnlineBookingServicesOptionsUpdateRequest | null = null;
   private version: string | null = null;
-  /** Whether a supplement was chosen: only a change to none by the user empties its value. */
-  private hadSupplement: boolean | null = null;
+  /** Whether a supplement was chosen: only a change by the user empties its value, never a reading. */
+  private hadSupplement = false;
   protected readonly draftForm = form(this.draft, (path) => {
     applyWhen(
-      path.supplementValue,
-      ({ valueOf }) => valueOf(path.supplementType) !== SupplementType.None,
-      (supplementValue) => greaterThan(supplementValue, 0),
+      path.surchargeValue,
+      ({ valueOf }) => valueOf(path.surchargeType) !== SupplementType.None,
+      (surchargeValue) => {
+        required(surchargeValue);
+        min(surchargeValue, 0);
+        max(surchargeValue, ({ valueOf }) =>
+          valueOf(path.surchargeType) === SupplementType.Percentage
+            ? MAX_SURCHARGE_PERCENTAGE
+            : MAX_SURCHARGE_AMOUNT,
+        );
+      },
     );
-    max(path.supplementValue, ({ valueOf }) =>
-      valueOf(path.supplementType) === SupplementType.Percentage ? 100 : undefined,
-    );
+    maxHtmlLength(path.sectionTitle, MAX_SERVICES_SECTION_TITLE_LENGTH);
+    maxHtmlLength(path.usefulInfo, MAX_ONLINE_USEFUL_INFO_LENGTH);
   });
   protected readonly hasSupplement = computed(
-    () => this.draftForm.supplementType().value() !== SupplementType.None,
+    () => this.draftForm.surchargeType().value() !== SupplementType.None,
   );
   protected readonly isPercentage = computed(
-    () => this.draftForm.supplementType().value() === SupplementType.Percentage,
+    () => this.draftForm.surchargeType().value() === SupplementType.Percentage,
   );
   protected readonly fieldErrors = Object.fromEntries(
     (Object.keys(this.draft()) as (keyof OnlineBookingServicesOptionsUpdateRequest)[]).map(
-      (name) => [
-        name,
-        this.validationText.message(
-          this.draftForm[name],
-          name === 'supplementValue'
-            ? 'management.settings.online_booking_configuration.services_options.field_names.supplement_value'
-            : undefined,
-        ),
-      ],
+      (name) => [name, this.validationText.message(this.draftForm[name])],
     ),
   ) as Readonly<Record<keyof OnlineBookingServicesOptionsUpdateRequest, Signal<string | null>>>;
   protected readonly isLoading = signal(false);
   protected readonly isLoaded = signal(false);
   protected readonly isSaving = signal(false);
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly readError = signal<ApiProblem | null>(null);
   protected readonly isConflictShown = signal(false);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
@@ -173,8 +216,10 @@ export class OnlineBookingServicesOptionsPopup
     effect(() => {
       const hasSupplement = this.hasSupplement();
       untracked(() => {
-        if (this.hadSupplement && !hasSupplement) {
-          this.draftForm.supplementValue().value.set(null);
+        if (this.hadSupplement !== hasSupplement) {
+          const value = this.draftForm.surchargeValue();
+          value.value.set(hasSupplement ? null : this.valueWithoutSupplement());
+          value.markAsTouched();
         }
         this.hadSupplement = hasSupplement;
       });
@@ -185,9 +230,21 @@ export class OnlineBookingServicesOptionsPopup
     return (
       this.open() &&
       !this.isLoading() &&
-      comparableJson(this.draft()) !==
-        comparableJson(this.loaded ?? new OnlineBookingServicesOptionsUpdateRequest())
+      comparable(this.draft()) !==
+        comparable(this.loaded ?? new OnlineBookingServicesOptionsUpdateRequest())
     );
+  }
+
+  protected isAccepted(method: OnlinePaymentMethod): boolean {
+    return this.draftForm.paymentMethods().value().includes(method);
+  }
+
+  protected accept(method: OnlinePaymentMethod, isAccepted: boolean): void {
+    const methods = this.draftForm.paymentMethods();
+    methods.value.update((accepted) =>
+      isAccepted ? [...accepted, method] : accepted.filter((other) => other !== method),
+    );
+    methods.markAsDirty();
   }
 
   protected save(): void {
@@ -198,8 +255,8 @@ export class OnlineBookingServicesOptionsPopup
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        const sent = this.draft();
-        await firstValueFrom(this.booking.updateOnlineServicesOptions(sent, this.version));
+        const sent = savedOf(this.draft());
+        await firstValueFrom(this.onlineSettings.updateOnlineServicesOptions(sent, this.version));
         this.loaded = sent;
         this.isSaving.set(false);
         this.close();
@@ -211,13 +268,20 @@ export class OnlineBookingServicesOptionsPopup
           this.close();
           return undefined;
         }
-        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
-          this.error.set(general),
+        return apiFieldErrorsOrGeneral(
+          problem,
+          this.draftForm,
+          (general) => this.error.set(general),
+          this.hasSupplement() ? [] : HIDDEN_VALUE,
         );
       } finally {
         this.isSaving.set(false);
       }
     });
+  }
+
+  protected retryRead(): void {
+    this.open.set(true);
   }
 
   protected async leave(): Promise<void> {
@@ -247,36 +311,59 @@ export class OnlineBookingServicesOptionsPopup
   /** The saved options are read at every opening: the popup always starts from the server. */
   private load(): Subscription | undefined {
     this.error.set(null);
+    this.readError.set(null);
     this.isLoaded.set(false);
     if (!this.auth.user()?.propertyId) {
       return;
     }
     this.fill(new OnlineBookingServicesOptionsUpdateRequest());
     this.isLoading.set(true);
-    return this.booking.onlineServicesOptions().subscribe({
+    return this.onlineSettings.onlineServicesOptions().subscribe({
       next: (options) => {
         const loaded = onlyFieldsOf(OnlineBookingServicesOptionsUpdateRequest, options);
         this.loaded = loaded;
         this.version = options.version;
         this.fill(loaded);
+        this.draftForm().markAsTouched();
         this.isLoaded.set(true);
         this.isLoading.set(false);
       },
       error: (error: unknown) => {
-        this.error.set(toApiProblem(error));
         this.isLoading.set(false);
+        this.close();
+        this.readError.set(toApiProblem(error));
       },
     });
   }
 
   private fill(options: OnlineBookingServicesOptionsUpdateRequest): void {
-    this.hadSupplement = null;
+    this.hadSupplement = options.surchargeType !== SupplementType.None;
     this.draft.set(options);
     this.draftForm().reset();
+  }
+
+  /** The value read together with no supplement goes back as it was. */
+  private valueWithoutSupplement(): number | null {
+    return this.loaded?.surchargeType === SupplementType.None ? this.loaded.surchargeValue : null;
   }
 
   override ngOnDestroy(): void {
     this.unsaved.unwatch(this);
     super.ngOnDestroy();
   }
+}
+
+/** As the backend keeps them: 0 for an empty value. */
+function savedOf(
+  options: OnlineBookingServicesOptionsUpdateRequest,
+): OnlineBookingServicesOptionsUpdateRequest {
+  return { ...options, surchargeValue: options.surchargeValue ?? 0 };
+}
+
+/** The order of the payment methods means nothing. */
+function comparable(options: OnlineBookingServicesOptionsUpdateRequest): string {
+  return comparableJson({
+    ...savedOf(options),
+    paymentMethods: [...options.paymentMethods].sort(),
+  });
 }

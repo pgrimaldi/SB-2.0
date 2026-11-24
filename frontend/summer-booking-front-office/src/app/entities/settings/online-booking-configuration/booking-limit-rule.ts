@@ -1,7 +1,10 @@
+export const MAX_BOOKING_LIMIT_DAYS = 366;
+
 export class BookingLimitRule {
-  idSector: string | null = null;
-  dateFrom: string | null = null;
-  dateTo: string | null = null;
-  minSpotQuantity: number | null = null;
-  maxSpotQuantity: number | null = null;
+  id: string | null = null;
+  sectorId: string | null = null;
+  startsOn: string | null = null;
+  endsOn: string | null = null;
+  minDays: number | null = null;
+  maxDays: number | null = null;
 }

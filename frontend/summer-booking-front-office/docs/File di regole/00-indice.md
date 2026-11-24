@@ -82,13 +82,14 @@ Leggi i file della riga che corrisponde alla richiesta (anche più righe se la r
 | Servizi | `docs/Pagine/servizi.md` |
 | Sconti e voucher | `docs/Pagine/sconti-e-voucher.md` |
 | Sharing | `docs/Pagine/sharing.md` |
+| Prenotazioni online | `docs/Pagine/prenotazioni-online.md` |
 | Fiscalizzazione | `docs/Pagine/fiscalizzazione.md` |
 | Configurazione email | `docs/Pagine/configurazione-email.md` |
 | Assistenza | `docs/Pagine/assistenza.md` |
 | Database (con il Cestino) | `docs/Pagine/database.md` |
 | Impostazioni magazzino | `docs/Pagine/impostazioni-magazzino.md` |
 
-Prenotazioni online, Magazzino e Beachmap non hanno ancora una descrizione: si parte dal codice in `src/app/views/`.
+Magazzino e Beachmap non hanno ancora una descrizione: si parte dal codice in `src/app/views/`.
 
 ## Altri documenti
 

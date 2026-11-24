@@ -84,12 +84,18 @@
         <h3 class="online__booking__configuration__iframe__title">
           {{ 'management.settings.online_booking_configuration.iframe.direct_link' | translate }}
         </h3>
-        <p>{{ iframeCode }}</p>
+        @if (iframeCode(); as code) {
+          <p>{{ code }}</p>
+        } @else if (slugErrorMessage(); as message) {
+          <p class="online__booking__configuration__iframe__error">{{ message }}</p>
+        }
       </div>
       <app-button
         class="online__booking__configuration__iframe__copy"
         [appearance]="ButtonAppearance.Light"
         [pathIcon]="copyIcon"
+        [disabled]="!iframeCode()"
+        (clicked)="copyIframeCode()"
       >
         {{ 'management.settings.online_booking_configuration.iframe.copy' | translate }}
       </app-button>
@@ -101,4 +107,18 @@
 <app-online-booking-services-options-popup
   [pathIcon]="closeIcon"
   [(open)]="isServicesOptionsOpen"
+/>
+<app-message-popup
+  [pathIcon]="closeIcon"
+  [title]="'management.settings.online_booking_configuration.iframe.copied.title' | translate"
+  [text]="'management.settings.online_booking_configuration.iframe.copied.text' | translate"
+  [texts]="'management.settings.online_booking_configuration.iframe.copied' | translate"
+  [(open)]="isCopied"
+/>
+<app-message-popup
+  [pathIcon]="closeIcon"
+  [title]="'management.settings.online_booking_configuration.iframe.copy_failed.title' | translate"
+  [text]="'management.settings.online_booking_configuration.iframe.copy_failed.text' | translate"
+  [texts]="'management.settings.online_booking_configuration.iframe.copy_failed' | translate"
+  [(open)]="isCopyFailed"
 />

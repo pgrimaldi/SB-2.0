@@ -6304,6 +6304,506 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+### GET `/api/catalog/online-settings`
+
+Prenotazioni online: opzioni.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "isSuspendedByPlatform": false,
+  "isEnabled": true,
+  "isMapPick": true,
+  "isLocationRestricted": true,
+  "allowedSpotIds": [
+    "7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"
+  ],
+  "isPeriodRestricted": true,
+  "allowedPeriods": [
+    {
+      "startsOn": "2027-05-15",
+      "endsOn": "2027-09-20"
+    }
+  ],
+  "surchargeType": "disable",
+  "surchargeValue": 0,
+  "isBlocked": false,
+  "onlineBookingBlock": "three_hours_before",
+  "requiresManualConfirmation": false,
+  "allowsSameDayBooking": true,
+  "allowsHalfDay": true,
+  "morningFrom": "08:00:00",
+  "morningTo": "13:00:00",
+  "afternoonFrom": "13:30:00",
+  "afternoonTo": "19:00:00",
+  "afternoonConversionTime": "12:30:00",
+  "allowsSeasonal": false,
+  "allowsSharing": false,
+  "maxSpotsPerBooking": 4,
+  "bookingHorizonDays": 180,
+  "scope": "all",
+  "maxBookingsPerDay": null,
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property"
+  ],
+  "stayLimits": [
+    {
+      "id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601",
+      "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "startsOn": "2027-08-01",
+      "endsOn": "2027-08-31",
+      "minDays": 3,
+      "maxDays": 14
+    }
+  ],
+  "legend": [
+    {
+      "id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01",
+      "label": "Ombrellone libero",
+      "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01",
+      "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"
+    }
+  ],
+  "goodToKnow": null,
+  "usefulInfo": "<p>Il parcheggio è gratuito per i clienti.</p>",
+  "version": "7c1f03ab"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `isSuspendedByPlatform` | boolean | `false` |
+| `isMapPick` | boolean | `true` |
+| `isLocationRestricted` | boolean | `true` |
+| `allowedSpotIds` | string[] (UUID) | `["7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"]` |
+| `isPeriodRestricted` | boolean | `true` |
+| `allowedPeriods[]` | OnlineBookingPeriod[] (array di oggetti, al massimo 50) | `[{"startsOn": "2027-05-15", "endsOn": "2027-09-20"}]` |
+| `allowedPeriods[].startsOn` | string (giorno AAAA-MM-GG) | `2027-05-15` |
+| `allowedPeriods[].endsOn` | string (giorno AAAA-MM-GG) | `2027-09-20` |
+| `surchargeType` | string (enum SupplementType) | `disable` |
+| `surchargeValue` | number (decimale) | `0` |
+| `isBlocked` | boolean | `false` |
+| `onlineBookingBlock` | string (enum OnlineBookingBlock) | `three_hours_before` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `allowsSameDayBooking` | boolean | `true` |
+| `allowsHalfDay` | boolean | `true` |
+| `morningFrom` | string (HH:mm:ss in lettura, HH:mm in salvataggio) \| null | `08:00:00` |
+| `morningTo` | string (come morningFrom) \| null | `13:00:00` |
+| `afternoonFrom` | string (come morningFrom) \| null | `13:30:00` |
+| `afternoonTo` | string (come morningFrom) \| null | `19:00:00` |
+| `afternoonConversionTime` | string (come morningFrom) \| null | `12:30:00` |
+| `allowsSeasonal` | boolean | `false` |
+| `allowsSharing` | boolean | `false` |
+| `maxSpotsPerBooking` | number (intero da 1) \| null | `4` |
+| `bookingHorizonDays` | number (intero 0-730) \| null | `180` |
+| `scope` | string (enum OnlineBookingAudience) | `all` |
+| `maxBookingsPerDay` | number (intero da 1) \| null | `null` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property"]` |
+| `stayLimits[]` | BookingLimitRule[] (array di oggetti) | `[{"id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601", "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "startsOn": "2027-08-01", "endsOn": "2027-08-31", "minDays": 3, "maxDays": 14}]` |
+| `stayLimits[].id` | string (UUID) \| null | `3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601` |
+| `stayLimits[].sectorId` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `stayLimits[].startsOn` | string (giorno AAAA-MM-GG) | `2027-08-01` |
+| `stayLimits[].endsOn` | string (giorno AAAA-MM-GG) | `2027-08-31` |
+| `stayLimits[].minDays` | number (intero 1-366) \| null | `3` |
+| `stayLimits[].maxDays` | number (intero 1-366) \| null | `14` |
+| `legend[]` | LegendItem[] (array di oggetti, al massimo 30) | `[{"id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01", "label": "Ombrellone libero", "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01", "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"}]` |
+| `legend[].id` | string (UUID) \| null | `8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01` |
+| `legend[].label` | string (al massimo 100 caratteri) | `Ombrellone libero` |
+| `legend[].iconId` | string (UUID) \| null | `2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01` |
+| `legend[].iconUrl` | string (URL) \| null | `/assets/images/MapConfiguration_Umbrella1.svg` |
+| `goodToKnow` | string (HTML, al massimo 10.000 caratteri) \| null | `null` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il parcheggio è gratuito per i clienti.</p>` |
+| `version` | string | `7c1f03ab` |
+
+### PUT `/api/catalog/online-settings`
+
+Prenotazioni online: salvataggio delle opzioni.
+
+#### Payload
+
+```json
+{
+  "isEnabled": true,
+  "isMapPick": true,
+  "isLocationRestricted": true,
+  "allowedSpotIds": [
+    "7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"
+  ],
+  "isPeriodRestricted": true,
+  "allowedPeriods": [
+    {
+      "startsOn": "2027-05-15",
+      "endsOn": "2027-09-20"
+    }
+  ],
+  "surchargeType": "disable",
+  "surchargeValue": 0,
+  "isBlocked": false,
+  "onlineBookingBlock": "three_hours_before",
+  "requiresManualConfirmation": false,
+  "allowsSameDayBooking": true,
+  "allowsHalfDay": true,
+  "morningFrom": "08:00",
+  "morningTo": "13:00",
+  "afternoonFrom": "13:30",
+  "afternoonTo": "19:00",
+  "afternoonConversionTime": "12:30",
+  "allowsSeasonal": false,
+  "allowsSharing": false,
+  "maxSpotsPerBooking": 4,
+  "bookingHorizonDays": 180,
+  "scope": "all",
+  "maxBookingsPerDay": null,
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property"
+  ],
+  "stayLimits": [
+    {
+      "id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601",
+      "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "startsOn": "2027-08-01",
+      "endsOn": "2027-08-31",
+      "minDays": 3,
+      "maxDays": 14
+    }
+  ],
+  "legend": [
+    {
+      "id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01",
+      "label": "Ombrellone libero",
+      "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01"
+    }
+  ],
+  "goodToKnow": null,
+  "usefulInfo": "<p>Il parcheggio è gratuito per i clienti.</p>"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `isMapPick` | boolean | `true` |
+| `isLocationRestricted` | boolean | `true` |
+| `allowedSpotIds` | string[] (UUID) | `["7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"]` |
+| `isPeriodRestricted` | boolean | `true` |
+| `allowedPeriods[]` | OnlineBookingPeriod[] (array di oggetti, al massimo 50) | `[{"startsOn": "2027-05-15", "endsOn": "2027-09-20"}]` |
+| `allowedPeriods[].startsOn` | string (giorno AAAA-MM-GG) | `2027-05-15` |
+| `allowedPeriods[].endsOn` | string (giorno AAAA-MM-GG) | `2027-09-20` |
+| `surchargeType` | string (enum SupplementType) | `disable` |
+| `surchargeValue` | number (decimale) | `0` |
+| `isBlocked` | boolean | `false` |
+| `onlineBookingBlock` | string (enum OnlineBookingBlock) | `three_hours_before` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `allowsSameDayBooking` | boolean | `true` |
+| `allowsHalfDay` | boolean | `true` |
+| `morningFrom` | string (HH:mm:ss in lettura, HH:mm in salvataggio) \| null | `08:00` |
+| `morningTo` | string (come morningFrom) \| null | `13:00` |
+| `afternoonFrom` | string (come morningFrom) \| null | `13:30` |
+| `afternoonTo` | string (come morningFrom) \| null | `19:00` |
+| `afternoonConversionTime` | string (come morningFrom) \| null | `12:30` |
+| `allowsSeasonal` | boolean | `false` |
+| `allowsSharing` | boolean | `false` |
+| `maxSpotsPerBooking` | number (intero da 1) \| null | `4` |
+| `bookingHorizonDays` | number (intero 0-730) \| null | `180` |
+| `scope` | string (enum OnlineBookingAudience) | `all` |
+| `maxBookingsPerDay` | number (intero da 1) \| null | `null` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property"]` |
+| `stayLimits[]` | BookingLimitRule[] (array di oggetti) | `[{"id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601", "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "startsOn": "2027-08-01", "endsOn": "2027-08-31", "minDays": 3, "maxDays": 14}]` |
+| `stayLimits[].id` | string (UUID) \| null | `3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601` |
+| `stayLimits[].sectorId` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `stayLimits[].startsOn` | string (giorno AAAA-MM-GG) | `2027-08-01` |
+| `stayLimits[].endsOn` | string (giorno AAAA-MM-GG) | `2027-08-31` |
+| `stayLimits[].minDays` | number (intero 1-366) \| null | `3` |
+| `stayLimits[].maxDays` | number (intero 1-366) \| null | `14` |
+| `legend[]` | LegendItemRequest[] (array di oggetti, al massimo 30) | `[{"id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01", "label": "Ombrellone libero", "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01"}]` |
+| `legend[].id` | string (UUID) \| null | `8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01` |
+| `legend[].label` | string (al massimo 100 caratteri) | `Ombrellone libero` |
+| `legend[].iconId` | string (UUID) \| null | `2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01` |
+| `goodToKnow` | string (HTML, al massimo 10.000 caratteri) \| null | `null` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il parcheggio è gratuito per i clienti.</p>` |
+
+#### Response
+
+Stato: 200 OK (le opzioni salvate).
+
+```json
+{
+  "isSuspendedByPlatform": false,
+  "isEnabled": true,
+  "isMapPick": true,
+  "isLocationRestricted": true,
+  "allowedSpotIds": [
+    "7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"
+  ],
+  "isPeriodRestricted": true,
+  "allowedPeriods": [
+    {
+      "startsOn": "2027-05-15",
+      "endsOn": "2027-09-20"
+    }
+  ],
+  "surchargeType": "disable",
+  "surchargeValue": 0,
+  "isBlocked": false,
+  "onlineBookingBlock": "three_hours_before",
+  "requiresManualConfirmation": false,
+  "allowsSameDayBooking": true,
+  "allowsHalfDay": true,
+  "morningFrom": "08:00:00",
+  "morningTo": "13:00:00",
+  "afternoonFrom": "13:30:00",
+  "afternoonTo": "19:00:00",
+  "afternoonConversionTime": "12:30:00",
+  "allowsSeasonal": false,
+  "allowsSharing": false,
+  "maxSpotsPerBooking": 4,
+  "bookingHorizonDays": 180,
+  "scope": "all",
+  "maxBookingsPerDay": null,
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property"
+  ],
+  "stayLimits": [
+    {
+      "id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601",
+      "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "startsOn": "2027-08-01",
+      "endsOn": "2027-08-31",
+      "minDays": 3,
+      "maxDays": 14
+    }
+  ],
+  "legend": [
+    {
+      "id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01",
+      "label": "Ombrellone libero",
+      "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01",
+      "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"
+    }
+  ],
+  "goodToKnow": null,
+  "usefulInfo": "<p>Il parcheggio è gratuito per i clienti.</p>",
+  "version": "91d2e0c4"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `isSuspendedByPlatform` | boolean | `false` |
+| `isMapPick` | boolean | `true` |
+| `isLocationRestricted` | boolean | `true` |
+| `allowedSpotIds` | string[] (UUID) | `["7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01"]` |
+| `isPeriodRestricted` | boolean | `true` |
+| `allowedPeriods[]` | OnlineBookingPeriod[] (array di oggetti, al massimo 50) | `[{"startsOn": "2027-05-15", "endsOn": "2027-09-20"}]` |
+| `allowedPeriods[].startsOn` | string (giorno AAAA-MM-GG) | `2027-05-15` |
+| `allowedPeriods[].endsOn` | string (giorno AAAA-MM-GG) | `2027-09-20` |
+| `surchargeType` | string (enum SupplementType) | `disable` |
+| `surchargeValue` | number (decimale) | `0` |
+| `isBlocked` | boolean | `false` |
+| `onlineBookingBlock` | string (enum OnlineBookingBlock) | `three_hours_before` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `allowsSameDayBooking` | boolean | `true` |
+| `allowsHalfDay` | boolean | `true` |
+| `morningFrom` | string (HH:mm:ss in lettura, HH:mm in salvataggio) \| null | `08:00:00` |
+| `morningTo` | string (come morningFrom) \| null | `13:00:00` |
+| `afternoonFrom` | string (come morningFrom) \| null | `13:30:00` |
+| `afternoonTo` | string (come morningFrom) \| null | `19:00:00` |
+| `afternoonConversionTime` | string (come morningFrom) \| null | `12:30:00` |
+| `allowsSeasonal` | boolean | `false` |
+| `allowsSharing` | boolean | `false` |
+| `maxSpotsPerBooking` | number (intero da 1) \| null | `4` |
+| `bookingHorizonDays` | number (intero 0-730) \| null | `180` |
+| `scope` | string (enum OnlineBookingAudience) | `all` |
+| `maxBookingsPerDay` | number (intero da 1) \| null | `null` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property"]` |
+| `stayLimits[]` | BookingLimitRule[] (array di oggetti) | `[{"id": "3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601", "sectorId": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "startsOn": "2027-08-01", "endsOn": "2027-08-31", "minDays": 3, "maxDays": 14}]` |
+| `stayLimits[].id` | string (UUID) \| null | `3f6a1b20-7c8d-4e9f-a0b1-c2d3e4f5a601` |
+| `stayLimits[].sectorId` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `stayLimits[].startsOn` | string (giorno AAAA-MM-GG) | `2027-08-01` |
+| `stayLimits[].endsOn` | string (giorno AAAA-MM-GG) | `2027-08-31` |
+| `stayLimits[].minDays` | number (intero 1-366) \| null | `3` |
+| `stayLimits[].maxDays` | number (intero 1-366) \| null | `14` |
+| `legend[]` | LegendItem[] (array di oggetti, al massimo 30) | `[{"id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01", "label": "Ombrellone libero", "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01", "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"}]` |
+| `legend[].id` | string (UUID) \| null | `8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01` |
+| `legend[].label` | string (al massimo 100 caratteri) | `Ombrellone libero` |
+| `legend[].iconId` | string (UUID) \| null | `2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01` |
+| `legend[].iconUrl` | string (URL) \| null | `/assets/images/MapConfiguration_Umbrella1.svg` |
+| `goodToKnow` | string (HTML, al massimo 10.000 caratteri) \| null | `null` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il parcheggio è gratuito per i clienti.</p>` |
+| `version` | string | `91d2e0c4` |
+
+### GET `/api/catalog/map/icon-catalog`
+
+Catalogo delle icone della mappa.
+
+#### Payload
+
+Nessun corpo né parametri.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "id": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01",
+    "category": "umbrella",
+    "state": "free",
+    "name": "Umbrella1",
+    "url": "/assets/images/MapConfiguration_Umbrella1.svg",
+    "isDefault": true
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (UUID) | `2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01` |
+| `category` | string (enum MapIconCategory) | `umbrella` |
+| `state` | string | `free` |
+| `name` | string | `Umbrella1` |
+| `url` | string (URL) \| null | `/assets/images/MapConfiguration_Umbrella1.svg` |
+| `isDefault` | boolean | `true` |
+
+### GET `/api/catalog/property-info`
+
+Scheda pubblica dello stabilimento: indirizzo sul sito.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "slug": "lido-demo"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `slug` | string \| null | `lido-demo` |
+
+### GET `/api/catalog/online-settings/services`
+
+Prenotazioni online: opzioni dei servizi.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "isEnabled": true,
+  "surchargeType": "percentage",
+  "surchargeValue": 10,
+  "requiresManualConfirmation": false,
+  "sectionTitle": "<p>Prenota i tuoi servizi.</p>",
+  "usefulInfo": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property",
+    "pay_at_property_prepaid"
+  ],
+  "version": "0fb5c88e"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `surchargeType` | string (enum SupplementType) | `percentage` |
+| `surchargeValue` | number (decimale) | `10` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `sectionTitle` | string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) \| null | `<p>Prenota i tuoi servizi.</p>` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property", "pay_at_property_prepaid"]` |
+| `version` | string | `0fb5c88e` |
+
+### PUT `/api/catalog/online-settings/services`
+
+Prenotazioni online: salvataggio delle opzioni dei servizi.
+
+#### Payload
+
+```json
+{
+  "isEnabled": true,
+  "surchargeType": "percentage",
+  "surchargeValue": 10,
+  "requiresManualConfirmation": false,
+  "sectionTitle": "<p>Prenota i tuoi servizi.</p>",
+  "usefulInfo": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property",
+    "pay_at_property_prepaid"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `surchargeType` | string (enum SupplementType) | `percentage` |
+| `surchargeValue` | number (decimale) | `10` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `sectionTitle` | string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) \| null | `<p>Prenota i tuoi servizi.</p>` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property", "pay_at_property_prepaid"]` |
+
+#### Response
+
+Stato: 200 OK (le opzioni salvate).
+
+```json
+{
+  "isEnabled": true,
+  "surchargeType": "percentage",
+  "surchargeValue": 10,
+  "requiresManualConfirmation": false,
+  "sectionTitle": "<p>Prenota i tuoi servizi.</p>",
+  "usefulInfo": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
+  "paymentMethods": [
+    "pay_now",
+    "pay_at_property",
+    "pay_at_property_prepaid"
+  ],
+  "version": "6b0c41e7"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isEnabled` | boolean | `true` |
+| `surchargeType` | string (enum SupplementType) | `percentage` |
+| `surchargeValue` | number (decimale) | `10` |
+| `requiresManualConfirmation` | boolean | `false` |
+| `sectionTitle` | string (HTML, al massimo 2.000 caratteri, limite chiesto al backend) \| null | `<p>Prenota i tuoi servizi.</p>` |
+| `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+| `paymentMethods` | string[] (enum OnlinePaymentMethod, anche vuoto) | `["pay_now", "pay_at_property", "pay_at_property_prepaid"]` |
+| `version` | string | `6b0c41e7` |
+
 ### GET `/api/catalog/map/settings`
 
 Configura mappa: impostazioni.
@@ -8624,11 +9124,11 @@ Stato: 200 OK.
 | `priceListPdf` | PropertyInfoDocument \| null | `null` |
 | `menuPdf` | PropertyInfoDocument \| null | `null` |
 
-## /booking
+## /payment
 
-### GET `/api/booking/get-online-services-options`
+### GET `/api/payment/get-stripe-information`
 
-Prenotazioni online: opzioni dei servizi.
+Prenotazioni online: conto Stripe collegato.
 
 #### Payload
 
@@ -8638,79 +9138,11 @@ Nessun corpo né parametri: lo stabilimento viene dal token.
 
 Stato: 200 OK.
 
-```json
-{
-  "isServicesOnlineBookingEnabled": true,
-  "supplementType": "Percentage",
-  "supplementValue": 10,
-  "isBookingConfirmationRequired": false,
-  "isPayNowAccepted": true,
-  "isPayAtPropertyAccepted": true,
-  "isPayAtPropertyWithoutCardAccepted": false,
-  "isDepositAccepted": false,
-  "isPrepaidCardAccepted": true,
-  "bookingPanelTitle": "<p>Prenota i tuoi servizi.</p>",
-  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
-  "version": "0fb5c88e"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `isServicesOnlineBookingEnabled` | boolean | `true` |
-| `supplementType` | string (enum SupplementType) | `Percentage` |
-| `supplementValue` | number (decimale) \| null | `10` |
-| `isBookingConfirmationRequired` | boolean | `false` |
-| `isPayNowAccepted` | boolean | `true` |
-| `isPayAtPropertyAccepted` | boolean | `true` |
-| `isPayAtPropertyWithoutCardAccepted` | boolean | `false` |
-| `isDepositAccepted` | boolean | `false` |
-| `isPrepaidCardAccepted` | boolean | `true` |
-| `bookingPanelTitle` | string (HTML) \| null | `<p>Prenota i tuoi servizi.</p>` |
-| `usefulInformation` | string (HTML) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
-| `version` | string | `0fb5c88e` |
-
-### POST `/api/booking/update-online-services-options`
-
-Prenotazioni online: salvataggio delle opzioni dei servizi.
-
-#### Payload
+Il corpo è solo l'id del conto Stripe collegato, come stringa JSON (tra virgolette, Content-Type application/json): acct_…. null se lo stabilimento non ha ancora collegato Stripe.
 
 ```json
-{
-  "isServicesOnlineBookingEnabled": true,
-  "supplementType": "Percentage",
-  "supplementValue": 10,
-  "isBookingConfirmationRequired": false,
-  "isPayNowAccepted": true,
-  "isPayAtPropertyAccepted": true,
-  "isPayAtPropertyWithoutCardAccepted": false,
-  "isDepositAccepted": false,
-  "isPrepaidCardAccepted": true,
-  "bookingPanelTitle": "<p>Prenota i tuoi servizi.</p>",
-  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>"
-}
+"acct_1QmDemo4Fz8Lw2Xc"
 ```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `isServicesOnlineBookingEnabled` | boolean | `true` |
-| `supplementType` | string (enum SupplementType) | `Percentage` |
-| `supplementValue` | number (decimale) \| null | `10` |
-| `isBookingConfirmationRequired` | boolean | `false` |
-| `isPayNowAccepted` | boolean | `true` |
-| `isPayAtPropertyAccepted` | boolean | `true` |
-| `isPayAtPropertyWithoutCardAccepted` | boolean | `false` |
-| `isDepositAccepted` | boolean | `false` |
-| `isPrepaidCardAccepted` | boolean | `true` |
-| `bookingPanelTitle` | string (HTML) \| null | `<p>Prenota i tuoi servizi.</p>` |
-| `usefulInformation` | string (HTML) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
 
 ## /system
 
@@ -8876,21 +9308,3 @@ Assistenza: messaggio al supporto.
 Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
-
-### GET `/api/system/get-stripe-information`
-
-Prenotazioni online: conto Stripe collegato.
-
-#### Payload
-
-Nessun corpo né parametri: lo stabilimento viene dal token.
-
-#### Response
-
-Stato: 200 OK.
-
-Il corpo è solo l'id del conto Stripe collegato, come stringa JSON (tra virgolette, Content-Type application/json): acct_…. null se lo stabilimento non ha ancora collegato Stripe.
-
-```json
-"acct_1QmDemo4Fz8Lw2Xc"
-```

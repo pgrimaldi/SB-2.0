@@ -119,6 +119,9 @@
     "booking": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
     },
+    "payment": {
+      "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
+    },
     "audit": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
       "export_too_large": "Es gibt {total, number, integer} Einträge zum Exportieren, aber höchstens {max, number, integer} können exportiert werden: Schränke den Zeitraum oder die Filter ein und versuche es erneut."
@@ -126,7 +129,8 @@
     "map": {
       "spot_not_found": "Der Bereich der Karte ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
       "spots_outside_grid": "Einige Plätze liegen außerhalb dieser Größe: Es braucht mindestens {{rows}} Reihen und {{columns}} Artikel pro Reihe.",
-      "invalid_image": "Das Bild muss PNG, JPEG oder WebP sein und darf höchstens 5 MB groß sein."
+      "invalid_image": "Das Bild muss PNG, JPEG oder WebP sein und darf höchstens 5 MB groß sein.",
+      "icon_not_found": "Das Symbol ist nicht mehr vorhanden: Wähle ein anderes."
     },
     "catalog": {
       "sector_in_use": "Der Sektor/die Reihe {{sectorName}} wird verwendet und kann nicht gelöscht werden: Plätze auf der Karte {{mapSpots}}, Preislisten {{priceLists}}, Aufenthaltsgrenzen {{stayLimits}}, Rabatte {{discounts}}, Leistungen {{services}}, automatische Preise {{automaticPrices}}.",
@@ -139,7 +143,9 @@
       "property_not_found": "Das Strandbad deines Kontos wurde nicht gefunden. Melde dich ab und wieder an; wenn es erneut passiert, wende dich an den Support.",
       "country_not_found": "Das gewählte Land ist nicht mehr verfügbar: Wähle ein anderes.",
       "sector_not_found": "Der Sektor/die Reihe ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
-      "vat_rate_not_allowed": "Dieser Satz ist nicht zulässig. Gültige Sätze: {{rates}}."
+      "vat_rate_not_allowed": "Dieser Satz ist nicht zulässig. Gültige Sätze: {{rates}}.",
+      "stay_limit_not_found": "Die Buchungsregel ist nicht mehr vorhanden: Sie wurde vielleicht schon gelöscht.",
+      "stay_limit_overlap": "Zwei Regeln derselben Reihe/desselben Sektors überschneiden sich."
     },
     "pricing": {
       "season_required": "Lege zuerst die Daten der Saison fest.",
@@ -403,7 +409,17 @@
           "subtitle": "Ihre Gäste buchen Sonnenschirme, Liegen und Services mit wenigen Klicks direkt auf Ihrer Website.",
           "description": "Kopieren Sie den Einbettungscode an die gewünschte Stelle Ihrer Website. Das Widget gleicht die Verfügbarkeiten in Echtzeit mit dem Plan der Verwaltungssoftware ab.",
           "direct_link": "Direkter Link",
-          "copy": "Link kopieren"
+          "copy": "Link kopieren",
+          "copied": {
+            "title": "Code kopiert",
+            "text": "Füge ihn in die Seite deiner Website ein.",
+            "close": "Schließen"
+          },
+          "copy_failed": {
+            "title": "Code nicht kopiert",
+            "text": "Markiere den Code und kopiere ihn von Hand.",
+            "close": "Schließen"
+          }
         },
         "booking_options": {
           "title": "Optionen Online-Buchungen",
@@ -478,20 +494,19 @@
           "booking_limits": {
             "title": "Buchungslimits",
             "add": "Neue Regel hinzufügen",
-            "description": "Lege Buchungsregeln fest, um eine minimale und maximale Anzahl buchbarer Plätze in einem bestimmten Zeitraum und in einer bestimmten Reihe bzw. einem Sektor festzulegen.",
+            "description": "Lege Buchungsregeln fest, um eine minimale und maximale Anzahl buchbarer Tage in einem bestimmten Zeitraum und in einer bestimmten Reihe bzw. einem Sektor festzulegen.",
             "sector": "Reihe/Sektor",
             "date_from": "Vom",
             "date_to": "Bis",
             "min": "Min",
-            "max": "Max"
-          },
-          "field_names": {
-            "supplement_value": "des Zuschlags"
+            "max": "Max",
+            "missing_sector": "Sektor/Reihe nicht mehr verfügbar"
           },
           "periods": {
             "hint": "Klicken Sie auf zwei Daten, um einen Zeitraum zu wählen",
             "selected": "Gewählte Zeiträume:"
-          }
+          },
+          "suspended": "Der Online-Verkauf ist von der Plattform ausgesetzt: Du kannst die Optionen ändern, aber Kunden können nicht online buchen."
         },
         "services_options": {
           "title": "Optionen Service-Buchungen",
@@ -506,9 +521,6 @@
           },
           "supplement_value": "Zuschlagswert",
           "confirmation_required": "Bestätigung anfordern",
-          "field_names": {
-            "supplement_value": "des Zuschlags"
-          },
           "payment_methods": {
             "title": "Akzeptierte Zahlungsarten",
             "pay_now": "Jetzt bezahlen",
@@ -2109,6 +2121,7 @@
     "web_link": "Gib einen vollständigen Link ein, der mit http:// oder https:// beginnt",
     "email": "Ungültige E-Mail-Adresse",
     "max_length": "Höchstens {{max}} Zeichen",
+    "max_html_length": "Höchstens {{max}} Zeichen, einschließlich Formatierung",
     "phone_digits": "Nur Ziffern und Leerzeichen: Die Vorwahl gehört ins Feld daneben",
     "phone_digits_without_prefix": "Nur Ziffern und Leerzeichen, ohne +",
     "phone_max_length": "Die Nummer darf höchstens {{max}} Zeichen haben, Leerzeichen eingeschlossen",
@@ -2146,6 +2159,17 @@
       },
       "tables": {
         "seats_taken": "Plätze schon verwendet"
+      }
+    },
+    "online_booking_configuration": {
+      "periods": {
+        "overlap": "Zwei Datumsbereiche überschneiden sich.",
+        "max": "Höchstens {{max}} Datumsbereiche."
+      },
+      "booking_limits": {
+        "days_required": "Gib mindestens ein Minimum oder Maximum an Tagen an.",
+        "max_days": "Das Maximum an Tagen darf nicht kleiner als das Minimum sein.",
+        "overlap": "Diese Reihe/dieser Sektor hat an diesen Daten bereits eine Regel."
       }
     }
   },
