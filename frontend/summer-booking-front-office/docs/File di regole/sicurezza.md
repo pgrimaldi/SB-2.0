@@ -162,7 +162,8 @@ header di sicurezza e CSP.
 - La CSP DEV include Google Maps: script solo da `maps.googleapis.com` e `maps.gstatic.com`, font Google, origini
   immagini Google e worker `blob:`. `connect-src` include anche i due host dei font, perché il service worker li
   scarica con `fetch`.
-- Immagini, script e servizi su altri domini (es. Google Maps) vanno aggiunti alla CSP prima di usarli.
+- Immagini, script e servizi su altri domini (es. Google Maps) vanno aggiunti alla CSP prima di usarli; le immagini in
+  `img-src` e in `connect-src`, sempre per il service worker. `blob:` in `img-src` serve alle anteprime dei file scelti.
 - Non copiare l'allowlist generica di Google e non lasciare attivo il bypass del service worker come soluzione.
 - Valore completo della CSP e verifiche su pagina e `ngsw-worker.js`: `docs/README_DEPLOY.md`. Policy di PROD e
   scelte ancora aperte: `docs/SECURITY_TODO.md`.

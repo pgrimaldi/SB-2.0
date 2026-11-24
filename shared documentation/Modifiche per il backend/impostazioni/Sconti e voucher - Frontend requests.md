@@ -43,8 +43,8 @@ delle rotte non si confondono con `/{id:guid}`, perché non sono UUID. Per il fr
   (sezioni 5 e 6) mancante, `null` o non UUID, e per un elemento di `idVouchers` (sezioni 2 e 3) `null` o non UUID: il backend li riceve
   come testo e li converte nel codice (con un `Guid` il framework risponderebbe 400 prima dell'endpoint).
 - **Valori che non si leggono** (una data, un'ora o un numero che non sono tali, un intero oltre i 32 bit, un `idSectors` non UUID): non
-  arrivano ai validatori. 400 `validation.failed` senza `errors[]`, come nelle altre pagine (`Impostazioni magazzino - Frontend
-  requests.md`, "Valori che non si leggono"). Il frontend non li manda. Gli errori di campo di questo documento valgono per i valori che
+  arrivano ai validatori: in Development 400 `validation.failed` senza `errors[]`, negli altri ambienti 400 senza corpo
+  (`Boot/Program.cs` non imposta `RouteHandlerOptions.ThrowOnBadRequest`). Il frontend non li manda. Gli errori di campo di questo documento valgono per i valori che
   si leggono, e per quelli assenti o `null`.
 - **Elenchi**: assente o `null` vale `[]`; un elemento `null` è un errore di campo su quell'elenco ("Errori" dei popup; oggi un 500:
   `DiscountValidators.cs:38,41`).
@@ -209,9 +209,8 @@ degli sconti.
   (né un 500) per il codice. Più copie dello stesso sconto, o di sconti con lo stesso codice di base, nella stessa chiamata prendono
   codici diversi.
 - Se lo stesso id compare più volte, si fa una copia sola.
-- Nel registro una voce per copia: `catalog.discount_created`, oppure un codice nuovo `catalog.discount_duplicated` come
-  `catalog.price_list_duplicated`. Lo sceglie lo sviluppatore; se è nuovo lo scrive qui (il filtro del Log della pagina Gestione
-  utenti ha l'elenco dei codici).
+- Nel registro una voce `catalog.discount_created` per copia, come la creazione. Non un codice nuovo: il Log della pagina Gestione
+  utenti mostra e filtra i codici che conosce.
 - **Permesso**: `CatalogPricing`.
 
 ### Richiesta, risposta ed errori
@@ -269,7 +268,7 @@ scegliere **in ogni periodo**.
   dentro una di esse. Le tre condizioni si guardano **sullo stesso periodo**, non una per periodo. Per tutto il resto (attivo, canale,
   utilizzi, ora attuale e non quella della prenotazione, fascia da `from` compreso a `to` escluso) vale quello che c'è oggi.
 - **Dove si caricano i dati nuovi**: nei due punti che leggono gli sconti, `PublicCatalogRepository.Discounts()` (preventivo) e
-  `DiscountRepository.WithChildren` (`DiscountRepository.cs:47`: lista, lettura, salvataggio, eliminazione e snapshot). Senza il secondo
+  `DiscountRepository.WithChildren` (lista, lettura, salvataggio, eliminazione e snapshot). Senza il secondo
   `get-selected-item` li darebbe vuoti (tutti i giorni, nessuna fascia) e il salvataggio li cancellerebbe. Quando un salvataggio toglie o
   ricrea un periodo (`Discount.ReplaceWindows`), le righe dei suoi giorni e delle sue fasce si eliminano con lui.
 - **Senza periodi**, come oggi (`QuoteRules.cs:53-60`): uno sconto automatico non vale mai; uno con il codice vale in ogni data, con i
@@ -277,6 +276,10 @@ scegliere **in ogni periodo**.
 - **Dati già salvati** (migrazione): ogni periodo prende i giorni e le fasce orarie del suo sconto, che sullo sconto diventano vuoti:
   nessuno sconto cambia. Uno sconto **senza** periodi con giorni o fasce li tiene; un salvataggio che lascia `validityPeriods` vuoto li
   lascia com'erano, il primo con un periodo li svuota.
+- **Importazione**: quella dal vecchio sistema si rifà da capo **dopo** le migration (`shared documentation/backend/progettazione/83-retention-file.md`:
+  schemi tolti, `dotnet ef database update`, importazione), quindi la migration da sola lavora su tabelle vuote.
+  Anche l'importazione porta giorni e fasce dello sconto nei suoi periodi: senza, uno sconto importato varrebbe tutti i giorni. Non è in
+  questo repository: l'agente avverte lo sviluppatore.
 - **Valori di partenza nel database**: le colonne nuove ne hanno uno (nessun giorno = tutti), perché l'importazione inserisce i periodi senza
   nominarle (`DiscountDateRangeConfiguration.cs:41-44`).
 - **In lettura** un periodo senza giorni (vuoto = tutti) dà `daysOfWeek` `[1, 2, 3, 4, 5, 6, 7]`; tutti e sette e vuoto sono la stessa
@@ -517,18 +520,20 @@ Salva del popup di modifica. Per il frontend sostituisce `PUT /api/catalog/disco
 
 Se due utenti modificano lo stesso sconto, vince chi salva per ultimo: il popup rimanda tutto lo sconto letto all'apertura e cancella,
 senza che nessuno se ne accorga, quello che un altro utente ha cambiato nel frattempo. Il backend non ha un controllo di concorrenza sugli
-sconti: nessun token in `DiscountConfiguration`, nessun `If-Match` in `PUT /api/catalog/discounts/{id}`. Il frontend chiede lo schema di
-**concorrenza ottimistica** già progettato per le prenotazioni offline
-(`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un **codice di errore unico per tutte le
-API**: `resource.version_conflict`. Lo stesso schema è chiesto in `Listino - Frontend requests.md` (sezione 16) e negli altri documenti: se lì è
-già fatto, qui si aggiungono solo le API 5 e 6.
+sconti: nessun token in `DiscountConfiguration`, nessun `If-Match` in `PUT /api/catalog/discounts/{id}`. Il frontend chiede la
+**concorrenza ottimistica** degli altri documenti, con un **codice di errore unico per tutte le API**: `resource.version_conflict`. È lo stesso
+di `Listino - Frontend requests.md` (sezione 16): se lì è già fatto, qui si aggiungono solo le API 5 e 6.
+
+**Non è quello che Booking ha già per le prenotazioni** (`Endpoints.cs:253-255`, `ReservationService.cs:114-115`): lì
+l'`If-Match` è un numero, se manca o non si legge non si controlla niente, e il conflitto è 412 o 409
+`booking.version_conflict`. Qui valgono le regole sotto: con un altro codice il frontend non rileggerebbe i dati.
 
 ### Cosa ci serve
 
 - **Versione nella lettura** (sezione 5): il campo `version` (stringa opaca, sempre presente). Cambia ogni volta che cambiano i dati che il
   salvataggio scrive, anche quando li cambia un'altra API (per esempio `PUT /api/catalog/discounts/{id}`), e solo allora: non cambia per
   `used_count` e `updated_at`, altrimenti uno sconto usato mentre il popup è aperto farebbe perdere le modifiche. Non dipende dall'ordine in
-  cui il database restituisce le righe figlie (oggi i settori non hanno un ordine, `DiscountRepository.cs:48`).
+  cui il database restituisce le righe figlie (oggi i settori non hanno un ordine, `DiscountRepository.WithChildren`).
 - **Dati coperti**: nome, codice, `isCodeRequired`, periodi con giorni e fasce orarie, tipo, valore, ambito con categorie e settori, numero
   massimo di utilizzi e stato. Stanno in più tabelle: un token della sola riga di `catalog.pricing_discounts` (come `xmin`) non basta, e
   cambierebbe anche con `used_count`.
@@ -562,7 +567,7 @@ Con un token con `CatalogRead` e `CatalogPricing`:
 4. Un settore usato solo da uno sconto eliminato con `delete-voucher-item` si può eliminare (niente `discounts` in
    `catalog.sector_in_use`). Dopo l'eliminazione non resta nessuna riga figlia non eliminata, compresi i giorni e le fasce dei periodi.
    Lo stesso con `bulk-delete`, e per un settore usato solo da uno sconto eliminato con `bulk-delete` prima della modifica.
-5. `duplicate-voucher-item` di uno sconto attivo e usato (nessuna API scrive ancora `used_count`: si imposta nel database di prova): 204;
+5. `duplicate-voucher-item` di uno sconto attivo e usato (`used_count` lo scrive Booking quando una prenotazione prende lo sconto): 204;
    la copia ha codice e nome con " copia", è spenta, con zero utilizzi e tutto il resto uguale, periodi, giorni e fasce compresi. Di
    nuovo: " copia 2". Con un codice di 60 caratteri: la copia ne ha al massimo 60.
 6. Due `duplicate-voucher-item` dello stesso sconto nello stesso momento: due 204 e due codici diversi. Una chiamata con due sconti dello

@@ -55,7 +55,7 @@ import {
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { PeriodCalendar } from '../../../../shared/ui/datepickers/period-calendar/period-calendar';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
-import { periodOverlapError, rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
+import { rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
@@ -73,8 +73,6 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
   readonly isNextSeason = input.required<boolean>();
   /** First and last day of the season of the tab: the days outside cannot be chosen. */
   readonly season = input<SeasonPeriodInterval | null>(null);
-  /** The date intervals the season has already: the new ones cannot overlap them. */
-  readonly seasonIntervals = input<readonly SeasonPeriodInterval[]>([]);
   /** The periods the season has already: the new one cannot have the name of one of them. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
   readonly added = output<void>();
@@ -114,7 +112,7 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
         ? { kind: 'seasons.ranges.max', max: MAX_SEASON_PERIOD_RANGES }
         : undefined,
     );
-    noOverlaps(path.ranges, () => this.seasonIntervals());
+    noOverlaps(path.ranges);
     readonly(path, () => this.isLoading());
   });
   protected readonly nameError = this.validationText.message(this.draftForm.name);
@@ -122,11 +120,8 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
     this.draftForm.ranges,
     'management.settings.seasons.add_popup.field_names.interval',
   );
-  /** The days of the other periods of the season and of the intervals chosen already. */
-  protected readonly takenIntervals = computed(() => [
-    ...this.seasonIntervals(),
-    ...this.draft().ranges,
-  ]);
+  /** The days of the intervals chosen already: those of the other periods can be chosen too. */
+  protected readonly takenIntervals = computed(() => this.draft().ranges);
   /** The backend creates a period only in a season with both its days. */
   protected readonly isSeasonMissing = computed(() => !this.season());
   protected readonly canSave = computed(() => this.draftForm().valid() && !this.isSeasonMissing());
@@ -169,10 +164,6 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
         }
         if (problem.code === ApiErrorCode.PricingPeriodOutsideSeason) {
           return apiFieldError(this.draftForm.ranges, problem.code);
-        }
-        const overlap = periodOverlapError(problem, this.draftForm.ranges);
-        if (overlap) {
-          return overlap;
         }
         const ranges = rangesErrors(problem, this.draftForm.ranges);
         if (!ranges.length) {

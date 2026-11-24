@@ -1,10 +1,10 @@
 <app-section-title
   [text]="'management.settings.services.form.validity.services_title' | translate"
 />
-<app-toggle [formField]="isAllServicesEnabled()">
+<app-toggle [checked]="isAllOn()" [disabled]="isAllLocked()" (checkedChange)="toggleAll($event)">
   {{ 'management.settings.services.form.validity.all_services' | translate }}
 </app-toggle>
-@if (!isAllServicesEnabled()().value()) {
+@if (!isAllOn()) {
   @for (group of groups(); track group.title) {
     <app-expansion-panel [title]="group.title" [pathIcon]="groupIcons">
       @if (group.services.length) {
@@ -38,7 +38,7 @@
 }
 @if (
   validationText.text(
-    isAllServicesEnabled(),
+    idBarServices(),
     'management.settings.services.form.validity.field_names.service'
   );
   as error

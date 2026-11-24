@@ -55,17 +55,17 @@ articoli.
   e 4) il testo del `code` con questi `args`; per la tabella (sezione 1) e la tendina (sezione 2) mostra un testo
   senza i singoli errori.
 - **Valori che non si leggono**: un id che non è un UUID o un numero che non entra in un intero a 32 bit non arrivano
-  ai validatori. Oggi il backend risponde 400 `validation.failed` senza `errors[]` (`BadHttpRequestException` in
-  `Boot/Web/ProblemDetailsWriter.cs`); l'agente verifica con lo sviluppatore che fuori da Development la risposta sia
-  la stessa (`RouteHandlerOptions.ThrowOnBadRequest` non è impostato in `Boot/Program.cs`). Il frontend non manda
-  questi valori.
+  ai validatori: in Development 400 `validation.failed` senza `errors[]` (`BadHttpRequestException` in
+  `Boot/Web/ProblemDetailsWriter.cs`), negli altri ambienti 400 senza corpo (`Boot/Program.cs` non imposta
+  `RouteHandlerOptions.ThrowOnBadRequest`). Il frontend non manda questi valori.
 - **Prenotazioni (modulo Booking)**: Booking usa gli articoli tramite il loro `public_id`, senza chiavi esterne
-  (`resource_id` in `ResourceConsumptionConfiguration.cs`), e `booking.resource_availability_daily.total_qty` copia la
-  giacenza del magazzino. Le API di questo documento cambiano la quantità totale (sezioni 3, 4 e 6) o eliminano
-  articoli (sezione 5) senza controllare né aggiornare Booking, come fanno oggi `PUT` e `DELETE` di
-  `/api/catalog/inventory-items/{id}` (`InventoryService.UpdateAsync` e `DeleteAsync`). L'agente chiede allo
-  sviluppatore se servono controlli o aggiornamenti su Booking; se ne nasce un errore nuovo, va scritto qui con status e
-  `code`, perché il frontend lo mostri.
+  (`resource_id` in `ResourceConsumptionConfiguration.cs`), e legge le quantità da Catalog **ogni volta** che salva una
+  prenotazione (`InventoryPlanner.PlanAsync`, `BookingCatalog.ListInventoryAsync`): non c'è nessuna copia da aggiornare
+  (`booking.resource_availability_daily` esiste ma nessun codice la scrive o la legge). Le API di questo documento cambiano la
+  quantità totale (sezioni 3, 4 e 6) o eliminano articoli (sezione 5) senza guardare gli impegni delle prenotazioni, come fanno
+  oggi `PUT` e `DELETE` di `/api/catalog/inventory-items/{id}`: si può scendere sotto la quantità già impegnata, e da quel momento
+  modificare quelle prenotazioni chiede conferma (409 `booking.service_capacity_exceeded`). L'agente chiede allo sviluppatore se
+  serve un controllo; se ne nasce un errore nuovo, va scritto qui con status e `code`, perché il frontend lo mostri.
 
 ## 1. POST /api/catalog/inventory-items-list
 
@@ -196,15 +196,10 @@ Listino (tendina "Seleziona articolo"). È **una sola API per le due pagine**: l
 
 ### Cosa ci serve
 
-- **Un'API nuova**, oppure, in alternativa, **la modifica di `GET /api/catalog/inventory-items/lookup`** perché diventi
-  questa: rotta, metodo, risposta e ordine di questa sezione (oggi la lookup è una GET e risponde
-  `[{ id, name, articleCode }]` per nome con l'ordine del database). Quale delle due strade seguire lo decide lo
-  sviluppatore backend: l'agente glielo chiede prima di scrivere codice. Al frontend serve solo che esista l'API
-  descritta qui.
-- Gli articoli sono quelli di `GET /api/catalog/inventory-items/lookup` (`InventoryService.LookupAsync`,
-  `InventoryItemRepository.ListAllAsync`): tutti quelli dello stabilimento, senza gli eliminati. Se lo sviluppatore
-  sceglie di modificare la lookup, `InventoryService.LookupAsync` deve continuare a servire
-  `ConfigSnapshotBuilder` (`Application/Services/ConfigSnapshotBuilder.cs`), che la usa per contare gli articoli.
+- **Un'API nuova**. `GET /api/catalog/inventory-items/lookup` (`[{ id, name, articleCode }]`, per nome con l'ordine del
+  database) resta com'è: la usa anche `ConfigSnapshotBuilder`, e lo dice pure `Listino - Frontend requests.md`, sezione 17.
+- Gli articoli sono quelli di quella lookup (`InventoryService.LookupAsync`, `InventoryItemRepository.ListAllAsync`): tutti
+  quelli dello stabilimento, senza gli eliminati.
 - **Permesso**: `CatalogRead`, come le altre tendine del Listino. Ogni ruolo con `InventoryRead` ha anche
   `CatalogRead` (`Shared/Security/RolePermissions.cs`), quindi la tendina la vede chi apre il Listino o le Impostazioni
   magazzino.
@@ -496,10 +491,9 @@ sola chiamata, tutto o niente**. È un'**API nuova**: oggi il backend non ha un 
     bastano, perché la violazione dell'indice diventa un 500 `server.unexpected`.
 - Se lo stesso id compare più volte, si fa una copia sola.
 - **Come farlo lo sceglie lo sviluppatore del backend** (metodo nuovo di `InventoryService`, transazione, come evitare
-  il 500 sul nome...), purché il risultato sia questo. L'agente gli chiede anche **quale voce del registro** usare per
-  le copie: `catalog.inventory_item_created`, come la creazione, oppure un codice nuovo
-  `catalog.inventory_item_duplicated`, come `catalog.service_duplicated` (`Shared/Contracts/Audit/AuditActionCodes.cs`).
-  Il frontend non legge il registro.
+  il 500 sul nome...), purché il risultato sia questo.
+- **Registro**: una voce `catalog.inventory_item_created` per ogni copia, come la creazione. Non un codice nuovo: il Log di
+  Gestione utenti (`user-management-logs`) mostra e filtra i codici che conosce.
 - Il database non ha un vincolo "soglia fino alla quantità totale" (c'è solo `ck_catalog_inventory_items_total_quantity`,
   `total_quantity >= 0`): un articolo vecchio con la soglia oltre il totale, copiato con `InventoryItem.Create`, oggi
   darebbe un 500 (`ArgumentException` in `InventoryItem.Update`). Cosa fare in quel caso lo decide lo sviluppatore:
@@ -543,10 +537,13 @@ Il frontend mostra ogni errore di questa API nell'avviso "Operazione non riuscit
 Oggi, se due utenti modificano lo stesso articolo, vince chi salva per ultimo: il popup "Modifica articolo" rimanda
 tutto l'articolo letto all'apertura e cancella, senza che nessuno se ne accorga, quello che un altro utente ha cambiato
 nel frattempo (per esempio i pezzi aggiunti con la sezione 3). Il backend non ha un controllo di concorrenza sugli
-aggiornamenti: nessun token di concorrenza in `InventoryItemConfiguration`, nessun `If-Match`. Il frontend chiede lo
-schema di **concorrenza ottimistica** che il backend ha già progettato per le prenotazioni offline
-(`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un **codice di errore
-unico per tutte le API**: `resource.version_conflict`.
+aggiornamenti: nessun token di concorrenza in `InventoryItemConfiguration`, nessun `If-Match`. Il frontend chiede la
+**concorrenza ottimistica** degli altri documenti, con un **codice di errore unico per tutte le API**:
+`resource.version_conflict`.
+
+**Non è quello che Booking ha già per le prenotazioni** (`Endpoints.cs:253-255`, `ReservationService.cs:114-115`): lì
+l'`If-Match` è un numero, se manca o non si legge non si controlla niente, e il conflitto è 412 o 409
+`booking.version_conflict`. Qui valgono le regole sotto: con un altro codice il frontend non rileggerebbe i dati.
 
 ### Cosa ci serve
 
@@ -560,9 +557,11 @@ unico per tutte le API**: `resource.version_conflict`.
   anche quando risponde 204 senza corpo.
 - Il 409 `resource.version_conflict` si controlla dopo il 404 dell'elemento e prima degli altri 409 (per esempio
   `inventory.name_taken`).
-- **Come farlo lo sceglie lo sviluppatore del backend** (il token `xmin` di Npgsql come nel documento offline, un hash
-  dei dati coperti dalla versione, un contatore...): l'agente glielo chiede prima di scrivere codice. Il frontend tratta
-  la versione come una stringa opaca e non la confronta mai.
+- **Controllo e salvataggio sono una cosa sola**: di due salvataggi dello stesso articolo nello stesso momento con lo stesso
+  `If-Match` uno riesce e l'altro risponde 409 `resource.version_conflict`; mai i dati di tutti e due mescolati, mai un 500.
+- **Come farlo lo sceglie lo sviluppatore del backend** (il token `xmin` di Npgsql, un hash dei dati coperti dalla versione,
+  un contatore...): l'agente glielo chiede prima di scrivere codice. Il frontend tratta la versione come una stringa opaca
+  e non la confronta mai.
 
 ### API coinvolte
 

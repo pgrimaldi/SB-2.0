@@ -69,12 +69,22 @@ immagini stanno nell'app: al backend manda il nome e dal backend vuole indietro 
     in `catalog.map_layout_special_icons` o in una tabella nuova), con la loro migration; il catalogo non serve alla pagina
     (serve però alla legenda di Prenotazioni online: `Prenotazioni online - Frontend requests.md`, sezione 3);
   - **legame con il catalogo**: per ogni nome del frontend un'icona attiva di `catalog.map_icons` con lo stesso `name`
-    (`varchar(255)`, oggi non unico), della categoria e dello stato giusti; si salva il suo `media_asset_id` come oggi e
-    si restituisce il suo `name`. Funziona solo se il catalogo contiene già, una volta sola, tutti i nomi degli elenchi:
-    va controllato sui dati, che il frontend non può vedere.
+    (`varchar(255)`, oggi non unico), della categoria giusta; si salva il suo `media_asset_id` come oggi e si restituisce
+    il suo `name`. Funziona solo se il catalogo contiene già, una volta sola, tutti i nomi degli elenchi: va controllato
+    sui dati, che il frontend non può vedere. **Lo stato non conta**: un'icona ne ha uno solo (`MapIcon.Type`), mentre lo
+    stesso nome può stare in Libero e in Occupato. Il controllo di oggi sullo stato (`MapSettingsService.IconAsync`) qui
+    non va usato: rifiuterebbe un'icona valida con 422 `map.icon_not_allowed`, che dalle API 1 e 2 non esce mai (il
+    frontend non conosce quel codice).
 
   Quale strada usare lo decide lo sviluppatore backend: l'agente gli presenta le due strade e glielo chiede prima di
   scrivere codice. Il contratto di questo documento resta fisso.
+- **Sito pubblico e snapshot**: la stessa `MapSettingsDto` va in `GET /api/catalog/public/bathhouses/{slug}/map`
+  (`PublicBathhouseService.MapAsync`, `MapProjection.MapAsync`) e nello snapshot `beach_map` (`ConfigSnapshotBuilder`).
+  Le immagini dei nomi stanno solo nell'app del gestionale: con le colonne nuove il sito riceverebbe un'icona scelta con
+  `url` `null` e `isDefault` falso, cioè senza immagine e senza nemmeno quella predefinita. Con **qualunque strada** ogni
+  sfondo e ogni icona scelti con un nome hanno in `url` un'immagine vera. I file sono in
+  `frontend/summer-booking-front-office/src/assets/images/MapConfiguration_<Nome>` (`.png` gli sfondi, `.svg` le icone):
+  come caricarli fra i media lo decide lo sviluppatore backend, e l'agente glielo chiede insieme alla strada.
 
 ## 1. PUT /api/catalog/map/update-background
 
@@ -105,7 +115,8 @@ sfondo (sezione 4).
 
 1. Lo sfondo della mappa diventa quello con quel nome, **non** caricato dal gestore (`isCustom` falso): lo sfondo
    caricato, se c'era, non si usa più, come oggi quando `PUT /api/catalog/map/settings` riceve `BackgroundIconId`.
-   Se cancellare l'immagine caricata lo decide lo sviluppatore backend.
+   Se cancellare l'immagine caricata lo decide lo sviluppatore backend. Con le colonne nuove si azzera anche il
+   riferimento di prima (`template_asset_id`).
 2. Reticolo, inclinazione, colore di sfondo, icone e `resetDeletesBookings` non cambiano.
 3. Nel registro una voce `catalog.map_background_updated`, come `UploadBackgroundAsync` e `RemoveBackgroundAsync`, con
    il nome dello sfondo nei metadati.
@@ -215,7 +226,10 @@ In una sola transazione, tutto o niente:
    elimina postazioni.
 5. Reticolo: file = `rowQuantity`, colonne = `maxRowItemQuantity`, inclinazione = `tiltDegrees`.
 6. Icone: Libero e Occupato dell'ombrellone e, per ogni `variant`, Libero e Occupato dell'articolo personalizzato,
-   salvati come nomi (vedi "Sfondi e icone sono nomi del frontend"); `null` toglie l'icona scelta.
+   salvati come nomi (vedi "Sfondi e icone sono nomi del frontend"); `null` toglie l'icona scelta. Con le colonne nuove
+   si azzerano anche i riferimenti di prima: `umbrella_free_asset_id`, `umbrella_occupied_asset_id` e le righe di
+   `catalog.map_layout_special_icons`. Se restano, `MapProjection.SettingsAsync` (funzione `Slot`) ridà un'icona scelta
+   senza nome (`isDefault` falso) e la pagina la mostra come "Icona non esistente", con Salva spento, a ogni rilettura.
 7. Sfondo, colore di sfondo e `resetDeletesBookings` non cambiano.
 8. Nel registro, come le tre API che sostituisce: `catalog.map_settings_updated` con `rows`, `columns` e
    `tiltDegrees`, e `catalog.map_icons_updated`.
@@ -289,9 +303,11 @@ scelte. Serve un campo **`name`** nello sfondo e in ogni icona:
     un'icona o la svuota. Così `update-configuration` (sezione 2) non riceve mai `null` al posto di un'icona che
     l'utente non ha visto.
 - Il resto della risposta non cambia: `iconId`, `url`, `isDefault`, `isCustom`, `rows`, `columns`, `tiltDegrees`,
-  `backgroundColor`, `resetDeletesBookings`, e `customArticles` sempre con 8 voci, una per `variant` da 1 a 8. Dello
-  sfondo caricato il frontend usa `url` per l'anteprima, come oggi. In più ci sono `backgroundVersion` e
-  `configurationVersion` della sezione 4 (nell'esempio sotto, in fondo).
+  `backgroundColor`, `resetDeletesBookings`, e `customArticles` sempre con 8 voci, una per `variant` da 1 a 8. Degli
+  sfondi e delle icone scelti con un nome `url` è l'immagine per sito e snapshot ("Sfondi e icone sono nomi del
+  frontend"): il gestionale non la usa. Dello sfondo caricato il frontend usa `url` per l'anteprima, come oggi, e solo se
+  è un link https o dell'app (`Informazioni stabilimento - Frontend requests.md`, sezione 9). In più ci sono
+  `backgroundVersion` e `configurationVersion` della sezione 4 (nell'esempio sotto, in fondo).
 - Vale per ogni risposta che contiene `MapSettingsDto`: `GET /api/catalog/map/settings`, `POST` e
   `DELETE /api/catalog/map/background`, `settings` di `POST /api/catalog/map/reset` e di `GET /api/catalog/map`. Il
   frontend usa le prime quattro.
@@ -302,24 +318,24 @@ scelte. Serve un campo **`name`** nello sfondo e in ogni icona:
   "columns": 16,
   "tiltDegrees": 8,
   "backgroundColor": null,
-  "background": { "iconId": null, "name": "BackgroundBeach", "url": null, "isCustom": false },
+  "background": { "iconId": null, "name": "BackgroundBeach", "url": "https://cdn.summerbooking.it/backgrounds/BackgroundBeach.png", "isCustom": false },
   "icons": {
     "umbrella": {
-      "free": { "iconId": null, "name": "Umbrella3", "url": null, "isDefault": false },
-      "occupied": { "iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false }
+      "free": { "iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false },
+      "occupied": { "iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false }
     },
     "customArticles": [
       {
         "variant": 1,
         "icons": {
-          "free": { "iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false },
-          "occupied": { "iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false }
+          "free": { "iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false },
+          "occupied": { "iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false }
         }
       },
       {
         "variant": 2,
         "icons": {
-          "free": { "iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false },
+          "free": { "iconId": null, "name": "MixedSpot8", "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg", "isDefault": false },
           "occupied": { "iconId": "0b7d0f7e-6f3a-4c1e-9d2b-5a8e4c3f2a10", "name": null, "url": "https://cdn.summerbooking.it/icons/ombrellone-occupato.svg", "isDefault": true }
         }
       }
@@ -365,11 +381,13 @@ hanno letto all'apertura della pagina (sezioni 1 e 2) e cancellano, senza che ne
 altro utente ha cambiato nel frattempo (per esempio file e colonne aggiunte nell'editor della mappa, che "Imposta
 reticolo" riporterebbe alle misure lette). Il backend non ha un controllo di concorrenza sugli aggiornamenti della
 mappa: nessun token di concorrenza in `MapLayoutConfiguration` e `MapLayoutSpecialIconConfiguration`, nessun
-`If-Match`. Il frontend chiede lo schema di **concorrenza ottimistica** che il backend ha già progettato per le
-prenotazioni offline (`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un
-**codice di errore unico per tutte le API**: `resource.version_conflict`. Lo stesso schema e lo stesso codice sono
-chiesti in `Impostazioni magazzino - Frontend requests.md` (sezione 7): se lì sono già fatti, qui si aggiungono solo
-le API della tabella sotto.
+`If-Match`. Il frontend chiede la **concorrenza ottimistica** degli altri documenti, con un **codice di errore unico per
+tutte le API**: `resource.version_conflict`. È lo stesso di `Impostazioni magazzino - Frontend requests.md` (sezione 7):
+se lì è già fatto, qui si aggiungono solo le API della tabella sotto.
+
+**Non è quello che Booking ha già per le prenotazioni** (`Endpoints.cs:253-255`, `ReservationService.cs:114-115`): lì
+l'`If-Match` è un numero, se manca o non si legge non si controlla niente, e il conflitto è 412 o 409
+`booking.version_conflict`. Qui valgono le regole sotto: con un altro codice il frontend non rileggerebbe i dati.
 
 ### Cosa ci serve
 
@@ -388,6 +406,12 @@ le API della tabella sotto.
   - Ognuna cambia ogni volta che cambiano i suoi dati, e solo allora: salvare lo sfondo non cambia
     `configurationVersion` e salvare il reticolo non cambia `backgroundVersion`, altrimenti un riquadro farebbe
     fallire il Salva dell'altro.
+  - **Mai `null`, anche senza una mappa salvata** (`MapSettingsService.GetSettingsAsync` lavora anche senza riga): senza
+    versione il frontend non manda `If-Match` e ogni Salva darebbe 409. Il primo salvataggio con la versione letta riesce
+    e crea la mappa.
+  - **Riga eliminata** (`deleted_at` valorizzato, per esempio da un'importazione: nessun codice la elimina oggi): vale
+    come mappa mai salvata, e il salvataggio riesce. Oggi darebbe un 500: il filtro globale la nasconde (`MapLayout` è
+    `ISoftDeletable`) ma l'indice unico `uq_catalog_map_layouts_property` non ha il filtro.
 - **In ogni risposta con `MapSettingsDto`**: `GET /api/catalog/map/settings`, `POST` e
   `DELETE /api/catalog/map/background`, `settings` di `POST /api/catalog/map/reset` e di `GET /api/catalog/map`.
   Dopo il caricamento o l'eliminazione dello sfondo personalizzato il frontend prende da lì la nuova
@@ -400,9 +424,12 @@ le API della tabella sotto.
   `ETag: "<version>"`, anche se risponde 204 senza corpo.
 - Il 409 `resource.version_conflict` si controlla dopo validazione e stabilimento e prima di
   `map.spots_outside_grid`.
+- **Controllo e salvataggio sono una cosa sola**: di due salvataggi della stessa API nello stesso momento con lo stesso
+  `If-Match` uno risponde 204 e l'altro 409 `resource.version_conflict`; mai i dati di tutti e due mescolati, mai un 500.
+  Vale anche per il primo in assoluto dello stabilimento, e per i due riquadri salvati insieme: riescono tutti e due.
 - **Come farlo lo sceglie lo sviluppatore del backend** (un hash dei dati coperti da ogni versione, due contatori...):
-  l'agente glielo chiede prima di scrivere codice. Un solo token di riga su `catalog.map_layouts` (come `xmin` nel
-  documento offline) non basta: cambierebbe con tutti e due i salvataggi, e le icone degli articoli personalizzati
+  l'agente glielo chiede prima di scrivere codice. Un solo token di riga su `catalog.map_layouts` (come `xmin`) non
+  basta: cambierebbe con tutti e due i salvataggi, e le icone degli articoli personalizzati
   stanno in un'altra tabella (`catalog.map_layout_special_icons`). Il frontend tratta le versioni come stringhe opache
   e non le confronta mai.
 
@@ -459,7 +486,7 @@ Con uno stabilimento di prova e un token con `catalog.settings`:
 
 API 3, con un token con `catalog.read` e `catalog.settings`:
 
-1. Su una mappa mai configurata: `background` `null` e tutti i `name` delle icone `null`.
+1. Su una mappa mai configurata: `background` `null`, tutti i `name` delle icone `null` e le due versioni valorizzate.
 2. Dopo `update-background` con `BackgroundBoardwalk`: `background.name` `"BackgroundBoardwalk"`, `isCustom` false.
 3. Dopo `POST /api/catalog/map/background` con un'immagine: la sua risposta e la `GET` hanno `background.name` `null`,
    `url` valorizzato e `isCustom` true. Dopo `DELETE /api/catalog/map/background`: `background` `null`.
@@ -471,6 +498,9 @@ API 3, con un token con `catalog.read` e `catalog.settings`:
    `null` e `isDefault` falso.
 6. `POST /api/catalog/map/reset`: in `settings` gli stessi nomi di prima (il reset non tocca sfondo e icone).
 7. Ogni `name` restituito è uno dei nomi degli elenchi, identico a quello salvato.
+8. Dopo `update-background` e `update-configuration` con l'esempio: `GET /api/catalog/public/bathhouses/{slug}/map` ha lo
+   sfondo e le icone con un `url` che si apre. Una mappa con icone scelte prima con gli id del catalogo, salvata con
+   `update-configuration`: la rilettura non ha nessuna icona con `name` `null` e `isDefault` falso.
 
 API 4, con un token con `catalog.read` e `catalog.settings`:
 
@@ -489,3 +519,7 @@ API 4, con un token con `catalog.read` e `catalog.settings`:
    prima del caricamento: 409.
 6. `POST /api/catalog/map/reset`: `settings` ha una `configurationVersion` nuova e la `backgroundVersion` di prima.
 7. `update-background` o `update-configuration` senza `If-Match`: 409 `resource.version_conflict`.
+8. Mappa mai configurata, e mappa con la riga eliminata: `update-configuration` e poi `update-background` con le versioni
+   lette: 204 tutti e due.
+9. Due `update-configuration` nello stesso momento con lo stesso `If-Match` e valori diversi, anche su una mappa mai
+   configurata: uno 204 e uno 409, mai 500.

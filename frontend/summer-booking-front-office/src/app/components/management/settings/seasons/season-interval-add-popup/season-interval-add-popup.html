@@ -11,7 +11,7 @@
         [pathIcon]="dateIcon"
         [minDate]="season()?.startsOn ?? null"
         [maxDate]="season()?.endsOn ?? null"
-        [disabledPeriods]="seasonIntervals()"
+        [disabledPeriods]="otherIntervals()"
         [formField]="draftForm.startsOn"
         [error]="startsOnError()"
       />
@@ -21,7 +21,7 @@
         [pathIcon]="dateIcon"
         [minDate]="endsOnMin()"
         [maxDate]="endsOnMax()"
-        [disabledPeriods]="seasonIntervals()"
+        [disabledPeriods]="otherIntervals()"
         [formField]="draftForm.endsOn"
         [error]="endsOnError()"
       />

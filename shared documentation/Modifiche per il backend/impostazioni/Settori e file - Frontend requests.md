@@ -170,7 +170,12 @@ più settori in una sola chiamata, tutto o niente**. È un'**API nuova**: il fro
   prezzi ridotti o prezzi intermedi. Oggi `CountUsagesAsync` (`SeasonSectorRepositories.cs:71`) conta solo
   `pricing_price_list_sector_prices`: un settore abilitato, o con soli prezzi per periodo, si potrebbe eliminare, e il listino
   resterebbe limitato a un settore che non c'è più. Contano in `priceLists`, ogni listino una volta; le convenzioni restano contate
-  come oggi.
+  come oggi. **Di un articolo aggiuntivo contano solo le righe che il suo pannello mostra** (prezzi stagionali, per periodo e
+  intermedi), non i settori abilitati e i prezzi ridotti: il pannello non li mostra e l'utente non potrebbe toglierli, il
+  preventivo non guarda i settori abilitati di un articolo aggiuntivo, e il salvataggio toglie quelli di settori eliminati
+  (`Listino - Frontend requests.md`, sezione 13).
+- **Ordine**: i settori abilitati salvati a parte e i prezzi ridotti per settore nascono con `Listino - Frontend requests.md`, sezione 5.
+  Se questo documento si applica prima, il conteggio si fa sulle tabelle che ci sono e si completa con quello.
 - **Come farlo lo sceglie lo sviluppatore del backend** (metodo nuovo di `SectorService`, conteggi per più settori
   insieme, transazione...), purché il risultato sia questo.
 
@@ -296,11 +301,14 @@ Oggi, se due utenti rinominano lo stesso settore, vince chi salva per ultimo: il
 della riga letta con la tabella (sezione 1) e lo sostituisce, senza che nessuno se ne accorga, anche se un altro
 utente l'ha cambiato nel frattempo. Il backend non ha un controllo di concorrenza sugli aggiornamenti: nessun token
 di concorrenza in `MapSectorConfiguration`, nessun `If-Match` (`SectorService.UpdateAsync`,
-`Application/Services/SectorService.cs:51-61`). Il frontend chiede lo schema di **concorrenza ottimistica** che il
-backend ha già progettato per le prenotazioni offline (`shared documentation/backend/progettazione/19-frontend-offline.md`,
-sezioni 4.4 e 5.8), con un **codice di errore unico per tutte le API**: `resource.version_conflict`. Lo stesso schema
-e lo stesso codice sono chiesti in `Impostazioni magazzino - Frontend requests.md` (sezione 7): se lì sono già fatti,
-qui si aggiungono solo le API della tabella sotto.
+`Application/Services/SectorService.cs:51-61`). Il frontend chiede la **concorrenza ottimistica** degli altri documenti,
+con un **codice di errore unico per tutte le API**: `resource.version_conflict`. È lo stesso di
+`Impostazioni magazzino - Frontend requests.md` (sezione 7): se lì è già fatto, qui si aggiungono solo le API della
+tabella sotto.
+
+**Non è quello che Booking ha già per le prenotazioni** (`Endpoints.cs:253-255`, `ReservationService.cs:114-115`): lì
+l'`If-Match` è un numero, se manca o non si legge non si controlla niente, e il conflitto è 412 o 409
+`booking.version_conflict`. Qui valgono le regole sotto: con un altro codice il frontend non rileggerebbe i dati.
 
 ### Cosa ci serve
 
@@ -315,9 +323,11 @@ qui si aggiungono solo le API della tabella sotto.
   `SectorDto` di oggi.
 - Il 409 `resource.version_conflict` si controlla dopo il 404 `catalog.sector_not_found` (`LoadAsync`) e prima del
   409 `catalog.sector_name_taken` (`EnsureNameFreeAsync`).
-- **Come farlo lo sceglie lo sviluppatore del backend** (il token `xmin` di Npgsql come nel documento offline, un hash
-  dei dati coperti dalla versione, un contatore...): l'agente glielo chiede prima di scrivere codice. Il frontend tratta
-  la versione come una stringa opaca e non la confronta mai.
+- **Controllo e salvataggio sono una cosa sola**: di due `PUT` nello stesso momento dello stesso settore con lo stesso
+  `If-Match` e nomi diversi, una risponde 200 e l'altra 409 `resource.version_conflict`; mai un 500.
+- **Come farlo lo sceglie lo sviluppatore del backend** (un hash del nome, un contatore aggiornato quando cambia il
+  nome...): l'agente glielo chiede prima di scrivere codice. Un token di tutta la riga (come `xmin`) cambierebbe anche con
+  gli altri dati del settore. Il frontend tratta la versione come una stringa opaca e non la confronta mai.
 
 ### API coinvolte
 
@@ -415,6 +425,7 @@ API 2 e 3, con un token con `catalog.settings`:
    con `services` 1 e gli altri conteggi 0; lo stesso con un prezzo automatico (`automaticPrices` 1). Tolto il limite
    dal servizio, o eliminato il servizio: 204. Lo stesso con un pacchetto che ha quel settore solo fra gli abilitati, o solo
    un prezzo per periodo, ridotto o intermedio: 409 con `priceLists` 1; tolto dal pacchetto, o eliminato il pacchetto: 204.
+   Con un articolo aggiuntivo che ha quel settore solo fra gli abilitati o solo nei prezzi ridotti: 204.
 
 Salvataggi contemporanei:
 
@@ -432,5 +443,6 @@ API 4, con un token con `catalog.settings`:
    cambia.
 3. `PUT` senza `If-Match`: 409 `resource.version_conflict`.
 4. Rinominare un settore non cambia la `version` degli altri settori in `sectors-list`.
-5. `PUT` su un settore eliminato, con qualsiasi `If-Match`: 404 `catalog.sector_not_found`. `PUT` con un nome già
+5. Due `PUT` nello stesso momento con lo stesso `If-Match` e nomi diversi: una 200 e una 409 `resource.version_conflict`.
+6. `PUT` su un settore eliminato, con qualsiasi `If-Match`: 404 `catalog.sector_not_found`. `PUT` con un nome già
    usato da un altro settore e una versione vecchia: 409 `resource.version_conflict`, non `catalog.sector_name_taken`.

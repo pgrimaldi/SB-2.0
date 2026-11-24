@@ -140,9 +140,9 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
   `GeneralIcon_CalendarFilled.svg` scelta per tipo di azione (aggiunta, modifica, eliminazione, duplicazione,
   ripristino, accesso…), nome tradotto in `logs.actions.<modulo>.<azione>` con l'icona prima (`SelectOption.icon`). Si
   possono scegliere tutte.
-- Le azioni dei moduli che il backend non ha ancora (prenotazioni, pagamenti, cassa, ordini, database, prenotazioni dei
-  tavoli: `booking.*`, `payment.*`, `cash.*`, `order.*`, `database.*`, `table_booking.*`) hanno già i loro testi nelle 7
-  lingue ma non sono nel filtro: i codici sono chiesti al backend (sezione 9 del documento di richieste della pagina).
+- Mancano i codici di prenotazioni e pagamenti (`booking.*`, `payment.*`) che il backend scrive già: il Log li mostra come
+  codice e il filtro non li ha (`docs/TODO.md`). Quelli che nessun modulo registra ancora (`booking.arrival_reported`,
+  `cash.*`, `order.*`) sono nella sezione 9 del documento di richieste della pagina.
 - L'elenco scorre, è largo quanto il nome più lungo e mai meno del campo, con ogni nome su una riga sola in ogni lingua
   (`isPanelSizedToOptions` di `app-filled-multi-select`).
 - Gli utenti arrivano da `user-combobox` a ogni apertura (`DropdownList`), con la tendina vuota finché arriva la

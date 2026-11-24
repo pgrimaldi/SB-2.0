@@ -5295,7 +5295,6 @@ Prezzi Automatici: creazione prezzo automatico.
       ]
     }
   ],
-  "isAllServicesEnabled": false,
   "idBarServices": [
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"
@@ -5330,7 +5329,6 @@ Prezzi Automatici: creazione prezzo automatico.
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) | `[{"startTime": "09:00", "endTime": "12:00"}, {"startTime": "15:00", "endTime": "17:00"}]` |
 | `validityPeriods[].timeSlots[].startTime` | string (HH:mm) | `09:00` |
 | `validityPeriods[].timeSlots[].endTime` | string (HH:mm) | `12:00` |
-| `isAllServicesEnabled` | boolean | `false` |
 | `idBarServices` | string[] (UUID) | `["8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01", "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"]` |
 | `idStandardServices` | string[] (UUID) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
 | `idHourlyServices` | string[] (UUID) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
@@ -5449,7 +5447,6 @@ Stato: 200 OK.
       ]
     }
   ],
-  "isAllServicesEnabled": false,
   "idBarServices": [
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"
@@ -5480,7 +5477,6 @@ Stato: 200 OK.
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) | `[{"startTime": "12:00", "endTime": "15:00"}, {"startTime": "19:00", "endTime": "23:00"}]` |
 | `validityPeriods[].timeSlots[].startTime` | string (HH:mm) | `12:00` |
 | `validityPeriods[].timeSlots[].endTime` | string (HH:mm) | `15:00` |
-| `isAllServicesEnabled` | boolean | `false` |
 | `idBarServices` | string[] (UUID) | `["8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01", "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"]` |
 | `idStandardServices` | string[] (UUID) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
 | `idHourlyServices` | string[] (UUID) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
@@ -5590,7 +5586,6 @@ Prezzi Automatici: prezzo automatico, salvataggio Prezzi e Validità.
       ]
     }
   ],
-  "isAllServicesEnabled": false,
   "idBarServices": [
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"
@@ -5621,7 +5616,6 @@ Prezzi Automatici: prezzo automatico, salvataggio Prezzi e Validità.
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) | `[{"startTime": "12:00", "endTime": "15:00"}, {"startTime": "19:00", "endTime": "23:00"}]` |
 | `validityPeriods[].timeSlots[].startTime` | string (HH:mm) | `12:00` |
 | `validityPeriods[].timeSlots[].endTime` | string (HH:mm) | `15:00` |
-| `isAllServicesEnabled` | boolean | `false` |
 | `idBarServices` | string[] (UUID) | `["8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01", "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"]` |
 | `idStandardServices` | string[] (UUID) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
 | `idHourlyServices` | string[] (UUID) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
@@ -6881,7 +6875,7 @@ Stato: 200 OK.
   "background": {
     "iconId": null,
     "name": "BackgroundBeach",
-    "url": null,
+    "url": "https://cdn.summerbooking.it/backgrounds/BackgroundBeach.png",
     "isCustom": false
   },
   "icons": {
@@ -6889,13 +6883,13 @@ Stato: 200 OK.
       "free": {
         "iconId": null,
         "name": "Umbrella3",
-        "url": null,
+        "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg",
         "isDefault": false
       },
       "occupied": {
         "iconId": null,
         "name": "MixedSpot4",
-        "url": null,
+        "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg",
         "isDefault": false
       }
     },
@@ -6906,13 +6900,13 @@ Stato: 200 OK.
           "free": {
             "iconId": null,
             "name": "MixedSpot1",
-            "url": null,
+            "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg",
             "isDefault": false
           },
           "occupied": {
             "iconId": null,
             "name": "MixedSpot13",
-            "url": null,
+            "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg",
             "isDefault": false
           }
         }
@@ -6923,7 +6917,7 @@ Stato: 200 OK.
           "free": {
             "iconId": null,
             "name": "MixedSpot8",
-            "url": null,
+            "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg",
             "isDefault": false
           },
           "occupied": {
@@ -6948,35 +6942,35 @@ Stato: 200 OK.
 | `columns` | number (intero) | `16` |
 | `tiltDegrees` | number (intero) | `8` |
 | `backgroundColor` | string (#RRGGBB) \| null | `#F0D8CC` |
-| `background` | MapBackground \| null | `{"iconId": null, "name": "BackgroundBeach", "url": null, "isCustom": false}` |
+| `background` | MapBackground \| null | `{"iconId": null, "name": "BackgroundBeach", "url": "https://cdn.summerbooking.it/backgrounds/BackgroundBeach.png", "isCustom": false}` |
 | `background.iconId` | string (UUID) \| null | `null` |
 | `background.name` | string \| null | `BackgroundBeach` |
-| `background.url` | string (URL) \| null | `null` |
+| `background.url` | string (URL) \| null | `https://cdn.summerbooking.it/backgrounds/BackgroundBeach.png` |
 | `background.isCustom` | boolean | `false` |
-| `icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
-| `icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}` |
-| `icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}` |
+| `icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg", "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
+| `icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}}` |
+| `icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}` |
 | `icons.umbrella.free.iconId` | string (UUID) \| null | `null` |
 | `icons.umbrella.free.name` | string \| null | `Umbrella3` |
-| `icons.umbrella.free.url` | string (URL) \| null | `null` |
+| `icons.umbrella.free.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/Umbrella3.svg` |
 | `icons.umbrella.free.isDefault` | boolean | `false` |
-| `icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}` |
+| `icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}` |
 | `icons.umbrella.occupied.iconId` | string (UUID) \| null | `null` |
 | `icons.umbrella.occupied.name` | string \| null | `MixedSpot4` |
-| `icons.umbrella.occupied.url` | string (URL) \| null | `null` |
+| `icons.umbrella.occupied.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot4.svg` |
 | `icons.umbrella.occupied.isDefault` | boolean | `false` |
-| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg", "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
 | `icons.customArticles[].variant` | number (intero) | `1` |
-| `icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}` |
-| `icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}` |
+| `icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}` |
 | `icons.customArticles[].icons.free.iconId` | string (UUID) \| null | `null` |
 | `icons.customArticles[].icons.free.name` | string \| null | `MixedSpot1` |
-| `icons.customArticles[].icons.free.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot1.svg` |
 | `icons.customArticles[].icons.free.isDefault` | boolean | `false` |
-| `icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}` |
 | `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null | `null` |
 | `icons.customArticles[].icons.occupied.name` | string \| null | `MixedSpot13` |
-| `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot13.svg` |
 | `icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
 | `resetDeletesBookings` | boolean | `false` |
 | `backgroundVersion` | string | `953d1375` |
@@ -7090,13 +7084,13 @@ Stato: 200 OK.
       "free": {
         "iconId": null,
         "name": "Umbrella3",
-        "url": null,
+        "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg",
         "isDefault": false
       },
       "occupied": {
         "iconId": null,
         "name": "MixedSpot4",
-        "url": null,
+        "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg",
         "isDefault": false
       }
     },
@@ -7107,13 +7101,13 @@ Stato: 200 OK.
           "free": {
             "iconId": null,
             "name": "MixedSpot1",
-            "url": null,
+            "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg",
             "isDefault": false
           },
           "occupied": {
             "iconId": null,
             "name": "MixedSpot13",
-            "url": null,
+            "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg",
             "isDefault": false
           }
         }
@@ -7124,7 +7118,7 @@ Stato: 200 OK.
           "free": {
             "iconId": null,
             "name": "MixedSpot8",
-            "url": null,
+            "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg",
             "isDefault": false
           },
           "occupied": {
@@ -7154,30 +7148,30 @@ Stato: 200 OK.
 | `background.name` | string \| null | `null` |
 | `background.url` | string (URL) \| null | `https://cdn.summerbooking.it/backgrounds/sfondo-lido-azzurro.png` |
 | `background.isCustom` | boolean | `true` |
-| `icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
-| `icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}` |
-| `icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}` |
+| `icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg", "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
+| `icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}}` |
+| `icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}` |
 | `icons.umbrella.free.iconId` | string (UUID) \| null | `null` |
 | `icons.umbrella.free.name` | string \| null | `Umbrella3` |
-| `icons.umbrella.free.url` | string (URL) \| null | `null` |
+| `icons.umbrella.free.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/Umbrella3.svg` |
 | `icons.umbrella.free.isDefault` | boolean | `false` |
-| `icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}` |
+| `icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}` |
 | `icons.umbrella.occupied.iconId` | string (UUID) \| null | `null` |
 | `icons.umbrella.occupied.name` | string \| null | `MixedSpot4` |
-| `icons.umbrella.occupied.url` | string (URL) \| null | `null` |
+| `icons.umbrella.occupied.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot4.svg` |
 | `icons.umbrella.occupied.isDefault` | boolean | `false` |
-| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg", "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
 | `icons.customArticles[].variant` | number (intero) | `1` |
-| `icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}` |
-| `icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}` |
+| `icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}` |
 | `icons.customArticles[].icons.free.iconId` | string (UUID) \| null | `null` |
 | `icons.customArticles[].icons.free.name` | string \| null | `MixedSpot1` |
-| `icons.customArticles[].icons.free.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot1.svg` |
 | `icons.customArticles[].icons.free.isDefault` | boolean | `false` |
-| `icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}` |
 | `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null | `null` |
 | `icons.customArticles[].icons.occupied.name` | string \| null | `MixedSpot13` |
-| `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot13.svg` |
 | `icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
 | `resetDeletesBookings` | boolean | `false` |
 | `backgroundVersion` | string | `b0a7f6ba` |
@@ -7207,13 +7201,13 @@ Stato: 200 OK.
       "free": {
         "iconId": null,
         "name": "Umbrella3",
-        "url": null,
+        "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg",
         "isDefault": false
       },
       "occupied": {
         "iconId": null,
         "name": "MixedSpot4",
-        "url": null,
+        "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg",
         "isDefault": false
       }
     },
@@ -7224,13 +7218,13 @@ Stato: 200 OK.
           "free": {
             "iconId": null,
             "name": "MixedSpot1",
-            "url": null,
+            "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg",
             "isDefault": false
           },
           "occupied": {
             "iconId": null,
             "name": "MixedSpot13",
-            "url": null,
+            "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg",
             "isDefault": false
           }
         }
@@ -7241,7 +7235,7 @@ Stato: 200 OK.
           "free": {
             "iconId": null,
             "name": "MixedSpot8",
-            "url": null,
+            "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg",
             "isDefault": false
           },
           "occupied": {
@@ -7267,30 +7261,30 @@ Stato: 200 OK.
 | `tiltDegrees` | number (intero) | `8` |
 | `backgroundColor` | string (#RRGGBB) \| null | `#F0D8CC` |
 | `background` | MapBackground \| null | `null` |
-| `icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
-| `icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}` |
-| `icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}` |
+| `icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg", "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
+| `icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}}` |
+| `icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}` |
 | `icons.umbrella.free.iconId` | string (UUID) \| null | `null` |
 | `icons.umbrella.free.name` | string \| null | `Umbrella3` |
-| `icons.umbrella.free.url` | string (URL) \| null | `null` |
+| `icons.umbrella.free.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/Umbrella3.svg` |
 | `icons.umbrella.free.isDefault` | boolean | `false` |
-| `icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}` |
+| `icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}` |
 | `icons.umbrella.occupied.iconId` | string (UUID) \| null | `null` |
 | `icons.umbrella.occupied.name` | string \| null | `MixedSpot4` |
-| `icons.umbrella.occupied.url` | string (URL) \| null | `null` |
+| `icons.umbrella.occupied.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot4.svg` |
 | `icons.umbrella.occupied.isDefault` | boolean | `false` |
-| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg", "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
 | `icons.customArticles[].variant` | number (intero) | `1` |
-| `icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}` |
-| `icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}` |
+| `icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}` |
 | `icons.customArticles[].icons.free.iconId` | string (UUID) \| null | `null` |
 | `icons.customArticles[].icons.free.name` | string \| null | `MixedSpot1` |
-| `icons.customArticles[].icons.free.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot1.svg` |
 | `icons.customArticles[].icons.free.isDefault` | boolean | `false` |
-| `icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}` |
 | `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null | `null` |
 | `icons.customArticles[].icons.occupied.name` | string \| null | `MixedSpot13` |
-| `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot13.svg` |
 | `icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
 | `resetDeletesBookings` | boolean | `false` |
 | `backgroundVersion` | string | `3828b8cd` |
@@ -7318,7 +7312,7 @@ Stato: 200 OK.
     "background": {
       "iconId": null,
       "name": "BackgroundBeach",
-      "url": null,
+      "url": "https://cdn.summerbooking.it/backgrounds/BackgroundBeach.png",
       "isCustom": false
     },
     "icons": {
@@ -7326,13 +7320,13 @@ Stato: 200 OK.
         "free": {
           "iconId": null,
           "name": "Umbrella3",
-          "url": null,
+          "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg",
           "isDefault": false
         },
         "occupied": {
           "iconId": null,
           "name": "MixedSpot4",
-          "url": null,
+          "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg",
           "isDefault": false
         }
       },
@@ -7343,13 +7337,13 @@ Stato: 200 OK.
             "free": {
               "iconId": null,
               "name": "MixedSpot1",
-              "url": null,
+              "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg",
               "isDefault": false
             },
             "occupied": {
               "iconId": null,
               "name": "MixedSpot13",
-              "url": null,
+              "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg",
               "isDefault": false
             }
           }
@@ -7360,7 +7354,7 @@ Stato: 200 OK.
             "free": {
               "iconId": null,
               "name": "MixedSpot8",
-              "url": null,
+              "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg",
               "isDefault": false
             },
             "occupied": {
@@ -7391,40 +7385,40 @@ Stato: 200 OK.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `settings` | MapSettings | `{"rows": 1, "columns": 1, "tiltDegrees": 0, "backgroundColor": "#F0D8CC", "background": {"iconId": null, "name": "BackgroundBeach", "url": null, "isCustom": false}, "icons": {"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}, "resetDeletesBookings": false, "backgroundVersion": "953d1375", "configurationVersion": "76b811ec"}` |
+| `settings` | MapSettings | `{"rows": 1, "columns": 1, "tiltDegrees": 0, "backgroundColor": "#F0D8CC", "background": {"iconId": null, "name": "BackgroundBeach", "url": "https://cdn.summerbooking.it/backgrounds/BackgroundBeach.png", "isCustom": false}, "icons": {"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg", "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}, "resetDeletesBookings": false, "backgroundVersion": "953d1375", "configurationVersion": "76b811ec"}` |
 | `settings.rows` | number (intero) | `1` |
 | `settings.columns` | number (intero) | `1` |
 | `settings.tiltDegrees` | number (intero) | `0` |
 | `settings.backgroundColor` | string (#RRGGBB) \| null | `#F0D8CC` |
-| `settings.background` | MapBackground \| null | `{"iconId": null, "name": "BackgroundBeach", "url": null, "isCustom": false}` |
+| `settings.background` | MapBackground \| null | `{"iconId": null, "name": "BackgroundBeach", "url": "https://cdn.summerbooking.it/backgrounds/BackgroundBeach.png", "isCustom": false}` |
 | `settings.background.iconId` | string (UUID) \| null | `null` |
 | `settings.background.name` | string \| null | `BackgroundBeach` |
-| `settings.background.url` | string (URL) \| null | `null` |
+| `settings.background.url` | string (URL) \| null | `https://cdn.summerbooking.it/backgrounds/BackgroundBeach.png` |
 | `settings.background.isCustom` | boolean | `false` |
-| `settings.icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
-| `settings.icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}` |
-| `settings.icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}` |
+| `settings.icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg", "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
+| `settings.icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}}` |
+| `settings.icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": "https://cdn.summerbooking.it/icons/Umbrella3.svg", "isDefault": false}` |
 | `settings.icons.umbrella.free.iconId` | string (UUID) \| null | `null` |
 | `settings.icons.umbrella.free.name` | string \| null | `Umbrella3` |
-| `settings.icons.umbrella.free.url` | string (URL) \| null | `null` |
+| `settings.icons.umbrella.free.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/Umbrella3.svg` |
 | `settings.icons.umbrella.free.isDefault` | boolean | `false` |
-| `settings.icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}` |
+| `settings.icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": "https://cdn.summerbooking.it/icons/MixedSpot4.svg", "isDefault": false}` |
 | `settings.icons.umbrella.occupied.iconId` | string (UUID) \| null | `null` |
 | `settings.icons.umbrella.occupied.name` | string \| null | `MixedSpot4` |
-| `settings.icons.umbrella.occupied.url` | string (URL) \| null | `null` |
+| `settings.icons.umbrella.occupied.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot4.svg` |
 | `settings.icons.umbrella.occupied.isDefault` | boolean | `false` |
-| `settings.icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
+| `settings.icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": "https://cdn.summerbooking.it/icons/MixedSpot8.svg", "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
 | `settings.icons.customArticles[].variant` | number (intero) | `1` |
-| `settings.icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}` |
-| `settings.icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}` |
+| `settings.icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}}` |
+| `settings.icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": "https://cdn.summerbooking.it/icons/MixedSpot1.svg", "isDefault": false}` |
 | `settings.icons.customArticles[].icons.free.iconId` | string (UUID) \| null | `null` |
 | `settings.icons.customArticles[].icons.free.name` | string \| null | `MixedSpot1` |
-| `settings.icons.customArticles[].icons.free.url` | string (URL) \| null | `null` |
+| `settings.icons.customArticles[].icons.free.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot1.svg` |
 | `settings.icons.customArticles[].icons.free.isDefault` | boolean | `false` |
-| `settings.icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}` |
+| `settings.icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": "https://cdn.summerbooking.it/icons/MixedSpot13.svg", "isDefault": false}` |
 | `settings.icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null | `null` |
 | `settings.icons.customArticles[].icons.occupied.name` | string \| null | `MixedSpot13` |
-| `settings.icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
+| `settings.icons.customArticles[].icons.occupied.url` | string (URL) \| null | `https://cdn.summerbooking.it/icons/MixedSpot13.svg` |
 | `settings.icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
 | `settings.resetDeletesBookings` | boolean | `false` |
 | `settings.backgroundVersion` | string | `953d1375` |

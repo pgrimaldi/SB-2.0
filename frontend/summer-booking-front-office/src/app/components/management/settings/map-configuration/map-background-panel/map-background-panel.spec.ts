@@ -95,6 +95,7 @@ describe('MapBackgroundPanel', () => {
     const changed = new MapSettings();
     changed.background = Object.assign(new MapBackground(), {
       name: MapBackgroundImage.BackgroundBoardwalk,
+      url: 'https://example.test/sfondi/BackgroundBoardwalk.png',
     });
     changed.backgroundVersion = 'b2';
     readSettings.mockReturnValue(of(changed));
@@ -114,6 +115,7 @@ describe('MapBackgroundPanel', () => {
     expect(updateBackground).toHaveBeenCalledWith(MapBackgroundImage.BackgroundBeach, 'b1');
     expect(readSettings).toHaveBeenCalledTimes(1);
     expect(slots()[1].classList).toContain('map__background__panel__slot__chosen');
+    expect(element.querySelector('.map__background__panel__delete')).toBeNull();
     expect(action('edit')).toBeDefined();
     expect(document.querySelector('.table__error__popup')).not.toBeNull();
     expect(element.querySelector('.map__background__panel__error')).toBeNull();

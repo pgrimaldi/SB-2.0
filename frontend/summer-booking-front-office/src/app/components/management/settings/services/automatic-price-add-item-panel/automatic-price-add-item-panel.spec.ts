@@ -24,6 +24,7 @@ describe('AutomaticPriceAddItemPanel', () => {
       of(request ? 's9' : ''),
     ),
     uploadAutomaticPriceImage = vi.fn((): Observable<void> => of(undefined)),
+    services = new AutomaticPriceServices(),
   } = {}) => {
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:image');
     vi.spyOn(URL, 'revokeObjectURL').mockReturnValue();
@@ -49,7 +50,7 @@ describe('AutomaticPriceAddItemPanel', () => {
           useValue: {
             createAutomaticPrice,
             uploadAutomaticPriceImage,
-            automaticPriceServices: () => of(new AutomaticPriceServices()),
+            automaticPriceServices: () => of(services),
           },
         },
         { provide: LanguageBehaviour, useValue: { current: signal(Language.It) } },
@@ -88,7 +89,7 @@ describe('AutomaticPriceAddItemPanel', () => {
       form.translations[0].serviceName().value.set('Coperto');
       form.translations[0].description().value.set('A persona');
       form.price().value.set(10);
-      form.isAllServicesEnabled().value.set(true);
+      form.idBarServices().value.set(['b1']);
       await fixture.whenStable();
     };
     return { fixture, panel, form, fill, save, createAutomaticPrice, created: () => created };
@@ -112,7 +113,7 @@ describe('AutomaticPriceAddItemPanel', () => {
     expect(panel['isSaveDisabled']()).toBe(false);
   });
 
-  it('should want a service, unless the price applies to all of them, and send only those in force', async () => {
+  it('should want a service at least and send those chosen', async () => {
     const { panel, form, fill, save, createAutomaticPrice } = await setup({
       createAutomaticPrice: vi.fn(() =>
         throwError(() => new HttpErrorResponse({ status: 500, error: null })),
@@ -120,22 +121,53 @@ describe('AutomaticPriceAddItemPanel', () => {
     });
 
     await fill();
-    form.isAllServicesEnabled().value.set(false);
+    form.idBarServices().value.set([]);
     expect(panel['isSaveDisabled']()).toBe(true);
     form.idHourlyServices().value.set(['h1']);
     expect(panel['isSaveDisabled']()).toBe(false);
     await save();
     expect(createAutomaticPrice.mock.lastCall?.[0]).toMatchObject({
-      isAllServicesEnabled: false,
+      idBarServices: [],
+      idHourlyServices: ['h1'],
+    });
+  });
+
+  it('should choose and send every service with "Tutti i servizi", and leave them chosen when off', async () => {
+    const { fixture, panel, form, fill, save, createAutomaticPrice } = await setup({
+      createAutomaticPrice: vi.fn(() =>
+        throwError(() => new HttpErrorResponse({ status: 500, error: null })),
+      ),
+      services: {
+        barServices: [
+          { id: 'b1', value: 'Caffè' },
+          { id: 'b2', value: 'Pizza' },
+        ],
+        standardServices: [],
+        hourlyServices: [{ id: 'h1', value: 'Sup' }],
+      },
+    });
+
+    await fill();
+    panel['selectedTab'].set(1);
+    await fixture.whenStable();
+    const toggle = async () => {
+      document
+        .querySelector<HTMLButtonElement>('app-automatic-price-service-validity app-toggle button')!
+        .click();
+      await fixture.whenStable();
+    };
+
+    await toggle();
+    await save();
+    expect(createAutomaticPrice.mock.lastCall?.[0]).toMatchObject({
+      idBarServices: ['b1', 'b2'],
+      idStandardServices: [],
       idHourlyServices: ['h1'],
     });
 
-    form.isAllServicesEnabled().value.set(true);
-    await save();
-    expect(createAutomaticPrice.mock.lastCall?.[0]).toMatchObject({
-      isAllServicesEnabled: true,
-      idHourlyServices: [],
-    });
+    await toggle();
+    expect(form.idBarServices().value()).toEqual(['b1', 'b2']);
+    expect(form.idHourlyServices().value()).toEqual(['h1']);
   });
 
   it('should want the price, a day and both hours of every time slot', async () => {

@@ -83,7 +83,6 @@ export enum ApiErrorCode {
   PricingPeriodRangesRequired = 'pricing.period_ranges_required',
   PricingPeriodInUse = 'pricing.period_in_use',
   PricingPeriodInUseByServices = 'pricing.period_in_use_by_services',
-  PricingPeriodOverlap = 'pricing.period_overlap',
   PricingCalculationMethodNotFound = 'pricing.calculation_method_not_found',
   PricingPriceListNotFound = 'pricing.price_list_not_found',
   PricingPriceListInUse = 'pricing.price_list_in_use',

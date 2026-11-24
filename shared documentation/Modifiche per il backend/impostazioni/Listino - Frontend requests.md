@@ -568,9 +568,10 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
   Fila 2] e prezzi per 10 settori → `GET /api/catalog/price-lists/get-package` risponde `idSectors` = [Fila 1, Fila 2].
   Il pacchetto è limitato (`is_sector_restricted`) se `idSectors` non è vuoto, anche con soli settori eliminati. **Anche la vendita
   usa i settori salvati a parte**: oggi il preventivo rifiuta con `pricing.package_not_for_sector` i settori senza una riga in
-  `sectorPrices` (`QuoteService.cs:120`, `PricingSource._hasSector`), e `sectorIds` di `GET /price-lists/{id}`
+  `sectorPrices` (`QuoteService.BuildAsync`, `PricingSource._hasSector`), e `sectorIds` di `GET /price-lists/{id}`
   (`PriceListsService.cs:279`) e dello snapshot si ricavano allo stesso modo. Senza questa modifica il pacchetto dell'esempio si
-  venderebbe in 10 settori, e uno con solo prezzi per periodo in nessuno.
+  venderebbe in 10 settori, e uno con solo prezzi per periodo in nessuno. **Anche il conteggio degli usi di un settore** li
+  comprende (`Settori e file - Frontend requests.md`, sezione 2): se quel documento è già applicato, qui si completa.
 - `isOnlineEnabled` e `isOnlineOnly`: due scelte **separate e indipendenti**, al posto di `salesChannel`; possono essere tutte e due
   spente o tutte e due accese, e **si rileggono come sono state salvate**. Da loro dipende dove si vende il listino, cioè il
   `sales_channel` di oggi, che resta quello usato da preventivo, vetrina e ricerca:
@@ -634,6 +635,11 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
   com'erano, finché `isIntermediatePricesIncluded` è vero. Se un prezzo intermedio crea la riga di un settore dove per quel periodo c'è solo la riga "tutte le file", la riga
   nuova parte dai prezzi di quella: il preventivo usa la riga del settore quando c'è (`PricingSource`, `_rates`) e gli altri
   soggiorni di quel settore costerebbero 0.
+  **Il prezzo che si vede è quello che si usa**: con un settore il preventivo (`PricingSource`, `_rates`) usa solo la riga di quel
+  settore; la riga "tutte le file" vale solo per le postazioni **senza settore** (`MapSpot.SectorId` nullo). Oggi vale anche per
+  ogni settore senza una riga sua: la griglia lo mostra vuoto e il prezzo c'è lo stesso, e svuotando un prezzo tornerebbe quello
+  nascosto. I prezzi di oggi non si perdono: vedi "Dati già salvati". Vale anche per il preventivo offline; le convenzioni non
+  cambiano.
 - `sectorPrices` e `periodPrices` arrivano vuoti se l'utente non ha aperto la tab Listino: il pacchetto si crea senza
   prezzi.
 - `calculationMethod`: tendina "Calcolo del prezzo", null se non scelta. I valori sono i nomi .NET, come in tutti gli
@@ -701,6 +707,18 @@ La migrazione dei dati nuovi non deve cambiare i prezzi e le vendite di oggi, pe
 - **Prezzi intermedi**: `isIntermediatePricesIncluded` come detto sopra.
 - **Vendita online**: `isOnlineEnabled` parte vero per i listini `manager_and_online`, falso per gli altri; `sales_channel` non
   cambia.
+- **Righe di prezzo "tutte le file"** (`catalog.pricing_price_list_period_prices` con `sector_id` nullo e un periodo): per ogni settore
+  non eliminato dello stabilimento che per quel listino e quel periodo non ha una riga sua, se ne crea una con gli stessi prezzi e
+  gli stessi prezzi intermedi; la riga "tutte le file" resta per le postazioni senza settore. Così la griglia mostra i prezzi che
+  valgono già oggi e nessuno cambia. Lo stesso fa l'importazione da file (`PriceListTransferService`, riga senza settore).
+- **Importazione**: quella dal vecchio sistema si rifà da capo **dopo** le migration (`shared documentation/backend/progettazione/83-retention-file.md`:
+  schemi tolti, `dotnet ef database update`, importazione), quindi la migration da sola lavora su tabelle vuote.
+  Le regole di questo elenco valgono allo stesso modo per i dati importati dopo: senza, il primo Salva di un listino
+  `manager_and_online` lo porterebbe a `manager_only`, toglierebbe i prezzi intermedi e aprirebbe a tutti i settori un pacchetto
+  limitato. L'importazione non è in questo repository: l'agente avverte lo sviluppatore.
+- **Snapshot**: dopo la migrazione quelli di `price_catalog` di tutti gli stabilimenti vanno rigenerati. Una migrazione SQL non passa da
+  `SnapshotTriggers`, e all'avvio si costruiscono solo quelli mancanti (`CatalogNightlyJob`, `onlyMissing: true`): gli altri resterebbero
+  vecchi fino alla notte o a `POST /admin/snapshots/rebuild`.
 
 ## 6. GET /api/catalog/price-lists/get-package?idPackage=…
 
@@ -815,7 +833,8 @@ Per il frontend sostituisce `PUT /api/catalog/price-lists/{id}`, che accetta sol
   dentro i `sectorPrices` dei prezzi stagionali ridotti) e tiene come arrivano le altre. Esempio: Fila 9 eliminata dopo l'apertura
   del pannello → "Salva" risponde 204 e la riga di Fila 9 non si salva.
 - **Periodi** (vale per letture, salvataggi e copie): lo stabilimento ha una stagione sola (`uq_catalog_pricing_seasons_property`) e i
-  periodi della prossima stagione (`catalog.pricing_next_season_periods`) non c'entrano. Un periodo **esiste** se ha almeno una riga
+  periodi della prossima stagione (`catalog.pricing_next_season_periods`) qui non si guardano (li usa solo il rinnovo delle
+  prenotazioni, con la stessa `key`). Un periodo **esiste** se ha almeno una riga
   non eliminata in `catalog.pricing_tariff_periods`; è **eliminato** se ha solo righe eliminate; una `key` senza nessuna riga, o
   `null`, si tiene e si copia com'è. Una `key` eliminata non si riusa (`Stagioni e periodi - Frontend requests.md`, sezione 3).
 - **Quello che è già salvato e torna uguale non dà errore**, anche se non rispetta i limiti nuovi: oggi due prezzi ridotti possono
@@ -1191,11 +1210,13 @@ Senza un controllo, se due utenti modificano lo stesso pacchetto o lo stesso art
 ultimo: i pannelli di modifica rimandano tutto quello che hanno letto all'apertura (sezioni 7 e 15) e cancellano,
 senza che nessuno se ne accorga, quello che un altro utente ha cambiato nel frattempo. Il backend non ha un controllo
 di concorrenza sugli aggiornamenti dei listini: nessun token di concorrenza in `PriceListConfiguration`, nessun
-`If-Match`. Il frontend chiede lo schema di **concorrenza ottimistica** che il backend ha già progettato per le
-prenotazioni offline (`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un
-**codice di errore unico per tutte le API**: `resource.version_conflict`. Lo stesso schema e lo stesso codice sono
-chiesti in `Impostazioni magazzino - Frontend requests.md` (sezione 7): se lì sono già fatti, qui si aggiungono solo
-le API della tabella sotto.
+`If-Match`. Il frontend chiede la **concorrenza ottimistica** degli altri documenti, con un **codice di errore unico per
+tutte le API**: `resource.version_conflict`. È lo stesso di `Impostazioni magazzino - Frontend requests.md` (sezione 7):
+se lì è già fatto, qui si aggiungono solo le API della tabella sotto.
+
+**Non è quello che Booking ha già per le prenotazioni** (`Endpoints.cs:253-255`, `ReservationService.cs:114-115`): lì
+l'`If-Match` è un numero, se manca o non si legge non si controlla niente, e il conflitto è 412 o 409
+`booking.version_conflict`. Qui valgono le regole sotto: con un altro codice il frontend non rileggerebbe i dati.
 
 ### Cosa ci serve
 
@@ -1211,9 +1232,14 @@ le API della tabella sotto.
   controlli sui dati collegati (IVA, settori, aree, articoli, pacchetti). Esempio: eliminare un pacchetto lo toglie dagli articoli
   aggiuntivi e ne cambia la versione; con l'ordine opposto l'utente riceverebbe 404 `pricing.package_not_found`, toglierebbe il
   pacchetto, salverebbe e solo allora un 409 che gli fa perdere le modifiche.
-- **Come farlo lo sceglie lo sviluppatore del backend** (il token `xmin` di Npgsql come nel documento offline, un hash
-  dei dati coperti dalla versione, un contatore...): l'agente glielo chiede prima di scrivere codice. Il frontend tratta
-  la versione come una stringa opaca e non la confronta mai.
+- **Dati in più tabelle**: prezzi, festivi, prezzi intermedi e ridotti, articoli e nomi stanno in tabelle figlie. Un token della
+  sola riga di `catalog.pricing_price_lists` (come `xmin`) **non basta**: cambiando solo quelli la versione resterebbe uguale e due
+  salvataggi si sovrascriverebbero senza avviso. La versione non dipende dall'ordine in cui il database restituisce le righe figlie.
+- **Controllo e salvataggio sono una cosa sola**: di due salvataggi nello stesso momento con lo stesso `If-Match` uno risponde 204 e
+  l'altro 409 `resource.version_conflict`; mai i dati di tutti e due mescolati, mai un 500.
+- **Come farlo lo sceglie lo sviluppatore del backend** (un hash dei dati coperti dalla versione, un contatore aggiornato da
+  ogni API che li cambia...): l'agente glielo chiede prima di scrivere codice. Il frontend tratta la versione come una
+  stringa opaca e non la confronta mai.
 
 ### API coinvolte
 
@@ -1296,7 +1322,7 @@ pubblico.
 ### Com'è oggi
 
 Il preventivo controlla il canale in un verso solo: dal sito (`QuoteChannel.Online`) rifiuta un listino `manager_only` con 422
-`pricing.package_not_online` (`QuoteService.cs:118` per il pacchetto, `:154` per gli articoli aggiuntivi). Dal gestionale
+`pricing.package_not_online` (`QuoteService.BuildAsync`, per il pacchetto e per gli articoli aggiuntivi). Dal gestionale
 (`QuoteChannel.Manager`) non controlla niente: `PricingSource.IsOnline` è solo "diverso da `manager_only`"
 (`PricingSource.cs:53`), quindi `online_only` si vende come `manager_and_online`.
 
@@ -1309,11 +1335,14 @@ Il preventivo controlla il canale in un verso solo: dal sito (`QuoteChannel.Onli
   `errors[]`.
 - **Dal sito non cambia niente**: `online_only` e `manager_and_online` si vendono, `manager_only` no.
 - **Convenzioni**: i loro listini non hanno il canale e non cambiano.
-- **Prenotazioni che hanno già quel listino**: il blocco vale quando dal gestionale lo si mette in una prenotazione. Una prenotazione
-  presa dal sito con un listino solo online (o con un listino diventato solo online dopo) deve potersi modificare e ricalcolare dal
-  gestionale tenendolo. Oggi `QuoteRequest` non dice di quale prenotazione è il preventivo e il salvataggio delle prenotazioni non
-  c'è ancora (`89-api-catalog.md`, "Non ancora disponibile"): quando ci sarà, come riconoscere i listini che la prenotazione ha già
-  lo sceglie lo sviluppatore. Fino ad allora il blocco vale per ogni preventivo del gestionale.
+- **Prenotazioni che hanno già quel listino**: il blocco vale quando dal gestionale lo si **mette** in una prenotazione. Una
+  prenotazione presa dal sito con un listino solo online (o con un listino diventato solo online dopo) deve potersi modificare e
+  ricalcolare dal gestionale tenendolo. Il salvataggio delle prenotazioni passa dallo stesso preventivo con `QuoteChannel.Manager`
+  (`ReservationWriter` con `IQuoteCalculator`, `BookingCatalog.QuoteAsync`): senza un'eccezione, modificare, spostare, scambiare,
+  dividere o cedere giorni (`SharingService`) di quelle prenotazioni darebbe 422. I listini che la prenotazione ha già si
+  accettano, come succede già per lo sconto preso (`PriceQuoteRequest.RedeemedDiscountId`, `QuoteService.QuoteAsync`): come passarli lo
+  sceglie lo sviluppatore. Il rinnovo (`RenewalService`, `QuoteNextSeasonAsync`) crea una prenotazione nuova con gli stessi listini:
+  se accettarli anche lì lo decide lo sviluppatore, e l'agente glielo chiede.
 - **Preventivo offline**: vale la stessa regola (`salesChannel` è già in `PriceListDto`, quindi nello snapshot `price_catalog`).
 - Elenchi e tendine dei listini non cambiano: un listino solo online si vede e si modifica come gli altri, e può essere il
   predefinito.
@@ -1337,7 +1366,7 @@ Oggi il frontend non chiama il preventivo: aggiungerà il testo di questo codice
 I pannelli dei pacchetti e degli articoli aggiuntivi leggono i periodi della stagione corrente con
 `GET /api/catalog/tariff-periods` (`key`, `name`, `ranges`): la `key` di ogni periodo è l'`idPeriod` dei prezzi per periodo
 e dei prezzi intermedi. Per il Listino **non va cambiata**: la `version` chiesta in `Stagioni e periodi - Frontend
-requests.md` (sezione 6) serve solo a quella pagina, e il Listino non la usa. Vale anche qui la sezione 3 di quel documento:
+requests.md` (sezione 5) serve solo a quella pagina, e il Listino non la usa. Vale anche qui la sezione 3 di quel documento:
 la `key` di un periodo eliminato non si riusa, altrimenti i prezzi salvati passerebbero al periodo nuovo.
 
 ## Verifica
@@ -1492,3 +1521,14 @@ API 18, con un pacchetto e un articolo aggiuntivo per ognuno dei tre canali:
 26. `POST /api/catalog/public/bathhouses/{slug}/quote`: 200 con `online_only` e `manager_and_online`, 422
     `pricing.package_not_online` con `manager_only`, come oggi.
 27. Un pacchetto salvato con `isOnlineEnabled` e `isOnlineOnly` veri si rifiuta dal gestionale; tolta `isOnlineOnly`: 200.
+28. Una prenotazione presa dal sito con un pacchetto `online_only`: dal gestionale si modifica, si sposta e si cedono i suoi giorni; non si
+    può mettere quel pacchetto su un'altra postazione della stessa prenotazione che non lo aveva.
+
+Versione e dati già salvati:
+
+29. `get-package` (versione `v1`), poi un altro salvataggio che cambia **solo** un prezzo per periodo, un giorno festivo o un prezzo
+    intermedio, poi `update-package` con `If-Match: "v1"`: 409. Due `update-package` insieme con lo stesso `If-Match`: uno 204, uno 409.
+30. Un pacchetto con una riga di prezzo "tutte le file" e una sola riga di Fila 1: dopo la migrazione ogni altro settore ha la riga con
+    quei prezzi, e i preventivi di prima danno gli stessi importi. Svuotato il prezzo di Fila 2 e salvato: il preventivo in Fila 2 dà 0
+    con l'avviso `period_without_price`, non il prezzo "tutte le file"; una postazione senza settore lo usa ancora.
+31. Dopo la migrazione lo snapshot `price_catalog` ha i dati nuovi senza aspettare la notte.

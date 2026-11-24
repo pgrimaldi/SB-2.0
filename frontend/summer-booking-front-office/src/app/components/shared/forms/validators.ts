@@ -115,17 +115,14 @@ export function noOverlap<T extends DayRange, TPathKind extends PathKind = PathK
   );
 }
 
-/** A list of ranges of days where one shares a day with another of the list or with one of `others`. */
+/** A list of ranges of days where one shares a day with another of the list. */
 export function noOverlaps<T extends DayRange, TPathKind extends PathKind = PathKind.Root>(
   path: SchemaPath<readonly T[], SchemaPathRules.Supported, TPathKind>,
-  others: () => readonly DayRange[],
 ): void {
   validate(path, ({ value }): OverlapError | undefined => {
     const ranges = value();
-    const isClash = ranges.some(
-      (range, index) =>
-        others().some((other) => rangesOverlap(range, other)) ||
-        ranges.some((other, otherIndex) => otherIndex !== index && rangesOverlap(range, other)),
+    const isClash = ranges.some((range, index) =>
+      ranges.some((other, otherIndex) => otherIndex !== index && rangesOverlap(range, other)),
     );
     return isClash ? { kind: OVERLAP_KIND } : undefined;
   });

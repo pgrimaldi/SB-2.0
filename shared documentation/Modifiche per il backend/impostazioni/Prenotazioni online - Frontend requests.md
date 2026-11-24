@@ -290,6 +290,10 @@ più:
 - `catalog.map_legend_items` ha bisogno di un id pubblico: `public_id uuid NOT NULL` con indice unico, valorizzato per le righe
   esistenti, anche eliminate (come `20261025193541_OnlineBookingOptions` per i limiti). `PUT /legend`, che resta, deve
   valorizzarlo.
+- **Importazione**: quella dal vecchio sistema si rifà da capo **dopo** le migration (`shared documentation/backend/progettazione/83-retention-file.md`:
+  schemi tolti, `dotnet ef database update`, importazione), quindi la migration da sola lavora su tabelle vuote.
+  Anche l'importazione della legenda deve valorizzare `public_id`, altrimenti fallisce. Non è in questo repository: l'agente avverte lo
+  sviluppatore.
 - Un elemento mandato con il suo `id` lo tiene: la riga si **aggiorna**, non si elimina e ricrea. Un `id` che non è dello
   stabilimento vale come un elemento nuovo, con un `id` nuovo (mai quello mandato).
 - **Icona**:

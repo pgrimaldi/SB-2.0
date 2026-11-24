@@ -204,7 +204,7 @@ export function hourlyServicePriceRules(
 
 /**
  * An automatic price as the backend wants it: the price always, a day at least and both hours of the
- * time slots in every period, a service at least unless it applies to all of them.
+ * time slots in every period, a service at least.
  */
 export function automaticPriceRules(path: SchemaPathTree<AutomaticPriceAddItemRequest>): void {
   required(path.price);
@@ -217,23 +217,13 @@ export function automaticPriceRules(path: SchemaPathTree<AutomaticPriceAddItemRe
       timeRange(timeSlot.startTime, timeSlot.endTime);
     });
   });
-  validate(path.isAllServicesEnabled, ({ value, valueOf }): MinItemsError | undefined =>
-    value() ||
+  validate(path.idBarServices, ({ valueOf }): MinItemsError | undefined =>
     [path.idBarServices, path.idStandardServices, path.idHourlyServices].some(
       (ids) => valueOf(ids).length > 0,
     )
       ? undefined
       : { kind: 'min_items', count: 1 },
   );
-}
-
-/** The services chosen only when the automatic price does not apply to all of them. */
-export function withServicesInForce(
-  values: AutomaticPriceAddItemRequest,
-): AutomaticPriceAddItemRequest {
-  return values.isAllServicesEnabled
-    ? { ...values, idBarServices: [], idStandardServices: [], idHourlyServices: [] }
-    : values;
 }
 
 /** Without the services chosen that are no longer there. */
@@ -253,13 +243,12 @@ export function withExistingServices(
 
 /** What would be sent, to compare: the order of the services and of the sectors is not a change. */
 export function comparableAutomaticPrice(values: AutomaticPriceAddItemRequest): string {
-  const sent = withServicesInForce(values);
   return comparableJson({
-    ...sent,
-    idBarServices: [...sent.idBarServices].sort(),
-    idStandardServices: [...sent.idStandardServices].sort(),
-    idHourlyServices: [...sent.idHourlyServices].sort(),
-    idSectors: [...sent.idSectors].sort(),
+    ...values,
+    idBarServices: [...values.idBarServices].sort(),
+    idStandardServices: [...values.idStandardServices].sort(),
+    idHourlyServices: [...values.idHourlyServices].sort(),
+    idSectors: [...values.idSectors].sort(),
   });
 }
 

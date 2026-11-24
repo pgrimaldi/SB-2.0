@@ -29,7 +29,7 @@ Rotta `/settings/map-configuration` · vista `views/settings/map-configuration/`
   con `isCustom`, mostra lo sfondo caricato. Come la tab Media di Informazioni stabilimento, `background.url` va
   nell'anteprima solo se è https o del nostro dominio (`fileLinkOf`); con un link non sicuro o assente lo sfondo
   caricato c'è lo stesso, senza anteprima (nell'area l'icona `GeneralIcon_Images.svg` al posto del testo), e si può
-  cancellare.
+  cancellare. L'`url` di uno sfondo o di un'icona scelti con un nome serve al sito pubblico: la pagina non lo usa.
 - Imposta reticolo riempie i tre campi da `rows`, `columns` e `tiltDegrees` e i bottoni delle icone con i nomi
   ricevuti. `rows` o `columns` 0 vuol dire reticolo non ancora impostato (una mappa nuova del backend parte da 0 × 0):
   il campo resta vuoto da riempire, senza valori inventati. Le icone degli articoli sono abbinate per

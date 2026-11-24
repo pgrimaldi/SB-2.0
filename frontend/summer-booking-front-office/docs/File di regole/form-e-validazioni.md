@@ -43,8 +43,8 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   compresa").
 - Lunghezza massima di un campo di testo: `metadata(path, MAX_LENGTH, () => LIMITE)`, con il limite del backend in una
   costante dell'entità. Il wrapper riceve `maxLength` e il campo non accetta caratteri oltre il limite.
-- `noOverlap(path, altri)` / `noOverlaps(path, altri)`: un intervallo di giorni (o una lista di intervalli) che ha un
-  giorno in comune con un altro (`invalidate.overlap`).
+- `noOverlap(path, altri)`: un intervallo di giorni che ha un giorno in comune con un altro; `noOverlaps(path)`: una lista
+  di intervalli con giorni in comune tra loro (`invalidate.overlap`).
 - `isTextTaken(testo, altri)`: vero se il testo è uguale a uno degli altri, senza badare a maiuscole e spazi agli
   estremi (ogni confronto di testi ignora gli spazi agli estremi: vedi `00-indice.md`). Serve ai controlli "nome già usato" che il form fa da sé con `validate`, con un errore della pagina sotto
   `invalidate.` (es. il nome di un periodo in Stagioni e periodi).
@@ -230,8 +230,8 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   calendario.
 - Se il "Dal" passa oltre il "Al" già scelto, il wrapper svuota il "Al" (un giorno fuori da `minDate` / `maxDate` viene
   sempre svuotato) e l'utente lo sceglie di nuovo.
-- Se c'è anche un altro limite (es. i giorni della stagione) vale il più stretto; i giorni già presi da altri periodi
-  si spengono con `disabledPeriods`. Ogni nuova coppia fa lo stesso.
+- Se c'è anche un altro limite (es. i giorni della stagione) vale il più stretto; i giorni che non si possono scegliere perché
+  già presi si spengono con `disabledPeriods`. Ogni nuova coppia fa lo stesso.
 - Un periodo di giorni dei componenti comuni si chiama `startsOn` / `endsOn`, come nel backend: i periodi di
   `app-period-calendar`, i `disabledPeriods` di `app-period-calendar` e `app-filled-date-field`, `DayRange` di
   `noOverlap` / `noOverlaps` (`components/shared/forms/validators.ts`) e le entità che li usano (es.

@@ -17,6 +17,7 @@ import {
   OCCUPIED_UMBRELLA_ICONS,
 } from '../../../entities/settings/map-configuration/map-grid';
 import {
+  MapBackground,
   MapCustomArticleIcons,
   MapIcon,
   MapSettings,
@@ -31,10 +32,24 @@ import { MockFieldError, problem } from '../errors/problem.mock';
 import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
 const MAX_BYTES = MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE;
+/** The image of a name of the frontend: the backend has it for the public site, the page does not use it. */
+function imageOf(name: string, extension = 'svg'): string {
+  return `/assets/images/MapConfiguration_${name}.${extension}`;
+}
+
 /** As the backend: a name without the spaces at the sides; none chosen is the default (`name` null). */
 function icon(name: string | null): MapIcon {
   const chosen = name?.trim() || null;
-  return { iconId: null, name: chosen, url: null, isDefault: chosen === null };
+  return {
+    iconId: null,
+    name: chosen,
+    url: chosen && imageOf(chosen),
+    isDefault: chosen === null,
+  };
+}
+
+function background(name: string): MapBackground {
+  return { iconId: null, name, url: imageOf(name, 'png'), isCustom: false };
 }
 
 function article(
@@ -51,12 +66,7 @@ let settings: Omit<MapSettings, 'backgroundVersion' | 'configurationVersion'> = 
   columns: 16,
   tiltDegrees: 8,
   backgroundColor: null,
-  background: {
-    iconId: null,
-    name: MapBackgroundImage.BackgroundBeach,
-    url: null,
-    isCustom: false,
-  },
+  background: background(MapBackgroundImage.BackgroundBeach),
   icons: {
     umbrella: {
       free: icon(MapUmbrellaIcon.Umbrella3),
@@ -129,7 +139,7 @@ function catalogIcon(
     category,
     state: 'free',
     name,
-    url: `/assets/images/MapConfiguration_${name}.${extension}`,
+    url: imageOf(name, extension),
     isDefault: number === 1,
   };
 }
@@ -228,10 +238,7 @@ export const updateMapBackgroundMock = (
   if (conflict) {
     return conflict;
   }
-  settings = {
-    ...settings,
-    background: { iconId: null, name: name.trim(), url: null, isCustom: false },
-  };
+  settings = { ...settings, background: background(name.trim()) };
   return savedWithVersion(request, backgroundData());
 };
 

@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  linkedSignal,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -45,7 +53,6 @@ interface ServiceGroup {
 })
 export class AutomaticPriceServiceValidity {
   /** The fields of the form of the panel, which validates and saves them. */
-  readonly isAllServicesEnabled = input.required<FieldTree<boolean>>();
   readonly idBarServices = input.required<FieldTree<string[]>>();
   readonly idStandardServices = input.required<FieldTree<string[]>>();
   readonly idHourlyServices = input.required<FieldTree<string[]>>();
@@ -89,6 +96,37 @@ export class AutomaticPriceServiceValidity {
     },
   ]);
 
+  /** The kinds with a service at least: none, nothing to turn on. */
+  private readonly usedGroups = computed(() =>
+    this.groups().filter(({ services }) => services.length > 0),
+  );
+  /**
+   * The user is choosing the services one by one: their panels stay open also with all of them chosen,
+   * until the services are read again or Annulla.
+   */
+  private readonly isChoosing = linkedSignal(() => {
+    this.services();
+    this.idBarServices()().touched();
+    return false;
+  });
+  /** "Tutti i servizi": every service of the property is chosen, and sent. */
+  protected readonly isAllOn = computed(
+    () =>
+      !this.isChoosing() &&
+      this.usedGroups().length > 0 &&
+      this.usedGroups().every((group) => this.isAllChosen(group)),
+  );
+  protected readonly isAllLocked = computed(
+    () => !this.usedGroups().length || this.usedGroups().some((group) => this.isLocked(group)),
+  );
+
+  protected toggleAll(isOn: boolean): void {
+    this.touch(!isOn);
+    if (isOn) {
+      this.usedGroups().forEach((group) => this.setAll(group, true));
+    }
+  }
+
   protected isAllChosen(group: ServiceGroup): boolean {
     const chosen = group.field().value();
     return group.services.length > 0 && group.services.every(({ id }) => chosen.includes(id));
@@ -100,16 +138,26 @@ export class AutomaticPriceServiceValidity {
   }
 
   protected chooseAll(group: ServiceGroup, isChosen: boolean): void {
-    this.isAllServicesEnabled()().markAsTouched();
-    group.field().value.set(isChosen ? group.services.map(({ id }) => id) : []);
+    this.touch(true);
+    this.setAll(group, isChosen);
   }
 
   protected choose(group: ServiceGroup, id: string, isChosen: boolean): void {
-    this.isAllServicesEnabled()().markAsTouched();
+    this.touch(true);
     group
       .field()
       .value.update((chosen) =>
         isChosen ? [...chosen, id] : chosen.filter((chosenId) => chosenId !== id),
       );
+  }
+
+  private setAll(group: ServiceGroup, isChosen: boolean): void {
+    group.field().value.set(isChosen ? group.services.map(({ id }) => id) : []);
+  }
+
+  /** The first list shows the error of the three. */
+  private touch(isChoosing: boolean): void {
+    this.idBarServices()().markAsTouched();
+    this.isChoosing.set(isChoosing);
   }
 }

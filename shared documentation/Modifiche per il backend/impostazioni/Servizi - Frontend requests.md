@@ -82,10 +82,12 @@ Le rotte nuove stanno sempre **sotto la radice che il backend ha già per quei d
 
 Senza un controllo, se due utenti modificano la stessa tab dello stesso servizio vince chi salva per ultimo: ogni Salva
 rimanda tutta la tab letta all'apertura (il frontend rimanda sempre tutto il modello letto) e cancella, senza che
-nessuno se ne accorga, quello che l'altro utente ha cambiato nel frattempo. Il frontend chiede lo schema di
-**concorrenza ottimistica** che il backend ha già progettato per le prenotazioni offline
-(`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un **codice di errore
-unico per tutte le API**: `resource.version_conflict`.
+nessuno se ne accorga, quello che l'altro utente ha cambiato nel frattempo. Il frontend chiede la **concorrenza
+ottimistica** degli altri documenti, con un **codice di errore unico per tutte le API**: `resource.version_conflict`.
+
+**Non è quello che Booking ha già per le prenotazioni** (`Endpoints.cs:253-255`, `ReservationService.cs:114-115`): lì
+l'`If-Match` è un numero, se manca o non si legge non si controlla niente, e il conflitto è 412 o 409
+`booking.version_conflict`. Qui valgono le regole sotto: con un altro codice il frontend non rileggerebbe i dati.
 
 ### Cosa ci serve
 
@@ -144,11 +146,13 @@ unico per tutte le API**: `resource.version_conflict`.
   frontend lo manda sempre.
 - **`ETag` nelle risposte**: ogni salvataggio riuscito risponde 204 senza corpo, come nei contratti, con la nuova
   versione nell'header `ETag: "<version>"`.
-- Il 409 si controlla dopo il 404 dell'elemento (`service.not_found`, `service.automatic_price_not_found` o
-  `service.table_service_not_found`) e dopo il 400 `validation.failed`, subito prima del salvataggio; nei Prezzi automatici
-  **prima** del 404 `service.not_found` e del 404 `catalog.sector_not_found` dei servizi e dei settori scelti: un servizio
-  eliminato esce dai prezzi automatici (`ServiceItemsService.RemoveAsync`), quindi i loro dati sono cambiati e il pannello
-  deve rileggerli.
+- Il 409 si controlla dopo il 400 `validation.failed` e il 404 dell'elemento (`service.not_found`,
+  `service.automatic_price_not_found` o `service.table_service_not_found`), e **prima dei controlli sui dati collegati**: IVA,
+  icona, periodi, settori e, nei Prezzi automatici, i servizi scelti. Esempio: un altro utente toglie un settore dal servizio e lo
+  elimina; con l'ordine opposto chi salva riceverebbe 404 `catalog.sector_not_found`, toglierebbe il settore e solo al secondo
+  Salva un 409 che gli fa perdere le modifiche.
+- **Controllo e salvataggio sono una cosa sola**: di due salvataggi della stessa tab nello stesso momento con lo stesso
+  `If-Match` uno riesce e l'altro risponde 409 `resource.version_conflict`; mai i dati di tutti e due mescolati, mai un 500.
 - La copia fatta da Duplica ha le sue versioni: salvarla non cambia quelle del servizio di partenza.
 - **Come farlo lo sceglie lo sviluppatore del backend** (un hash dei dati coperti, un contatore per tab...): l'agente
   glielo chiede prima di scrivere codice. Il frontend tratta la versione come una stringa opaca e non la confronta mai.
@@ -170,7 +174,7 @@ del salvataggio, tranne l'id.
 | Servizio orario, Prezzi | `GET /api/catalog/services/get-hourly-service-prices?idHourlyService=…` | `POST /api/catalog/services/update-hourly-service-prices` | `price`, `vatRate`, `isPeriodPricingEnabled`, `availabilityOptions`, `periodAvailabilities` (anche dei periodi che la tab non mostra), `idSectors`, `isOnlinePurchaseEnabled` |
 | Servizio orario, Prenotazioni | `GET /api/catalog/services/get-hourly-service-booking-options?idHourlyService=…` | `POST /api/catalog/services/update-hourly-service-booking` | `bookingOptions` |
 | Prezzo automatico, Info Generali | `GET /api/catalog/automatic-prices/get-automatic-price-general-info?idAutomaticPrice=…` | `POST /api/catalog/automatic-prices/update-automatic-price-general` | `translations`, `icon` |
-| Prezzo automatico, Prezzi e Validità | `GET /api/catalog/automatic-prices/get-automatic-price-prices-validity?idAutomaticPrice=…` | `POST /api/catalog/automatic-prices/update-automatic-price-prices-validity` | `price`, `vatRate`, `isOnlinePurchaseEnabled`, `validityPeriods`, `isAllServicesEnabled`, `idBarServices`, `idStandardServices`, `idHourlyServices`, `isPricePerServiceEnabled`, `idSectors` |
+| Prezzo automatico, Prezzi e Validità | `GET /api/catalog/automatic-prices/get-automatic-price-prices-validity?idAutomaticPrice=…` | `POST /api/catalog/automatic-prices/update-automatic-price-prices-validity` | `price`, `vatRate`, `isOnlinePurchaseEnabled`, `validityPeriods`, `idBarServices`, `idStandardServices`, `idHourlyServices`, `isPricePerServiceEnabled`, `idSectors` |
 | Servizio tavoli, Info Generali | `GET /api/catalog/table-services/get-table-service-general-info?idTableService=…` | `POST /api/catalog/table-services/update-table-service-general` | `translations`, `isHighlighted` |
 | Servizio tavoli, Disponibilità e Prenotazioni | `GET /api/catalog/table-services/get-table-service-availability-bookings?idTableService=…` | `POST /api/catalog/table-services/update-table-service-availability-bookings` | `availabilities`, `availabilityMode`, `tableGroups`, `totalSeatQuantity`, `averageMealMinutes`, `maxBookingPerTimeSlotQuantity`, `minSeatPerBookingQuantity`, `maxSeatPerBookingQuantity`, `bookingPayment`, `depositMode`, `depositPercentage`, `depositAmount`, `isOnlineBookingEnabled` |
 
@@ -828,11 +832,11 @@ sezione lo dice.
 | 403 | `catalog.property_required` | Token senza stabilimento. |
 | 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
 | 404 | `service.not_found` | `idBarService` non è un servizio bar dello stabilimento (anche perché già eliminato). Niente cambia. |
+| 409 | `resource.version_conflict` | `If-Match` non è più la versione dei dati della tab (sezione 1). Niente cambia. |
 | 422 | `catalog.vat_rate_not_allowed` | `vatRate` non è un'aliquota del Paese dello stabilimento, con `args` `{ "rates": [4, 5, 10, 22] }` come oggi (`VatPolicy.ResolveAsync`). Niente cambia. |
 | 404 | `service.icon_not_found` | `icon` non ha un'icona corrispondente nel catalogo (`CatalogErrors.ServiceIconNotFound`). Niente cambia. |
 | 422 | `pricing.period_not_found` | Un `idPeriod` di `periodPrices` non è un periodo della stagione corrente e non è già salvato su quel servizio. Niente cambia. |
 | 404 | `catalog.sector_not_found` | Un id di `idSectors` non è un settore dello stabilimento (`ContentMapping.SectorIdsAsync`). Niente cambia. |
-| 409 | `resource.version_conflict` | `If-Match` non è più la versione dei dati della tab (sezione 1). Niente cambia. |
 
 Un controllo che ha bisogno del servizio salvato si fa dopo il 404 `service.not_found`, e risponde sempre con lo stesso 400
 `validation.failed` e il suo `errors[]`: qui l'icona che il servizio ha già (`icon` di `update-bar-service-general`).
@@ -1101,8 +1105,8 @@ I campi sono quelli della sezione 17, più `idBarService`. `variants`, `periodPr
 e prendono il posto di quelli salvati. Un servizio senza aliquota che ha già una natura dell'IVA la mantiene se
 `vatRate` è ancora `null`.
 
-Risposta: **204 senza corpo**, con l'header `ETag` della nuova versione. Errori: 404 `service.not_found`, 404
-`catalog.sector_not_found`, 422 `pricing.period_not_found`, 409 `resource.version_conflict` e gli altri comuni.
+Risposta: **204 senza corpo**, con l'header `ETag` della nuova versione. Errori: 404 `service.not_found`, 409
+`resource.version_conflict`, 404 `catalog.sector_not_found`, 422 `pricing.period_not_found` e gli altri comuni.
 
 ## 23. POST /api/catalog/services/update-bar-service-booking
 
@@ -1382,8 +1386,8 @@ Come la sezione 21: una lingua con i due testi `null` si toglie; `icon` uguale a
 `null` l'immagine caricata resta, con un'icona l'immagine caricata non vale più; un'immagine nuova si carica dopo il 204
 con la sezione 24, che toglie l'icona.
 
-Risposta: **204 senza corpo**, con l'header `ETag` della nuova versione. Errori: 404 `service.not_found`, 404
-`service.icon_not_found`, 409 `resource.version_conflict` e gli altri comuni.
+Risposta: **204 senza corpo**, con l'header `ETag` della nuova versione. Errori: 404 `service.not_found`, 409
+`resource.version_conflict`, 404 `service.icon_not_found` e gli altri comuni.
 
 ## 31. POST /api/catalog/services/update-standard-service-prices
 
@@ -1409,9 +1413,9 @@ Come la sezione 22, senza `variants`, che restano com'erano: `periodPrices` e `i
 il posto di quelli salvati; un servizio senza aliquota che ha già una natura dell'IVA la mantiene se `vatRate` è ancora
 `null`.
 
-Risposta: **204 senza corpo**, con l'header `ETag` della nuova versione. Errori: 404 `service.not_found`, 422
-`catalog.vat_rate_not_allowed`, 422 `pricing.period_not_found`, 404 `catalog.sector_not_found`, 409
-`resource.version_conflict` e gli altri comuni.
+Risposta: **204 senza corpo**, con l'header `ETag` della nuova versione. Errori: 404 `service.not_found`, 409
+`resource.version_conflict`, 422 `catalog.vat_rate_not_allowed`, 422 `pricing.period_not_found`, 404
+`catalog.sector_not_found` e gli altri comuni.
 
 ## 32. POST /api/catalog/services/update-standard-service-booking
 
@@ -1548,9 +1552,9 @@ salvataggio non deve toccare le fasce già prenotate. Come farlo lo sceglie lo s
 ### Errori
 
 Quelli comuni dei pannelli di Servizi Bar, nello stesso ordine (401, 403 `auth.forbidden`, 400, 403
-`catalog.property_required`, 404 `catalog.property_not_found`, 404 `service.not_found`, 422
+`catalog.property_required`, 404 `catalog.property_not_found`, 404 `service.not_found`, 409 `resource.version_conflict`, 422
 `catalog.vat_rate_not_allowed` per il `vatRate` del servizio o di una disponibilità, 404 `service.icon_not_found`, 422
-`pricing.period_not_found`, 404 `catalog.sector_not_found`, 409 `resource.version_conflict`). I controlli che hanno bisogno
+`pricing.period_not_found`, 404 `catalog.sector_not_found`). I controlli che hanno bisogno
 del servizio salvato (l'icona che ha già, e `vatRate` `null` di un servizio esente o con le aliquote nelle disponibilità
 delle opzioni di prenotazione, in `update-hourly-service-prices`) si fanno dopo il 404 `service.not_found`, con lo stesso
 400 `validation.failed`. Errori di campo del 400:
@@ -1671,24 +1675,25 @@ Tab Prenotazioni, letta la prima volta che si apre, con `idHourlyService` nella 
 ## 37. POST /api/catalog/services/update-hourly-service-general
 
 Salva della tab Info Generali, con l'header `If-Match` della versione letta (sezione 34). Corpo e regole come la sezione 30,
-con `idHourlyService`: scrive solo nomi, descrizioni, icona e "Metti in evidenza". Risposta: **204 senza corpo**, con l'header
-`ETag`. Errori: 404 `service.not_found`, 404 `service.icon_not_found`, 409 `resource.version_conflict` e gli altri comuni.
+con `idHourlyService`: scrive solo nomi, descrizioni, icona e "Metti in evidenza". Risposta: **204 senza corpo**, con
+l'header `ETag`. Errori: 404 `service.not_found`, 409 `resource.version_conflict`, 404 `service.icon_not_found` e gli altri
+comuni.
 
 ## 38. POST /api/catalog/services/update-hourly-service-prices
 
 Salva della tab Prezzi, con l'header `If-Match` della versione letta (sezione 35). Corpo: `idHourlyService`, `price`,
 `vatRate`, `isPeriodPricingEnabled`, `availabilityOptions`, `periodAvailabilities`, `idSectors` e `isOnlinePurchaseEnabled`,
 come nella sezione 33. Le disponibilità in vigore arrivano sempre tutte, anche quelle di periodi letti e non mostrati, e
-prendono il posto di quelle salvate. Risposta: **204 senza corpo**, con l'header `ETag`. Errori: 404 `service.not_found`, 422
-`catalog.vat_rate_not_allowed`, 422 `pricing.period_not_found`, 404 `catalog.sector_not_found`, 409
-`resource.version_conflict` e gli altri comuni.
+prendono il posto di quelle salvate. Risposta: **204 senza corpo**, con l'header `ETag`. Errori: 404 `service.not_found`, 409
+`resource.version_conflict`, 422 `catalog.vat_rate_not_allowed`, 422 `pricing.period_not_found`, 404
+`catalog.sector_not_found` e gli altri comuni.
 
 ## 39. POST /api/catalog/services/update-hourly-service-booking
 
 Salva della tab Prenotazioni, con l'header `If-Match` della versione letta (sezione 36). Corpo: `idHourlyService` e
 `bookingOptions`, l'elenco intero come nella sezione 33, che prende il posto di quello salvato (`[]` le toglie tutte).
-Risposta: **204 senza corpo**, con l'header `ETag`. Errori: 404 `service.not_found`, 422 `catalog.vat_rate_not_allowed`, 409
-`resource.version_conflict` e gli altri comuni.
+Risposta: **204 senza corpo**, con l'header `ETag`. Errori: 404 `service.not_found`, 409 `resource.version_conflict`, 422
+`catalog.vat_rate_not_allowed` e gli altri comuni.
 
 ## Regole comuni dei pannelli di Prezzi Automatici (sezioni 40-46)
 
@@ -1709,11 +1714,11 @@ torna com'era, controllo di versione, permessi, JSON, nome e descrizione nelle l
 
 ### Servizi e giorni
 
-- **Servizi**: `isAllServicesEnabled` (`applies_to_all_services`) vero = il prezzo vale per tutti i servizi, anche per quelli
-  creati dopo; i tre elenchi di id sono allora `[]`, nelle letture e nei salvataggi. Falso = vale per i servizi dei tre
-  elenchi, **almeno uno** in tutto, come vuole già il backend (`SaveAutomaticPriceRequestValidator`, `serviceIds`). Se
-  l'utente accende l'interruttore e salva, i servizi scelti prima non ci sono più, come oggi
-  (`AutomaticPricesService.ApplyAsync`).
+- **Servizi**: il prezzo vale per i servizi dei tre elenchi di id, **almeno uno** in tutto, come vuole già il backend
+  (`SaveAutomaticPriceRequestValidator`, `serviceIds`). "Si applica a tutti i servizi" non c'è, come nel backend (migration
+  `ServicesAlignedToFront`): l'interruttore "Tutti i servizi" della pagina è solo del frontend, che manda nei tre elenchi
+  gli id di tutti i servizi letti (sezione 41) e, in lettura, lo mostra acceso se ci sono tutti. Un servizio creato dopo
+  non entra da solo.
 - **Giorni**: il frontend manda sempre almeno un giorno per periodo; `[]` in lettura vuol dire tutti i giorni, come nel
   backend (`AutomaticPricePeriod.Covers`), e il pannello li mostra tutti scelti.
 
@@ -1730,9 +1735,9 @@ dove la sezione lo dice.
 | 403 | `catalog.property_required` | Token senza stabilimento. |
 | 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
 | 404 | `service.automatic_price_not_found` | `idAutomaticPrice` non è un prezzo automatico dello stabilimento. Niente cambia. |
+| 409 | `resource.version_conflict` | `If-Match` non è più la versione dei dati della tab (sezione 1). Niente cambia. |
 | 422 | `catalog.vat_rate_not_allowed` | `vatRate` non è un'aliquota del Paese dello stabilimento, con `args.rates` come oggi (`VatPolicy.ResolveAsync`). Niente cambia. |
 | 404 | `service.icon_not_found` | `icon` non ha un'icona corrispondente nel catalogo (`CatalogErrors.ServiceIconNotFound`). Niente cambia. |
-| 409 | `resource.version_conflict` | `If-Match` non è più la versione dei dati della tab (sezione 1). Niente cambia. |
 | 404 | `service.not_found` | Un id dei tre elenchi non è un servizio dello stabilimento di quel tipo (`CatalogErrors.ServiceNotFound`). Niente cambia. |
 | 404 | `catalog.sector_not_found` | Un id di `idSectors` non è un settore dello stabilimento (`ContentMapping.SectorIdsAsync`). Niente cambia. |
 
@@ -1747,7 +1752,7 @@ Errori di campo del 400, con `field` uguale al nome nel corpo:
 | `icon` | `validation.invalid` | Un nome fuori dalle 43 icone (sezione 40); nella sezione 44 va bene anche l'icona già salvata. |
 | `price` | `validation.required` o `validation.out_of_range` | Assente, o fuori da 0-100.000. |
 | `vatRate` | `validation.invalid` | Non maggiore di 0 e minore di 100 (`ContentRules.Vat`). |
-| `isAllServicesEnabled` | `validation.required` o `validation.invalid` | Falso senza nessun servizio nei tre elenchi, o vero con almeno uno. |
+| `idBarServices` | `validation.required` | Nessun servizio nei tre elenchi (vuoti o assenti): un solo errore, sul primo. |
 | `validityPeriods` | `validation.invalid` | Più di 50. |
 | `validityPeriods[i].dateTo` | `validation.end_before_start` | Prima di `dateFrom`. |
 | `validityPeriods[i].daysOfWeek` | `validation.invalid` | Un valore fuori da 1-7. |
@@ -1785,7 +1790,6 @@ Salva del pannello "Aggiungi nuovo prezzo automatico".
       "timeSlots": [{ "startTime": "12:00", "endTime": "15:00" }]
     }
   ],
-  "isAllServicesEnabled": false,
   "idBarServices": ["0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01"],
   "idStandardServices": [],
   "idHourlyServices": [],
@@ -1802,8 +1806,7 @@ Salva del pannello "Aggiungi nuovo prezzo automatico".
 | `vatRate` | number o `null` | `vat_rate` | Come Servizi Bar: `null` = senza aliquota, con la natura predefinita (`VatPolicy.ResolveAsync`); un prezzo che ha già una natura la mantiene se `vatRate` è ancora `null`. |
 | `isOnlinePurchaseEnabled` | boolean | `is_purchasable` | |
 | `validityPeriods` | array | `catalog.automatic_price_periods` | `[]` = sempre. `dateFrom`, `dateTo` (giorno UTC o `null`) = `starts_on`, `ends_on`; `daysOfWeek` (ISO: 1 lunedì … 7 domenica) = `weekdays`; `timeSlots` = `catalog.automatic_price_time_ranges`, con `startTime` ed `endTime` obbligatori (`"HH:mm"`); `[]` = tutto il giorno. |
-| `isAllServicesEnabled` | boolean | `applies_to_all_services` | "Servizi e giorni". |
-| `idBarServices`, `idStandardServices`, `idHourlyServices` | array di string (UUID) | `catalog.automatic_price_services` | I servizi scelti, con gli `id` della sezione 41; `[]` tutti e tre con `isAllServicesEnabled` vero. |
+| `idBarServices`, `idStandardServices`, `idHourlyServices` | array di string (UUID) | `catalog.automatic_price_services` | I servizi scelti, con gli `id` della sezione 41 ("Servizi e giorni"). |
 | `isPricePerServiceEnabled` | boolean | `applies_per_service` | |
 | `idSectors` | array di string (UUID) | `is_sector_restricted` e `catalog.automatic_price_sectors` | Come la sezione 17. |
 
@@ -1862,7 +1865,6 @@ della sezione 40 da `price` a `idSectors`, più `version`:
   "vatRate": 10,
   "isOnlinePurchaseEnabled": true,
   "validityPeriods": [],
-  "isAllServicesEnabled": false,
   "idBarServices": ["0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01"],
   "idStandardServices": [],
   "idHourlyServices": [],
@@ -1881,16 +1883,15 @@ Salva della tab Info Generali, con l'header `If-Match` della versione letta (sez
 `translations` (tutte e 7 le lingue) e `icon`, come nella sezione 40; `icon` può essere anche quella letta fuori dalle 43, o
 `null` se c'è un'immagine, che resta. Se l'utente ha scelto un'immagine, `icon` è quella di prima: la toglie il caricamento
 (sezione 46), che parte dopo il 204. Scrive solo nomi, descrizioni e icona. Risposta: **204 senza corpo**, con l'header
-`ETag`. Errori: 404 `service.automatic_price_not_found`, 404 `service.icon_not_found`, 409 `resource.version_conflict` e gli
+`ETag`. Errori: 404 `service.automatic_price_not_found`, 409 `resource.version_conflict`, 404 `service.icon_not_found` e gli
 altri comuni.
 
 ## 45. POST /api/catalog/automatic-prices/update-automatic-price-prices-validity
 
 Salva della tab Prezzi e Validità, con l'header `If-Match` della versione letta (sezione 43). Corpo: `idAutomaticPrice` e i
 campi della sezione 40 da `price` a `idSectors`; gli elenchi arrivano interi e prendono il posto di quelli salvati. Risposta:
-**204 senza corpo**, con l'header `ETag`. Errori: 404 `service.automatic_price_not_found`, 422
-`catalog.vat_rate_not_allowed`, 404 `service.not_found`, 404 `catalog.sector_not_found`, 409 `resource.version_conflict` e gli
-altri comuni.
+**204 senza corpo**, con l'header `ETag`. Errori: 404 `service.automatic_price_not_found`, 409 `resource.version_conflict`,
+422 `catalog.vat_rate_not_allowed`, 404 `service.not_found`, 404 `catalog.sector_not_found` e gli altri comuni.
 
 ## 46. POST e DELETE /api/catalog/automatic-prices/{id}/image
 
@@ -1987,8 +1988,11 @@ La durata facoltativa riguarda tutto il modello, non solo le API nuove: `TableSe
 senza durata, e la duplicazione (sezione 16), che passa da quei due DTO (`TableServicesService.ToRequest`), ne fa una copia
 senza durata. Il vincolo `ck_catalog_table_services_meal` (`average_meal_minutes > 0`) può restare: con `NULL` non blocca.
 
-Oggi nessun calcolo del backend usa la durata (solo `TableService`, i suoi DTO e il validatore la leggono): un servizio senza
-durata si salva e si legge, e non cambia altro.
+**Booking la usa**: quando la prenotazione di un tavolo parte a un'ora che non è l'inizio di una fascia (dal gestionale, con
+conferma), la fine è l'inizio più la durata (`ServiceWriter`, `slot?.To ?? input.SlotStart.AddMinutes(...)`). Ci arriva con
+`BookableTableService.AverageMealMinutes` (`Shared/Contracts/Catalog/IBookingServices.cs`, oggi `short`) e
+`BookingCatalog.ListTableServicesAsync`: anche questi diventano `short?`, altrimenti non si compila. Quale durata vale lì senza
+un valore lo decide lo sviluppatore: l'agente glielo chiede. Per la pagina non cambia niente.
 
 ### Errori
 
@@ -2344,9 +2348,9 @@ API 40-46, con un token con `CatalogRead` e `CatalogSettings`:
     `service.automatic_price_not_found`.
 73. Due salvataggi con la stessa `If-Match` e dati diversi: il primo 204 con l'`ETag` nuovo, il secondo 409
     `resource.version_conflict`.
-74. `isAllServicesEnabled` falso con i tre elenchi vuoti: 400 `validation.required` su `isAllServicesEnabled`; vero con un
-    servizio: 400 `validation.invalid`. Vero con gli elenchi vuoti: 204, e un servizio creato dopo prende il prezzo
-    automatico (preventivo). Poi falso con un servizio: 204, e la lettura dà solo quello.
+74. I tre elenchi vuoti, o assenti: 400 con il solo `validation.required` su `idBarServices`. Con gli id di tutti i servizi: 204 e
+    la lettura li dà tutti; un servizio creato dopo non prende il prezzo automatico (preventivo). Poi con un servizio solo:
+    204, e la lettura dà solo quello.
 75. Un periodo salvato senza giorni: la lettura dà `daysOfWeek` `[]` e il periodo vale tutti i giorni.
 
 API 47-51, con un token con `CatalogRead` e `CatalogSettings`:
@@ -2365,7 +2369,8 @@ API 47-51, con un token con `CatalogRead` e `CatalogSettings`:
     prima in `startTime` ed `endTime`, l'altra in `otherTimeSlots`; rimandate uguali restano tutte e due. Otto fasce senza
     giorno: rimandate uguali 204, non un errore per le 50 fasce.
 81. `averageMealMinutes` `null`: 204, e la lettura dà `null`; 5 → 400 `validation.out_of_range`; 100 resta 100. Un servizio
-    senza durata si duplica (sezione 16) e si legge con `GET /api/catalog/table-services/{id}`.
+    senza durata si duplica (sezione 16) e si legge con `GET /api/catalog/table-services/{id}`; una prenotazione di quel
+    servizio a un'ora fuori fascia si salva con la fine decisa dallo sviluppatore, mai un 500.
 82. `Deposit` senza percentuale né importo: 400 `validation.required` su `depositPercentage`; 0 o 101 → 400
     `validation.out_of_range`. Un importo di 15 già salvato: la lettura dà `depositAmount` 15 e `depositPercentage` `null`;
     rimandato uguale resta. `None`: 204, e tipo e valore non ci sono più.

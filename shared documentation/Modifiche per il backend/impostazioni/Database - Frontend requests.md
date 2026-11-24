@@ -14,14 +14,15 @@ la stessa tabella con le prenotazioni del cestino (Ripristina, Elimina definitiv
 | 1 | POST | `/api/booking/reservations/reservation-list` | Elenco delle prenotazioni per la tabella, a pagine |
 | 2 | POST | `/api/booking/trash/trash-list` | Elenco del cestino per la tabella, a pagine |
 | 3 | POST | `/api/catalog/agreement-partners/agreement-partner-combobox` | Tendina "Strutture convenzionate" del popup Filtri |
+| 4 | POST | `/api/booking/trash/restore` | **Modifica**: la prenotazione torna allo stato che aveva prima del cestino |
 
-Le azioni usano le API che ci sono già, così come sono: "Cancella dati" `POST /api/booking/cleanup/move-to-trash`, "Ripristina"
+Le azioni usano le API che ci sono già, così come sono (tranne la 4): "Cancella dati" `POST /api/booking/cleanup/move-to-trash`, "Ripristina"
 `POST /api/booking/trash/restore`, "Elimina definitivamente" `POST /api/booking/trash/purge` e "Svuota cestino"
 `POST /api/booking/trash/empty`.
 
 ## Regole comuni
 
-- **Le API esistenti non cambiano**: `GET /api/booking/reservations`, `GET /api/booking/trash` e
+- **Le API esistenti non cambiano** (tranne la 4): `GET /api/booking/reservations`, `GET /api/booking/trash` e
   `GET /api/catalog/agreement-partners/lookup` restano come sono. Le tre API nuove servono perché le tabelle e le tendine del
   frontend hanno tutte la stessa richiesta e la stessa risposta.
 - **Moduli**: le API 1 e 2 in Booking (`Endpoints/Endpoints.cs`, `MapReservations` e `MapTrash`; `ReservationService.ListAsync`,
@@ -224,30 +225,41 @@ apertura del popup. Segue la regola di tutte le tendine del frontend: `POST`, se
 401 `auth.unauthenticated`, 403 `auth.forbidden`, 403 `catalog.property_required`, 404 `catalog.property_not_found`. Il frontend mostra
 l'errore sotto la tendina e rilegge l'elenco quando l'utente prova ad aprirla.
 
-## Da segnalare allo sviluppatore
+## 4. POST /api/booking/trash/restore: lo stato di prima
 
-**Il ripristino rimette sempre "Confermata"**: `Reservation.RestoreFromTrash` (`Reservation.cs:356`) imposta `Confirmed` qualunque fosse lo
-stato prima, e `TrashService.RestoreAsync` riattiva i consumi rilasciati. Nel cestino ci vanno prenotazioni in qualsiasi stato
-(`CleanupAsync` e `DeleteAsync` non lo guardano), e `CancelForTrash` non conserva quello di prima. Quindi dopo un ripristino:
+API che esiste già ("Ripristina" del Cestino): rotta, corpo, permesso, risposta `{ succeeded, failed }` ed errori restano quelli di oggi.
+Il frontend non cambia.
 
-- una prenotazione online **in attesa** di conferma torna confermata, senza che nessuno l'abbia accettata;
+**Oggi** `Reservation.RestoreFromTrash` imposta `Confirmed` qualunque fosse lo stato prima, e `TrashService.RestoreAsync` riattiva i consumi
+rilasciati. Nel cestino ci vanno prenotazioni in qualsiasi stato (`CleanupAsync` e `DeleteAsync` non lo guardano), e `CancelForTrash` non
+conserva quello di prima. Quindi dopo un ripristino:
+
+- una prenotazione online **in attesa** di conferma, o in attesa di **pagamento** (`PaymentHoldUntil`), torna confermata senza che nessuno
+  l'abbia accettata o pagata;
 - una prenotazione già **annullata**, spostata nel cestino con "Cancella dati", torna confermata e riprende le sue postazioni.
 
 Per il ripristino di uno stabilimento il caso è già gestito: `ReactivateAfterPropertyRestore` rimette `Pending` quando
-`OnlineConfirmationState` è in attesa e non tocca quelle annullate per un altro motivo. Se e come correggerlo lo decide lo sviluppatore:
-l'agente glielo segnala. Il frontend non cambia.
+`OnlineConfirmationState` è in attesa e non tocca quelle annullate per un altro motivo.
 
-**Altri due casi del ripristino** (`TrashService.RestoreAsync`):
+**Cosa ci serve**:
 
-- dopo un `SpotUnavailable` al salvataggio non chiama `DiscardChanges()` (come fanno `RenewalService` e `SharingService`): le prenotazioni
-  dopo, nella stessa richiesta, possono risultare non disponibili per sbaglio;
-- una prenotazione in attesa di **pagamento** (`PaymentHoldUntil`, che `CancelForTrash` non tocca) torna confermata come quella in attesa
-  di conferma.
+- la prenotazione torna allo **stato di prima**, con il suo motivo e la sua data di annullamento se era annullata: confermata, in attesa (con le
+  sue scadenze: se sono già passate la tratta il lavoro che le fa scadere, come le altre) o annullata;
+- postazioni, servizi e utilizzo dello sconto si riprendono **solo se torna attiva** (confermata o in attesa), come oggi. Una annullata esce dal
+  cestino e resta annullata, senza riprendere niente: non può fallire per una postazione occupata;
+- le prenotazioni finite nel cestino **prima** di questa modifica, di cui non si conosce lo stato, tornano come oggi: confermate;
+- dopo un `SpotUnavailable` al salvataggio si chiama `DiscardChanges()`, come fanno `OnlineBookingService`, `RenewalService` e `SharingService`: oggi
+  le prenotazioni dopo, nella stessa richiesta, possono risultare non disponibili per sbaglio;
+- come conservare lo stato di prima (colonne nuove, con la migration) lo decide lo sviluppatore: l'agente glielo chiede prima di scrivere codice.
+
+## Da segnalare allo sviluppatore
 
 **Affiliato**: vede solo le prenotazioni con una sua postazione (`90-api-booking.md`, "Affiliato"; `CanSeeAsync` in `BookingSupport.cs`), ma
 `ReservationService.ListAsync` e `TrashService` non lo controllano, e il ruolo ha `bookings.delete`: con il cestino vedrebbe le
 prenotazioni, e i clienti, di tutto lo stabilimento. L'agente chiede allo sviluppatore se le API 1 e 2 devono filtrare per le sue
-postazioni (nella query, non dopo la paginazione).
+postazioni (nella query, non dopo la paginazione). Se sì, **solo per chi ha le postazioni limitate** (`UserResourceScope.IsRestricted`) e non con
+`CanSeeAsync` così com'è: `VisibleIdsAsync` conta le postazioni di oggi, e una prenotazione con la postazione tolta dalla mappa sparirebbe per
+**tutti**, proprio quelle vecchie che questa pagina serve a ripulire.
 
 ## Verifica
 
@@ -266,3 +278,7 @@ postazioni (nella query, non dopo la paginazione).
 7. `trash-list`: solo le prenotazioni del cestino, le ultime eliminate prima con `sortField` `""`, `isTrashed` `true`; ricerca, filtri, ordine
    e pagine come la 1. Un affiliato con postazioni limitate: quello che lo sviluppatore ha deciso. Dopo `POST /api/booking/trash/empty`: `total` 0.
 8. `agreement-partner-combobox`: le stesse convenzioni di `lookup`, con `id` e `value`; una convenzione eliminata non c'è; senza convenzioni `[]`.
+9. Ripristino di quattro prenotazioni messe nel cestino: confermata, in attesa di conferma, in attesa di pagamento e annullata. Tornano
+   ognuna nel suo stato; l'annullata ha il motivo e la data di prima e non occupa la postazione, anche se nel frattempo è di un altro. Una
+   confermata con la postazione occupata è in `failed` con `booking.spot_unavailable`, e quella dopo nella stessa richiesta si ripristina.
+10. Una prenotazione nel cestino da prima della modifica torna confermata, come oggi.

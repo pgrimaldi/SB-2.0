@@ -180,7 +180,7 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
     `POST /api/catalog/tariff-periods` (o `/api/catalog/next-season/tariff-periods`), usata così com'è: risponde 201
     con il periodo creato (con la sua `key`), che la tab non usa: ricarica i periodi.
   - Errori del backend: `name`, `pricing.period_name_taken` e `validation.max_length` sotto il nome; `ranges`,
-    `ranges[i]`, `pricing.period_outside_season` e `pricing.period_overlap` sotto il calendario; gli altri (es.
+    `ranges[i]` e `pricing.period_outside_season` sotto il calendario; gli altri (es.
     `pricing.season_required`, `catalog.property_required`) sopra i bottoni.
 - Gli altri tre popup salvano tutti il periodo intero con l'API del backend
   `PUT /api/catalog/tariff-periods/{key}` (o `/api/catalog/next-season/tariff-periods/{key}`,
@@ -201,8 +201,8 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   dà `invalidate.seasons.ranges.invalid`, gli altri il testo del loro codice), anche quando arrivano insieme a un
   errore sul nome, che resta sotto il campo; gli altri codici (`pricing.*`) vanno sopra i bottoni.
 - Tutti e quattro i popup passano ogni errore alla tab con `(failed)`: su un 404, un 409 o un 422 (es.
-  `pricing.period_not_found`, periodo già eliminato da qualcun altro; `pricing.period_name_taken` o
-  `pricing.period_overlap`, nome o giorni presi intanto da un altro periodo) il popup mostra l'errore come sempre e
+  `pricing.period_not_found`, periodo già eliminato da qualcun altro; `pricing.period_name_taken`, nome preso intanto da
+  un altro periodo) il popup mostra l'errore come sempre e
   dietro la tab ricarica i periodi (`reloadIfStale`), così i controlli del popup lavorano sulla lista nuova. Con
   `pricing.period_outside_season` la tab fa rileggere anche le date della stagione (`SeasonDatesBehaviour.reload()`).
 - Con 409 `resource.version_conflict` (un altro utente ha cambiato il periodo dopo la lettura della lista, anche
@@ -234,28 +234,23 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   delle stagioni e i popup); le modifiche dell'utente si perdono e le rifà.
 - I mock calcolano la versione come hash dei dati coperti (`versionOf`, `versionConflict`, `savedWithVersion` di
   `services/mocks/versions/versions.mock.ts`, in `seasons.mock.ts`).
-- È chiesto al backend nella sezione 6 di
+- È chiesto al backend nella sezione 5 di
   `shared documentation/Modifiche per il backend/impostazioni/Stagioni e periodi - Frontend requests.md`.
 
-## Intervalli senza sovrapposizioni
+## Sovrapposizioni degli intervalli
 
-- Gli intervalli di una stagione non si sovrappongono mai, nemmeno di un giorno e anche tra periodi diversi.
-- `SeasonPeriods.seasonIntervals` (tutti gli intervalli della tab) va ai popup:
-  - Imposta periodo: `noOverlaps` sulla lista, anche tra i suoi intervalli;
-  - Aggiungi intervallo e Modifica Intervallo: `noOverlap` sul form (la modifica esclude il proprio intervallo).
-- Validatori in `components/shared/forms/validators.ts`. Il messaggio `invalidate.overlap` sta sotto il calendario in
-  Imposta periodo e sopra i bottoni negli altri due popup; Salva resta spento.
-- Il backend controlla le sovrapposizioni solo dentro lo stesso periodo (`SaveTariffPeriodRequestValidator`, per le
-  due stagioni; nel database il vincolo `ex_catalog_pricing_tariff_periods_no_overlap`, solo per la stagione
-  corrente): quelle tra periodi diversi le impedisce solo il frontend. Il controllo è chiesto al backend (sezioni 4 e 5
-  del documento di richieste della pagina), con il codice `pricing.period_overlap` (`args.periodName`), che Imposta
-  periodo mostra sotto il calendario e gli altri popup sopra i bottoni ("Le date si sovrappongono al periodo …"); i
-  mock lo simulano. Se `periodName` arriva vuoto (l'altro periodo è stato eliminato intanto) compare il testo di
-  `invalidate.overlap` ("Le date si sovrappongono a un altro intervallo della stagione"), con
-  `periodOverlapError` di `season-ranges-errors.ts`.
-- Di solito il messaggio non compare, perché i giorni presi sono grigi (`disabledPeriods`):
-  - in Imposta periodo `app-period-calendar` riceve gli intervalli della stagione e quelli già scelti nel popup e,
-    dopo il primo clic, mette in grigio anche i giorni dal prossimo intervallo preso in poi;
-  - in Aggiungi intervallo e Modifica Intervallo `app-filled-date-field` riceve gli altri intervalli della stagione
+- Periodi **diversi** della stessa stagione possono avere giorni in comune: per un giorno vale il periodo più breve (lo
+  decide il backend, `TariffCalendar.Resolve`). Serve per esempio per un giorno di festa dentro "Bassa".
+- Gli intervalli dello **stesso** periodo non si sovrappongono mai, nemmeno di un giorno, come nel backend:
+  - Imposta periodo: `noOverlaps` sulla lista dei suoi intervalli;
+  - Aggiungi intervallo e Modifica Intervallo: `noOverlap` sul form con gli altri intervalli del periodo
+    (`otherIntervals`, da `[period]`; la modifica esclude il proprio).
+- Validatori in `components/shared/forms/validators.ts`. Il messaggio `invalidate.overlap` ("Le date si sovrappongono a un
+  altro intervallo del periodo") sta sotto il calendario in Imposta periodo e sopra i bottoni negli altri due popup; Salva
+  resta spento.
+- Di solito il messaggio non compare, perché i giorni presi dallo stesso periodo sono grigi (`disabledPeriods`):
+  - in Imposta periodo `app-period-calendar` riceve gli intervalli già scelti nel popup e, dopo il primo clic, mette in
+    grigio anche i giorni dal prossimo intervallo preso in poi;
+  - in Aggiungi intervallo e Modifica Intervallo `app-filled-date-field` riceve gli altri intervalli del periodo
     sia nel "Dal" sia nel "Al"; il "Al" ha come `maxDate` il giorno prima del prossimo intervallo preso dopo il
     "Dal" (`lastFreeDay`), o la fine della stagione.

@@ -127,8 +127,8 @@ const COUNTRY_CODE_LENGTH = 2;
 const MAX_SAVED_SERVICE_QUANTITY = 200;
 /** The backend's limit of Descrizione and Regolamento, counted on their HTML. */
 const MAX_BACKEND_RICH_TEXT_LENGTH = 20_000;
-const MIN_NOTICE_HOURS = 1;
-const MAX_NOTICE_HOURS = 720;
+/** `SavePropertyInfoRequestValidator.CancellationWindows`. */
+const NOTICE_HOURS: readonly number[] = [3, 12, 24, 48, 72, 168];
 
 /**
  * `GET /api/catalog/lookups/countries`: the active countries, `code` = ISO code and `name` in the language
@@ -825,10 +825,10 @@ const GENERAL_TEXT_LIMITS: Partial<Record<keyof BathhouseGeneralInformation, num
  * over its limit (`GENERAL_TEXT_LIMITS`), an email that is not one, a phone or WhatsApp number that
  * is not digits and spaces up to 32 characters (see `phoneErrors`), a country code not of 2
  * letters, a time not `HH:mm`, no `isFreeCancellation`, notice hours with `isFreeCancellation`
- * false and out of 1-720 (two errors when both), no `petPolicy` of `PetPolicy`, a `closingTime` not
- * after the `openingTime`; 422 catalog.country_not_found for a country not in the list; 409
- * `resource.version_conflict` when `If-Match` is not the version of the information; 401 without a
- * valid access token.
+ * false and not one of `NOTICE_HOURS` (two errors when both), no `petPolicy` of `PetPolicy`, a
+ * `closingTime` not after the `openingTime`; 409 `resource.version_conflict` when `If-Match` is not
+ * the version of the information; 422 catalog.country_not_found for a country not in the list; 401
+ * without a valid access token.
  */
 export const saveBathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -876,12 +876,8 @@ export const saveBathhouseConfigurationGeneralMock = (
   if (body.isFreeCancellation === false && hours !== null && hours !== undefined) {
     errors.push({ field: 'cancellationNoticeHours', code: ApiErrorCode.ValidationInvalid });
   }
-  if (typeof hours === 'number' && (hours < MIN_NOTICE_HOURS || hours > MAX_NOTICE_HOURS)) {
-    errors.push({
-      field: 'cancellationNoticeHours',
-      code: ApiErrorCode.ValidationOutOfRange,
-      args: { from: MIN_NOTICE_HOURS, to: MAX_NOTICE_HOURS },
-    });
+  if (typeof hours === 'number' && !NOTICE_HOURS.includes(hours)) {
+    errors.push({ field: 'cancellationNoticeHours', code: ApiErrorCode.ValidationInvalid });
   }
   if (!Object.values<unknown>(PetPolicy).includes(body.petPolicy)) {
     errors.push({ field: 'petPolicy', code: ApiErrorCode.ValidationInvalid });
@@ -902,13 +898,13 @@ export const saveBathhouseConfigurationGeneralMock = (
       errors,
     });
   }
-  const country = body.country?.toUpperCase();
-  if (country && !COUNTRY_CODES.some((code) => code === country)) {
-    return problem(request, 422, ApiErrorCode.CatalogCountryNotFound);
-  }
   const conflict = versionConflict(request, generalInformation);
   if (conflict) {
     return conflict;
+  }
+  const country = body.country?.toUpperCase();
+  if (country && !COUNTRY_CODES.some((code) => code === country)) {
+    return problem(request, 422, ApiErrorCode.CatalogCountryNotFound);
   }
   generalInformation = onlyFieldsOf(BathhouseGeneralInformation, {
     ...generalInformation,
@@ -950,8 +946,8 @@ function phoneErrors(field: string, value: unknown): MockFieldError[] {
  * says, a service not in the list stays as it was (until the page is reloaded). 204 without a body,
  * with the new version in its `ETag`; first 400 without `services` (never read as `[]`), with more
  * than 200 or a repeated `idService`, with an `isSelected` that is not true or false in an element;
- * then 404 for a null element, one without `idService` or with a service that does not exist; 409
- * `resource.version_conflict` when `If-Match` is not the version of the services offered; 401
+ * then 409 `resource.version_conflict` when `If-Match` is not the version of the services offered;
+ * then 404 for a null element, one without `idService` or with a service that does not exist; 401
  * without a valid access token.
  */
 export const saveBathhouseConfigurationServicesMock = (
@@ -988,12 +984,12 @@ export const saveBathhouseConfigurationServicesMock = (
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
   }
-  if (!services.every((service) => isServiceId(service?.idService))) {
-    return resourceNotFound(request);
-  }
   const conflict = versionConflict(request, offeredServices());
   if (conflict) {
     return conflict;
+  }
+  if (!services.every((service) => isServiceId(service?.idService))) {
+    return resourceNotFound(request);
   }
   const offered = new Set(idOfferedServices);
   for (const { idService, isSelected } of services as BathhouseServiceItem[]) {
@@ -1821,8 +1817,8 @@ type UpdateBarServiceBody = CreateBarServiceBody & { idBarService?: unknown };
  * The common part of the three updates of the edit panel: 401 without a valid access token; 400 with
  * one error per wrong field; 404 `service.not_found` for an `idBarService` that is not one of
  * its bar services; 400 for what depends on
- * the saved service (`savedErrorsOf`); 422 and 404 of its references (`referenceProblem`); 409
- * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * the saved service (`savedErrorsOf`); 409 `resource.version_conflict` when `If-Match` is not the
+ * version of the data of the tab (`dataOf`); 422 and 404 of its references (`referenceProblem`);
  * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their new
  * version in its `ETag`.
  */
@@ -1861,13 +1857,13 @@ function updateBarService(
   if (savedErrors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
   }
-  const missing = referenceProblem(request, body, detailsOf(row).periodPrices);
-  if (missing) {
-    return missing;
-  }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
     return conflict;
+  }
+  const missing = referenceProblem(request, body, detailsOf(row).periodPrices);
+  if (missing) {
+    return missing;
   }
   const details = structuredClone(detailsOf(row));
   apply(details, structuredClone(body), row);
@@ -2224,8 +2220,8 @@ type UpdateStandardServiceBody = CreateStandardServiceBody & { idStandardService
  * The common part of the three updates of the edit panel: 401 without a valid access token; 400 with
  * one error per wrong field; 404 `service.not_found` for an `idStandardService` that is not one of
  * its services; 400 for what depends on
- * the saved service (`savedErrorsOf`); 422 and 404 of its references (`referenceProblem`); 409
- * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * the saved service (`savedErrorsOf`); 409 `resource.version_conflict` when `If-Match` is not the
+ * version of the data of the tab (`dataOf`); 422 and 404 of its references (`referenceProblem`);
  * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their new
  * version in its `ETag`.
  */
@@ -2264,13 +2260,13 @@ function updateStandardService(
   if (savedErrors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
   }
-  const missing = referenceProblem(request, body, standardDetailsOf(row).periodPrices);
-  if (missing) {
-    return missing;
-  }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
     return conflict;
+  }
+  const missing = referenceProblem(request, body, standardDetailsOf(row).periodPrices);
+  if (missing) {
+    return missing;
   }
   const details = structuredClone(standardDetailsOf(row));
   apply(details, structuredClone(body), row);
@@ -2858,8 +2854,8 @@ type UpdateHourlyServiceBody = CreateHourlyServiceBody & { idHourlyService?: unk
  * The common part of the three updates of the edit panel: 401 without a valid access token; 400 with
  * one error per wrong field; 404 `service.not_found` for an `idHourlyService` that is not one of
  * its hourly services; 400 for what depends on
- * the saved service (`savedErrorsOf`); 422 and 404 of its references (`hourlyReferenceProblem`); 409
- * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * the saved service (`savedErrorsOf`); 409 `resource.version_conflict` when `If-Match` is not the
+ * version of the data of the tab (`dataOf`); 422 and 404 of its references (`hourlyReferenceProblem`);
  * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their new
  * version in its `ETag`.
  */
@@ -2898,13 +2894,13 @@ function updateHourlyService(
   if (savedErrors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
   }
-  const missing = hourlyReferenceProblem(request, body, hourlyDetailsOf(row).periodAvailabilities);
-  if (missing) {
-    return missing;
-  }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
     return conflict;
+  }
+  const missing = hourlyReferenceProblem(request, body, hourlyDetailsOf(row).periodAvailabilities);
+  if (missing) {
+    return missing;
   }
   const details = structuredClone(hourlyDetailsOf(row));
   apply(details, structuredClone(body), row);
@@ -3074,6 +3070,15 @@ function serviceItemsOf<
     .sort((first, second) => naturalOrder(first.value, second.value));
 }
 
+function serviceIdsOf<
+  Row extends { propertyId: number; serviceName: string | null },
+  Details extends { translations: ServiceTranslation[] },
+>(table: ServiceTable<Row, Details>): string[] {
+  return table.rows
+    .filter((row) => row.propertyId === DEMO_PROPERTY.id)
+    .map((row) => String(row[table.idField]));
+}
+
 /** Every id, when the list is given, of a service of the property. */
 function areServicesOf<Row extends { propertyId: number }>(
   ids: unknown,
@@ -3204,23 +3209,31 @@ function automaticPriceOfImage(request: HttpRequest<unknown>): AutomaticPriceRow
   return AUTOMATIC_PRICES.find((row) => row.idAutomaticPrice === idAutomaticPrice);
 }
 
-/** The data of the add panel of an automatic price: the saved one, or a minimal one from the list. */
+/**
+ * The data of the add panel of an automatic price: the saved one, or a minimal one from the list, of
+ * all the services there are the first time.
+ */
 function automaticDetailsOf(row: AutomaticPriceRow): AutomaticPriceAddItemRequest {
-  return (
-    AUTOMATIC_PRICE_DETAILS.get(row.idAutomaticPrice ?? '') ??
-    Object.assign(new AutomaticPriceAddItemRequest(), {
-      translations: [
-        {
-          language: Language.It,
-          serviceName: row.serviceName,
-          description: 'Prezzo automatico dello stabilimento.',
-        },
-      ],
-      price: row.price,
-      vatRate: 10,
-      isAllServicesEnabled: true,
-    })
-  );
+  const saved = AUTOMATIC_PRICE_DETAILS.get(row.idAutomaticPrice ?? '');
+  if (saved) {
+    return saved;
+  }
+  const details = Object.assign(new AutomaticPriceAddItemRequest(), {
+    translations: [
+      {
+        language: Language.It,
+        serviceName: row.serviceName,
+        description: 'Prezzo automatico dello stabilimento.',
+      },
+    ],
+    price: row.price,
+    vatRate: 10,
+    idBarServices: serviceIdsOf(BAR_SERVICE_TABLE),
+    idStandardServices: serviceIdsOf(STANDARD_SERVICE_TABLE),
+    idHourlyServices: serviceIdsOf(HOURLY_SERVICE_TABLE),
+  });
+  AUTOMATIC_PRICE_DETAILS.set(row.idAutomaticPrice ?? '', details);
+  return details;
 }
 
 /** The automatic price of the `idAutomaticPrice` of the query string, if it exists. */
@@ -3299,7 +3312,6 @@ function automaticPricesValidityOf(
     vatRate: details.vatRate,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
     validityPeriods: details.validityPeriods,
-    isAllServicesEnabled: details.isAllServicesEnabled,
     idBarServices: details.idBarServices,
     idStandardServices: details.idStandardServices,
     idHourlyServices: details.idHourlyServices,
@@ -3314,8 +3326,8 @@ type UpdateAutomaticPriceBody = CreateAutomaticPriceBody & { idAutomaticPrice?: 
  * The common part of the two updates of the edit panel: 401 without a valid access token; 400 with
  * one error per wrong field; 404 `service.automatic_price_not_found` for an `idAutomaticPrice` that is not one of
  * its automatic prices; 400 for what depends on
- * the saved one (`savedErrorsOf`); 422 `catalog.vat_rate_not_allowed`; 409
- * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * the saved one (`savedErrorsOf`); 409 `resource.version_conflict` when `If-Match` is not the version
+ * of the data of the tab (`dataOf`); 422 `catalog.vat_rate_not_allowed`;
  * 404 `service.not_found` and `catalog.sector_not_found` for a service or a sector that is not one of
  * the property; otherwise `apply` changes the data of its tab and the answer is 204 without a body,
  * with their new version in its `ETag`.
@@ -3355,13 +3367,13 @@ function updateAutomaticPrice(
   if (savedErrors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
   }
-  const vatProblem = vatRateNotAllowed(request, body.vatRate);
-  if (vatProblem) {
-    return vatProblem;
-  }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
     return conflict;
+  }
+  const vatProblem = vatRateNotAllowed(request, body.vatRate);
+  if (vatProblem) {
+    return vatProblem;
   }
   if (!areAutomaticServicesOf(body, property.id)) {
     return problem(request, 404, ApiErrorCode.ServiceNotFound);
@@ -3418,7 +3430,6 @@ export const updateAutomaticPricePricesValidityMock = (
       details.vatRate = body.vatRate ?? null;
       details.isOnlinePurchaseEnabled = body.isOnlinePurchaseEnabled === true;
       details.validityPeriods = body.validityPeriods ?? [];
-      details.isAllServicesEnabled = body.isAllServicesEnabled === true;
       details.idBarServices = body.idBarServices ?? [];
       details.idStandardServices = body.idStandardServices ?? [];
       details.idHourlyServices = body.idHourlyServices ?? [];
@@ -3454,21 +3465,14 @@ function automaticGeneralErrors(
 
 /**
  * The price always, the VAT when given, the days and the time slots of every period in their order;
- * a service at least without `isAllServicesEnabled`, none with it.
+ * a service at least.
  */
 function automaticPriceErrors(body: CreateAutomaticPriceBody): MockFieldError[] {
   const hasServices = [body.idBarServices, body.idStandardServices, body.idHourlyServices].some(
     (ids) => ids?.length,
   );
   return [
-    ...(hasServices === (body.isAllServicesEnabled === true)
-      ? [
-          {
-            field: 'isAllServicesEnabled',
-            code: hasServices ? ApiErrorCode.ValidationInvalid : ApiErrorCode.ValidationRequired,
-          },
-        ]
-      : []),
+    ...(hasServices ? [] : [{ field: 'idBarServices', code: ApiErrorCode.ValidationRequired }]),
     ...requiredPriceErrors('price', body.price),
     ...((body.validityPeriods?.length ?? 0) > MAX_PERIOD_QUANTITY
       ? [{ field: 'validityPeriods', code: ApiErrorCode.ValidationInvalid }]

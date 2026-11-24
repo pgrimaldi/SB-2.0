@@ -194,7 +194,7 @@ const RESERVATIONS: ReservationRow[] = [
     dateFrom: '2026-06-05T00:00:00.000Z',
     dateTo: '2026-06-07T00:00:00.000Z',
     agreementName: null,
-    reservationStatus: ReservationStatus.Cancelled,
+    reservationStatus: ReservationStatus.Confirmed,
   },
   {
     propertyId: 1,
@@ -204,7 +204,7 @@ const RESERVATIONS: ReservationRow[] = [
     dateFrom: '2026-07-18T00:00:00.000Z',
     dateTo: '2026-07-18T00:00:00.000Z',
     agreementName: 'Hotel Esempio',
-    reservationStatus: ReservationStatus.Cancelled,
+    reservationStatus: ReservationStatus.Pending,
   },
   {
     propertyId: 1,
@@ -365,7 +365,7 @@ export const emptyTrashMock = (request: HttpRequest<unknown>): Observable<HttpEv
   return of(new HttpResponse({ status: 200, url: request.url, body: { purged } })).pipe(delay(600));
 };
 
-/** `POST /api/booking/trash/restore` with `{ ids }`: back to the bookings list. */
+/** `POST /api/booking/trash/restore` with `{ ids }`: back to the bookings list, with the status it had before. */
 export const restoreBookingItemMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>

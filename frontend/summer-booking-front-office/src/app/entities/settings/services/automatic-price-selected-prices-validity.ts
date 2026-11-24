@@ -5,7 +5,6 @@ export class AutomaticPriceSelectedPricesValidity {
   vatRate: number | null = null;
   isOnlinePurchaseEnabled: boolean | null = null;
   validityPeriods: AutomaticPriceValidityPeriod[] = [];
-  isAllServicesEnabled: boolean | null = null;
   idBarServices: string[] = [];
   idStandardServices: string[] = [];
   idHourlyServices: string[] = [];

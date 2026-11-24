@@ -462,10 +462,12 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
     con il cestino e "Aggiungi fascia oraria" come nei voucher; di ogni fascia servono le due ore, come nel backend
     (`automaticPriceRules`). Un periodo nuovo ha tutti i giorni scelti e almeno uno è obbligatorio; un periodo letto senza
     giorni vale tutti i giorni e li mostra tutti scelti;
-  - "Validità sui servizi" (`app-automatic-price-service-validity`): l'interruttore "Tutti i servizi"
-    (`isAllServicesEnabled`, anche per quelli creati dopo) e, se è spento, un `app-expansion-panel` per Servizi bar,
-    Servizi e Servizi orari con "Seleziona tutti" e una casella per servizio, tre per riga: ne serve almeno uno, come nel
-    backend. Con l'interruttore acceso i tre elenchi si mandano vuoti (`withServicesInForce`); poi la casella
+  - "Validità sui servizi" (`app-automatic-price-service-validity`): l'interruttore "Tutti i servizi" e, se è spento, un
+    `app-expansion-panel` per Servizi bar, Servizi e Servizi orari con "Seleziona tutti" e una casella per servizio, tre
+    per riga: ne serve almeno uno, come nel backend (l'errore è quello di `idBarServices`). L'interruttore non è un
+    campo: acceso sceglie tutti i servizi, che si mandano tutti nei tre elenchi; spento apre i pannelli con i servizi ancora
+    scelti. All'apertura è acceso se il prezzo ha già tutti i servizi: uno creato dopo non entra da solo e lo mostra
+    spento. Chi sceglie i servizi uno per uno tiene i pannelli aperti anche con tutti scelti; poi la casella
     "Abilita prezzo automatico per ogni singolo servizio" con la (i): attiva, il prezzo si applica e si inserisce
     per ogni singolo servizio aggiunto alla prenotazione; spenta, una sola volta per singolo ordine;
   - Limiti (`app-services-limits`).
@@ -475,8 +477,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - Con 404 `service.not_found` (un servizio scelto è stato eliminato) i servizi si rileggono, quelli che non ci sono più
   escono dalla scelta (`withExistingServices`) e il messaggio resta sopra i bottoni. Se il servizio era già salvato nel prezzo
   arriva prima il conflitto di versione, e la tab si rilegge.
-- L'ordine dei servizi, e quelli scelti con "Tutti i servizi" acceso, non sono modifiche da perdere
-  (`comparableAutomaticPrice`).
+- L'ordine dei servizi non è una modifica da perdere (`comparableAutomaticPrice`).
 - Entità `AutomaticPriceValidityPeriod`, `AutomaticPriceTimeSlot`.
 - Salva: `POST /api/catalog/automatic-prices/create-automatic-price` (`CatalogService.createAutomaticPrice`), ripulito a
   ogni livello con `onlyFieldsOf`; risponde con l'id del prezzo automatico creato, poi parte l'immagine

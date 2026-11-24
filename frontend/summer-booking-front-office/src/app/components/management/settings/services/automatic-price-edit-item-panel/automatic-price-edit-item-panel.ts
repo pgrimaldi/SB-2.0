@@ -69,7 +69,6 @@ import {
   comparableAutomaticPrice,
   otherTranslationRules,
   withExistingServices,
-  withServicesInForce,
 } from '../service-form-rules';
 import { ServiceImageErrorPopup } from '../service-image-error-popup/service-image-error-popup';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
@@ -97,7 +96,6 @@ const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof AutomaticPriceAddIte
     'vatRate',
     'isOnlinePurchaseEnabled',
     'validityPeriods',
-    'isAllServicesEnabled',
     'idBarServices',
     'idStandardServices',
     'idHourlyServices',
@@ -512,7 +510,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     return this.catalog.updateAutomaticPricePricesValidity(
       Object.assign(new AutomaticPriceUpdatePricesValidityRequest(), {
         idAutomaticPrice,
-        ...pick(withServicesInForce(draft), tab),
+        ...pick(draft, tab),
       }),
       version,
     );
@@ -629,7 +627,6 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
           ),
         }),
       ),
-      isAllServicesEnabled: values.isAllServicesEnabled ?? false,
       idBarServices: [...values.idBarServices],
       idStandardServices: [...values.idStandardServices],
       idHourlyServices: [...values.idHourlyServices],

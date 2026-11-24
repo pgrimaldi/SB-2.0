@@ -519,9 +519,8 @@ che un altro utente ha cambiato i dati e il form rilegge l'account. Fino alle ri
   Content-Disposition: attachment; filename="guida-scontrino-elettronico.pdf"
   ```
 
-  con `Results.File(contenuto, tipo, nome)` come `PropertyAuditEndpoints`. `Content-Disposition` va fra gli header esposti dalla
-  policy CORS (`SecuritySetup.AddCors`, `WithExposedHeaders`), come chiede `Gestione utenti - Frontend requests.md`; con il
-  controllo di versione della sezione 7 anche `ETag`.
+  con `Results.File(contenuto, tipo, nome)` come `PropertyAuditEndpoints`. Frontend e API stanno sulla stessa origine (`/api`): il
+  browser legge `Content-Disposition` (e l'`ETag` della sezione 7) senza modifiche al CORS.
 - **Quale file**: la guida per chi configura lo scontrino elettronico, uguale per tutti gli stabilimenti. Nei documenti e nel
   codice del backend non ce n'è traccia: chi la fornisce, in che formato, in quali lingue (`Accept-Language`) e dove sta lo decide
   lo sviluppatore: l'agente glielo chiede. Il frontend salva il file così com'è. Nessuna voce nel registro.
@@ -574,7 +573,7 @@ stampanti USB si preparano nel database di prova; Fiskaly è sempre un client fi
     `POST` con `If-Match` uguale a quella `version`: 204 con l'header `ETag` della nuova; due `POST` che cambiano i dati con la stessa
     `If-Match`: il primo 204, il secondo 409 `resource.version_conflict` e l'account resta quello del primo; senza `If-Match`: 409; un
     `POST` che cambia solo PIN o password: 204 con `ETag` uguale alla versione letta.
-12. `download-guide-electronic-receipt`: 200 con il file, `Content-Type` e `Content-Disposition`, leggibile da un altro dominio. Senza
+12. `download-guide-electronic-receipt`: 200 con il file, `Content-Type` e `Content-Disposition`. Senza
     la guida: 404 `fiskaly.guide_not_found`.
 13. `GET /api/audit/entries` ha una voce per ogni modifica riuscita (due per l'accensione che spegne un'altra stampante), con il
     modulo, il `targetType` e i metadati della tabella, tradotta nell'esportazione; nessuna voce dopo un errore.

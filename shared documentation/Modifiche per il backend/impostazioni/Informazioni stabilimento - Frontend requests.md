@@ -80,9 +80,9 @@ Valgono per le sei API nuove.
 - **Ordine dei controlli**, uguale per tutte: 1) token e permesso (401, 403 `auth.forbidden`); 2) corpo JSON leggibile
   (altrimenti 400: il frontend manda sempre JSON valido, quindi `code` ed `errors[]` di questo 400 non contano); 3)
   validazione del corpo (400 `validation.failed`); 4) stabilimento dal token (403 `catalog.property_required`, 404
-  `catalog.property_not_found`); 5) i controlli sui dati della singola API (422 della API 2, 404 della API 4); 6)
-  versione in `If-Match` dei salvataggi (409 `resource.version_conflict`, sezione 10); 7) salvataggio. Se un controllo
-  fallisce non si salva nulla.
+  `catalog.property_not_found`); 5) versione in `If-Match` dei salvataggi (409 `resource.version_conflict`, sezione 10);
+  6) i controlli sui dati della singola API (422 della API 2, 404 della API 4); 7) salvataggio. Se un controllo fallisce
+  non si salva nulla.
 - **Errori** nel formato Problem Details del backend (`Boot/Web/ProblemDetailsWriter.cs`), con `code` e `traceId`, più
   `args` ed `errors[]` quando ci sono. Gli errori di validazione sono 400 `validation.failed` con `errors[]`: un
   elemento per ogni regola non rispettata (`ValidatorExtensions.EnsureValid`), con `field` = nome del campo **nel corpo
@@ -97,7 +97,7 @@ Valgono per le sei API nuove.
   "code": "validation.failed",
   "traceId": "00-4f1c2b7e9a0d4e3f8a6b5c4d3e2f1a0b-7c6d5e4f3a2b1c0d-00",
   "errors": [
-    { "field": "cancellationNoticeHours", "code": "validation.out_of_range", "args": { "from": 1, "to": 720 } },
+    { "field": "cancellationNoticeHours", "code": "validation.invalid", "args": {} },
     { "field": "petPolicy", "code": "validation.invalid", "args": {} }
   ]
 }
@@ -161,7 +161,7 @@ Tipi e provenienza, rispetto a `PropertyInfoDto` (cioè all'entità `Bathhouse`)
 | `description`, `regulation` | string o `null` | stessi nomi | HTML dell'editor del frontend, vedi sotto. |
 | `openingTime`, `closingTime` | string `HH:mm` o `null` | `openHoursFrom`, `openHoursTo` | `TimeOnly` scritto con `ToString("HH:mm", CultureInfo.InvariantCulture)`; non il formato di `TimeOnly` in JSON (`"08:30:00"`). |
 | `isFreeCancellation` | boolean, mai `null` | `isFreeCancellation` | |
-| `cancellationNoticeHours` | integer o `null` | `cancellationNoticeHours` | La tendina del frontend sceglie `true` con 48 o 24 ore, oppure `false` con `null`. Una combinazione diversa (es. `true` con 72) lascia la tendina vuota e il salvataggio la rimanda così com'è. |
+| `cancellationNoticeHours` | integer o `null` | `cancellationNoticeHours` | La tendina del frontend sceglie `true` con 48 o 24 ore, oppure `false` con `null`. Una combinazione diversa (es. `true` con 72) lascia la tendina vuota e il salvataggio la rimanda così com'è; un valore fuori dall'elenco del backend (sezione 2) dà l'errore sotto la tendina, e l'utente ne sceglie un altro. |
 | `petPolicy` | string, mai `null` | `petsPolicy` | `bathhouse.PetsPolicy.ToString()`: `Allowed`, `NotAllowed`, `OnRequest`. |
 | `version` | string, mai `null` | — | La versione dei 20 campi (sezione 10). Il frontend la rimanda nell'header `If-Match` della API 2, non nel corpo. |
 
@@ -173,8 +173,8 @@ HTML di `description` e `regulation`: l'editor (TipTap) produce solo `<p>`, `<br
 Oggi il backend non controlla l'HTML e lo salva com'è (toglie solo gli spazi ai lati): deve continuare ad accettarlo
 così.
 
-Non ci sono: `slug`, `latitude`, `longitude`, `virtualTourUrl`, `mainPhotoUrl`, `photos`, `menuPdf`, `priceListPdf` e
-`amenityCodes` (sono di altre tab o la pagina non li usa).
+Non ci sono: `slug`, `latitude`, `longitude`, `virtualTourUrl`, `mainPhotoUrl`, `photos`, `menuPdf`, `priceListPdf`,
+`amenityCodes` e `cancellationPenalties` (sono di altre tab o la pagina non li usa).
 
 Errori: solo quelli delle regole comuni (401, 403 `auth.forbidden`, 403 `catalog.property_required`, 404
 `catalog.property_not_found`).
@@ -222,8 +222,16 @@ Bottone "Salva" della tab Informazioni Generali.
     come `"0"` non vale).
   - Un orario vale solo con `TimeOnly.TryParseExact(value, "HH:mm", CultureInfo.InvariantCulture,
     DateTimeStyles.None, out _)`.
-- Salva **solo questi campi**: posizione, tour virtuale, foto, PDF e servizi restano come sono. Se si riusa
-  `Bathhouse.Update`, latitudine, longitudine e tour virtuale vanno passati con i valori attuali della scheda.
+- Salva **solo questi campi**: posizione, tour virtuale, foto, PDF, servizi e **trattenute di annullamento** restano come
+  sono. Se si riusa `Bathhouse.Update`, latitudine, longitudine, tour virtuale e `CancellationPenalties` vanno passati con
+  i valori attuali della scheda: senza, `Update` svuota le trattenute (`Bathhouse.cs:107-109`) e da quel momento chi
+  annulla riceve tutto (`Module.Booking/Application/Services/CustomerArea.cs`). Con `isFreeCancellation` `false` le
+  trattenute si tolgono, come oggi.
+- **Trattenuta e preavviso**: nel backend ogni trattenuta sta oltre il preavviso (`SavePropertyInfoRequestValidator`).
+  Questa API non manda le trattenute, quindi un preavviso nuovo può raggiungerne una salvata (trattenuta a 48 ore,
+  preavviso da 24 a 48). Se rifiutarlo (400 `validation.invalid` su `cancellationNoticeHours`, che il frontend mostra
+  sotto la tendina) o salvarlo lo decide lo sviluppatore: l'agente glielo chiede. In nessuno dei due casi la trattenuta si
+  toglie da sola.
 - Effetti, gli stessi di `PUT /property-info` di oggi (`PropertyInfoService.SaveAsync`):
   - se lo stabilimento non ha ancora la scheda, la crea (`Bathhouse.Create`) e poi la aggiorna;
   - `bathhouseName` diventa il nome della scheda e anche quello dello stabilimento (`catalog.properties.name`,
@@ -242,7 +250,7 @@ Bottone "Salva" della tab Informazioni Generali.
 - Validazione: le stesse regole di `PUT /property-info` (`SavePropertyInfoRequestValidator`) per gli stessi dati, con i
   nomi del corpo qui sopra, più le righe segnate **Nuova**. Le lunghezze si contano sul testo ricevuto, prima di
   togliere gli spazi ai lati. Ogni regola dà al massimo un errore (`CascadeMode.Stop`, `Boot/Program.cs`), ma un campo
-  con due regole può averne due (es. `cancellationNoticeHours` = 800 con `isFreeCancellation` = `false`).
+  con due regole può averne due (es. `cancellationNoticeHours` = 30 con `isFreeCancellation` = `false`).
 
 | `field` | `code` | `args` | Quando |
 |---|---|---|---|
@@ -258,15 +266,15 @@ Bottone "Salva" della tab Informazioni Generali.
 | `closingTime` | `validation.out_of_range` | `value` = `openingTime` come lo confronta la regola (es. `"08:30:00"` con `TimeOnly`); il frontend non lo legge | Con tutti e due gli orari validi, `closingTime` non è dopo `openingTime` (uguale non vale). |
 | `isFreeCancellation` | `validation.required` | | **Nuova.** Mancante o `null`. |
 | `cancellationNoticeHours` | `validation.invalid` | | Non `null` con `isFreeCancellation` = `false`. Con `isFreeCancellation` mancante o `null` c'è solo l'errore su `isFreeCancellation` (sotto); la regola qui sotto vale comunque. |
-| `cancellationNoticeHours` | `validation.out_of_range` | `from` = 1, `to` = 720 | Non `null` e fuori da 1-720. |
+| `cancellationNoticeHours` | `validation.invalid` | | Non `null` e diverso da 3, 12, 24, 48, 72 e 168 (`SavePropertyInfoRequestValidator.CancellationWindows`). |
 | `petPolicy` | `validation.invalid` | | Mancante, `null` o diverso da `Allowed`, `NotAllowed`, `OnRequest` (la regola di oggi controlla i codici `allowed`…; qui valgono i nomi .NET). |
 
 - Nazione: dopo la validazione e lo stabilimento, un `country` di 2 caratteri senza una nazione non cancellata con quel
   codice (confronto in maiuscolo, `PropertyInfoRepository.FindCountryIdAsync`; `is_active` non conta) risponde 422
   `catalog.country_not_found`, senza `errors[]`, e non si salva nulla. Il frontend lo mostra sotto Nazione.
 - Errori: 401 `auth.unauthenticated`, 403 `auth.forbidden`, 400 `validation.failed` (tabella sopra), 403
-  `catalog.property_required`, 404 `catalog.property_not_found`, 422 `catalog.country_not_found`, 409
-  `resource.version_conflict` (sezione 10), in quest'ordine.
+  `catalog.property_required`, 404 `catalog.property_not_found`, 409 `resource.version_conflict` (sezione 10), 422
+  `catalog.country_not_found`, in quest'ordine.
 
 ## 3. GET /api/catalog/property-info/bathhouse-configuration-services
 
@@ -630,9 +638,12 @@ Richiesta, in **ogni ambiente, sviluppo compreso**:
 
 Oggi, se due utenti modificano la stessa tab, vince chi salva per ultimo: ogni Salva rimanda tutto il modello letto
 (sezioni 2, 4 e 6) e cancella, senza che nessuno se ne accorga, quello che un altro utente ha cambiato nel frattempo.
-Il frontend chiede lo schema di **concorrenza ottimistica** che il backend ha già progettato per le prenotazioni offline
-(`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un **codice di errore
-unico per tutte le API**: `resource.version_conflict`.
+Il frontend chiede la **concorrenza ottimistica** degli altri documenti, con un **codice di errore unico per tutte le
+API**: `resource.version_conflict`.
+
+**Non è quello che Booking ha già per le prenotazioni** (`Endpoints.cs:253-255`, `ReservationService.cs:114-115`): lì
+l'`If-Match` è un numero, se manca o non si legge non si controlla niente, e il conflitto è 412 o 409
+`booking.version_conflict`. Qui valgono le regole sotto: con un altro codice il frontend non rileggerebbe i dati.
 
 ### Cosa ci serve
 
@@ -650,8 +661,13 @@ unico per tutte le API**: `resource.version_conflict`.
   `errors[]`. Senza `If-Match` risponde allo stesso modo: il frontend lo manda sempre.
 - **`ETag` nelle risposte**: ogni salvataggio riuscito risponde 204 senza corpo con la nuova versione nell'header
   `ETag: "<version>"`. Il frontend la tiene per il Salva successivo della stessa tab, senza rileggere.
-- Il 409 si controlla dopo i controlli sui dati della singola API (422 `catalog.country_not_found` della API 2, 404
-  `resource.not_found` della API 4) e subito prima del salvataggio (regole comuni, "Ordine dei controlli").
+- Il 409 si controlla dopo lo stabilimento e **prima** dei controlli sui dati della singola API (422
+  `catalog.country_not_found` della API 2, 404 `resource.not_found` della API 4; regole comuni, "Ordine dei controlli"), come
+  negli altri documenti: con dati vecchi l'utente deve rileggerli subito.
+- **Controllo e salvataggio sono una cosa sola**: di due salvataggi della stessa tab nello stesso momento con lo stesso
+  `If-Match` uno risponde 204 e l'altro 409 `resource.version_conflict`; mai i dati di tutti e due mescolati, mai un 500.
+  Vale anche senza scheda: due primi salvataggi insieme, anche di due tab diverse, non creano mai due schede (l'indice di
+  `catalog.bathhouses` sullo stabilimento non è unico); con due tab diverse riescono tutti e due.
 - **Stabilimento senza scheda**: le letture restituiscono comunque una `version`, quella dei valori di partenza, e il
   primo salvataggio con quella versione riesce e crea la scheda. Una scheda creata nel frattempo da un'altra API senza
   cambiare i dati della tab (per esempio dal caricamento di una foto) non cambia la versione.
@@ -722,12 +738,14 @@ Con uno stabilimento di prova e un token con `catalog.read` e `catalog.settings`
 2. **API 2**: dopo un 204 la API 1 restituisce i valori mandati, con gli orari `"HH:mm"` (non `"08:30:00"`) e
    `petPolicy` col nome .NET; `catalog.properties.name` = `bathhouseName` senza spazi ai lati; al primo salvataggio
    `catalog.bathhouses.slug` non è più `NULL`; `catalog.properties.country_id` è la nazione di `country`; latitudine,
-   longitudine, tour virtuale, foto, PDF e servizi non cambiano.
+   longitudine, tour virtuale, foto, PDF, servizi e trattenute di annullamento non cambiano (`GET /property-info` prima e
+   dopo). Con `isFreeCancellation` `false` le trattenute si svuotano.
 3. **"Ammessi" al primo salvataggio**: la prova della sezione 8.
 4. **Validazione della API 2**: il corpo dell'esempio con `postalCode` di 17 caratteri, `petPolicy` = `"allowed"`,
    `openingTime` = `"8:30"`, `isFreeCancellation` = `null` e `cancellationNoticeHours` = `null` risponde 400 con
-   quattro elementi in `errors[]`, con `field` `postalCode`, `petPolicy`, `openingTime` e `isFreeCancellation`; `country` = `"ZZ"` risponde 422 `catalog.country_not_found`; in
-   tutti e due i casi la API 1 restituisce i valori di prima.
+   quattro elementi in `errors[]`, con `field` `postalCode`, `petPolicy`, `openingTime` e `isFreeCancellation`;
+   `cancellationNoticeHours` = 30 con `isFreeCancellation` = `true` risponde 400 con `validation.invalid`; `country` =
+   `"ZZ"` risponde 422 `catalog.country_not_found`; in tutti i casi la API 1 restituisce i valori di prima.
 5. **API 3**: nel database locale restituisce i 48 servizi della tabella della sezione 7, in quell'ordine e con quel
    `categoryCode`; con `Accept-Language: en` i nomi sono in inglese dove c'è la traduzione; nessun servizio senza
    sezione o non attivo.
@@ -767,3 +785,5 @@ Controllo di versione (sezione 10), con lo stesso stabilimento e lo stesso token
     la API 2 e la API 6 dopo una `PUT /api/catalog/property-info` che cambia i loro dati.
 16. La API 3 con `Accept-Language: it` e con `Accept-Language: en` restituisce la stessa `version`.
 17. Su uno stabilimento senza scheda la API 2 con la `version` della API 1 risponde 204 e crea la scheda.
+18. Due API 2 nello stesso momento con lo stesso `If-Match` e valori diversi, con e senza scheda: una 204 e una 409. API 2
+    e API 6 insieme su uno stabilimento senza scheda: due 204 e una scheda sola.

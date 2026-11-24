@@ -59,7 +59,6 @@ import {
   comparableAutomaticPrice,
   otherTranslationRules,
   withExistingServices,
-  withServicesInForce,
 } from '../service-form-rules';
 import { ServiceImageErrorPopup } from '../service-image-error-popup/service-image-error-popup';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
@@ -203,7 +202,7 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         const idAutomaticPrice = await firstValueFrom(
-          this.catalog.createAutomaticPrice(withServicesInForce(this.draft())),
+          this.catalog.createAutomaticPrice(this.draft()),
         );
         const imageError = await this.uploadImage(idAutomaticPrice);
         this.isSaving.set(false);

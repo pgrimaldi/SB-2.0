@@ -171,10 +171,6 @@ export class SeasonPeriods {
       item,
     }));
   });
-  /** All the date intervals of the season of the tab: a new or changed one cannot overlap them. */
-  protected readonly seasonIntervals = computed(() =>
-    (this.periodItems() ?? []).flatMap(({ ranges }) => ranges),
-  );
   private readonly panels = viewChildren(ExpansionPanel);
   protected readonly isAllShown = computed(() => {
     const panels = this.panels();
@@ -300,8 +296,8 @@ export class SeasonPeriods {
 
   /**
    * An answer that says the list on screen is old (a period changed or gone, an interval gone, a name
-   * or days taken meanwhile, a period outside the season): the list is read again, and the season
-   * dates too when a period went outside them.
+   * taken meanwhile, a period outside the season): the list is read again, and the season dates too
+   * when a period went outside them.
    */
   protected reloadIfStale(problem: ApiProblem): void {
     if (STALE_STATUSES.includes(problem.status)) {

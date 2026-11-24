@@ -49,7 +49,7 @@ Console **CloudFront** → **Crea distribuzione**:
 - **Origine**: il bucket S3 (endpoint REST, non l'endpoint "website");
 - **Accesso all'origine**: **Origin Access Control (OAC)**, creando un nuovo controllo con le impostazioni predefinite. Al termine la console propone la policy del bucket: copiarla in S3 → bucket → **Autorizzazioni** → **Policy del bucket**. Consente a questa sola distribuzione di leggere gli oggetti (`s3:GetObject`);
 - **Criterio del protocollo visualizzatore**: **Reindirizza HTTP a HTTPS**;
-- **Criterio di cache**: **CachingOptimized** (TTL minimo 1 secondo, predefinito 1 giorno, massimo 1 anno): CloudFront usa il `max-age` impostato dal deploy entro questi limiti; `no-cache` diventa al massimo 1 secondo di cache su CloudFront, mentre il browser lo rispetta. Le future API (`/api`) avranno un comportamento separato, senza cache delle risposte personali;
+- **Criterio di cache**: **CachingOptimized** (TTL minimo 1 secondo, predefinito 1 giorno, massimo 1 anno): CloudFront usa il `max-age` impostato dal deploy entro questi limiti; `no-cache` diventa al massimo 1 secondo di cache su CloudFront, mentre il browser lo rispetta. Le API (`/api/*`) hanno un comportamento separato, senza cache (vedi "Comportamento per le API");
 - **Compressione automatica degli oggetti**: attiva;
 - **Oggetto root predefinito**: `index.html`;
 - **Firewall (WAF)**: secondo le esigenze dell'ambiente;
@@ -76,17 +76,19 @@ Lasciare **CORS disabilitato**: questa distribuzione serve il frontend statico e
 
 #### Content Security Policy
 
-La build non mette più script né stili inline in `index.html` (`optimization.styles.inlineCritical: false` in `angular.json`). La policy consente gli script del nostro dominio e dei soli due host necessari al caricamento di Google Maps, senza `'unsafe-inline'` o `'unsafe-eval'` negli script. Valore completo dell'header `Content-Security-Policy`, su una riga (aggiornato il 22/10/2026):
+La build non mette più script né stili inline in `index.html` (`optimization.styles.inlineCritical: false` in `angular.json`). La policy consente gli script del nostro dominio e dei soli due host necessari al caricamento di Google Maps, senza `'unsafe-inline'` o `'unsafe-eval'` negli script. Valore completo dell'header `Content-Security-Policy`, su una riga (aggiornato il 24/11/2026 con `blob:` in `img-src`):
 
 ```text
-default-src 'self'; script-src 'self' https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://maps.googleapis.com https://mapsresources-pa.googleapis.com https://maps.gstatic.com https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+default-src 'self'; script-src 'self' https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://maps.googleapis.com https://mapsresources-pa.googleapis.com https://maps.gstatic.com https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 ```
 
-I domini di Google servono alla mappa della tab Media di Informazioni stabilimento (Maps JavaScript API, dal 21/10/2026). La configurazione è basata sulla [guida CSP di Google Maps](https://developers.google.com/maps/documentation/javascript/content-security-policy) e sull'[elenco dei domini Maps](https://developers.google.com/maps/domains), limitando gli script a `maps.googleapis.com` e `maps.gstatic.com` e le connessioni ai cinque host espliciti sopra. I caratteri jolly restano solo nelle origini delle immagini; `blob:` è consentito solo ai worker, non agli script. Questa allowlist non equivale a una CSP strict con nonce: eventuali nuovi domini o richieste di `eval` vanno valutati prima di aggiungere eccezioni.
+I domini di Google servono alla mappa della tab Media di Informazioni stabilimento (Maps JavaScript API, dal 21/10/2026). La configurazione è basata sulla [guida CSP di Google Maps](https://developers.google.com/maps/documentation/javascript/content-security-policy) e sull'[elenco dei domini Maps](https://developers.google.com/maps/domains), limitando gli script a `maps.googleapis.com` e `maps.gstatic.com` e le connessioni ai cinque host espliciti sopra. I caratteri jolly restano solo nelle origini delle immagini; `blob:` è consentito ai worker e alle immagini, non agli script. Questa allowlist non equivale a una CSP strict con nonce: eventuali nuovi domini o richieste di `eval` vanno valutati prima di aggiungere eccezioni.
 
-`fonts.googleapis.com` deve essere in `style-src` e `connect-src`, `fonts.gstatic.com` in `font-src` e `connect-src`: il service worker Angular inoltra le richieste tramite `fetch()`, che è controllato da `connect-src` anche quando la risorsa richiesta è un foglio CSS o un font. Autorizzare solo stili e font non basta quando interviene il worker. Riferimento: [MDN, direttiva connect-src](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/connect-src).
+`fonts.googleapis.com` deve essere in `style-src` e `connect-src`, `fonts.gstatic.com` in `font-src` e `connect-src`: il service worker Angular inoltra le richieste tramite `fetch()`, che è controllato da `connect-src` anche quando la risorsa richiesta è un foglio CSS o un font. Autorizzare solo stili e font non basta quando interviene il worker; lo stesso vale per le immagini (vedi "Foto e file"). Riferimento: [MDN, direttiva connect-src](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/connect-src).
 
-Stato: CSP attiva su DEV dal 07/10/2026, estesa a Maps il 22/10/2026 nella policy `summerbooking-dev-frontoffice-security-headers`. L'utente ha confermato il funzionamento dopo gli adeguamenti; richieste `HEAD` del 22/10/2026 hanno verificato il valore finale sia sulla pagina `/it/home` sia su `/ngsw-worker.js` del dominio CloudFront DEV. Su PROD resta da configurare e verificare.
+**Foto e file**. `blob:` in `img-src` serve alle anteprime delle immagini scelte e non ancora caricate (immagine dei servizi, sfondo della mappa): sono indirizzi creati dalla pagina, validi solo lì. Le foto, le icone e gli altri file del backend hanno gli indirizzi di `Storage:PublicBaseUrls` (backend): se sono su un altro dominio, quel dominio va in `img-src` **e** in `connect-src`, perché il service worker scarica le immagini con `fetch`. I PDF si aprono in una nuova scheda e i file scaricati passano da `/api`: non richiedono direttive. Il frontend accetta solo link `https` o del nostro dominio.
+
+Stato: CSP attiva su DEV dal 07/10/2026, estesa a Maps il 22/10/2026 nella policy `summerbooking-dev-frontoffice-security-headers`. L'utente ha confermato il funzionamento dopo gli adeguamenti; richieste `HEAD` del 22/10/2026 hanno verificato il valore finale sia sulla pagina `/it/home` sia su `/ngsw-worker.js` del dominio CloudFront DEV. Su DEV resta da aggiungere `blob:` in `img-src`: senza, le anteprime non si vedono. Su PROD resta da configurare e verificare.
 
 Si attiva in due fasi, prima su DEV e poi su PROD:
 
@@ -119,6 +121,25 @@ Dopo aver creato la policy:
 Non serve invalidare la cache per questa modifica: CloudFront applica la policy anche alle risposte servite dalla cache. Riferimenti ufficiali: [creazione e associazione della policy](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/creating-response-headers-policies.html) e [funzionamento delle response headers policy](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/modifying-response-headers.html).
 
 Poiché CloudFront non ha il permesso `s3:ListBucket`, un file inesistente restituisce **403** e non 404. È voluto: gli errori reali restano visibili.
+
+### Comportamento per le API (`/api/*`)
+
+Da creare quando l'ambiente passa dai mock al backend: oggi su DEV non c'è e le API sono finte. Il frontend chiama `/api` sul **suo stesso dominio** (`apiBaseUrl` in `environment.prod.ts`) e non funziona con le API su un altro dominio: il cookie della sessione è `SameSite=Strict` e la CSP consente solo `'self'`. Nella stessa distribuzione:
+
+1. **Origini → Crea origine**: il backend (per esempio il load balancer), con protocollo **solo HTTPS**.
+2. **Comportamenti → Crea comportamento**, modello di percorso `/api/*`, **prima** di `Default (*)`:
+   - protocollo del visualizzatore: **solo HTTPS**;
+   - metodi consentiti: **GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE**;
+   - criterio di cache: **CachingDisabled**. Le risposte sono personali e cambiano a ogni salvataggio;
+   - criterio di richiesta all'origine: **AllViewer**. Al backend devono arrivare i cookie, i parametri e gli header `Authorization`, `Accept-Language` (nomi tradotti di Listino, Servizi e altri), `X-Time-Zone`, `If-Match` e `Origin`; con `AllViewer` arriva anche `Host`, quindi il certificato dell'origine deve valere per il dominio del sito;
+   - response headers policy: la stessa di `Default (*)`;
+   - **nessuna funzione associata**: quella del passo 3 trasformerebbe le API in `index.html`.
+3. **Risposte di errore personalizzate: nessuna**, come già detto: valgono per tutta la distribuzione e sostituirebbero gli errori del backend (400, 403, 404, 409), che il frontend legge per mostrare il messaggio giusto.
+4. **WAF**, se c'è: le regole gestite che guardano il corpo (dimensione e XSS) bloccherebbero il caricamento dei file e i testi formattati (descrizione, regolamento, template delle email). Vanno provate prima in sola osservazione (Count).
+
+Verifica: `curl -sI https://DOMINIO/api/identity/me` risponde con un errore del backend, non `200` con l'HTML dell'app né `403` di S3; due letture della stessa API non hanno `X-Cache: Hit from cloudfront`. Poi dal browser: accesso, ricarica della pagina (la sessione resta), un salvataggio con dati vecchi che risponde 409 (arriva `If-Match`), un elenco in un'altra lingua (arriva `Accept-Language`).
+
+Le impostazioni del backend che dipendono da CloudFront (indirizzo del visitatore, domini ammessi, indirizzi dei file) vanno concordate con lo sviluppatore del backend prima di collegarlo.
 
 ## 3. CloudFront Function per le route dell'app
 

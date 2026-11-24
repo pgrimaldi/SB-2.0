@@ -39,7 +39,7 @@ import { SeasonService } from '../../../../../services/api/seasons/season.servic
 import { noOverlap } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
-import { periodOverlapError, rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
+import { rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
 import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
@@ -57,8 +57,6 @@ export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges,
   readonly isNextSeason = input.required<boolean>();
   /** The period the interval goes to, as the list gave it: it is saved with all its intervals. */
   readonly period = input<SeasonPeriodItem | null>(null);
-  /** The date intervals the season has already: the new one cannot overlap them. */
-  readonly seasonIntervals = input<readonly SeasonPeriodInterval[]>([]);
   /** First and last day of the season of the tab: the days outside cannot be chosen. */
   readonly season = input<SeasonPeriodInterval | null>(null);
   readonly added = output<void>();
@@ -76,10 +74,12 @@ export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges,
   protected readonly dateIcon = ['/assets/images/GeneralIcon_CalendarFilled.svg'] as const;
   protected readonly isLoading = signal(false);
   private readonly draft = signal(new SeasonPeriodInterval());
+  /** The intervals of the same period: those of another one may share days with the new one. */
+  protected readonly otherIntervals = computed(() => this.period()?.ranges ?? []);
   protected readonly draftForm = form(this.draft, (path) => {
     required(path.startsOn);
     required(path.endsOn);
-    noOverlap(path, () => this.seasonIntervals());
+    noOverlap(path, () => this.otherIntervals());
     readonly(path, () => this.isLoading());
   });
   protected readonly startsOnError = this.validationText.message(this.draftForm.startsOn);
@@ -89,9 +89,9 @@ export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges,
   protected readonly endsOnMin = computed(() =>
     laterDay(this.season()?.startsOn ?? null, this.draft().startsOn),
   );
-  /** Data fine stops the day before the next interval of the season. */
+  /** Data fine stops the day before the next interval of the period. */
   protected readonly endsOnMax = computed(() =>
-    lastFreeDay(this.draft().startsOn, this.seasonIntervals(), this.season()?.endsOn ?? null),
+    lastFreeDay(this.draft().startsOn, this.otherIntervals(), this.season()?.endsOn ?? null),
   );
   protected readonly canSave = computed(() => this.draftForm().valid());
   protected readonly isConflictShown = signal(false);
@@ -150,10 +150,6 @@ export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges,
           this.isConflictShown.set(true);
           this.close();
           return undefined;
-        }
-        const overlap = periodOverlapError(problem, this.draftForm);
-        if (overlap) {
-          return overlap;
         }
         const ranges = rangesErrors(problem, this.draftForm);
         if (!ranges.length) {

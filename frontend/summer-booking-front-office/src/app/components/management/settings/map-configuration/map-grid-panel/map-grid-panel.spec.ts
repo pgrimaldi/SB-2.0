@@ -18,7 +18,9 @@ describe('MapGridPanel', () => {
     read.columns = 16;
     read.tiltDegrees = 8;
     read.icons.umbrella.free.name = MapUmbrellaIcon.Umbrella3;
+    read.icons.umbrella.free.url = 'https://example.test/icone/Umbrella3.svg';
     read.icons.umbrella.occupied.name = MapMixedSpotIcon.MixedSpot4;
+    read.icons.umbrella.occupied.url = 'https://example.test/icone/MixedSpot4.svg';
     read.configurationVersion = 'c1';
     return read;
   };

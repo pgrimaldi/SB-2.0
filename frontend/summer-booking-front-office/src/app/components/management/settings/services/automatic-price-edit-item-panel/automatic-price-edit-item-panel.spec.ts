@@ -142,7 +142,7 @@ describe('AutomaticPriceEditItemPanel', () => {
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove()),
   );
 
-  it('should save the Prezzi e Validità tab alone, with the services in force and its version', async () => {
+  it('should save the Prezzi e Validità tab alone, with its services and its version', async () => {
     const { fixture, panel, save, updateAutomaticPricePricesValidity, updated } = await setup({
       pricesValidity: { vatRate: 10, idSectors: ['s1'], version: 'v7' },
     });
@@ -151,7 +151,6 @@ describe('AutomaticPriceEditItemPanel', () => {
     await fixture.whenStable();
     panel['startEdit']();
     panel['draftForm'].price().value.set(3);
-    panel['draftForm'].isAllServicesEnabled().value.set(true);
     await save();
 
     expect(updateAutomaticPricePricesValidity).toHaveBeenCalledExactlyOnceWith(
@@ -159,7 +158,7 @@ describe('AutomaticPriceEditItemPanel', () => {
         idAutomaticPrice: 's5',
         price: 3,
         vatRate: 10,
-        isAllServicesEnabled: true,
+        idBarServices: ['b2', 'b1'],
         idSectors: ['s1'],
       }),
       'v7',
@@ -198,18 +197,15 @@ describe('AutomaticPriceEditItemPanel', () => {
     expect(panel['isSaveDisabled']()).toBe(false);
   });
 
-  it('should not ask for the order of the services, nor for those out of force', async () => {
-    const { fixture, panel } = await setup({
-      pricesValidity: { isAllServicesEnabled: true, idBarServices: [], idSectors: ['s2', 's1'] },
-    });
+  it('should not ask for the order of the services and of the sectors', async () => {
+    const { fixture, panel } = await setup({ pricesValidity: { idSectors: ['s2', 's1'] } });
 
     await panel['requestTab'](1);
     await fixture.whenStable();
     panel['startEdit']();
-    panel['draftForm'].isAllServicesEnabled().value.set(false);
     panel['draftForm'].idBarServices().value.set(['b1']);
     expect(panel.hasUnsavedChanges()).toBe(true);
-    panel['draftForm'].isAllServicesEnabled().value.set(true);
+    panel['draftForm'].idBarServices().value.set(['b1', 'b2']);
     panel['draftForm'].idSectors().value.set(['s1', 's2']);
     expect(panel.hasUnsavedChanges()).toBe(false);
   });
@@ -219,7 +215,7 @@ describe('AutomaticPriceEditItemPanel', () => {
 
     await panel['requestTab'](1);
     await fixture.whenStable();
-    const { touched, errors } = panel['draftForm'].isAllServicesEnabled();
+    const { touched, errors } = panel['draftForm'].idBarServices();
     expect(touched()).toBe(false);
     panel['startEdit']();
     expect(panel['isSaveDisabled']()).toBe(true);

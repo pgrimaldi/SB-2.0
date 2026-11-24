@@ -22,8 +22,8 @@ registro, `/settings/user-management/logs`.
 | 8 | POST | `/api/audit/export-log` | File Excel con le voci del registro filtrate |
 | 10 | GET + POST | `/api/identity/get-selected-user` e `/api/identity/update-user` | Controllo di versione: `version` nella lettura, `If-Match` ed `ETag` nel salvataggio, 409 `resource.version_conflict` |
 
-Oltre alle API, la sezione 9 chiede i codici di azione del registro per i moduli che oggi non hanno API (prenotazioni,
-pagamenti, cassa, ordini, database, prenotazioni dei tavoli). La sezione 10 aggiunge il controllo di versione alle API
+Oltre alle API, la sezione 9 dice quali codici di azione del registro usare per le azioni che nessun modulo registra ancora
+(cassa, ordini, ingresso segnalato). La sezione 10 aggiunge il controllo di versione alle API
 3 e 4.
 
 ## Regole comuni
@@ -515,10 +515,10 @@ e le 2 del primo giorno e mostrerebbe quelle tra mezzanotte e le 2 del giorno do
 
 ### Limiti
 
-- `actionCode`: il popup Filtri permette di scegliere tutte le azioni del catalogo (oggi 102, quelle di
+- `actionCode`: il popup Filtri permette di scegliere tutte le azioni del catalogo che il frontend conosce (oggi 102 di quelle di
   `GET /api/audit/action-codes`), quindi qui non vale il tetto di 50 codici di `GET /api/audit/entries`
   (`AuditQueryRules.MaxActionCodes` in `Module.Audit/Application/Validators/AuditValidators.cs`, 400 oltre 50). Il
-  massimo è il numero di codici di `AuditActionCodes.All` (oggi 111, cresce con il catalogo); oltre, o con un codice
+  massimo è il numero di codici di `AuditActionCodes.All` (oggi 149, cresce con il catalogo); oltre, o con un codice
   vuoto o più lungo di 100 caratteri, 400 `validation.failed` con `errors[]`
   `{ "field": "filters", "code": "validation.invalid" }`. Un codice che non è nel catalogo non è un errore e non trova
   voci, come oggi.
@@ -674,9 +674,8 @@ file, lo salva sul dispositivo con il nome di `Content-Disposition` (`FileDownlo
 | `Content-Type` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | Sempre questo: il documento è un file Excel. |
 | `Content-Disposition` | `attachment; filename="log-2026-10-26.xlsx"` | `log-` più la data di oggi nel fuso di `X-Time-Zone` (`yyyy-MM-dd`) ed estensione `.xlsx`; il frontend lo usa per salvarlo. |
 
-Il backend aggiunge `Content-Disposition` agli header esposti dalla policy CORS (`Boot/Web/SecuritySetup.cs`,
-`AddCors`: `WithExposedHeaders("Content-Disposition")`): oggi non ne espone nessuno, e con frontend e backend su domini
-diversi il browser nasconde l'header (il frontend salverebbe il file come `log-print.xlsx` o `log.xlsx`).
+Frontend e API stanno sulla stessa origine (`/api`), quindi il browser legge `Content-Disposition` senza altre modifiche: il
+CORS (`Boot/Web/SecuritySetup.cs`, `AddCors`) non c'entra.
 
 ### Lingua, fuso, colonne, troppe voci e registro
 
@@ -768,8 +767,6 @@ registro come per la stampa (sezione 7, "Lingua, fuso, colonne, troppe voci e re
 | `Content-Type` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | File Excel. |
 | `Content-Disposition` | `attachment; filename="log-2026-10-26.xlsx"` | `log-` più la data di oggi nel fuso di `X-Time-Zone` (`yyyy-MM-dd`) ed estensione `.xlsx`, come la stampa; il frontend lo usa per salvarlo. |
 
-`Content-Disposition` esposto dalla policy CORS come per la stampa (sezione 7).
-
 ### Errori
 
 Errori in JSON (Problem Details), come per `print-log`, mostrati nello stesso popup:
@@ -782,52 +779,30 @@ Errori in JSON (Problem Details), come per `print-log`, mostrati nello stesso po
 | 403 | `audit.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
-## 9. Codici di azione del registro per i moduli futuri
+## 9. Codici di azione del registro
 
-La schermata del registro (`/settings/user-management/logs`) traduce e filtra le azioni con i codici di
-`AuditActionCodes` (`Shared/Contracts/Audit/AuditActionCodes.cs`), che il frontend conosce tutti. Il mockup della
-pagina ha anche azioni dei moduli che oggi non hanno API, quindi non scrivono niente nel registro: il frontend le ha già
-tradotte nelle 7 lingue, ma le ha tolte dal filtro "Azione" finché il backend non le registra.
+La schermata del registro (`/settings/user-management/logs`) traduce e filtra le azioni con i codici di `AuditActionCodes`
+(`Shared/Contracts/Audit/AuditActionCodes.cs`). Di un codice che non conosce mostra il codice, e non lo ha nel filtro.
 
-Quando quei moduli registreranno le loro azioni, devono usare **esattamente questi codici** (categoria `Operator`, come
-le azioni degli operatori di oggi), così il frontend li mostra senza altre modifiche. Se un'azione non serve o il
-backend ne vuole un'altra, va deciso insieme: il frontend allinea il suo elenco.
+- **I codici che ci sono non si rinominano** e non se ne aggiungono altri per le stesse azioni. Prenotazioni e pagamenti hanno già i loro
+  (34 `booking.*`, per esempio `booking.reservation_checked_in`, `booking.reservations_cleaned_up`,
+  `booking.sharing_settings_updated`, e 4 `payment.*`): le pagine Database e Sharing usano quelle API così come sono, con quelle voci. Il
+  frontend aggiungerà al suo elenco quelli che non conosce.
+- **Le azioni che oggi nessuno registra**, quando i loro moduli le scriveranno, usano **questi codici** (categoria `Operator`, come le
+  azioni degli operatori di oggi), che il frontend ha già tradotto:
 
 | Codice | Testo del frontend (italiano) | Modulo |
 |---|---|---|
-| `booking.checked_in` | Check-in | Prenotazioni (`Module.Booking`) |
-| `booking.checked_out` | Check-out | Prenotazioni (`Module.Booking`) |
 | `booking.arrival_reported` | Ingresso segnalato | Prenotazioni (`Module.Booking`) |
-| `booking.guest_added` | Ospite aggiunto | Prenotazioni (`Module.Booking`) |
-| `booking.dates_changed` | Date prenotazione modificate | Prenotazioni (`Module.Booking`) |
-| `booking.agreement_added` | Convenzione aggiunta | Prenotazioni (`Module.Booking`) |
-| `booking.repeated` | Prenotazione ripetuta | Prenotazioni (`Module.Booking`) |
-| `booking.spot_added` | Postazione aggiunta | Prenotazioni (`Module.Booking`) |
-| `booking.absences_added` | Assenze programmate aggiunte | Prenotazioni (`Module.Booking`) |
-| `booking.moved` | Prenotazione spostata | Prenotazioni (`Module.Booking`) |
-| `booking.file_attached` | File allegato | Prenotazioni (`Module.Booking`) |
-| `booking.extra_added` | Extra aggiunto | Prenotazioni (`Module.Booking`) |
-| `booking.renewed` | Prenotazione rinnovata | Prenotazioni (`Module.Booking`) |
-| `booking.cancelled` | Prenotazione cancellata | Prenotazioni (`Module.Booking`) |
-| `payment.deposit_added` | Acconto aggiunto | Pagamenti (`Module.Payment`) |
-| `payment.balance_added` | Saldo aggiunto | Pagamenti (`Module.Payment`) |
-| `payment.bill_split` | Conto diviso | Pagamenti (`Module.Payment`) |
-| `payment.discount_code_applied` | Codice sconto applicato | Pagamenti (`Module.Payment`) |
-| `payment.discount_applied` | Sconto applicato | Pagamenti (`Module.Payment`) |
-| `payment.increase_added` | Incremento aggiunto | Pagamenti (`Module.Payment`) |
 | `cash.pre_bill_printed` | Preconto stampato | Cassa e stampa fiscale (`Module.FiscalPrint` / `Module.Fiskaly`) |
 | `cash.receipt_printed` | Scontrino stampato | Cassa e stampa fiscale (`Module.FiscalPrint` / `Module.Fiskaly`) |
 | `order.marked_done` | Ordine segnalato come evaso | Ordini |
 | `order.marked_not_done` | Ordine segnalato come non evaso | Ordini |
-| `database.bookings_trashed` | Dati database eliminati | Pagina Database (prenotazioni nel cestino) |
-| `database.bookings_restored` | Dati database ripristinati | Pagina Database (prenotazioni nel cestino) |
-| `database.trash_emptied` | Cestino database svuotato | Pagina Database (prenotazioni nel cestino) |
-| `table_booking.created` | Prenotazione servizio tavoli aggiunta | Prenotazioni del servizio tavoli |
-| `table_booking.deleted` | Prenotazione servizio tavoli eliminata | Prenotazioni del servizio tavoli |
-| `table_booking.updated` | Prenotazione servizio tavoli modificata | Prenotazioni del servizio tavoli |
 
-Per ognuna, `bookingNumber` e `spotLabel` della voce sono valorizzati quando l'azione riguarda una prenotazione o una
-postazione, come per le altre voci (sezione 5).
+Se un'azione non serve o il backend ne vuole un'altra, va deciso insieme: il frontend allinea il suo elenco. Per ogni voce,
+`bookingNumber` e `spotLabel` sono valorizzati quando l'azione riguarda una prenotazione o una postazione, come per le altre voci (sezione
+5). **Oggi non lo sono per i 4 `payment.*`**: `ReservationPayments` non passa il numero della prenotazione, come fa Booking
+(`BookingSupport.cs`), e la colonna "ID prenotazione" del registro resta vuota. Va aggiunto.
 
 ## 10. Controllo di versione sui salvataggi di modifica
 
@@ -835,10 +810,13 @@ Oggi, se due utenti del pannello modificano lo stesso utente, vince chi salva pe
 rimanda tutti i campi letti all'apertura (sezione 4) e cancella, senza che nessuno se ne accorga, quello che un altro
 utente ha cambiato nel frattempo (per esempio con `PATCH /api/identity/property-users/{userId}` o con un altro popup
 aperto sullo stesso utente). Il backend non ha un controllo di concorrenza sugli aggiornamenti: nessun token di
-concorrenza in `AccountConfiguration` (`identity.access_users`), nessun `If-Match`. Il frontend chiede lo schema di
-**concorrenza ottimistica** che il backend ha già progettato per le prenotazioni offline
-(`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un **codice di errore
-unico per tutte le API**: `resource.version_conflict`, anche qui al posto di un codice dell'area `account.*`.
+concorrenza in `AccountConfiguration` (`identity.access_users`), nessun `If-Match`. Il frontend chiede la **concorrenza
+ottimistica** degli altri documenti, con un **codice di errore unico per tutte le API**: `resource.version_conflict`, anche qui al
+posto di un codice dell'area `account.*`.
+
+**Non è quello che Booking ha già per le prenotazioni** (`Endpoints.cs:253-255`, `ReservationService.cs:114-115`): lì
+l'`If-Match` è un numero, se manca o non si legge non si controlla niente, e il conflitto è 412 o 409
+`booking.version_conflict`. Qui valgono le regole sotto: con un altro codice il frontend non rileggerebbe i dati.
 
 ### Cosa ci serve
 
@@ -863,6 +841,8 @@ unico per tutte le API**: `resource.version_conflict`, anche qui al posto di un 
   il corpo resta quello della sezione 4.
 - Il 409 `resource.version_conflict` si controlla dopo i controlli sull'utente da modificare (404, 422, 403 della
   sezione 3) e prima degli altri 409 (`account.email_taken`) e del 422 sul ruolo nuovo.
+- **Controllo e salvataggio sono una cosa sola**: di due salvataggi dello stesso utente nello stesso momento con lo stesso
+  `If-Match` uno riesce e l'altro risponde 409 `resource.version_conflict`; mai i dati di tutti e due mescolati, mai un 500.
 - **Come farlo lo sceglie lo sviluppatore del backend** (un hash dei dati coperti dalla versione, un contatore
   aggiornato da ogni API che li cambia...), nei limiti dei due punti sopra: l'agente glielo chiede prima di scrivere
   codice. Il frontend tratta la versione come una stringa opaca e non la confronta mai.
@@ -960,9 +940,9 @@ Il frontend si aspetta 204 senza corpo e questi errori, che mostra nel popup "Op
   `Date and time` e le azioni in inglese; con `X-Time-Zone: America/New_York` una voce delle `2026-10-23T11:11:00Z` ha
   "Data e ora" `2026-10-23 07:11:00`, con `Europe/Rome` `2026-10-23 13:11:00`; con più di 50.000 voci rispondono 422
   `audit.export_too_large` con `args.max` 50000 e `args.total`, senza file e senza scrivere nel registro; ogni file
-  scrive `audit.entries_exported` nel registro, con `format` `xlsx` per la stampa e per l'esportazione; da un'origine
-  diversa il browser legge `Content-Disposition`.
+  scrive `audit.entries_exported` nel registro, con `format` `xlsx` per la stampa e per l'esportazione.
 - I codici della sezione 9, quando i loro moduli registrano le azioni, sono quelli della tabella, con la categoria
-  `Operator`, e `GET /api/audit/action-codes` li restituisce.
+  `Operator`, e `GET /api/audit/action-codes` li restituisce. Un pagamento registrato su una prenotazione ha il suo numero nella voce
+  `payment.payment_recorded`, e la ricerca per numero la trova.
 - Ovunque: lo stabilimento è quello del token, nessuna richiesta lo contiene; un token senza stabilimento dà 403
   `account.property_required` (`/api/identity/*`) o `audit.property_required` (`/api/audit/*`).

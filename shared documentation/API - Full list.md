@@ -6188,7 +6188,6 @@ Nessun payload.
       ]
     }
   ],
-  "isAllServicesEnabled": "boolean",
   "idBarServices": "string[] (UUID)",
   "idStandardServices": "string[] (UUID)",
   "idHourlyServices": "string[] (UUID)",
@@ -6222,7 +6221,6 @@ Nessun payload.
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) |
 | `validityPeriods[].timeSlots[].startTime` | string (HH:mm) |
 | `validityPeriods[].timeSlots[].endTime` | string (HH:mm) |
-| `isAllServicesEnabled` | boolean |
 | `idBarServices` | string[] (UUID) |
 | `idStandardServices` | string[] (UUID) |
 | `idHourlyServices` | string[] (UUID) |
@@ -6312,7 +6310,6 @@ Nessun payload.
       ]
     }
   ],
-  "isAllServicesEnabled": "boolean",
   "idBarServices": "string[] (UUID)",
   "idStandardServices": "string[] (UUID)",
   "idHourlyServices": "string[] (UUID)",
@@ -6342,7 +6339,6 @@ Nessun payload.
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) |
 | `validityPeriods[].timeSlots[].startTime` | string (HH:mm) |
 | `validityPeriods[].timeSlots[].endTime` | string (HH:mm) |
-| `isAllServicesEnabled` | boolean |
 | `idBarServices` | string[] (UUID) |
 | `idStandardServices` | string[] (UUID) |
 | `idHourlyServices` | string[] (UUID) |
@@ -6410,7 +6406,6 @@ Nessun corpo (204).
       ]
     }
   ],
-  "isAllServicesEnabled": "boolean",
   "idBarServices": "string[] (UUID)",
   "idStandardServices": "string[] (UUID)",
   "idHourlyServices": "string[] (UUID)",
@@ -6438,7 +6433,6 @@ Nessun corpo (204).
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) |
 | `validityPeriods[].timeSlots[].startTime` | string (HH:mm) |
 | `validityPeriods[].timeSlots[].endTime` | string (HH:mm) |
-| `isAllServicesEnabled` | boolean |
 | `idBarServices` | string[] (UUID) |
 | `idStandardServices` | string[] (UUID) |
 | `idHourlyServices` | string[] (UUID) |

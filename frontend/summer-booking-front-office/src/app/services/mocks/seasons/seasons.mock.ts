@@ -172,8 +172,7 @@ export const seasonPeriodListMock = (
  * created and its version; 401 without a valid access token; 400 with one error per wrong field; 422
  * `pricing.season_required` / `pricing.next_season_required` while the season has no dates; 409
  * `pricing.period_name_taken` for the name of another period of the season; 422
- * `pricing.period_outside_season` for a day outside the season; 409 `pricing.period_overlap` with
- * `periodName` for a day already in another period of the season.
+ * `pricing.period_outside_season` for a day outside the season. Days of other periods are allowed.
  */
 export const createSeasonPeriodMock = (
   request: HttpRequest<unknown>,
@@ -205,10 +204,6 @@ export const createSeasonPeriodMock = (
     return problem(request, 422, ApiErrorCode.PricingPeriodOutsideSeason, {
       args: { seasonStartsOn: season.startsOn as string, seasonEndsOn: season.endsOn as string },
     });
-  }
-  const overlapping = periods.find((row) => hasOverlap(ranges, row.ranges));
-  if (overlapping) {
-    return periodOverlap(request, overlapping);
   }
   const period: PeriodRow = {
     propertyId: property.id,
@@ -277,8 +272,7 @@ export const deleteSeasonPeriodMock = (
  * `pricing.season_required` / `pricing.next_season_required` while the season has no dates; 404
  * `pricing.period_not_found`; 409 `resource.version_conflict` when `If-Match` is not the version of
  * the period; 409 `pricing.period_name_taken` for the name of another period of the season; 422
- * `pricing.period_outside_season` for a day outside the season; 409 `pricing.period_overlap` with
- * `periodName` for a day already in another period of the season.
+ * `pricing.period_outside_season` for a day outside the season. Days of other periods are allowed.
  */
 export const updateSeasonPeriodMock = (
   request: HttpRequest<unknown>,
@@ -320,10 +314,6 @@ export const updateSeasonPeriodMock = (
     return problem(request, 422, ApiErrorCode.PricingPeriodOutsideSeason, {
       args: { seasonStartsOn: season.startsOn as string, seasonEndsOn: season.endsOn as string },
     });
-  }
-  const overlapping = periods.find((row) => row !== period && hasOverlap(ranges, row.ranges));
-  if (overlapping) {
-    return periodOverlap(request, overlapping);
   }
   period.name = name;
   period.ranges = sorted(ranges);
@@ -420,7 +410,7 @@ function savePeriodErrors(
       errors.push({ field: `ranges[${index}]`, code: ApiErrorCode.ValidationEndBeforeStart });
     }
   });
-  if (ranges.length > 1 && hasOverlap(ranges, [])) {
+  if (ranges.length > 1 && hasOverlap(ranges)) {
     errors.push({ field: 'ranges', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
@@ -476,13 +466,6 @@ function periodDataOf(row: PeriodRow): Omit<SeasonPeriodItem, 'version'> {
   return structuredClone({ key: row.key, name: row.name, ranges: row.ranges });
 }
 
-/** A day of the new ranges is already in another period of the season. */
-function periodOverlap(request: HttpRequest<unknown>, other: PeriodRow): Observable<never> {
-  return problem(request, 409, ApiErrorCode.PricingPeriodOverlap, {
-    args: { periodName: other.name ?? '' },
-  });
-}
-
 /** As `RequireNextSeasonAsync`: without any season `pricing.season_required`, then the next one. */
 function seasonRequired(request: HttpRequest<unknown>, isNextSeason: boolean): Observable<never> {
   const hasSeason = SEASON_DATES.some((row) => row.propertyId === DEMO_PROPERTY.id);
@@ -520,18 +503,13 @@ function seasonOf(propertyId: number, isNextSeason: boolean): SeasonPeriodInterv
   return startsOn && endsOn ? { startsOn, endsOn } : null;
 }
 
-/** One of the new ranges shares a day with another new one or with one of `taken`. */
-function hasOverlap(
-  ranges: readonly SeasonPeriodInterval[],
-  taken: readonly SeasonPeriodInterval[],
-): boolean {
+/** One of the ranges shares a day with another of them. */
+function hasOverlap(ranges: readonly SeasonPeriodInterval[]): boolean {
   const overlap = (first: SeasonPeriodInterval, second: SeasonPeriodInterval): boolean =>
     (first.startsOn as string) <= (second.endsOn as string) &&
     (second.startsOn as string) <= (first.endsOn as string);
-  return ranges.some(
-    (range, index) =>
-      taken.some((other) => overlap(range, other)) ||
-      ranges.some((other, otherIndex) => otherIndex !== index && overlap(range, other)),
+  return ranges.some((range, index) =>
+    ranges.some((other, otherIndex) => otherIndex !== index && overlap(range, other)),
   );
 }
 
