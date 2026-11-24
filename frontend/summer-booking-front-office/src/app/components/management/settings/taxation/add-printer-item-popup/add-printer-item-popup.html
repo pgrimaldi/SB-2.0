@@ -1,5 +1,5 @@
 <ng-template #content>
-  <div class="add__printer__item__popup">
+  <div #popup class="add__printer__item__popup">
     <h2 class="add__printer__item__popup__title">
       {{ 'management.settings.taxation.printer.form.title' | translate }}
     </h2>
@@ -13,10 +13,20 @@
           [formField]="draftForm.printerName"
           [error]="printerNameError()"
         />
+        <app-filled-select
+          class="add__printer__item__popup__model"
+          [label]="'management.settings.taxation.printer.form.model' | translate"
+          [isMandatory]="true"
+          [placeholder]="'management.settings.taxation.printer.form.choose' | translate"
+          [options]="modelOptions()"
+          [formField]="draftForm.printerModel"
+          [error]="printerModelError()"
+        />
         <app-filled-text-field
           class="add__printer__item__popup__ip"
           [label]="'management.settings.taxation.printer.form.ip' | translate"
           [isMandatory]="true"
+          [isCodeField]="true"
           [formField]="draftForm.printerIP"
           [error]="printerIPError()"
         />
@@ -26,15 +36,6 @@
           [isMandatory]="true"
           [formField]="draftForm.printerPort"
           [error]="printerPortError()"
-        />
-        <app-filled-select
-          class="add__printer__item__popup__model"
-          [label]="'management.settings.taxation.printer.form.model' | translate"
-          [isMandatory]="true"
-          [placeholder]="'management.settings.taxation.printer.form.choose' | translate"
-          [options]="modelOptions()"
-          [formField]="draftForm.printerModel"
-          [error]="printerModelError()"
         />
         <app-checkbox
           class="add__printer__item__popup__ssl"
@@ -104,7 +105,8 @@
       class="add__printer__item__popup__save"
       [size]="ButtonSize.Small"
       [isLoading]="isLoading()"
-      [disabled]="draftForm().invalid()"
+      [isFullWidth]="true"
+      [disabled]="!isReady() || draftForm().invalid()"
       (clicked)="save()"
     >
       {{ 'management.settings.taxation.printer.form.save' | translate }}

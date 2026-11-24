@@ -2,7 +2,7 @@ import { PrinterMode } from '../../enums/printer-mode';
 import { PrinterModel } from '../../enums/printer-model';
 
 export const PRINTER_DEPARTMENTS_COUNT = 5;
-export const VAT_RATES = [0, 4, 5, 10, 22];
+export const VAT_RATES = [0, 4, 5, 10, 22] as const;
 export const MAX_PRINTER_NAME_LENGTH = 120;
 export const MAX_PRINTER_IP_LENGTH = 255;
 export const MAX_PRINTER_PORT = 65_535;

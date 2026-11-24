@@ -1,18 +1,16 @@
 <div class="electronic__receipt__account__form__heading">
   <div class="electronic__receipt__account__form__heading__title">
-    <button
+    <app-icon-button
       class="electronic__receipt__account__form__back"
-      type="button"
+      [pathIcon]="backIcon"
       [disabled]="isLoading()"
       (click)="back.emit()"
-    >
-      <img [src]="backIcon" width="10" height="14" alt="" />
-    </button>
+    />
     <h3 class="electronic__receipt__account__form__title">
       {{ 'management.settings.taxation.receipt.account.title' | translate }}
     </h3>
   </div>
-  @if (isSaved()) {
+  @if (isSaved() && !isEditing()) {
     <p class="electronic__receipt__account__form__saved">
       {{ 'management.settings.taxation.receipt.account.saved' | translate }}
       <img [src]="savedIcon" width="14" height="12" alt="" />
@@ -20,15 +18,16 @@
   }
 </div>
 
-<div class="electronic__receipt__account__form__fields" [attr.inert]="isLoading() ? '' : null">
+<div class="electronic__receipt__account__form__fields">
   @for (item of fields; track item.key) {
     <app-filled-text-field
       [style.grid-column]="'span ' + item.columns"
       [label]="'management.settings.taxation.receipt.account.' + item.key | translate"
       [isMandatory]="!item.isSecretSaved?.()"
-      [isPasswordField]="item.isSecret"
-      [pathIcon]="item.isSecret ? eyeIcons : null"
-      [autocomplete]="item.isSecret ? 'new-password' : undefined"
+      [isPasswordField]="!!item.isSecretSaved"
+      [isCodeField]="item.isCode"
+      [pathIcon]="item.isSecretSaved ? eyeIcons : null"
+      [autocomplete]="item.isSecretSaved ? 'new-password' : 'off'"
       [placeholder]="
         item.isSecretSaved?.()
           ? ('management.settings.taxation.receipt.account.' + item.key + '_saved' | translate)
@@ -49,6 +48,7 @@
     <app-button
       class="electronic__receipt__account__form__edit"
       [size]="ButtonSize.Small"
+      [isFullWidth]="true"
       (clicked)="edit()"
     >
       {{ 'management.settings.taxation.receipt.account.edit' | translate }}
@@ -59,6 +59,7 @@
         class="electronic__receipt__account__form__cancel"
         [appearance]="ButtonAppearance.Light"
         [size]="ButtonSize.Small"
+        [isFullWidth]="true"
         [disabled]="isLoading()"
         (clicked)="requestCancel()"
       >
@@ -68,8 +69,9 @@
     <app-button
       class="electronic__receipt__account__form__save"
       [size]="ButtonSize.Small"
+      [isFullWidth]="true"
       [isLoading]="isLoading()"
-      [disabled]="accountForm().invalid()"
+      [disabled]="!isReady() || accountForm().invalid()"
       (clicked)="save()"
     >
       {{ 'management.settings.taxation.receipt.account.save' | translate }}

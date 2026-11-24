@@ -130,7 +130,8 @@
       "property_required": "Your account is not linked to a property: sign in with an account of the property.",
       "not_enabled": "The electronic receipt is not active for your property.",
       "terms_not_accepted": "To set up the account you must first accept the terms and conditions.",
-      "unavailable": "The electronic receipt service is not responding. Please try again shortly."
+      "unavailable": "The electronic receipt service is not responding. Please try again shortly.",
+      "guide_not_found": "The guide is not available yet."
     },
     "audit": {
       "property_required": "Your account is not linked to a property: sign in with an account of the property.",
@@ -692,10 +693,16 @@
             "mode": "Mode"
           },
           "delete": {
-            "title": "Delete printer",
-            "text": "Do you want to delete the printer {{name}}?",
             "cancel": "Cancel",
-            "confirm": "Delete"
+            "confirm": "Delete",
+            "one": {
+              "title": "Delete printer",
+              "text": "Do you want to delete the printer {{name}}?"
+            },
+            "many": {
+              "title": "Delete printers",
+              "text": "Do you want to delete the {{count}} selected printers?"
+            }
           },
           "add": "Add printer",
           "form": {
@@ -737,7 +744,8 @@
           "accept": "I accept",
           "refuse": "I do not accept",
           "send": "Send",
-          "refused_warning": "To use the electronic receipt you must accept the terms of use",
+          "refused_warning": "To use the electronic receipt you must accept the terms and conditions",
+          "no_terms": "The terms and conditions are not available yet.",
           "account": {
             "title": "Account setup",
             "company_name": "Company name",

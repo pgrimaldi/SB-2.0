@@ -29,7 +29,9 @@ describe('TaxationService', () => {
     } as unknown as Parameters<typeof taxation.printerList>[0];
 
     taxation.printerList(page).subscribe();
-    taxation.addPrinter(new AddPrinterItemRequest()).subscribe();
+    taxation
+      .addPrinter({ ...new AddPrinterItemRequest(), extra: true } as AddPrinterItemRequest)
+      .subscribe();
     taxation.setPrinterIsActive({ idPrinter: 'p1', isEnabled: true }).subscribe();
     taxation.deletePrinter('p1').subscribe();
 
@@ -50,7 +52,12 @@ describe('TaxationService', () => {
 
     taxation.electronicReceipt().subscribe();
     taxation.activateElectronicReceipt(true).subscribe();
-    taxation.saveElectronicReceiptAccount(new ElectronicReceiptAccount()).subscribe();
+    taxation
+      .saveElectronicReceiptAccount({
+        ...new ElectronicReceiptAccount(),
+        extra: true,
+      } as ElectronicReceiptAccount)
+      .subscribe();
     taxation.downloadGuideElectronicReceipt().subscribe();
 
     const bodyOf = (method: string, name: string): unknown =>

@@ -1212,23 +1212,23 @@ Fiscalizzazione: account dello scontrino elettronico.
   "taxCode": "XXXXXXXXXXXXXXXX",
   "revenueAgencyCode": "AE00000000",
   "vatNumber": "00000000000",
-  "pin": "00000",
+  "pin": "0000000000",
   "password": "password-digitata"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `companyName` | string \| null | `Bagno Esempio Srl` |
-| `companyAddress` | string \| null | `Via del Mare` |
-| `streetNumber` | string \| null | `1` |
-| `postalCode` | string \| null | `00100` |
-| `city` | string \| null | `Roma` |
+| `companyName` | string (al massimo 128 caratteri) | `Bagno Esempio Srl` |
+| `companyAddress` | string (al massimo 128 caratteri) | `Via del Mare` |
+| `streetNumber` | string (al massimo 16 caratteri) | `1` |
+| `postalCode` | string (al massimo 5 caratteri) | `00100` |
+| `city` | string (al massimo 128 caratteri) | `Roma` |
 | `country` | string \| null | `Italia` |
-| `taxCode` | string \| null | `XXXXXXXXXXXXXXXX` |
+| `taxCode` | string (al massimo 16 caratteri) | `XXXXXXXXXXXXXXXX` |
 | `revenueAgencyCode` | string \| null | `AE00000000` |
-| `vatNumber` | string \| null | `00000000000` |
-| `pin` | string \| null | `00000` |
+| `vatNumber` | string (al massimo 13 caratteri) | `00000000000` |
+| `pin` | string \| null | `0000000000` |
 | `password` | string \| null | `password-digitata` |
 
 #### Response
@@ -1249,7 +1249,7 @@ Nessun corpo né parametri: lo stabilimento viene dal token.
 
 Stato: 200 OK.
 
-Il corpo è solo il testo dei termini e condizioni in HTML, come stringa JSON (tra virgolette, Content-Type application/json), nella lingua dell'header Accept-Language.
+Il corpo è solo il testo dei termini e condizioni in HTML, come stringa JSON (tra virgolette, Content-Type application/json), nella lingua dell'header Accept-Language; null se il testo non c'è.
 
 ```json
 "<h4>Generale</h4><p>Testo dei termini e condizioni…</p>"

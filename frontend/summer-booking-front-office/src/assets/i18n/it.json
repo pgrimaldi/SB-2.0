@@ -130,7 +130,8 @@
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
       "not_enabled": "Lo scontrino elettronico non è attivo per il tuo stabilimento.",
       "terms_not_accepted": "Per configurare l'account devi prima accettare i termini e condizioni.",
-      "unavailable": "Il servizio dello scontrino elettronico non risponde. Riprova tra poco."
+      "unavailable": "Il servizio dello scontrino elettronico non risponde. Riprova tra poco.",
+      "guide_not_found": "La guida non è ancora disponibile."
     },
     "audit": {
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
@@ -692,10 +693,16 @@
             "mode": "Modalità"
           },
           "delete": {
-            "title": "Elimina stampante",
-            "text": "Vuoi eliminare la stampante {{name}}?",
             "cancel": "Annulla",
-            "confirm": "Elimina"
+            "confirm": "Elimina",
+            "one": {
+              "title": "Elimina stampante",
+              "text": "Vuoi eliminare la stampante {{name}}?"
+            },
+            "many": {
+              "title": "Elimina stampanti",
+              "text": "Vuoi eliminare le {{count}} stampanti selezionate?"
+            }
           },
           "add": "Aggiungi stampante",
           "form": {
@@ -737,7 +744,8 @@
           "accept": "Accetto",
           "refuse": "Non accetto",
           "send": "Invia",
-          "refused_warning": "Per utilizzare lo scontrino elettronico devi accettare i termini di utilizzo",
+          "refused_warning": "Per utilizzare lo scontrino elettronico devi accettare i termini e condizioni",
+          "no_terms": "I termini e condizioni non sono ancora disponibili.",
           "account": {
             "title": "Configurazione account",
             "company_name": "Nome azienda",

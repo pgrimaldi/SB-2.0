@@ -72,6 +72,12 @@ export class FilledTextField {
       this.error();
       this.matInput().updateErrorState();
     });
+    // What is written once the field opens again is not shown.
+    effect(() => {
+      if (this.readonly() || this.disabled()) {
+        this.visible.set(false);
+      }
+    });
   }
 
   protected toggleVisible(): void {

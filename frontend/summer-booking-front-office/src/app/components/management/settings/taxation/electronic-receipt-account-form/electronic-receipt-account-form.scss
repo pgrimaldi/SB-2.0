@@ -33,21 +33,14 @@
 }
 
 .electronic__receipt__account__form__back {
-  display: grid;
-  width: 1.5rem;
-  height: 1.5rem;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
+  --icon-button-background: none;
+  --icon-button-size: 1.5rem;
+  --icon-button-icon-size: 0.875rem;
 
-  img {
-    transform: scaleX(-1);
-  }
+  transform: scaleX(-1);
 }
 
-:host-context([dir='rtl']) .electronic__receipt__account__form__back img {
+:host-context([dir='rtl']) .electronic__receipt__account__form__back {
   transform: none;
 }
 
@@ -79,7 +72,7 @@
   margin-top: 1.625rem;
 
   app-button {
-    min-width: 7.5rem;
+    width: 7.5rem;
   }
 }
 

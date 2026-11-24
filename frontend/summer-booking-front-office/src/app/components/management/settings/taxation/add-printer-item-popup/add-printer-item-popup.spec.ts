@@ -209,4 +209,41 @@ describe('AddPrinterItemPopup', () => {
     expect(popup()!.querySelector('.add__printer__item__popup__rates')).toBeNull();
     expect(draftForm.departmentVatRates().value()).toEqual([null, null, null, null, null]);
   });
+
+  it('should send the texts without the spaces at the sides', async () => {
+    const { save, fill, settle, addPrinter } = await setup();
+    addPrinter.mockReturnValue(new Subject<void>());
+    await fill({ printerName: ' EPSON - 3 ', footer: '   ' });
+
+    save().click();
+    await settle();
+    expect(addPrinter).toHaveBeenCalledWith(PRINTER);
+  });
+
+  it('should show above Salva an error on the departments of a printer without them, and forget it at the next opening', async () => {
+    const { host, fixture, popup, save, fill, settle, addPrinter } = await setup();
+    await fill({ printerMode: PrinterMode.Orders });
+    addPrinter.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: {
+              status: 400,
+              code: ApiErrorCode.ValidationFailed,
+              errors: [{ field: 'departmentVatRates', code: ApiErrorCode.ValidationInvalid }],
+            },
+          }),
+      ),
+    );
+    save().click();
+    await settle();
+    expect(popup()!.querySelector('.add__printer__item__popup__general')).not.toBeNull();
+
+    host.open.set(false);
+    await fixture.whenStable();
+    host.open.set(true);
+    await fixture.whenStable();
+    expect(popup()!.querySelector('.add__printer__item__popup__general')).toBeNull();
+  });
 });

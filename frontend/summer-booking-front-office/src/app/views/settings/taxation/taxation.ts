@@ -1,7 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  EnvironmentInjector,
+  OnDestroy,
   Signal,
+  afterNextRender,
   computed,
   effect,
   inject,
@@ -9,28 +12,31 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, firstValueFrom, map, of, switchMap, tap } from 'rxjs';
+import { Observable, Subscription, firstValueFrom, map, of, switchMap, tap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { DeleteItemsPopup } from '../../../components/management/delete-items-popup/delete-items-popup';
 import { AddPrinterItemPopup } from '../../../components/management/settings/taxation/add-printer-item-popup/add-printer-item-popup';
 import { ElectronicReceiptAccountForm } from '../../../components/management/settings/taxation/electronic-receipt-account-form/electronic-receipt-account-form';
 import { FileDownloadBehaviour } from '../../../behaviours/files/file-download.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
+import { IconButton } from '../../../components/shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../components/shared/ui/checkboxes/checkbox/checkbox';
 import { AlertPopup } from '../../../components/shared/ui/dialogs/alert-popup/alert-popup';
-import { ConfirmPopup } from '../../../components/shared/ui/dialogs/confirm-popup/confirm-popup';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { ExpansionPanel } from '../../../components/shared/ui/expansion-panels/expansion-panel/expansion-panel';
 import { PageSpinner } from '../../../components/shared/ui/spinners/page-spinner/page-spinner';
+import { Spinner } from '../../../components/shared/ui/spinners/spinner/spinner';
+import { standardRowActions } from '../../../components/shared/tables/standard-row-actions';
 import {
   Table,
   TableColumn,
   TableLoad,
-  TableRowAction,
   TableRowToggle,
 } from '../../../components/shared/ui/tables/table/table';
 import { PrinterMode } from '../../../entities/enums/printer-mode';
@@ -39,10 +45,8 @@ import { ApiProblem } from '../../../entities/errors/api-problem';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { TaxationService } from '../../../services/api/taxation/taxation.service';
 
-/** Used only when the server gives no name in `Content-Disposition`. */
 const GUIDE_FALLBACK_NAME = 'electronic-receipt-guide';
 
-/** Translation group `management.settings.taxation.printer.table`. */
 interface PrinterTableHeaders {
   name: string;
   ip: string;
@@ -64,11 +68,13 @@ interface PrinterRow {
     AlertPopup,
     Button,
     Checkbox,
-    ConfirmPopup,
+    DeleteItemsPopup,
     ElectronicReceiptAccountForm,
     ExpansionPanel,
     I18nText,
+    IconButton,
     PageSpinner,
+    Spinner,
     Table,
     TableErrorPopup,
     TranslatePipe,
@@ -77,13 +83,15 @@ interface PrinterRow {
   styleUrl: './taxation.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Taxation {
+export class Taxation implements OnDestroy {
   private readonly taxation = inject(TaxationService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
   private readonly translateService = inject(TranslateService);
   private readonly fileDownload = inject(FileDownloadBehaviour);
+  private readonly injector = inject(EnvironmentInjector);
+  private readonly window = inject(DOCUMENT).defaultView;
   protected readonly ButtonSize = ButtonSize;
 
   /** [before the title, arrow]. */
@@ -97,22 +105,23 @@ export class Taxation {
     '/assets/images/GeneralIcon_ChevronRight.svg',
   ] as const;
   protected readonly addPrinterIcon = ['/assets/images/GeneralIcon_Add.svg'] as const;
-  private readonly deletePrinterIcon = '/assets/images/GeneralIcon_Delete.svg';
   protected readonly downloadGuideIcon = ['/assets/images/Taxation_DownloadGuide.svg'] as const;
 
   protected readonly printersExpanded = signal(true);
   protected readonly receiptExpanded = signal(false);
   protected readonly hasPrinters = signal(false);
-  /** A change of a printer is running: the whole page waits for it. */
+  protected readonly isReady = computed(() => !!this.auth.user()?.propertyId);
   protected readonly isPrinterActionRunning = signal(false);
   protected readonly isDeletePrinterAsked = signal(false);
   protected readonly isAddPrinterOpen = signal(false);
   protected readonly printerToDelete = signal<PrinterRow | null>(null);
+  protected readonly idPrintersToDelete = computed(() => {
+    const idPrinter = this.printerToDelete()?.idPrinter;
+    return idPrinter ? [idPrinter] : [];
+  });
   private readonly printersTable = viewChild.required(Table);
   protected readonly printersPerPage = 5;
-  protected readonly printerParams = computed<object | null>(() =>
-    this.auth.user()?.propertyId ? {} : null,
-  );
+  protected readonly printerParams = computed<object | null>(() => (this.isReady() ? {} : null));
   private readonly printerHeaders = toSignal(
     this.translateService.stream(
       'management.settings.taxation.printer.table',
@@ -124,40 +133,35 @@ export class Taxation {
     { field: 'printerIP', header: this.printerHeaders().ip },
     { field: 'printerMode', header: this.printerHeaders().mode },
   ]);
-  private readonly deleteLabel = toSignal(
-    this.translateService.stream('table.actions.delete') as Observable<string>,
-    { initialValue: '' },
-  );
-  protected readonly printerActions = computed<readonly TableRowAction<PrinterRow>[]>(() => [
-    {
-      label: this.deleteLabel(),
-      icon: this.deletePrinterIcon,
-      action: (printer) => this.askDeletePrinter(printer),
-    },
-  ]);
+  protected readonly printerActions = standardRowActions<PrinterRow>({
+    delete: (printer) => this.askDeletePrinter(printer),
+  });
+  private readonly termsReads = signal(0);
+  protected readonly isReadingTerms = signal(false);
   protected readonly termsAndConditions = signal<string | null>(null);
+  protected readonly areTermsRead = computed(() => !!this.termsAndConditions()?.trim());
   protected readonly printersLoadFailed = signal(false);
   protected readonly isGuideDownloading = signal(false);
+  private guideDownload: Subscription | null = null;
   protected readonly isAcceptChosen = signal(false);
   protected readonly isReceiptActivated = signal(false);
+  /** It stays in the page, with what was written, while the terms are shown. */
+  protected readonly isAccountOpened = signal(false);
   protected readonly isReceiptAccepted = computed(
     () => this.isReceiptActivated() || this.isAcceptChosen(),
   );
   protected readonly isReceiptAccountShown = signal(true);
-  protected readonly toAccountIcon = '/assets/images/GeneralIcon_ChevronRight.svg';
+  protected readonly toAccountIcon = ['/assets/images/GeneralIcon_ChevronRight.svg'] as const;
   protected readonly isSendingReceiptChoice = signal(false);
-  /** The error of an action (switch, delete, guide) goes in a popup. */
   private readonly actionError = signal<ApiProblem | null>(null);
   protected readonly isActionErrorShown = signal(false);
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
-  protected readonly addPrinterCloseIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
   protected readonly alertIcons = [
     '/assets/images/GeneralIcon_Close.svg',
     '/assets/images/GeneralIcon_Warning.svg',
   ] as const;
   private readonly receiptError = signal<ApiProblem | null>(null);
-  /** The electronic receipt is off for the property: nothing to accept. */
   protected readonly isReceiptOff = computed(
     () => this.receiptError()?.code === ApiErrorCode.FiskalyNotEnabled,
   );
@@ -165,21 +169,23 @@ export class Taxation {
   protected readonly receiptErrorMessage = this.messageOf(this.receiptError);
 
   constructor() {
-    // Loaded again when the language changes: the server sends the terms translated.
     effect((onCleanup) => {
+      this.termsReads();
       this.dataReload?.();
-      if (!this.auth.user()?.propertyId) {
+      if (!this.isReady()) {
         return;
       }
-      const subscription = untracked(() =>
-        this.taxation.electronicReceipt().subscribe({
+      const subscription = untracked(() => {
+        this.isReadingTerms.set(true);
+        this.receiptError.set(null);
+        return this.taxation.electronicReceipt().subscribe({
           next: (termsAndConditions) => {
             this.termsAndConditions.set(termsAndConditions);
-            this.receiptError.set(null);
+            this.isReadingTerms.set(false);
           },
           error: (error: unknown) => this.showReceiptError(toApiProblem(error)),
-        }),
-      );
+        });
+      });
       onCleanup(() => subscription.unsubscribe());
     });
   }
@@ -214,50 +220,78 @@ export class Taxation {
       this.taxation.setPrinterIsActive({ idPrinter: id, isEnabled }),
     );
 
-  protected deletePrinter(): void {
-    this.isDeletePrinterAsked.set(false);
-    void this.changePrinter(this.printerToDelete()?.idPrinter ?? null, (idPrinter) =>
-      this.taxation.deletePrinter(idPrinter),
-    );
+  protected readonly deletePrinter = ([idPrinter]: string[]): Observable<void> =>
+    this.taxation.deletePrinter(idPrinter);
+
+  protected readTermsAgain(): void {
+    this.termsReads.update((reads) => reads + 1);
   }
 
-  protected async downloadGuide(): Promise<void> {
-    if (!this.auth.user()?.propertyId || this.isGuideDownloading()) {
+  /** The links of the terms never take the place of the page. */
+  protected openTermsLink(event: Event): void {
+    const link = event.target instanceof Element ? event.target.closest('a') : null;
+    if (link && /^https?:$/.test(link.protocol)) {
+      event.preventDefault();
+      this.window?.open(link.href, '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  protected downloadGuide(): void {
+    if (!this.isReady() || this.isGuideDownloading()) {
       return;
     }
     this.isGuideDownloading.set(true);
-    try {
-      const guide = await firstValueFrom(this.taxation.downloadGuideElectronicReceipt());
-      this.fileDownload.save(guide, GUIDE_FALLBACK_NAME);
-    } catch (error: unknown) {
-      this.showActionError(error);
-    } finally {
-      this.isGuideDownloading.set(false);
-    }
+    this.guideDownload = this.taxation.downloadGuideElectronicReceipt().subscribe({
+      next: (guide) => {
+        this.isGuideDownloading.set(false);
+        this.fileDownload.save(guide, GUIDE_FALLBACK_NAME);
+      },
+      error: (error: unknown) => {
+        this.isGuideDownloading.set(false);
+        this.showActionError(toApiProblem(error));
+      },
+    });
   }
 
-  protected chooseReceipt(isAccepted: boolean, isChecked: boolean): void {
-    this.isAcceptChosen.set(isChecked && isAccepted);
+  protected chooseReceipt(isAccepted: boolean): void {
+    this.isAcceptChosen.set(isAccepted);
+  }
+
+  /** The box chosen is changed only by choosing the other one. */
+  protected keepChecked(box: Checkbox): void {
+    afterNextRender(() => box.checked.set(true), { injector: this.injector });
   }
 
   protected async sendReceiptChoice(): Promise<void> {
-    if (!this.auth.user()?.propertyId || this.isSendingReceiptChoice() || !this.isAcceptChosen()) {
+    if (
+      !this.isReady() ||
+      !this.areTermsRead() ||
+      this.isSendingReceiptChoice() ||
+      !this.isAcceptChosen()
+    ) {
       return;
     }
     this.isSendingReceiptChoice.set(true);
     try {
       await firstValueFrom(this.taxation.activateElectronicReceipt(this.isAcceptChosen()));
       this.isReceiptActivated.set(true);
+      this.isAccountOpened.set(true);
       this.isReceiptAccountShown.set(true);
     } catch (error: unknown) {
-      const problem = toApiProblem(error);
-      if (problem.code === ApiErrorCode.FiskalyNotEnabled) {
-        this.showReceiptError(problem);
-      }
-      this.showActionError(error);
+      this.showReceiptRefusal(toApiProblem(error));
     } finally {
       this.isSendingReceiptChoice.set(false);
     }
+  }
+
+  /** The account cannot be saved: off for the property, or the terms are to be accepted again. */
+  protected showAccountRefusal(problem: ApiProblem): void {
+    this.isReceiptAccountShown.set(false);
+    if (problem.code === ApiErrorCode.FiskalyTermsNotAccepted) {
+      this.isReceiptActivated.set(false);
+      this.isAcceptChosen.set(false);
+    }
+    this.showReceiptRefusal(problem);
   }
 
   private askDeletePrinter(printer: PrinterRow): void {
@@ -265,20 +299,16 @@ export class Taxation {
     this.isDeletePrinterAsked.set(true);
   }
 
-  /**
-   * Then the printers are read again in any case: after an error the switch must go back to the
-   * state the server has.
-   */
   private async changePrinter(
     idPrinter: string | null,
     call: (idPrinter: string) => Observable<void>,
   ): Promise<void> {
-    if (this.auth.user()?.propertyId && idPrinter && !this.isPrinterActionRunning()) {
+    if (this.isReady() && idPrinter && !this.isPrinterActionRunning()) {
       this.isPrinterActionRunning.set(true);
       try {
         await firstValueFrom(call(idPrinter));
       } catch (error: unknown) {
-        this.showActionError(error);
+        this.showActionError(toApiProblem(error));
       } finally {
         this.isPrinterActionRunning.set(false);
       }
@@ -286,13 +316,22 @@ export class Taxation {
     this.printersTable().reload();
   }
 
+  private showReceiptRefusal(problem: ApiProblem): void {
+    if (problem.code === ApiErrorCode.FiskalyNotEnabled) {
+      this.showReceiptError(problem);
+    } else {
+      this.showActionError(problem);
+    }
+  }
+
   private showReceiptError(problem: ApiProblem): void {
+    this.isReadingTerms.set(false);
     this.termsAndConditions.set(null);
     this.receiptError.set(problem);
   }
 
-  private showActionError(error: unknown): void {
-    this.actionError.set(toApiProblem(error));
+  private showActionError(problem: ApiProblem): void {
+    this.actionError.set(problem);
     this.isActionErrorShown.set(true);
   }
 
@@ -303,5 +342,9 @@ export class Taxation {
       ),
       { initialValue: null },
     );
+  }
+
+  ngOnDestroy(): void {
+    this.guideDownload?.unsubscribe();
   }
 }

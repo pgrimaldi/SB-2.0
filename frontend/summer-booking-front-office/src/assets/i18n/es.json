@@ -130,7 +130,8 @@
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento.",
       "not_enabled": "El ticket electrónico no está activo para tu establecimiento.",
       "terms_not_accepted": "Para configurar la cuenta, primero debes aceptar los términos y condiciones.",
-      "unavailable": "El servicio del ticket electrónico no responde. Inténtalo de nuevo en breve."
+      "unavailable": "El servicio del ticket electrónico no responde. Inténtalo de nuevo en breve.",
+      "guide_not_found": "La guía aún no está disponible."
     },
     "audit": {
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento.",
@@ -692,10 +693,16 @@
             "mode": "Modo"
           },
           "delete": {
-            "title": "Eliminar impresora",
-            "text": "¿Quieres eliminar la impresora {{name}}?",
             "cancel": "Cancelar",
-            "confirm": "Eliminar"
+            "confirm": "Eliminar",
+            "one": {
+              "title": "Eliminar impresora",
+              "text": "¿Quieres eliminar la impresora {{name}}?"
+            },
+            "many": {
+              "title": "Eliminar impresoras",
+              "text": "¿Quieres eliminar las {{count}} impresoras seleccionadas?"
+            }
           },
           "add": "Añadir impresora",
           "form": {
@@ -737,7 +744,8 @@
           "accept": "Acepto",
           "refuse": "No acepto",
           "send": "Enviar",
-          "refused_warning": "Para usar el ticket electrónico debes aceptar las condiciones de uso",
+          "refused_warning": "Para usar el ticket electrónico debes aceptar los términos y condiciones",
+          "no_terms": "Los términos y condiciones aún no están disponibles.",
           "account": {
             "title": "Configuración de la cuenta",
             "company_name": "Nombre de la empresa",
@@ -751,7 +759,7 @@
             "vat_number": "NIF/IVA",
             "pin": "PIN",
             "password": "Contraseña",
-            "pin_saved": "PIN configurado: escribe para cambiarlo",
+            "pin_saved": "PIN guardado: escribe otro",
             "password_saved": "Contraseña configurada",
             "save": "Guardar",
             "saved": "Cuenta configurada correctamente",

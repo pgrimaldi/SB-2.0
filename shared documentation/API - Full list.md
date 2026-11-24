@@ -7826,7 +7826,7 @@ Nessun payload.
 **Response JSON**
 
 ```json
-"string (HTML)"
+"string (HTML) | null"
 ```
 
 **Payload tabella**
@@ -7837,7 +7837,7 @@ Nessun payload.
 
 | Campo | Tipo |
 |---|---|
-| `(corpo)` | string (HTML) |
+| `(corpo)` | string (HTML) \| null |
 
 ### POST `/api/fiskaly/electronic-receipt-activation`
 
@@ -7887,15 +7887,15 @@ File (binario), non JSON.
 
 ```json
 {
-  "companyName": "string | null",
-  "companyAddress": "string | null",
-  "streetNumber": "string | null",
-  "postalCode": "string | null",
-  "city": "string | null",
+  "companyName": "string (al massimo 128 caratteri)",
+  "companyAddress": "string (al massimo 128 caratteri)",
+  "streetNumber": "string (al massimo 16 caratteri)",
+  "postalCode": "string (al massimo 5 caratteri)",
+  "city": "string (al massimo 128 caratteri)",
   "country": "string | null",
-  "taxCode": "string | null",
+  "taxCode": "string (al massimo 16 caratteri)",
   "revenueAgencyCode": "string | null",
-  "vatNumber": "string | null",
+  "vatNumber": "string (al massimo 13 caratteri)",
   "pin": "string | null",
   "password": "string | null"
 }
@@ -7909,15 +7909,15 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `companyName` | string \| null |
-| `companyAddress` | string \| null |
-| `streetNumber` | string \| null |
-| `postalCode` | string \| null |
-| `city` | string \| null |
+| `companyName` | string (al massimo 128 caratteri) |
+| `companyAddress` | string (al massimo 128 caratteri) |
+| `streetNumber` | string (al massimo 16 caratteri) |
+| `postalCode` | string (al massimo 5 caratteri) |
+| `city` | string (al massimo 128 caratteri) |
 | `country` | string \| null |
-| `taxCode` | string \| null |
+| `taxCode` | string (al massimo 16 caratteri) |
 | `revenueAgencyCode` | string \| null |
-| `vatNumber` | string \| null |
+| `vatNumber` | string (al massimo 13 caratteri) |
 | `pin` | string \| null |
 | `password` | string \| null |
 

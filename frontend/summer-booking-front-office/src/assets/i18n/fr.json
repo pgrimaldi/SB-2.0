@@ -130,7 +130,8 @@
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
       "not_enabled": "Le ticket électronique n'est pas activé pour votre établissement.",
       "terms_not_accepted": "Pour configurer le compte, acceptez d'abord les conditions générales.",
-      "unavailable": "Le service du ticket électronique ne répond pas. Réessayez dans quelques instants."
+      "unavailable": "Le service du ticket électronique ne répond pas. Réessayez dans quelques instants.",
+      "guide_not_found": "Le guide n'est pas encore disponible."
     },
     "audit": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
@@ -692,10 +693,16 @@
             "mode": "Mode"
           },
           "delete": {
-            "title": "Supprimer l'imprimante",
-            "text": "Voulez-vous supprimer l'imprimante {{name}} ?",
             "cancel": "Annuler",
-            "confirm": "Supprimer"
+            "confirm": "Supprimer",
+            "one": {
+              "title": "Supprimer l'imprimante",
+              "text": "Voulez-vous supprimer l'imprimante {{name}} ?"
+            },
+            "many": {
+              "title": "Supprimer les imprimantes",
+              "text": "Voulez-vous supprimer les {{count}} imprimantes sélectionnées ?"
+            }
           },
           "add": "Ajouter une imprimante",
           "form": {
@@ -732,12 +739,13 @@
         },
         "guide": "Télécharger le guide",
         "receipt": {
-          "title": "Ticket de caisse électronique",
+          "title": "Ticket électronique",
           "terms": "Conditions générales",
           "accept": "J'accepte",
-          "refuse": "Refuser",
+          "refuse": "Je refuse",
           "send": "Envoyer",
-          "refused_warning": "Pour utiliser le ticket électronique, acceptez les conditions d'utilisation",
+          "refused_warning": "Pour utiliser le ticket électronique, acceptez les conditions générales",
+          "no_terms": "Les conditions générales ne sont pas encore disponibles.",
           "account": {
             "title": "Configuration du compte",
             "company_name": "Nom de l'entreprise",
@@ -751,7 +759,7 @@
             "vat_number": "Numéro de TVA",
             "pin": "PIN",
             "password": "Mot de passe",
-            "pin_saved": "PIN défini : saisissez-le pour le modifier",
+            "pin_saved": "PIN défini : saisir pour changer",
             "password_saved": "Mot de passe défini",
             "save": "Enregistrer",
             "saved": "Compte configuré avec succès",

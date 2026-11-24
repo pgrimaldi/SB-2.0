@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  EnvironmentInjector,
   OnDestroy,
   ViewEncapsulation,
   computed,
@@ -9,6 +11,7 @@ import {
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -57,7 +60,8 @@ import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/
 import { RadioGroup, RadioOption } from '../../../../shared/ui/radios/radio-group/radio-group';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
-import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { showFirstError } from '../../../../shared/forms/first-error';
+import { comparableJson, trimmedText } from '../../../../shared/forms/text-comparison';
 import { requiredText } from '../../../../shared/forms/validators';
 
 interface PrinterFormTexts {
@@ -93,11 +97,14 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
   private readonly taxation = inject(TaxationService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly injector = inject(EnvironmentInjector);
   private readonly translateService = inject(TranslateService);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
 
   protected readonly ButtonSize = ButtonSize;
+  private readonly popup = viewChild<ElementRef<HTMLElement>>('popup');
+  protected readonly isReady = computed(() => !!this.auth.user()?.propertyId);
   private readonly texts = toSignal(
     this.translateService.stream(
       'management.settings.taxation.printer.form',
@@ -193,14 +200,14 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
   }
 
   protected save(): void {
-    if (this.isLoading() || !this.auth.user()?.propertyId) {
+    if (this.isLoading() || !this.isReady()) {
       return;
     }
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.taxation.addPrinter(this.draft()));
+        await firstValueFrom(this.taxation.addPrinter(this.printerToSend()));
         this.isLoading.set(false);
         this.close();
         this.added.emit();
@@ -213,6 +220,10 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
         );
       } finally {
         this.isLoading.set(false);
+      }
+    }).then((isSaved) => {
+      if (!isSaved || this.error()) {
+        showFirstError(this.popup(), '.add__printer__item__popup__error', this.injector);
       }
     });
   }
@@ -253,6 +264,18 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
       panelClass: 'add__printer__item__popup__panel',
       disableClose: true,
       autoFocus: 'input',
+    };
+  }
+
+  private printerToSend(): AddPrinterItemRequest {
+    const printer = this.draft();
+    return {
+      ...printer,
+      printerName: trimmedText(printer.printerName),
+      printerIP: trimmedText(printer.printerIP),
+      firstHeader: trimmedText(printer.firstHeader),
+      secondHeader: trimmedText(printer.secondHeader),
+      footer: trimmedText(printer.footer),
     };
   }
 

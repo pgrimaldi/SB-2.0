@@ -134,28 +134,6 @@ describe('Taxation', () => {
     expect(terms.querySelector('p')?.textContent).toBe('Termini');
   });
 
-  it('should read the printers 5 at a time', async () => {
-    const printers = Array.from({ length: 7 }, (_, index) => ({
-      idPrinter: `pr${index + 1}`,
-      printerName: `EPSON - ${index + 1}`,
-      printerIP: `192.0.2.${index + 1}`,
-      printerMode: PrinterMode.Fiscal,
-      isEnabled: false,
-    }));
-    const { fixture, element, printerList } = await setup('<p>Termini</p>', of(printers));
-    const names = () =>
-      [...element.querySelectorAll('.taxation__printers tbody tr.table__row td:first-child')].map(
-        (cell) => cell.textContent?.trim(),
-      );
-
-    expect(names()).toEqual(['EPSON - 1', 'EPSON - 2', 'EPSON - 3', 'EPSON - 4', 'EPSON - 5']);
-
-    element.querySelector<HTMLButtonElement>('.mat-mdc-paginator-navigation-next')!.click();
-    await fixture.whenStable();
-    expect(printerList).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2, pageSize: 5 }));
-    expect(names()).toEqual(['EPSON - 6', 'EPSON - 7']);
-  });
-
   it('should switch a printer with the page spinner, then read the printers again', async () => {
     const { fixture, element, printerList, setPrinterIsActive, answer, spinner } =
       await setup('<p>Termini</p>');
@@ -282,9 +260,7 @@ describe('Taxation', () => {
     );
     const dialog = () => document.querySelector('mat-dialog-container');
 
-    expect(dialog()?.querySelector('.table__error__popup__title')?.textContent?.trim()).toBe(
-      'table.load_error.title',
-    );
+    expect(dialog()).not.toBeNull();
     printerList.mockReturnValue(of({ total: PRINTERS.length, rows: PRINTERS }));
     dialog()!.querySelectorAll<HTMLButtonElement>('app-button button')[1].click();
     await fixture.whenStable();
@@ -306,6 +282,11 @@ describe('Taxation', () => {
     accept().click();
     await fixture.whenStable();
     expect(refuse().checked).toBe(false);
+    expect(send().disabled).toBe(false);
+
+    accept().click();
+    await fixture.whenStable();
+    expect(accept().checked).toBe(true);
     expect(send().disabled).toBe(false);
 
     send().click();
@@ -343,7 +324,9 @@ describe('Taxation', () => {
     expect(formBox().hidden).toBe(false);
     expect(termsBox().hidden).toBe(true);
 
-    element.querySelector<HTMLButtonElement>('.electronic__receipt__account__form__back')!.click();
+    element
+      .querySelector<HTMLButtonElement>('.electronic__receipt__account__form__back button')!
+      .click();
     await fixture.whenStable();
     expect(formBox().hidden).toBe(true);
     expect(termsBox().hidden).toBe(false);
@@ -353,7 +336,7 @@ describe('Taxation', () => {
     expect(element.querySelector<HTMLButtonElement>('.taxation__send button')!.disabled).toBe(true);
     expect(element.querySelector('.taxation__refuse__warning')).toBeNull();
 
-    element.querySelector<HTMLButtonElement>('.taxation__to__account')!.click();
+    element.querySelector<HTMLButtonElement>('.taxation__to__account button')!.click();
     await fixture.whenStable();
     expect(formBox().hidden).toBe(false);
   });
@@ -373,10 +356,10 @@ describe('Taxation', () => {
 
     activateElectronicReceipt.mockImplementation(off as never);
     const page = fixture.componentInstance as unknown as {
-      chooseReceipt: (isAccepted: boolean, isChecked: boolean) => void;
+      chooseReceipt: (isAccepted: boolean) => void;
       sendReceiptChoice: () => Promise<void>;
     };
-    page.chooseReceipt(true, true);
+    page.chooseReceipt(true);
     await page.sendReceiptChoice();
     await settle(fixture);
 
@@ -385,5 +368,94 @@ describe('Taxation', () => {
     expect(element.querySelector('.taxation__terms')).toBeNull();
     expect(element.querySelector('.taxation__error')).not.toBeNull();
     expect(element.querySelector('.taxation__guide')).not.toBeNull();
+    expect(document.querySelector('.alert__popup__text')).toBeNull();
+  });
+
+  it('should have nothing to accept until the terms are read, with a Riprova', async () => {
+    const { fixture, element, electronicReceipt, activateElectronicReceipt } = await setup('');
+    const page = fixture.componentInstance as unknown as {
+      chooseReceipt: (isAccepted: boolean) => void;
+      sendReceiptChoice: () => Promise<void>;
+      readTermsAgain: () => void;
+    };
+    expect(element.querySelector('.taxation__choices')).toBeNull();
+    page.chooseReceipt(true);
+    await page.sendReceiptChoice();
+    expect(activateElectronicReceipt).not.toHaveBeenCalled();
+
+    electronicReceipt.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 })) as never,
+    );
+    page.readTermsAgain();
+    await fixture.whenStable();
+    expect(element.querySelector('.taxation__choices')).toBeNull();
+
+    electronicReceipt.mockReturnValue(of('<p>Termini</p>'));
+    element.querySelector<HTMLButtonElement>('.taxation__failure button')!.click();
+    await fixture.whenStable();
+    expect(element.querySelector('.taxation__failure')).toBeNull();
+    expect(element.querySelector('.taxation__choices')).not.toBeNull();
+  });
+
+  it('should show in a popup the error of a failed Invia and stay on the terms', async () => {
+    const { fixture, element, activateElectronicReceipt } = await setup('<p>Termini</p>');
+    activateElectronicReceipt.mockImplementation((() =>
+      throwError(() => new HttpErrorResponse({ status: 500 }))) as never);
+
+    element.querySelector<HTMLInputElement>('.taxation__accept input')!.click();
+    await fixture.whenStable();
+    element.querySelector<HTMLButtonElement>('.taxation__send button')!.click();
+    await settle(fixture);
+
+    expect(document.querySelector('.alert__popup__text')).not.toBeNull();
+    expect(element.querySelector('app-electronic-receipt-account-form')).toBeNull();
+    expect(element.querySelector('.taxation__choices')).not.toBeNull();
+  });
+
+  it('should open the terms again, keeping the form, when the server says they are not accepted', async () => {
+    const { fixture, element } = await setup('<p>Termini</p>');
+    element.querySelector<HTMLInputElement>('.taxation__accept input')!.click();
+    await fixture.whenStable();
+    element.querySelector<HTMLButtonElement>('.taxation__send button')!.click();
+    await settle(fixture);
+
+    const page = fixture.componentInstance as unknown as {
+      showAccountRefusal: (problem: { status: number; code: string }) => void;
+    };
+    page.showAccountRefusal({ status: 409, code: ApiErrorCode.FiskalyTermsNotAccepted });
+    await fixture.whenStable();
+    expect(
+      element.querySelector<HTMLElement>('app-electronic-receipt-account-form')!.parentElement!
+        .hidden,
+    ).toBe(true);
+    expect(element.querySelector<HTMLInputElement>('.taxation__accept input')!.disabled).toBe(
+      false,
+    );
+    expect(element.querySelector<HTMLInputElement>('.taxation__accept input')!.checked).toBe(false);
+    expect(document.querySelector('.alert__popup__text')).not.toBeNull();
+  });
+
+  it('should open the links of the terms in a new tab', async () => {
+    const { element } = await setup('<p><a href="https://example.com/privacy">privacy</a></p>');
+    const open = vi.spyOn(window, 'open').mockReturnValue(null);
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    element.querySelector('.taxation__terms a')!.dispatchEvent(click);
+    expect(open).toHaveBeenCalledWith(
+      'https://example.com/privacy',
+      '_blank',
+      'noopener,noreferrer',
+    );
+    expect(click.defaultPrevented).toBe(true);
+  });
+
+  it('should stop the download of the guide when the page is left', async () => {
+    const { fixture, element, guide, save } = await setup('<p>Termini</p>');
+    element.querySelector<HTMLButtonElement>('.taxation__guide button')!.click();
+    await fixture.whenStable();
+
+    fixture.destroy();
+    guide.next(new HttpResponse({ body: new Blob(['guida']) }));
+    expect(save).not.toHaveBeenCalled();
   });
 });

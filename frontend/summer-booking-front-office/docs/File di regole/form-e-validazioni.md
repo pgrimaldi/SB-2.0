@@ -75,6 +75,8 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - Nei form lunghi, dopo un salvataggio non riuscito, si scorre fino al primo errore: `showFirstError` trova i campi, gli
   interruttori, le caselle e i testi formattati sbagliati e i messaggi propri del form; `showMessage` solo il messaggio dato
   (es. l'errore generale in fondo).
+- I testi che il backend salva senza spazi ai lati partono già così: `trimmedText`
+  (`components/shared/forms/text-comparison.ts`), che dà `null` per un testo vuoto.
 - Un form che resta nella pagina toglie gli errori del backend rimasti sotto i campi quando si riapre (o con Annulla):
   `clearApiFieldErrors` (`behaviours/validation/api-field-errors.ts`), che lascia i valori come sono.
 - Anche gli errori del backend su un campo (`errors[]` di Problem Details, con `field` uguale al nome nella richiesta)

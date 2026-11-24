@@ -130,7 +130,8 @@
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
       "not_enabled": "您的浴场尚未启用电子收据。",
       "terms_not_accepted": "要配置账户，您必须先接受条款与条件。",
-      "unavailable": "电子收据服务没有响应，请稍后重试。"
+      "unavailable": "电子收据服务没有响应，请稍后重试。",
+      "guide_not_found": "指南尚未提供。"
     },
     "audit": {
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
@@ -692,10 +693,16 @@
             "mode": "模式"
           },
           "delete": {
-            "title": "删除打印机",
-            "text": "要删除打印机 {{name}} 吗？",
             "cancel": "取消",
-            "confirm": "删除"
+            "confirm": "删除",
+            "one": {
+              "title": "删除打印机",
+              "text": "要删除打印机 {{name}} 吗？"
+            },
+            "many": {
+              "title": "删除打印机",
+              "text": "要删除所选的 {{count}} 台打印机吗？"
+            }
           },
           "add": "添加打印机",
           "form": {
@@ -737,7 +744,8 @@
           "accept": "我接受",
           "refuse": "我不接受",
           "send": "发送",
-          "refused_warning": "要使用电子收据，您必须接受使用条款",
+          "refused_warning": "要使用电子收据，您必须接受条款与条件",
+          "no_terms": "条款与条件尚未提供。",
           "account": {
             "title": "账户配置",
             "company_name": "公司名称",

@@ -50,6 +50,7 @@ export enum ApiErrorCode {
   FiskalyNotEnabled = 'fiskaly.not_enabled',
   FiskalyTermsNotAccepted = 'fiskaly.terms_not_accepted',
   FiskalyUnavailable = 'fiskaly.unavailable',
+  FiskalyGuideNotFound = 'fiskaly.guide_not_found',
   CatalogSectorInUse = 'catalog.sector_in_use',
   CatalogSectorNameTaken = 'catalog.sector_name_taken',
   CatalogInvalidImage = 'catalog.invalid_image',

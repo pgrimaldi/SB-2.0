@@ -128,9 +128,10 @@
     },
     "fiskaly": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
-      "not_enabled": "Der elektronische Kassenbeleg ist für Ihr Strandbad nicht aktiv.",
-      "terms_not_accepted": "Um das Konto einzurichten, akzeptieren Sie zuerst die Nutzungsbedingungen.",
-      "unavailable": "Der Dienst für den elektronischen Kassenbeleg antwortet nicht. Bitte versuchen Sie es in Kürze erneut."
+      "not_enabled": "Der elektronische Kassenbeleg ist für dein Strandbad nicht aktiv.",
+      "terms_not_accepted": "Um das Konto einzurichten, akzeptiere zuerst die Nutzungsbedingungen.",
+      "unavailable": "Der Dienst für den elektronischen Kassenbeleg antwortet nicht. Bitte versuche es in Kürze erneut.",
+      "guide_not_found": "Die Anleitung ist noch nicht verfügbar."
     },
     "audit": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
@@ -692,10 +693,16 @@
             "mode": "Modus"
           },
           "delete": {
-            "title": "Drucker löschen",
-            "text": "Möchten Sie den Drucker {{name}} löschen?",
             "cancel": "Abbrechen",
-            "confirm": "Löschen"
+            "confirm": "Löschen",
+            "one": {
+              "title": "Drucker löschen",
+              "text": "Möchtest du den Drucker {{name}} löschen?"
+            },
+            "many": {
+              "title": "Drucker löschen",
+              "text": "Möchtest du die {{count}} ausgewählten Drucker löschen?"
+            }
           },
           "add": "Drucker hinzufügen",
           "form": {
@@ -737,7 +744,8 @@
           "accept": "Akzeptieren",
           "refuse": "Ablehnen",
           "send": "Senden",
-          "refused_warning": "Akzeptieren Sie die Nutzungsbedingungen, um den E-Beleg zu nutzen",
+          "refused_warning": "Akzeptiere die Nutzungsbedingungen, um den elektronischen Kassenbeleg zu nutzen",
+          "no_terms": "Die Nutzungsbedingungen sind noch nicht verfügbar.",
           "account": {
             "title": "Kontokonfiguration",
             "company_name": "Firmenname",
