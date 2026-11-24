@@ -8,9 +8,7 @@ import {
   model,
   output,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import { ApiProblem } from '../../../entities/errors/api-problem';
 import { TableErrorPopup } from '../../shared/ui/dialogs/table-error-popup/table-error-popup';
@@ -34,12 +32,7 @@ export class ReadErrorPopup {
   private readonly errorText = inject(ErrorTextBehaviour);
 
   protected readonly isGone = computed(() => this.problem()?.status === HttpStatusCode.NotFound);
-  protected readonly message = toSignal(
-    toObservable(this.problem).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly message = this.errorText.message(this.problem);
 
   protected closed(isOpen: boolean): void {
     if (!isOpen) {

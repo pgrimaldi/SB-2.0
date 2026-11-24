@@ -9,7 +9,6 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FormField,
   TreeValidationResult,
@@ -20,7 +19,7 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription, firstValueFrom, of, switchMap } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import {
@@ -138,12 +137,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   protected readonly canSave = computed(() => this.loaded() && !this.isSaving());
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly isConflictShown = signal(false);
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
 
   constructor() {
     this.unsaved.watch(this);

@@ -15,7 +15,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FieldTree,
   FormField,
@@ -34,7 +34,7 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { EMPTY, Observable, Subscription, firstValueFrom, of, switchMap } from 'rxjs';
+import { EMPTY, Observable, Subscription, firstValueFrom } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
@@ -426,12 +426,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly readError = signal<ApiProblem | null>(null);
   protected readonly isConflictShown = signal(false);
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
   private readonly texts = toSignal(
     this.translateService.stream(
       'management.settings.online_booking_configuration.booking_options',

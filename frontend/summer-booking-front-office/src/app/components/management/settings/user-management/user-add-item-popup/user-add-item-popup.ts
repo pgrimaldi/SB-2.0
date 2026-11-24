@@ -11,7 +11,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FormField,
   MAX_LENGTH,
@@ -24,7 +24,7 @@ import {
 } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   UnsavedChanges,
@@ -168,12 +168,7 @@ export class UserAddItemPopup extends BasePopup implements UnsavedChanges, OnDes
   protected readonly roleError = this.validationText.message(this.draftForm.role);
   protected readonly canAdd = computed(() => this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
   private readonly roleTexts = toSignal(
     this.translateService.stream(
       'management.settings.user_management.role',

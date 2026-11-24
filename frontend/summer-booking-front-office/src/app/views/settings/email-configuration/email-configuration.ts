@@ -12,7 +12,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FieldTree,
   FormField,
@@ -30,7 +30,7 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, firstValueFrom, of, switchMap } from 'rxjs';
+import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import {
@@ -332,9 +332,9 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     detail: this.lastVerificationError(),
   }));
   private readonly readError = signal<ApiProblem | null>(null);
-  protected readonly readErrorMessage = this.messageOf(this.readError);
+  protected readonly readErrorMessage = this.errorText.message(this.readError);
   private readonly error = signal<ApiProblem | null>(null);
-  protected readonly errorMessage = this.messageOf(this.error);
+  protected readonly errorMessage = this.errorText.message(this.error);
   /** The field `error` is about, when nothing can show under it. */
   protected readonly errorField = signal<keyof EmailConfigurationRequest | null>(null);
   protected readonly errorDetail = computed(() => {
@@ -559,15 +559,6 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   private clearError(): void {
     this.error.set(null);
     this.errorField.set(null);
-  }
-
-  private messageOf(problem: Signal<ApiProblem | null>): Signal<string | null> {
-    return toSignal(
-      toObservable(problem).pipe(
-        switchMap((shown) => (shown ? this.errorText.text(shown) : of(null))),
-      ),
-      { initialValue: null },
-    );
   }
 
   ngOnDestroy(): void {

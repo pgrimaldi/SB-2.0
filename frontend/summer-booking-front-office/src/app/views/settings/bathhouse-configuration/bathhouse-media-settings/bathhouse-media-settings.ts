@@ -12,7 +12,6 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FormField,
   MAX_LENGTH,
@@ -23,7 +22,7 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Observable, Subscription, firstValueFrom, of, switchMap } from 'rxjs';
+import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { fileLinkOf } from '../../../../behaviours/files/file-link';
 import { isUploadable } from '../../../../behaviours/files/uploadable-file';
 import { UploadContentType } from '../../../../entities/enums/upload-content-type';
@@ -220,12 +219,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   ]);
   protected readonly isLoading = signal(false);
   private readonly error = signal<ApiProblem | null>(null);
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
   protected readonly isEditing = signal(false);
   protected readonly isLoaded = signal(false);
   protected readonly isSaving = signal(false);
@@ -235,9 +229,9 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   protected readonly deletion = signal<MediaCall | null>(null);
   protected readonly isDocumentDeletion = signal(false);
   private readonly imagesError = signal<ApiProblem | null>(null);
-  protected readonly imagesErrorMessage = this.messageOf(this.imagesError);
+  protected readonly imagesErrorMessage = this.errorText.message(this.imagesError);
   private readonly documentsError = signal<ApiProblem | null>(null);
-  protected readonly documentsErrorMessage = this.messageOf(this.documentsError);
+  protected readonly documentsErrorMessage = this.errorText.message(this.documentsError);
   protected readonly isConflictShown = signal(false);
   private reloading?: Subscription;
 
@@ -474,15 +468,6 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
         this.isLoading.set(false);
       },
     });
-  }
-
-  private messageOf(problem: Signal<ApiProblem | null>): Signal<string | null> {
-    return toSignal(
-      toObservable(problem).pipe(
-        switchMap((current) => (current ? this.errorText.text(current) : of(null))),
-      ),
-      { initialValue: null },
-    );
   }
 }
 

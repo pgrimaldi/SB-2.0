@@ -7,9 +7,8 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import { ApiProblem } from '../../../entities/errors/api-problem';
@@ -45,12 +44,7 @@ export class DuplicateItemsPopup {
   protected readonly isLoading = signal(false);
   protected readonly isErrorShown = signal(false);
   private readonly error = signal<ApiProblem | null>(null);
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
 
   protected duplicateItems(): void {
     const idItems = [...this.idItems()];

@@ -11,7 +11,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   MAX_LENGTH,
   TreeValidationResult,
@@ -23,7 +23,7 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
+import { Observable, Subscription, finalize, firstValueFrom } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
@@ -216,18 +216,10 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly readError = signal<ApiProblem | null>(null);
   protected readonly isConflictShown = signal(false);
   private readonly tabErrors = signal<ReadonlyMap<PanelTab, ApiProblem>>(new Map());
-  protected readonly tabErrorMessage = toSignal(
-    toObservable(computed(() => this.tabErrors().get(this.selectedTab() as PanelTab) ?? null)).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
+  protected readonly tabErrorMessage = this.errorText.message(
+    computed(() => this.tabErrors().get(this.selectedTab() as PanelTab) ?? null),
   );
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
   private readonly loadings = new Map<PanelTab, Subscription>();
   /** Changed by someone else: the user is told once the tab has been read again. */
   private isConflictPending = false;

@@ -9,9 +9,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthBehaviour, STRIPE_CONNECT_STATE_KEY } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
@@ -71,12 +69,7 @@ export class OnlineBookingConfiguration {
   private readonly slug = signal<string | null>(null);
   protected readonly isSlugRead = signal(false);
   private readonly slugError = signal<ApiProblem | null>(null);
-  protected readonly slugErrorMessage = toSignal(
-    toObservable(this.slugError).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly slugErrorMessage = this.errorText.message(this.slugError);
   /** None while the property has no address on the public site. */
   protected readonly iframeCode = computed(() => {
     const slug = this.slug();

@@ -3,7 +3,6 @@ import {
   Component,
   EnvironmentInjector,
   OnDestroy,
-  Signal,
   afterNextRender,
   computed,
   effect,
@@ -13,9 +12,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, firstValueFrom, map, of, switchMap, tap } from 'rxjs';
+import { Observable, Subscription, firstValueFrom, map, switchMap, tap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { DeleteItemsPopup } from '../../../components/management/delete-items-popup/delete-items-popup';
 import { AddPrinterItemPopup } from '../../../components/management/settings/taxation/add-printer-item-popup/add-printer-item-popup';
@@ -165,8 +164,8 @@ export class Taxation implements OnDestroy {
   protected readonly isReceiptOff = computed(
     () => this.receiptError()?.code === ApiErrorCode.FiskalyNotEnabled,
   );
-  protected readonly actionErrorMessage = this.messageOf(this.actionError);
-  protected readonly receiptErrorMessage = this.messageOf(this.receiptError);
+  protected readonly actionErrorMessage = this.errorText.message(this.actionError);
+  protected readonly receiptErrorMessage = this.errorText.message(this.receiptError);
 
   constructor() {
     effect((onCleanup) => {
@@ -333,15 +332,6 @@ export class Taxation implements OnDestroy {
   private showActionError(problem: ApiProblem): void {
     this.actionError.set(problem);
     this.isActionErrorShown.set(true);
-  }
-
-  private messageOf(problem: Signal<ApiProblem | null>): Signal<string | null> {
-    return toSignal(
-      toObservable(problem).pipe(
-        switchMap((current) => (current ? this.errorText.text(current) : of(null))),
-      ),
-      { initialValue: null },
-    );
   }
 
   ngOnDestroy(): void {

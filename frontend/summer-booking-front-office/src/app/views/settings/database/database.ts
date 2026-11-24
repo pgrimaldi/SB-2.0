@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, map, of, switchMap, tap } from 'rxjs';
+import { Observable, map, switchMap, tap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import {
@@ -179,12 +179,7 @@ export class Database {
     '/assets/images/GeneralIcon_Warning.svg',
   ] as const;
   private readonly actionError = signal<ApiProblem | null>(null);
-  protected readonly actionErrorMessage = toSignal(
-    toObservable(this.actionError).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly actionErrorMessage = this.errorText.message(this.actionError);
   protected readonly params = computed<object | null>(() =>
     this.auth.user()?.propertyId ? {} : null,
   );

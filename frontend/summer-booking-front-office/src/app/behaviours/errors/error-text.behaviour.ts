@@ -1,4 +1,5 @@
-import { Injectable, inject, isDevMode } from '@angular/core';
+import { Injectable, Signal, inject, isDevMode } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { ApiFieldError, ApiProblem, ApiProblemArgs } from '../../entities/errors/api-problem';
@@ -19,6 +20,14 @@ export class ErrorTextBehaviour {
 
   text(problem: ApiProblem): Observable<string> {
     return this.translate(problem.code, problem.args);
+  }
+
+  /** The text of the error `problem` holds now, if any. Call it where `inject()` works. */
+  message(problem: Signal<ApiProblem | null>): Signal<string | null> {
+    return toSignal(
+      toObservable(problem).pipe(switchMap((shown) => (shown ? this.text(shown) : of(null)))),
+      { initialValue: null },
+    );
   }
 
   /**

@@ -9,9 +9,8 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription, of, switchMap } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import {
@@ -66,12 +65,7 @@ export class MapConfiguration implements OnDestroy {
   protected readonly loadError = signal<ApiProblem | null>(null);
   protected readonly isResetting = signal(false);
   private readonly resetError = signal<ApiProblem | null>(null);
-  protected readonly resetErrorMessage = toSignal(
-    toObservable(this.resetError).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly resetErrorMessage = this.errorText.message(this.resetError);
   private resetting?: Subscription;
 
   constructor() {

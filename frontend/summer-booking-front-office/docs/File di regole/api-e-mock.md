@@ -121,8 +121,9 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
 - Il backend risponde con Problem Details (RFC 9457) e un `code` stabile (es. `auth.invalid_credentials`), che è
   **direttamente la chiave di traduzione** sotto `error.` (`error.auth.invalid_credentials`,
   `error.validation.end_before_start`), senza conversioni.
-- La traduzione passa sempre da `ErrorTextBehaviour` (`behaviours/errors/`): `text(problem)` dà il messaggio,
-  `key(problem)` la chiave da passare ad `appI18nText` (con `[params]="problem.args"`), `instant(code, args)` il testo
+- La traduzione passa sempre da `ErrorTextBehaviour` (`behaviours/errors/`): `message(segnale)` dà il messaggio dell'errore
+  contenuto in un segnale (`protected readonly errorMessage = this.errorText.message(this.error);`) ed è il modo normale nei
+  componenti, `text(problem)` l'Observable del messaggio, `key(problem)` la chiave da passare ad `appI18nText` (con `[params]="problem.args"`), `instant(code, args)` il testo
   per un `computed`. I codici non ancora tradotti mostrano `error.unknown`.
 - `args` riempie i segnaposto: `{{name}}` nei testi semplici; `{date, date, long}`, `{amount, number, currency}`,
   `{count, plural, …}` per date, importi e plurali (vedi `traduzioni-e-lingue.md`).

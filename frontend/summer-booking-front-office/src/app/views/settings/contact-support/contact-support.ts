@@ -8,10 +8,9 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { firstValueFrom, of, switchMap } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import {
@@ -65,12 +64,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
     return phoneNumber ? `tel:${phoneNumber.replace(/[^\d+]/g, '')}` : null;
   });
   private readonly supportInfoError = signal<ApiProblem | null>(null);
-  protected readonly supportInfoErrorMessage = toSignal(
-    toObservable(this.supportInfoError).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly supportInfoErrorMessage = this.errorText.message(this.supportInfoError);
   protected readonly phoneIcon = '/assets/images/ContactSupport_Phone.svg';
   protected readonly emailIcon = '/assets/images/ContactSupport_Email.svg';
   protected readonly clockIcon = '/assets/images/ContactSupport_Clock.svg';
@@ -93,12 +87,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   protected readonly isLoading = signal(false);
   protected readonly sent = signal(false);
   private readonly error = signal<ApiProblem | null>(null);
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
 
   constructor() {
     this.unsaved.watch(this);

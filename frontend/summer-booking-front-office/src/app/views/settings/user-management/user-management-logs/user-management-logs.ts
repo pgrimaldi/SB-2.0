@@ -9,11 +9,11 @@ import {
 } from '@angular/core';
 import { Location } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, firstValueFrom, map, of, switchMap } from 'rxjs';
+import { Observable, firstValueFrom, map, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import {
   dateRangeFilters,
@@ -137,12 +137,7 @@ export class UserManagementLogs {
   protected readonly isExporting = signal(false);
   protected readonly isPrinting = signal(false);
   private readonly downloadError = signal<ApiProblem | null>(null);
-  protected readonly downloadErrorMessage = toSignal(
-    toObservable(this.downloadError).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly downloadErrorMessage = this.errorText.message(this.downloadError);
   protected readonly isDownloadErrorShown = signal(false);
   protected readonly params = computed<object | null>(() =>
     this.auth.user()?.propertyId ? {} : null,

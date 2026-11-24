@@ -8,10 +8,9 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormField, disabled, form } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription, firstValueFrom, of, switchMap } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
 import { fileLinkOf } from '../../../../behaviours/files/file-link';
@@ -85,12 +84,7 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
   /** [X]. */
   protected readonly popupIcons = ['/assets/images/GeneralIcon_Close.svg'] as const;
   private readonly error = signal<ApiProblem | null>(null);
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
   protected readonly isConflictShown = signal(false);
   private reloading?: Subscription;
 

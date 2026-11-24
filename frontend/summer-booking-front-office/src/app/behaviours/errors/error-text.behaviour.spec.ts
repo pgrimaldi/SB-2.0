@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
@@ -76,6 +77,24 @@ describe('ErrorTextBehaviour', () => {
       "L'ombrellone 42 è già prenotato il 01/08/2026.",
       'Umbrella 42 is already booked on 01/08/2026.',
     ]);
+  });
+
+  it('should give the message of the error a signal holds, following it and the language', () => {
+    const { errors, translate } = setup();
+    const problem = signal<ApiProblem | null>(null);
+    const message = TestBed.runInInjectionContext(() => errors.message(problem));
+    TestBed.tick();
+    expect(message()).toBeNull();
+
+    problem.set(overlap);
+    TestBed.tick();
+    expect(message()).toBe("L'ombrellone 42 è già prenotato il 01/08/2026.");
+    translate.use('en');
+    expect(message()).toBe('Umbrella 42 is already booked on 01/08/2026.');
+
+    problem.set(null);
+    TestBed.tick();
+    expect(message()).toBeNull();
   });
 
   it('should give the messages of the field errors by field, the first one for each field', async () => {

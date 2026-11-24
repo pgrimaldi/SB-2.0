@@ -14,7 +14,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FieldTree,
   FormField,
@@ -32,7 +32,7 @@ import {
 } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
+import { Observable, Subscription, finalize, firstValueFrom } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
@@ -208,12 +208,7 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly readError = signal<ApiProblem | null>(null);
   protected readonly isConflictShown = signal(false);
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
   protected readonly removePeriodIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   protected readonly addPeriodIcon = ['/assets/images/GeneralIcon_Add.svg'] as const;
   protected readonly calendarIcon = ['/assets/images/GeneralIcon_Calendar.svg'] as const;

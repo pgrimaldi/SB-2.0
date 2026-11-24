@@ -10,7 +10,6 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FormField,
   TreeValidationResult,
@@ -22,7 +21,7 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { firstValueFrom, of, switchMap } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   UnsavedChanges,
@@ -175,11 +174,8 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
     () => this.gridForm().valid() && !this.hasUnknownIcon() && !this.isSaving(),
   );
   private readonly error = signal<ApiProblem | null>(null);
-  protected readonly errorMessage = toSignal(
-    toObservable(computed(() => this.error() ?? this.readError() ?? this.loadError())).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
+  protected readonly errorMessage = this.errorText.message(
+    computed(() => this.error() ?? this.readError() ?? this.loadError()),
   );
   protected readonly picking = signal<IconPicking | null>(null);
   protected readonly isPickingUmbrella = computed(() => {

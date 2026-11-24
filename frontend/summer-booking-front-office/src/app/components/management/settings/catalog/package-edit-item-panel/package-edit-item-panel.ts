@@ -11,7 +11,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   MAX_LENGTH,
   TreeValidationResult,
@@ -32,9 +32,7 @@ import {
   finalize,
   firstValueFrom,
   forkJoin,
-  of,
   shareReplay,
-  switchMap,
 } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
@@ -240,12 +238,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   private version: string | null = null;
   /** The save found a newer version: the popup shows once the package has been read again. */
   private isConflictPending = false;
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
   private loading?: Subscription;
 
   constructor() {

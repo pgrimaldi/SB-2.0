@@ -11,7 +11,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   MAX_LENGTH,
   TreeValidationResult,
@@ -25,7 +25,7 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
+import { Observable, Subscription, finalize, firstValueFrom } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
@@ -174,12 +174,7 @@ export class GeneralServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly imagePreviewUrl = signal<string | null>(null);
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly imageError = signal<ApiProblem | null>(null);
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
   private fetching?: Subscription;
 
   constructor() {

@@ -11,7 +11,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   MAX_LENGTH,
   TreeValidationResult,
@@ -30,9 +30,7 @@ import {
   finalize,
   firstValueFrom,
   forkJoin,
-  of,
   shareReplay,
-  switchMap,
 } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
@@ -214,12 +212,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
       this.error() ??
       (this.selectedTab() === PanelTab.GeneralInfo ? this.articlesError() : this.priceListError()),
   );
-  protected readonly errorMessage = toSignal(
-    toObservable(this.shownError).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.shownError);
   private fetching?: Subscription;
   private fetchingArticles?: Subscription;
 

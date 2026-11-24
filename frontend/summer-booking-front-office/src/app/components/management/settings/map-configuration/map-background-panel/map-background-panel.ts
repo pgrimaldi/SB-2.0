@@ -12,9 +12,8 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription, of, switchMap } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import { fileLinkOf } from '../../../../../behaviours/files/file-link';
 import { isUploadable } from '../../../../../behaviours/files/uploadable-file';
@@ -121,18 +120,10 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     () => this.settings() !== null && this.readError() === null,
   );
   private readonly error = signal<ApiProblem | null>(null);
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
   private readonly saveError = signal<ApiProblem | null>(null);
-  protected readonly saveErrorMessage = toSignal(
-    toObservable(computed(() => this.saveError() ?? this.readError() ?? this.loadError())).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
+  protected readonly saveErrorMessage = this.errorText.message(
+    computed(() => this.saveError() ?? this.readError() ?? this.loadError()),
   );
   private savedSlot: number | null = null;
   private savedPreviewUrl: string | null = null;

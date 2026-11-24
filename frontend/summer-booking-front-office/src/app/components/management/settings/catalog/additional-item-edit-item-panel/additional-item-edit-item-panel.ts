@@ -11,7 +11,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FormField,
   TreeValidationResult,
@@ -22,7 +22,7 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
+import { Observable, Subscription, finalize, firstValueFrom, forkJoin } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
@@ -189,12 +189,7 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
   private version: string | null = null;
   /** The save found a newer version: the popup shows once the item has been read again. */
   private isConflictPending = false;
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
+  protected readonly errorMessage = this.errorText.message(this.error);
   private loadings = new Subscription();
 
   constructor() {
