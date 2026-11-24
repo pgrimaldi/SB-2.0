@@ -124,7 +124,7 @@
     },
     "notification": {
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
-      "test_email_failed": "L'email di test non è partita. Risposta del server: {{detail}}",
+      "test_email_failed": "L'email di test non è partita.",
       "test_email_blocked": "In questo ambiente le email sono bloccate: l'email di test non è partita.",
       "unavailable": "Il servizio email non risponde. Riprova tra poco."
     },
@@ -649,7 +649,7 @@
           },
           "smtp_port": {
             "title": "Porta SMTP:",
-            "description": "La porta del server SMTP. Le porte comuni sono: 25 (non sicura) 465 (SSL) 587 (STARTTLS) Autenticazione SMTP:"
+            "description": "La porta del server SMTP. Le porte comuni sono: 25 (non sicura), 465 (SSL), 587 (STARTTLS)."
           },
           "smtp_username": {
             "title": "Nome utente:",
@@ -690,6 +690,7 @@
           "failed": "L'ultima prova, del {at, date, medium} alle {at, time, short}, non è riuscita: {detail}",
           "done": "Ultima prova riuscita il {at, date, medium} alle {at, time, short}."
         },
+        "server_answer": "Risposta del server: {{detail}}",
         "send_test": "Invia email test",
         "reset": "Reset",
         "save": "Salva",

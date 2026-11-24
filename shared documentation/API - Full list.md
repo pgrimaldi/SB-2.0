@@ -7989,7 +7989,7 @@ Nessun payload.
   "smtpPassword": "string | null",
   "security": "string (enum SmtpSecurity)",
   "verifyCertificate": "boolean",
-  "testRecipients": "string[] (email di al massimo 320 caratteri, al massimo 10, anche vuoto)",
+  "testRecipients": "string[] (email di al massimo 320 caratteri, da 1 a 10)",
   "isActive": "boolean"
 }
 ```
@@ -8010,7 +8010,7 @@ Nessun corpo (204).
 | `smtpPassword` | string \| null |
 | `security` | string (enum SmtpSecurity) |
 | `verifyCertificate` | boolean |
-| `testRecipients` | string[] (email di al massimo 320 caratteri, al massimo 10, anche vuoto) |
+| `testRecipients` | string[] (email di al massimo 320 caratteri, da 1 a 10) |
 | `isActive` | boolean |
 
 **Response tabella**

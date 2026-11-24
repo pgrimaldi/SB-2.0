@@ -38,7 +38,11 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../behaviours/forms/unsaved-changes.behaviour';
 import { showFirstError } from '../../../components/shared/forms/first-error';
-import { comparableJson, trimmedText } from '../../../components/shared/forms/text-comparison';
+import {
+  comparableJson,
+  sameTextIgnoringCase,
+  trimmedText,
+} from '../../../components/shared/forms/text-comparison';
 import {
   emailAddress,
   isEmailAddress,
@@ -61,12 +65,16 @@ import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popu
 import { FilledSelect } from '../../../components/shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../components/shared/ui/selects/select/select';
 import { Toggle } from '../../../components/shared/ui/toggles/toggle/toggle';
+import { EmailVerification } from '../../../entities/enums/email-verification';
 import { SmtpSecurity } from '../../../entities/enums/smtp-security';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../entities/errors/api-problem';
 import { EmailConfigurationData } from '../../../entities/settings/email-configuration/email-configuration-data';
 import { EmailConfigurationDraft } from '../../../entities/settings/email-configuration/email-configuration-draft';
-import { EMAIL_CONFIGURATION_MASKED_FIELDS } from '../../../entities/settings/email-configuration/email-configuration-field';
+import {
+  EMAIL_CONFIGURATION_FIELD_KEYS,
+  EMAIL_CONFIGURATION_MASKED_FIELDS,
+} from '../../../entities/settings/email-configuration/email-configuration-field';
 import {
   EmailConfigurationRequest,
   MAX_SMTP_EMAIL_LENGTH,
@@ -77,8 +85,9 @@ import {
   SMTP_CONNECTION_FIELDS,
   SMTP_SSL_PORT,
   SMTP_START_TLS_PORT,
+  SMTP_VERIFIED_FIELDS,
 } from '../../../entities/settings/email-configuration/email-configuration-request';
-import { toApiProblem } from '../../../services/api/errors/to-api-problem';
+import { cutText, toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { NotificationService } from '../../../services/api/notification/notification.service';
 
 interface EmailConfigurationError extends ValidationError {
@@ -94,19 +103,25 @@ enum EmailConfigurationErrorKind {
   TooManyRecipients = 'email_configuration.test_recipients.max',
 }
 
-/** Translation group `management.settings.email_configuration.verification`. */
-enum EmailVerification {
-  NotConfigured = 'not_configured',
-  Off = 'off',
-  Never = 'never',
-  Failed = 'failed',
-  Done = 'done',
-}
-
 const RECIPIENT_SEPARATOR = ', ';
 
 function recipientsOf(text: string | null): string[] {
-  return (text ?? '').split(/[,;\s]+/).filter((email) => email !== '');
+  const recipients = (text ?? '').split(/[,;\s\uff0c\u3001\uff1b\u060c\u061b]+/).filter(Boolean);
+  return recipients.filter(
+    (email, index) => recipients.findIndex((other) => sameTextIgnoringCase(other, email)) === index,
+  );
+}
+
+function recipientsText(recipients: readonly string[]): string | null {
+  return recipients.join(RECIPIENT_SEPARATOR) || null;
+}
+
+function hasOther<TField extends string>(
+  fields: readonly TField[],
+  first: Readonly<Record<TField, unknown>>,
+  second: Readonly<Record<TField, unknown>>,
+): boolean {
+  return fields.some((field) => comparableJson(first[field]) !== comparableJson(second[field]));
 }
 
 function draftOf(data: EmailConfigurationData): EmailConfigurationDraft {
@@ -119,7 +134,7 @@ function draftOf(data: EmailConfigurationData): EmailConfigurationDraft {
     smtpPassword: null,
     security: data.security,
     verifyCertificate: data.verifyCertificate,
-    testRecipients: data.testRecipients.join(RECIPIENT_SEPARATOR) || null,
+    testRecipients: recipientsText(data.testRecipients),
     isActive: data.isActive,
   };
 }
@@ -169,6 +184,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   protected readonly ButtonSize = ButtonSize;
 
   protected readonly maskedFields = EMAIL_CONFIGURATION_MASKED_FIELDS;
+  protected readonly fieldKeys = EMAIL_CONFIGURATION_FIELD_KEYS;
   protected readonly sendTestIcon = ['/assets/images/EmailConfiguration_MailSend.svg'] as const;
   protected readonly resetIcon = ['/assets/images/GeneralIcon_DeleteWhite.svg'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
@@ -181,9 +197,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   protected readonly portIcons = ['', ...this.eyeIcons] as const;
 
   private readonly configuration = signal(new EmailConfigurationDraft());
-  /** "Sì" of "Vuoi sovrascrivere le impostazioni predefinite?": until then every field is read-only. */
   protected readonly editable = signal(false);
-  /** The server has a password saved (it never sends it). */
   protected readonly passwordSaved = signal(false);
   /**
    * The values the saved password belongs to, as the server last answered or saved them; never with
@@ -193,10 +207,12 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   private readonly lastVerificationAt = signal<string | null>(null);
   private readonly lastVerificationError = signal<string | null>(null);
   private verificationRead: Subscription | null = null;
-  /** The version of the configuration shown, sent back with Salva. */
+  private readonly idProperty = computed(() => this.auth.user()?.propertyId ?? null);
   private version: string | null = null;
   /** Goes up with every save that succeeds: a reading started before it answers older values. */
   private savesDone = 0;
+  private isConflictPending = false;
+  private isDestroyed = false;
   /**
    * The saved password must not be sent to another server, port, user or with another security
    * (e.g. a server of whoever changed it, or a connection without encryption): then it is typed again.
@@ -206,12 +222,9 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     return (
       this.passwordSaved() &&
       !!saved &&
-      SMTP_CONNECTION_FIELDS.some(
-        (field) => comparableJson(this.configuration()[field]) !== comparableJson(saved[field]),
-      )
+      hasOther(SMTP_CONNECTION_FIELDS, this.configuration(), saved)
     );
   });
-  /** The last reading arrived: nothing can be changed before the values of the server are there. */
   protected readonly loaded = signal(false);
   protected readonly configurationForm = form(this.configuration, (path) => {
     // Read-only also while a call runs: a reading would overwrite what is typed meanwhile, and Salva
@@ -260,7 +273,6 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
         : undefined,
     );
   });
-  /** Under each field: what is wrong in it, found here or by the backend. */
   protected readonly fieldErrors = Object.fromEntries(
     (Object.keys(this.configuration()) as (keyof EmailConfigurationDraft)[]).map((name) => [
       name,
@@ -273,7 +285,6 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     >,
     { initialValue: null },
   );
-  /** Asked again by Reset: the effect that loads the configuration reads it. */
   private readonly reloads = signal(0);
   protected readonly isReloading = signal(false);
   protected readonly isSendingTest = signal(false);
@@ -281,15 +292,22 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   protected readonly isSaving = signal(false);
   protected readonly saved = signal(false);
   protected readonly isConflictShown = signal(false);
-  protected readonly canOverride = computed(
-    () => !this.editable() && this.loaded() && !this.isReloading(),
-  );
   protected readonly isBusy = computed(
     () => this.isReloading() || this.isSendingTest() || this.isSaving(),
   );
-  private readonly isLocked = computed(() => !this.editable() || this.isBusy());
-  protected readonly hasRecipients = computed(
-    () => recipientsOf(this.configuration().testRecipients).length > 0,
+  protected readonly canOverride = computed(
+    () => !this.editable() && this.loaded() && !this.isBusy(),
+  );
+  private readonly isLocked = computed(() => !this.editable() || !this.loaded() || this.isBusy());
+  protected readonly canSendTest = computed(
+    () =>
+      this.loaded() &&
+      !this.isBusy() &&
+      recipientsOf(this.configuration().testRecipients).length > 0 &&
+      (this.editable() || !!this.savedConfiguration()?.fromEmail),
+  );
+  protected readonly canSave = computed(
+    () => !this.isLocked() && !this.configurationForm().invalid(),
   );
   protected readonly EmailVerification = EmailVerification;
   /** About the configuration saved, whatever is being typed. */
@@ -313,19 +331,23 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     at: this.lastVerificationAt(),
     detail: this.lastVerificationError(),
   }));
+  private readonly readError = signal<ApiProblem | null>(null);
+  protected readonly readErrorMessage = this.messageOf(this.readError);
   private readonly error = signal<ApiProblem | null>(null);
-  protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
-      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
-    ),
-    { initialValue: null },
-  );
-  protected readonly securityOptions = computed<readonly SelectOption<SmtpSecurity>[]>(() => [
-    ...Object.values(SmtpSecurity).map((value) => ({
+  protected readonly errorMessage = this.messageOf(this.error);
+  /** The field `error` is about, when nothing can show under it. */
+  protected readonly errorField = signal<keyof EmailConfigurationRequest | null>(null);
+  protected readonly errorDetail = computed(() => {
+    const problem = this.error();
+    const detail = problem?.args?.['detail'];
+    return problem?.code === ApiErrorCode.NotificationTestEmailFailed ? (detail ?? null) : null;
+  });
+  protected readonly securityOptions = computed<readonly SelectOption<SmtpSecurity>[]>(() =>
+    Object.values(SmtpSecurity).map((value) => ({
       value,
       label: this.securityTexts()?.[value] ?? '',
     })),
-  ]);
+  );
 
   constructor() {
     this.unsaved.watch(this);
@@ -335,40 +357,13 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
         untracked(() => this.configurationForm.smtpPassword().markAsTouched());
       }
     });
-    // Loaded again with Reset and when the language changes (what was typed is lost).
     effect((onCleanup) => {
       this.reloads();
       this.dataReload?.();
-      if (!this.auth.user()?.propertyId) {
+      if (!this.idProperty()) {
         return;
       }
-      const subscription = untracked(() => {
-        const savesAtStart = this.savesDone;
-        this.isReloading.set(true);
-        this.error.set(null);
-        return this.notification.emailConfiguration().subscribe({
-          next: (data) => {
-            this.isReloading.set(false);
-            if (savesAtStart !== this.savesDone) {
-              return; // the values just saved are newer than this answer
-            }
-            const configuration = draftOf(data);
-            this.version = data.version;
-            clearApiFieldErrors(this.configurationForm);
-            this.configuration.set(configuration);
-            this.passwordSaved.set(data.hasSmtpPassword);
-            this.savedConfiguration.set(configuration);
-            this.showVerification(data);
-            this.configurationForm().reset();
-            this.loaded.set(true);
-          },
-          error: (error: unknown) => {
-            this.isReloading.set(false);
-            this.loaded.set(false);
-            this.error.set(toApiProblem(error));
-          },
-        });
-      });
+      const subscription = untracked(() => this.load());
       onCleanup(() => subscription.unsubscribe());
     });
   }
@@ -381,18 +376,21 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     );
   }
 
-  /** "Sì": what the server had wrong shows at once, unless there is nothing saved yet. */
   protected allowChanges(): void {
+    if (!this.canOverride()) {
+      return;
+    }
     this.editable.set(true);
+    this.clearError();
     if (this.savedConfiguration()?.fromEmail) {
       this.configurationForm().markAsTouched();
     }
   }
 
-  /** Reset: the values of the server again (what was typed is lost), read-only until "Sì" again. */
-  protected reset(): void {
-    this.editable.set(false);
-    this.reloads.update((reloads) => reloads + 1);
+  protected async requestReset(): Promise<void> {
+    if (!this.isBusy() && (await this.unsaved.confirmDiscard(this))) {
+      this.reset();
+    }
   }
 
   protected sendTestEmail(): void {
@@ -405,6 +403,9 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
+    if (!this.editable()) {
+      return;
+    }
     this.submitWith(
       this.isSaving,
       (request) => this.notification.saveEmailConfiguration(request, this.version),
@@ -414,8 +415,15 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
         const savedValues: EmailConfigurationDraft = {
           ...sent,
           smtpPassword: null,
-          testRecipients: sent.testRecipients.join(RECIPIENT_SEPARATOR) || null,
+          testRecipients: recipientsText(sent.testRecipients),
         };
+        const previous = this.savedConfiguration();
+        if (
+          sent.smtpPassword !== null ||
+          (previous && hasOther(SMTP_VERIFIED_FIELDS, savedValues, previous))
+        ) {
+          this.showVerification(null, null);
+        }
         this.savesDone++;
         this.version = version;
         this.passwordSaved.update((saved) => saved || sent.smtpPassword !== null);
@@ -424,27 +432,71 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
         this.configurationForm().reset();
         this.editable.set(false);
         this.saved.set(true);
-        this.readVerification();
       },
     );
   }
 
-  /**
-   * Through Signal Forms `submit()`: nothing is sent while a field is wrong (every field becomes
-   * touched, so each shows its error), and an error of the backend on a field goes under that field.
-   */
+  protected reload(): void {
+    this.reloads.update((reloads) => reloads + 1);
+  }
+
+  private load(): Subscription {
+    const savesAtStart = this.savesDone;
+    this.isReloading.set(true);
+    this.readError.set(null);
+    this.clearError();
+    return this.notification.emailConfiguration().subscribe({
+      next: (data) => {
+        this.isReloading.set(false);
+        if (savesAtStart !== this.savesDone) {
+          return; // the values just saved are newer than this answer
+        }
+        const configuration = draftOf(data);
+        this.version = data.version;
+        clearApiFieldErrors(this.configurationForm);
+        this.configuration.set(configuration);
+        this.passwordSaved.set(data.hasSmtpPassword);
+        this.savedConfiguration.set(configuration);
+        this.showVerification(data.lastVerificationAt, data.lastVerificationError);
+        this.configurationForm().reset();
+        this.loaded.set(true);
+        if (this.isConflictPending) {
+          this.isConflictPending = false;
+          this.isConflictShown.set(true);
+        }
+      },
+      error: (error: unknown) => {
+        this.isReloading.set(false);
+        this.loaded.set(false);
+        this.readError.set(toApiProblem(error));
+      },
+    });
+  }
+
+  private reset(): void {
+    // While the fields can still change: read-only ones keep the errors of the backend.
+    clearApiFieldErrors(this.configurationForm);
+    this.editable.set(false);
+    const saved = this.savedConfiguration();
+    if (saved) {
+      this.configuration.set(saved);
+      this.configurationForm().reset();
+    }
+    this.reload();
+  }
+
   private submitWith<T>(
     isRunning: WritableSignal<boolean>,
     call: (request: EmailConfigurationRequest) => Observable<T>,
     done: (sent: EmailConfigurationRequest, answer: T) => void,
     always: () => void = () => undefined,
   ): void {
-    if (this.isBusy() || !this.loaded() || !this.auth.user()?.propertyId) {
+    if (this.isBusy() || !this.loaded() || !this.idProperty()) {
       return;
     }
     void submit(this.configurationForm, async (): Promise<TreeValidationResult> => {
       isRunning.set(true);
-      this.error.set(null);
+      this.clearError();
       try {
         const request = requestOf(this.configuration());
         done(request, await firstValueFrom(call(request)));
@@ -461,44 +513,65 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     });
   }
 
-  /** The outcome of the test of the configuration saved, without touching what is being typed. */
   private readVerification(): void {
-    if (this.hasUnsavedChanges()) {
+    if (this.isDestroyed || this.hasUnsavedChanges()) {
       return;
     }
     this.verificationRead?.unsubscribe();
     this.verificationRead = this.notification.emailConfiguration().subscribe({
-      next: (data) => this.showVerification(data),
+      next: ({ version, lastVerificationAt, lastVerificationError }) => {
+        if (version === this.version) {
+          this.showVerification(lastVerificationAt, lastVerificationError);
+        }
+      },
       error: () => undefined,
     });
   }
 
-  private showVerification(data: EmailConfigurationData): void {
-    this.lastVerificationAt.set(data.lastVerificationAt);
-    this.lastVerificationError.set(data.lastVerificationError);
+  private showVerification(at: string | null, error: string | null): void {
+    this.lastVerificationAt.set(at);
+    this.lastVerificationError.set(error && cutText(error));
   }
 
-  /**
-   * The errors on a field go under it; any other error under the panel. Read-only fields show no
-   * error (Signal Forms does not validate them): then the message goes under the panel too. After a
-   * version conflict the configuration is read again, as with Reset.
-   */
   private failed(problem: ApiProblem): TreeValidationResult {
     if (problem.code === ApiErrorCode.ResourceVersionConflict) {
-      this.isConflictShown.set(true);
+      this.isConflictPending = true;
       this.reset();
       return undefined;
     }
-    const errors = apiFieldErrorsOrGeneral(problem, this.configurationForm, (general) =>
-      this.error.set(general),
+    // Read-only fields show no error: the message says which one it is about.
+    const isReadOnly = !this.editable();
+    const names = Object.keys(
+      EMAIL_CONFIGURATION_FIELD_KEYS,
+    ) as (keyof EmailConfigurationRequest)[];
+    return apiFieldErrorsOrGeneral(
+      problem,
+      this.configurationForm,
+      (general) => {
+        this.error.set(general);
+        const field = isReadOnly ? problem.errors?.[0]?.field : null;
+        this.errorField.set(names.find((name) => name === field) ?? null);
+      },
+      isReadOnly ? names : [],
     );
-    if (!this.editable()) {
-      this.error.set(problem);
-    }
-    return errors;
+  }
+
+  private clearError(): void {
+    this.error.set(null);
+    this.errorField.set(null);
+  }
+
+  private messageOf(problem: Signal<ApiProblem | null>): Signal<string | null> {
+    return toSignal(
+      toObservable(problem).pipe(
+        switchMap((shown) => (shown ? this.errorText.text(shown) : of(null))),
+      ),
+      { initialValue: null },
+    );
   }
 
   ngOnDestroy(): void {
+    this.isDestroyed = true;
     this.verificationRead?.unsubscribe();
     this.unsaved.unwatch(this);
   }

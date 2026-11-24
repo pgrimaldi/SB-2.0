@@ -32,7 +32,7 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   `invalidate.time_after_start`), così si vede sotto quello che l'utente ha cambiato.
 - `webLink(path)`: un testo che non è un link completo http o https (`invalidate.web_link`). Il campo vuoto lo lascia
   a `requiredText`.
-- `emailAddress(path)`: un'email come la controlla il backend, cioè una sola `@`, né prima né ultima
+- `emailAddress(path)`: un'email (senza gli spazi ai lati) come la controlla il backend, cioè una sola `@`, né prima né ultima
   (`invalidate.email`). Il campo vuoto lo lascia a `requiredText`. La lunghezza massima è `MAX_EMAIL_LENGTH` (255,
   `entities/shared/email-address.ts`). Lo stesso controllo fuori da un form (es. nei mock) è `isEmailAddress(testo)`.
 - `maxRichTextLength(path, massimo)`: un testo di `app-rich-text-field` (HTML) con più di `massimo` caratteri visibili;
@@ -57,7 +57,7 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   testo tradotto del primo errore (chiave `invalidate.<kind>`, con i valori dell'errore e il nome del campo, es.
   `management.settings.warehouse.form.field_names.quantity` = "della quantità").
 - Il messaggio compare solo dopo che l'utente ha cambiato o lasciato il campo e segue la lingua. Un'eccezione: nei pannelli
-  di modifica di Servizi e Listino, premendo Modifica, e in Sharing, nel pannello e nel popup di Prenotazioni online, che
+  di modifica di Servizi e Listino, premendo Modifica, in Configurazione email, premendo Sì, e in Sharing, nel pannello e nel popup di Prenotazioni online, che
   sono sempre modificabili, dopo la lettura, i campi letti già sbagliati si segnano subito (`markAsTouched()` sul form),
   perché tengono spento Salva.
 - Per i campi di una lista, dove non si può tenere un signal per campo, il template legge lo stesso testo con

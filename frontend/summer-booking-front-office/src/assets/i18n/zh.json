@@ -124,7 +124,7 @@
     },
     "notification": {
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
-      "test_email_failed": "测试邮件未发送。服务器答复：{{detail}}",
+      "test_email_failed": "测试邮件未发送。",
       "test_email_blocked": "此环境中邮件已被阻止：测试邮件未发送。",
       "unavailable": "邮件服务没有响应，请稍后重试。"
     },
@@ -649,7 +649,7 @@
           },
           "smtp_port": {
             "title": "SMTP 端口：",
-            "description": "SMTP 服务器的端口。常用端口：25（不安全）465（SSL）587（STARTTLS）SMTP 认证："
+            "description": "SMTP 服务器的端口。常用端口：25（不安全）、465（SSL）、587（STARTTLS）。"
           },
           "smtp_username": {
             "title": "用户名：",
@@ -690,6 +690,7 @@
           "failed": "最近一次测试（{at, date, medium} {at, time, short}）失败：{detail}",
           "done": "最近一次成功测试：{at, date, medium} {at, time, short}。"
         },
+        "server_answer": "服务器答复：{{detail}}",
         "send_test": "发送测试邮件",
         "reset": "重置",
         "save": "保存",

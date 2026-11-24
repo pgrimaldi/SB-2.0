@@ -1,8 +1,5 @@
 @use '../../../styles/settings-panel' as panel;
 
-// One white panel, on each row the name and the explanation of the
-// setting on the left and its field on the right; the three buttons under the panel, on the right.
-// Wide page, texts and fields; extra room for the test email label.
 .email__configuration {
   --button-text-size: 0.75rem;
   --button-height: 1.75rem;
@@ -78,6 +75,14 @@
   color: var(--color__layout__error);
   font-size: 0.8125rem;
   line-height: 1.125rem;
+  overflow-wrap: anywhere;
+}
+
+.email__configuration__failure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
 }
 
 .email__configuration__override {

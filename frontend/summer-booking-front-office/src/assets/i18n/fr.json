@@ -124,7 +124,7 @@
     },
     "notification": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
-      "test_email_failed": "L'e-mail de test n'est pas parti. Réponse du serveur : {{detail}}",
+      "test_email_failed": "L'e-mail de test n'est pas parti.",
       "test_email_blocked": "Les e-mails sont bloqués dans cet environnement : l'e-mail de test n'est pas parti.",
       "unavailable": "Le service e-mail ne répond pas. Réessayez dans quelques instants."
     },
@@ -649,7 +649,7 @@
           },
           "smtp_port": {
             "title": "Port SMTP :",
-            "description": "Le port du serveur SMTP. Les ports courants sont : 25 (non sécurisé) 465 (SSL) 587 (STARTTLS) Authentification SMTP :"
+            "description": "Le port du serveur SMTP. Les ports courants sont : 25 (non sécurisé), 465 (SSL), 587 (STARTTLS)."
           },
           "smtp_username": {
             "title": "Nom d'utilisateur :",
@@ -690,6 +690,7 @@
           "failed": "Le dernier test, le {at, date, medium} à {at, time, short}, a échoué : {detail}",
           "done": "Dernier test réussi le {at, date, medium} à {at, time, short}."
         },
+        "server_answer": "Réponse du serveur : {{detail}}",
         "send_test": "Envoyer un e-mail de test",
         "reset": "Réinitialiser",
         "save": "Enregistrer",

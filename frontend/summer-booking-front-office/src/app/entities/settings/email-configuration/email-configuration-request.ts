@@ -29,3 +29,6 @@ export const SMTP_CONNECTION_FIELDS = [
   'security',
   'verifyCertificate',
 ] as const;
+
+/** A test says nothing any more once one of these changes. */
+export const SMTP_VERIFIED_FIELDS = [...SMTP_CONNECTION_FIELDS, 'fromEmail'] as const;

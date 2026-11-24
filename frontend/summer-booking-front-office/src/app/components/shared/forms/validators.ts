@@ -155,7 +155,7 @@ export function emailAddress<TPathKind extends PathKind = PathKind.Root>(
   path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
 ): void {
   validate(path, ({ value }): EmailError | undefined => {
-    const email = value();
+    const email = value()?.trim();
     return !email || isEmailAddress(email) ? undefined : { kind: 'email' };
   });
 }

@@ -87,7 +87,7 @@ function readArg(arg: unknown): unknown {
 }
 
 /** A text too long for the message ends with …. */
-function cutText(text: string): string {
+export function cutText(text: string): string {
   return text.length <= MAX_ARG_LENGTH ? text : `${text.slice(0, MAX_ARG_LENGTH - 1)}…`;
 }
 

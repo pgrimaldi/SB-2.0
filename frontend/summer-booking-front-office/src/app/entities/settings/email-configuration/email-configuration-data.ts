@@ -1,6 +1,5 @@
 import { SmtpSecurity } from '../../enums/smtp-security';
 
-/** Without a configuration of its own the property has no sender: the other fields are the ones a new one starts from. */
 export interface EmailConfigurationData {
   fromEmail: string | null;
   fromName: string | null;
@@ -18,5 +17,5 @@ export interface EmailConfigurationData {
   isActive: boolean;
   lastVerificationAt: string | null;
   lastVerificationError: string | null;
-  version: string | null;
+  version: string;
 }

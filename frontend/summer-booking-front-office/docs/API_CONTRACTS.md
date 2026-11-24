@@ -9216,7 +9216,7 @@ Configurazione email: invio di prova.
 | `smtpPassword` | string \| null | `null` |
 | `security` | string (enum SmtpSecurity) | `starttls` |
 | `verifyCertificate` | boolean | `true` |
-| `testRecipients` | string[] (email di al massimo 320 caratteri, al massimo 10, anche vuoto) | `["prova@lido-demo.example"]` |
+| `testRecipients` | string[] (email di al massimo 320 caratteri, da 1 a 10) | `["prova@lido-demo.example"]` |
 | `isActive` | boolean | `true` |
 
 #### Response

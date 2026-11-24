@@ -124,7 +124,7 @@
     },
     "notification": {
       "property_required": "Your account is not linked to a property: sign in with an account of the property.",
-      "test_email_failed": "The test email was not sent. Server answer: {{detail}}",
+      "test_email_failed": "The test email was not sent.",
       "test_email_blocked": "Emails are blocked in this environment: the test email was not sent.",
       "unavailable": "The email service is not responding. Please try again shortly."
     },
@@ -649,7 +649,7 @@
           },
           "smtp_port": {
             "title": "SMTP port:",
-            "description": "The port of the SMTP server. Common ports are: 25 (not secure) 465 (SSL) 587 (STARTTLS) SMTP authentication:"
+            "description": "The port of the SMTP server. Common ports are: 25 (not secure), 465 (SSL), 587 (STARTTLS)."
           },
           "smtp_username": {
             "title": "Username:",
@@ -690,6 +690,7 @@
           "failed": "The last test, on {at, date, medium} at {at, time, short}, failed: {detail}",
           "done": "Last successful test on {at, date, medium} at {at, time, short}."
         },
+        "server_answer": "Server answer: {{detail}}",
         "send_test": "Send test email",
         "reset": "Reset",
         "save": "Save",

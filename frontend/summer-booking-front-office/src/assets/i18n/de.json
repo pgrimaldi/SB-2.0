@@ -124,7 +124,7 @@
     },
     "notification": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
-      "test_email_failed": "Die Test-E-Mail wurde nicht gesendet. Antwort des Servers: {{detail}}",
+      "test_email_failed": "Die Test-E-Mail wurde nicht gesendet.",
       "test_email_blocked": "In dieser Umgebung sind E-Mails gesperrt: Die Test-E-Mail wurde nicht gesendet.",
       "unavailable": "Der E-Mail-Dienst antwortet nicht. Bitte versuche es in Kürze erneut."
     },
@@ -649,7 +649,7 @@
           },
           "smtp_port": {
             "title": "SMTP-Port:",
-            "description": "Der Port des SMTP-Servers. Übliche Ports sind: 25 (nicht sicher) 465 (SSL) 587 (STARTTLS) SMTP-Authentifizierung:"
+            "description": "Der Port des SMTP-Servers. Übliche Ports sind: 25 (nicht sicher), 465 (SSL), 587 (STARTTLS)."
           },
           "smtp_username": {
             "title": "Benutzername:",
@@ -690,12 +690,13 @@
           "failed": "Der letzte Test am {at, date, medium} um {at, time, short} ist fehlgeschlagen: {detail}",
           "done": "Letzter erfolgreicher Test am {at, date, medium} um {at, time, short}."
         },
+        "server_answer": "Antwort des Servers: {{detail}}",
         "send_test": "Test-E-Mail senden",
         "reset": "Zurücksetzen",
         "save": "Speichern",
         "test_sent": {
           "title": "Test-E-Mail gesendet",
-          "text": "Prüfen Sie das Postfach, um sicherzustellen, dass die Konfiguration funktioniert.",
+          "text": "Prüfe das Postfach, um sicherzustellen, dass die Konfiguration funktioniert.",
           "close": "Schließen"
         },
         "saved": {
@@ -704,7 +705,7 @@
           "close": "Schließen"
         },
         "override": {
-          "question": "Möchten Sie die Standardeinstellungen überschreiben?",
+          "question": "Möchtest du die Standardeinstellungen überschreiben?",
           "confirm": "Ja"
         }
       },
@@ -2170,7 +2171,7 @@
     "required": "Pflichtfeld",
     "email_configuration": {
       "smtp_password": {
-        "retype": "Sie haben die Verbindungsparameter geändert: Geben Sie das Passwort erneut ein oder legen Sie ein neues fest."
+        "retype": "Du hast die Verbindungsparameter geändert: Gib das Passwort erneut ein oder lege ein neues fest."
       },
       "security": {
         "ssl_port": "Port 465 braucht die Sicherheit SSL.",

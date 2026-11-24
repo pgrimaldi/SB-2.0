@@ -83,11 +83,11 @@ describe('emailAddress', () => {
       form(model, (path) => emailAddress(path.email)),
     );
 
-    for (const email of [null, '', 'info@lido.it', 'a@b']) {
+    for (const email of [null, '', 'info@lido.it', 'a@b', ' info@lido.it ']) {
       model.set({ email });
       expect(emailForm.email().valid()).toBe(true);
     }
-    for (const email of ['info.lido.it', '@lido.it', 'info@', 'info@lido@it']) {
+    for (const email of ['info.lido.it', '@lido.it', 'info@', 'info@ ', 'info@lido@it']) {
       model.set({ email });
       expect(emailForm.email().errors()).toEqual([expect.objectContaining({ kind: 'email' })]);
     }

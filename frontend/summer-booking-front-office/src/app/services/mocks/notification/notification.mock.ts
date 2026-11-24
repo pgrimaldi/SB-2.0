@@ -15,6 +15,7 @@ import {
   SMTP_CONNECTION_FIELDS,
   SMTP_SSL_PORT,
   SMTP_START_TLS_PORT,
+  SMTP_VERIFIED_FIELDS,
 } from '../../../entities/settings/email-configuration/email-configuration-request';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
@@ -36,6 +37,8 @@ const CONFIGURATION: Configuration = {
   lastVerificationAt: null,
   lastVerificationError: null,
 };
+/** An address inside the network, as it is written. */
+const INTERNAL_HOST = /^(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.0\.0\.0)/i;
 /** Kept apart, like the real server keeps it as a secret: it is never part of an answer. */
 let smtpPassword: string | null = 'password-di-esempio';
 
@@ -55,7 +58,11 @@ export const emailConfigurationMock = (
   return of(new HttpResponse({ status: 200, url: request.url, body })).pipe(delay(150));
 };
 
-/** `POST /api/notification/send-test-email`: a server named "errore" refuses the test. */
+/**
+ * `POST /api/notification/send-test-email`. A server whose name starts with "errore" refuses the test,
+ * with "bloccato" the environment blocks it, with "attesa" there are too many, with "spento" the
+ * service does not answer.
+ */
 export const sendTestEmailMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
@@ -63,15 +70,22 @@ export const sendTestEmailMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<EmailConfigurationRequest>;
-  const errors = [
-    ...configurationErrors(body),
-    ...(body.testRecipients?.length
-      ? []
-      : [{ field: 'testRecipients', code: ApiErrorCode.ValidationRequired }]),
-  ];
-  const wrong = errors.length ? errors : passwordErrors(body);
+  const errors = configurationErrors(body);
+  if (body.testRecipients?.length === 0) {
+    errors.push({ field: 'testRecipients', code: ApiErrorCode.ValidationRequired });
+  }
+  const wrong = errors.length ? errors : connectionErrors(body);
   if (wrong.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: wrong });
+  }
+  if (body.smtpHost?.startsWith('attesa')) {
+    return problem(request, 429, ApiErrorCode.AuthTooManyAttempts);
+  }
+  if (body.smtpHost?.startsWith('spento')) {
+    return problem(request, 503, ApiErrorCode.NotificationUnavailable);
+  }
+  if (body.smtpHost?.startsWith('bloccato')) {
+    return problem(request, 422, ApiErrorCode.NotificationTestEmailBlocked);
   }
   const detail = body.smtpHost?.startsWith('errore') ? '535 Authentication failed' : null;
   if (!trimmedText(body.smtpPassword ?? null) && isSaved(body)) {
@@ -99,17 +113,17 @@ export const saveEmailConfigurationMock = (
   if (conflict) {
     return conflict;
   }
-  const wrong = passwordErrors(body);
+  const wrong = connectionErrors(body);
   if (wrong.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: wrong });
   }
   const { smtpPassword: typed, ...values } = body as EmailConfigurationRequest;
-  if (trimmedText(typed) || isOtherConnection(body)) {
+  if (trimmedText(typed) || hasOther(body, SMTP_VERIFIED_FIELDS)) {
     CONFIGURATION.lastVerificationAt = null;
     CONFIGURATION.lastVerificationError = null;
   }
   Object.assign(CONFIGURATION, values);
-  smtpPassword = typed ?? smtpPassword;
+  smtpPassword = trimmedText(typed) ? typed : smtpPassword;
   return savedWithVersion(request, versionedData());
 };
 
@@ -130,18 +144,24 @@ function isSaved(body: Partial<EmailConfigurationRequest>): boolean {
     );
 }
 
-function isOtherConnection(body: Partial<EmailConfigurationRequest>): boolean {
-  return SMTP_CONNECTION_FIELDS.some(
-    (name) => comparableJson(body[name]) !== comparableJson(CONFIGURATION[name]),
-  );
+function hasOther(
+  body: Partial<EmailConfigurationRequest>,
+  fields: typeof SMTP_VERIFIED_FIELDS | typeof SMTP_CONNECTION_FIELDS,
+): boolean {
+  return fields.some((name) => comparableJson(body[name]) !== comparableJson(CONFIGURATION[name]));
 }
 
-/** The saved password is never sent anywhere else. */
-function passwordErrors(body: Partial<EmailConfigurationRequest>): MockFieldError[] {
+/** The saved password is never sent anywhere else, and no connection goes inside the network. */
+function connectionErrors(body: Partial<EmailConfigurationRequest>): MockFieldError[] {
+  const errors: MockFieldError[] = [];
   const isMissing = !trimmedText(body.smtpPassword ?? null);
-  return isMissing && smtpPassword !== null && isOtherConnection(body)
-    ? [{ field: 'smtpPassword', code: ApiErrorCode.ValidationRequired }]
-    : [];
+  if (isMissing && smtpPassword !== null && hasOther(body, SMTP_CONNECTION_FIELDS)) {
+    errors.push({ field: 'smtpPassword', code: ApiErrorCode.ValidationRequired });
+  }
+  if (INTERNAL_HOST.test(trimmedText(body.smtpHost ?? null) ?? '')) {
+    errors.push({ field: 'smtpHost', code: ApiErrorCode.ValidationInvalid });
+  }
+  return errors;
 }
 
 function configurationErrors(body: Partial<EmailConfigurationRequest>): MockFieldError[] {
@@ -173,6 +193,11 @@ function configurationErrors(body: Partial<EmailConfigurationRequest>): MockFiel
     (port === SMTP_START_TLS_PORT && body.security !== SmtpSecurity.StartTls)
   ) {
     errors.push({ field: 'security', code: ApiErrorCode.ValidationInvalid });
+  }
+  for (const field of ['verifyCertificate', 'isActive'] as const) {
+    if (typeof body[field] !== 'boolean') {
+      errors.push({ field, code: ApiErrorCode.ValidationRequired });
+    }
   }
   const recipients = body.testRecipients;
   if (!recipients) {
