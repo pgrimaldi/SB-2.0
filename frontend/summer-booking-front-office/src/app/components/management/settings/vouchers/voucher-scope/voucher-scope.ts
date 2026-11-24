@@ -31,7 +31,6 @@ interface ScopeTexts {
   missing_sector: string;
 }
 
-/** The names of the tabs of Servizi and Listino. */
 const CATEGORY_KEYS: Readonly<Record<DiscountServiceCategory, string>> = {
   [DiscountServiceCategory.Bar]: 'management.settings.services.tabs.bar_services',
   [DiscountServiceCategory.Normal]: 'management.settings.services.tabs.services',
@@ -47,7 +46,6 @@ const CATEGORY_KEYS: Readonly<Record<DiscountServiceCategory, string>> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VoucherScope implements OnDestroy {
-  /** The fields of the form of the popup, which validates and saves them. */
   readonly scope = input.required<FieldTree<DiscountScope>>();
   readonly categories = input.required<FieldTree<DiscountServiceCategory[]>>();
   readonly sectors = input.required<FieldTree<string[]>>();
@@ -90,7 +88,6 @@ export class VoucherScope implements OnDestroy {
         label: this.categoryNames()?.[CATEGORY_KEYS[category]] ?? '',
       })),
   );
-  /** Also the chosen ones that are no longer there, for the user to take away. */
   protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
     optionsWithMissing(
       this.sectorList,
@@ -99,7 +96,6 @@ export class VoucherScope implements OnDestroy {
     ),
   );
 
-  /** The sectors are read once, the first time they are shown. */
   constructor() {
     effect(() => {
       const version = this.sectorsVersion();

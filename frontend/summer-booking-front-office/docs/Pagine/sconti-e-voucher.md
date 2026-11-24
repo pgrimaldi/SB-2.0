@@ -13,8 +13,9 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
 
 - Righe `VoucherItem` (`entities/settings/vouchers/`; `DiscountType` in `entities/enums/`).
 - Colonne Sconto (il nome, o il codice se manca), Valido dal e Valido fino al (date UTC mostrate come giorno, vuote senza
-  periodi), Tipo di sconto tradotto, Valore con % o € (`Intl.NumberFormat`). Senza un ordinamento scelto, per nome. I titoli
-  delle due date sono lunghi quanto basta perché sul telefono la data si legga intera, in tutte le lingue.
+  periodi), Tipo di sconto tradotto (gli stessi nomi del popup), Valore con % o € (`Intl.NumberFormat`; un importo intero
+  senza decimali, gli altri con due). Senza un ordinamento scelto, per nome. I titoli delle due date sono lunghi quanto
+  basta perché sul telefono la data si legga intera, in tutte le lingue.
 
 ## Elimina e duplica
 
@@ -34,11 +35,11 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
   `min(42.3125rem, 95vw)` che scorre oltre il 95% dell'altezza.
 - Contenuto:
   - nome e codice dello sconto, affiancati (uno sotto l'altro se non c'è spazio);
-  - riquadro "Periodi di validità" (`app-section-title` con "Aggiungi periodo"). Ogni periodo ha le righe `app-form-row`
-    Periodo (Dal/al con `app-filled-date-field`, date UTC), Giorni della settimana (`app-filled-multi-select` con la
-    casella "Tutti", giorni ISO 1-7, elenco condiviso `DAYS_OF_WEEK` in `entities/shared/days-of-week.ts`) e Fasce orarie
-    facoltative (Dalle/alle con `app-filled-time-field`, `HH:mm`). "Aggiungi periodo" si spegne a 50 periodi, "Aggiungi
-    fascia oraria" a 20 fasce dello stesso periodo;
+  - riquadro "Periodi di validità" (`app-section-title` con "Aggiungi periodo di validità"). Ogni periodo ha le righe
+    `app-form-row` Periodo (Dal/al con `app-filled-date-field`, date UTC), Giorni della settimana
+    (`app-filled-multi-select` con la casella "Tutti", giorni ISO 1-7, elenco condiviso `DAYS_OF_WEEK` in
+    `entities/shared/days-of-week.ts`) e Fasce orarie facoltative (Dalle/alle con `app-filled-time-field`, `HH:mm`).
+    "Aggiungi periodo di validità" si spegne a 50 periodi, "Aggiungi fascia oraria" a 20 fasce dello stesso periodo;
   - riquadro "Opzioni": tipo, valore con % o €, applica a (sotto), numero massimo di utilizzi;
   - interruttore "Abilita sconto/voucher".
 - Form `VoucherAddItemRequest` con i Signal Forms: nome (al massimo 120 caratteri) e codice (60) obbligatori; per ogni
@@ -50,7 +51,7 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
   arriva dal backend sotto un campo. L'errore dei giorni della settimana compare appena si tolgono tutti.
 - **Codice da digitare o sconto automatico** (`isCodeRequired`): il popup non lo mostra. Uno sconto nuovo ha sempre un
   codice da digitare; in modifica il valore letto torna uguale. Con il codice i periodi sono facoltativi (senza, vale
-  sempre); per uno sconto automatico ne serve almeno uno.
+  in ogni data); per uno sconto automatico ne serve almeno uno.
 - **Applica sconto/voucher a** (`app-voucher-scope`, `components/management/settings/vouchers/voucher-scope/`, nei due
   popup): Tutto, Solo alcune scelte, Tutto tranne alcune scelte (`DiscountScope`: `All`, `Custom`, `WithoutCustom`). Con
   le ultime due compaiono le tendine a scelta multipla Categorie (`DiscountServiceCategory`, con i nomi delle tab di
@@ -59,6 +60,9 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
   scelte. Con 404 `catalog.sector_not_found` il messaggio compare sopra i bottoni e i settori si rileggono: quelli
   scelti che non ci sono più si vedono come "Settore/fila non più disponibile".
 - Giorni della settimana e fasce orarie sono di ogni periodo. Il canale (gestionale e online) non viaggia.
+- Il codice resta da sinistra a destra anche in arabo (`[isCodeField]="true"`).
+- Un errore del backend su un campo che non si vede (`isCodeRequired`; `serviceCategories` con Tutto) va nel messaggio
+  sopra i bottoni (`hiddenVoucherFields`, `voucher-scope/hidden-voucher-fields.ts`).
 - Salva chiama l'aggiunta con lo spinner sul bottone, poi chiude il popup e ricarica la tabella. Il 409
   `pricing.discount_code_taken` compare sotto il codice.
 - Con dati scritti chiede prima di chiudere (`UnsavedChangesBehaviour`).
@@ -71,9 +75,9 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
   gli passa l'`idVoucher` della riga.
 - Il titolo è "Modifica sconto/voucher".
 - All'apertura (effect su `open`, perché il componente nasce con la pagina e `ngOnInit` scatta una volta sola) legge lo
-  sconto e riempie il form campo per campo. Durante il caricamento i campi sono bloccati e Salva è spento; se fallisce
-  il popup si chiude e compare `app-read-error-popup` (il messaggio del `code`, Chiudi e Riprova, che riapre il popup e
-  rilegge; per un 404 solo Chiudi).
+  sconto e riempie il form campo per campo, senza valori di ripiego. Durante il caricamento i campi sono spenti (grigi) e
+  Salva è spento; se fallisce il popup si chiude e compare `app-read-error-popup` (il messaggio del `code`, Chiudi e
+  Riprova, che riapre il popup e rilegge; per un 404 solo Chiudi).
 - Le modifiche non salvate si confrontano con i dati caricati, senza guardare l'ordine di categorie e settori
   (`comparableVoucher`, `voucher-scope/comparable-voucher.ts`, nei due popup).
 - Per il resto è una copia identica del popup di aggiunta (codice duplicato voluto, accorpamento nel TODO), con tutti i

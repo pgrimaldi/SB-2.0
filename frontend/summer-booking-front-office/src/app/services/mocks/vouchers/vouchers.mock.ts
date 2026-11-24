@@ -20,6 +20,7 @@ import { VoucherUpdateItemRequest } from '../../../entities/settings/vouchers/vo
 import { Language } from '../../../entities/shared/language';
 import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
+import { SECTORS } from '../catalog/sectors-data.mock';
 import { missingSector } from '../catalog/service-checks.mock';
 import { copyName, naturalOrder, tableRequestErrors } from '../catalog/service-tables.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
@@ -120,6 +121,54 @@ const VOUCHERS: VoucherRow[] = [
     idSectors: [],
     maxUseQuantity: null,
     isEnabled: true,
+    usedQuantity: 0,
+  },
+  {
+    propertyId: 1,
+    idVoucher: '6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f05',
+    voucherName: null,
+    voucherCode: 'BENVENUTO-5',
+    isCodeRequired: true,
+    validityPeriods: [],
+    discountType: DiscountType.Fixed,
+    discountValue: 7.5,
+    discountScope: DiscountScope.All,
+    serviceCategories: [],
+    idSectors: [],
+    maxUseQuantity: 100,
+    isEnabled: true,
+    usedQuantity: 4,
+  },
+  {
+    propertyId: 1,
+    idVoucher: '6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f06',
+    voucherName: 'Fine settimana',
+    voucherCode: 'WEEKEND',
+    isCodeRequired: true,
+    validityPeriods: [
+      {
+        validFrom: '2026-09-01T00:00:00.000Z',
+        validTo: '2026-09-15T00:00:00.000Z',
+        daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
+        timeSlots: [],
+      },
+      {
+        validFrom: '2026-06-06T00:00:00.000Z',
+        validTo: '2026-06-28T00:00:00.000Z',
+        daysOfWeek: [6, 7],
+        timeSlots: [
+          { from: '14:00', to: '18:00' },
+          { from: '08:30', to: '11:00' },
+        ],
+      },
+    ],
+    discountType: DiscountType.Percentage,
+    discountValue: 20,
+    discountScope: DiscountScope.All,
+    serviceCategories: [],
+    idSectors: [],
+    maxUseQuantity: null,
+    isEnabled: false,
     usedQuantity: 0,
   },
 ];
@@ -294,7 +343,7 @@ export const addVoucherItemMock = (
       errors,
     });
   }
-  const refused = codeTaken(request, body) ?? missingSector(request, body.idSectors);
+  const refused = codeTaken(request, body) ?? missingSectorOf(request, body);
   if (refused) {
     return refused;
   }
@@ -341,7 +390,7 @@ export const updateVoucherItemMock = (
       args: { usedCount: voucher.usedQuantity },
     });
   }
-  const missing = missingSector(request, body.idSectors);
+  const missing = missingSectorOf(request, body);
   if (missing) {
     return missing;
   }
@@ -374,19 +423,33 @@ function selectedOf(voucher: VoucherRow): VoucherSelectedItem {
   return structuredClone({ ...data, version: versionOf(data) });
 }
 
-/** What `get-selected-item` answers besides the version: the version covers it. */
+/** What `get-selected-item` answers besides the version, which covers it: periods, days and time slots in order. */
 function voucherData(voucher: VoucherRow): Omit<VoucherSelectedItem, 'version'> {
   return {
     idVoucher: voucher.idVoucher,
     voucherName: voucher.voucherName,
     voucherCode: voucher.voucherCode,
     isCodeRequired: voucher.isCodeRequired,
-    validityPeriods: voucher.validityPeriods,
+    validityPeriods: voucher.validityPeriods
+      .map((period) => ({
+        ...period,
+        daysOfWeek: [...period.daysOfWeek].sort((a, b) => a - b),
+        timeSlots: [...period.timeSlots].sort((first, second) =>
+          (first.from ?? '').localeCompare(second.from ?? ''),
+        ),
+      }))
+      .sort((first, second) => (first.validFrom ?? '').localeCompare(second.validFrom ?? '')),
     discountType: voucher.discountType,
     discountValue: voucher.discountValue,
     discountScope: voucher.discountScope,
-    serviceCategories: voucher.serviceCategories,
-    idSectors: voucher.idSectors,
+    serviceCategories: Object.values(DiscountServiceCategory).filter((category) =>
+      voucher.serviceCategories.includes(category),
+    ),
+    idSectors: [...SECTORS]
+      .sort((first, second) => first.sortOrder - second.sortOrder)
+      .flatMap(({ idSector }) =>
+        idSector !== null && voucher.idSectors.includes(idSector) ? [idSector] : [],
+      ),
     maxUseQuantity: voucher.maxUseQuantity,
     isEnabled: voucher.isEnabled,
   };
@@ -409,13 +472,19 @@ function codeTaken(
     : null;
 }
 
+/** The sectors count only when the voucher does not apply to everything. */
+function missingSectorOf(request: HttpRequest<unknown>, body: AddVoucherBody) {
+  return body.discountScope === DiscountScope.All ? null : missingSector(request, body.idSectors);
+}
+
 /**
  * As the backend checks it: name and code, with their longest; at least one period without a code to
  * type and at most `MAX_VOUCHER_PERIOD_QUANTITY`, and in each period both days (the last not before the
  * first), at least one day of the week from 1 to 7 and time slots `HH:mm`, the end after the start
- * (none is fine); a known type and scope, a value more than 0 (up to 100 for a percentage and to
- * `MAX_FIXED_DISCOUNT` for an amount), a category or a sector at least unless the scope is `All`, from
- * 1 to `MAX_VOUCHER_USE_QUANTITY` uses or no limit, the switch.
+ * (none is fine); a known type and scope, a value more than 0 with 2 decimals at most (up to 100 for a
+ * percentage and to `MAX_FIXED_DISCOUNT` for an amount), a category or a sector at least unless the scope is `All`, from
+ * 1 to `MAX_VOUCHER_USE_QUANTITY` uses or no limit, the switch
+ * and whether the code is to be typed.
  */
 function voucherErrors(body: AddVoucherBody): MockFieldError[] {
   const errors: MockFieldError[] = [];
@@ -431,11 +500,12 @@ function voucherErrors(body: AddVoucherBody): MockFieldError[] {
       errors.push({ field, code: ApiErrorCode.ValidationMaxLength, args: { max } });
     }
   }
-  const periods = Array.isArray(body.validityPeriods) ? body.validityPeriods : [];
-  if (!periods.length && !body.isCodeRequired) {
+  const sent = Array.isArray(body.validityPeriods) ? body.validityPeriods : [];
+  const periods = sent.filter((period) => period !== null);
+  if (!sent.length && body.isCodeRequired === false) {
     errors.push({ field: 'validityPeriods', code: ApiErrorCode.ValidationRequired });
   }
-  if (periods.length > MAX_VOUCHER_PERIOD_QUANTITY) {
+  if (sent.length > MAX_VOUCHER_PERIOD_QUANTITY || periods.length !== sent.length) {
     errors.push({ field: 'validityPeriods', code: ApiErrorCode.ValidationInvalid });
   }
   periods.forEach((period, index) => {
@@ -459,7 +529,12 @@ function voucherErrors(body: AddVoucherBody): MockFieldError[] {
     if (
       timeSlots.length > MAX_VOUCHER_TIME_SLOT_QUANTITY ||
       timeSlots.some(
-        ({ from, to }) => !from || !to || !TIME.test(from) || !TIME.test(to) || to <= from,
+        (timeSlot) =>
+          !timeSlot?.from ||
+          !timeSlot.to ||
+          !TIME.test(timeSlot.from) ||
+          !TIME.test(timeSlot.to) ||
+          timeSlot.to <= timeSlot.from,
       )
     ) {
       errors.push({ field: `${at}.timeSlots`, code: ApiErrorCode.ValidationInvalid });
@@ -470,7 +545,12 @@ function voucherErrors(body: AddVoucherBody): MockFieldError[] {
   }
   const value = body.discountValue;
   const highest = body.discountType === DiscountType.Percentage ? 100 : MAX_FIXED_DISCOUNT;
-  if (typeof value !== 'number' || value <= 0 || value > highest) {
+  if (
+    typeof value !== 'number' ||
+    value <= 0 ||
+    value > highest ||
+    Number(value.toFixed(2)) !== value
+  ) {
     errors.push({ field: 'discountValue', code: ApiErrorCode.ValidationOutOfRange });
   }
   if (!Object.values(DiscountScope).includes(body.discountScope as DiscountScope)) {
@@ -491,8 +571,10 @@ function voucherErrors(body: AddVoucherBody): MockFieldError[] {
   if (uses !== null && (!Number.isInteger(uses) || uses < 1 || uses > MAX_VOUCHER_USE_QUANTITY)) {
     errors.push({ field: 'maxUseQuantity', code: ApiErrorCode.ValidationOutOfRange });
   }
-  if (typeof body.isEnabled !== 'boolean') {
-    errors.push({ field: 'isEnabled', code: ApiErrorCode.ValidationInvalid });
+  for (const field of ['isCodeRequired', 'isEnabled'] as const) {
+    if (typeof body[field] !== 'boolean') {
+      errors.push({ field, code: ApiErrorCode.ValidationInvalid });
+    }
   }
   return errors;
 }
@@ -504,7 +586,7 @@ function savedFields(
   return {
     voucherName: body.voucherName?.trim() ?? null,
     voucherCode: body.voucherCode?.trim() ?? null,
-    isCodeRequired: body.isCodeRequired ?? true,
+    isCodeRequired: body.isCodeRequired as boolean,
     validityPeriods: structuredClone(body.validityPeriods ?? []),
     discountType: body.discountType as DiscountType,
     discountValue: body.discountValue as number,

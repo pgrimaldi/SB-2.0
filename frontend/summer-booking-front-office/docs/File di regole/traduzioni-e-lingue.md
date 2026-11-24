@@ -57,6 +57,8 @@ Regole per i testi tradotti, le 7 lingue, l'arabo da destra a sinistra, le chiav
 - Nei campi si usa `[isPhoneField]="true"` di `app-filled-text-field`: applica `type="tel"` (tastiera telefonica) e
   `dir="ltr"` solo all'input, senza cambiare la direzione dell'etichetta o del layout. Riferimento:
   [W3C, gestione dei contenuti bidirezionali](https://www.w3.org/International/articles/inline-bidi-markup/).
+- Per un codice (es. quello di uno sconto) si usa `[isCodeField]="true"` di `app-filled-text-field`: `dir="ltr"` solo
+  all'input, che in arabo resta allineato a destra come gli altri campi.
 - Anche i numeri negativi restano da sinistra a destra (`-45`, non `45-`): `[isSigned]="true"` di
   `app-filled-number-field` applica `dir="ltr"` solo all'input, che in arabo resta allineato a destra come gli altri
   campi.

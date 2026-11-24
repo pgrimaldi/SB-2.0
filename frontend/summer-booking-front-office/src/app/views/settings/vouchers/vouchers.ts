@@ -148,12 +148,12 @@ export class Vouchers {
               style: 'percent',
               maximumFractionDigits: 2,
             });
-            const amount = new Intl.NumberFormat(locale, {
-              style: 'currency',
-              currency: 'EUR',
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 2,
-            });
+            const amount = (value: number) =>
+              new Intl.NumberFormat(locale, {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+              }).format(value);
             return {
               total: page.total,
               rows: page.rows.map((item): VoucherRow => ({
@@ -168,7 +168,7 @@ export class Vouchers {
                     ? null
                     : item.discountType === DiscountType.Percentage
                       ? percentage.format(item.discountValue / 100)
-                      : amount.format(item.discountValue),
+                      : amount(item.discountValue),
               })),
             };
           }),
@@ -201,7 +201,6 @@ export class Vouchers {
     this.editing.set(true);
   }
 
-  /** Only after "Duplica selezione" (no name): the chosen rows are done with. */
   protected afterDuplicate(): void {
     if (this.voucherNameToDuplicate() === null) {
       this.idSelectedVouchers.set([]);

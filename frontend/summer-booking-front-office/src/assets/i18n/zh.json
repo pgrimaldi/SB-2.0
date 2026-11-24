@@ -887,7 +887,7 @@
           }
         },
         "form": {
-          "title": "添加新折扣/优惠券",
+          "title": "添加新折扣/代金券",
           "edit_title": "编辑折扣/代金券",
           "cancel": "取消",
           "save": "保存",
@@ -924,13 +924,9 @@
           },
           "options": {
             "title": "选项",
-            "type": "折扣/优惠券类型",
-            "types": {
-              "percentage": "百分比",
-              "fixed": "金额"
-            },
-            "value": "折扣/优惠券值",
-            "applies_to": "折扣/优惠券适用于",
+            "type": "折扣/代金券类型",
+            "value": "折扣/代金券值",
+            "applies_to": "折扣/代金券适用于",
             "scopes": {
               "all": "全部",
               "custom": "仅部分选项",
@@ -941,7 +937,7 @@
             "choose": "请选择",
             "missing_sector": "排/区域已不可用",
             "max_uses": "最大使用次数",
-            "enabled": "启用折扣/优惠券"
+            "enabled": "启用折扣/代金券"
           }
         }
       },

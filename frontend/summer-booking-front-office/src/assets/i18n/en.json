@@ -925,10 +925,6 @@
           "options": {
             "title": "Options",
             "type": "Discount/voucher type",
-            "types": {
-              "percentage": "Percentage",
-              "fixed": "Amount"
-            },
             "value": "Discount/voucher value",
             "applies_to": "Apply discount/voucher to",
             "scopes": {

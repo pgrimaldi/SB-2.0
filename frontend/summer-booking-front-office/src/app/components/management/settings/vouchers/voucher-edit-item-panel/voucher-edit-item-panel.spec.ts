@@ -83,8 +83,10 @@ describe('VoucherEditItemPanel', () => {
       ],
     });
     const translate = TestBed.inject(TranslateService);
-    const form = { options: { types: {}, scopes: {} }, periods: { days: {} } };
-    translate.setTranslation('it', { management: { settings: { vouchers: { form } } } });
+    const form = { options: { scopes: {} }, periods: { days: {} } };
+    translate.setTranslation('it', {
+      management: { settings: { vouchers: { form, discount_type: {} } } },
+    });
     translate.use('it');
     const fixture = TestBed.createComponent(VoucherEditItemPanelHost);
     await fixture.whenStable();
@@ -225,6 +227,24 @@ describe('VoucherEditItemPanel', () => {
       ApiErrorCode.ResourceVersionConflict,
     ]);
     expect(host.updates).toBe(0);
+  });
+
+  it('should say above the buttons, without blocking the next save, an error on a field it does not show', async () => {
+    const { panel, save, updateVoucherItem } = await setup();
+    const error = {
+      status: 400,
+      code: ApiErrorCode.ValidationFailed,
+      errors: [{ field: 'isCodeRequired', code: ApiErrorCode.ValidationInvalid }],
+    };
+    updateVoucherItem.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: error.status, error })) as never,
+    );
+
+    await save();
+    expect(panel['error']()?.code).toBe(ApiErrorCode.ValidationInvalid);
+
+    await save();
+    expect(updateVoucherItem).toHaveBeenCalledTimes(2);
   });
 
   it('should not count another order of the categories and of the sectors as a change', async () => {

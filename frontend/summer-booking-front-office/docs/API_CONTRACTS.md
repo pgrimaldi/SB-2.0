@@ -1428,8 +1428,8 @@ Stato: 200 OK.
 | `rows[].voucherName` | string | `Giugno` |
 | `rows[].validFrom` | string (data ISO 8601 UTC) \| null | `2026-06-01T00:00:00.000Z` |
 | `rows[].validTo` | string (data ISO 8601 UTC) \| null | `2026-06-30T00:00:00.000Z` |
-| `rows[].discountType` | string (enum DiscountType) \| null | `Percentage` |
-| `rows[].discountValue` | number (decimale) \| null | `12.5` |
+| `rows[].discountType` | string (enum DiscountType) | `Percentage` |
+| `rows[].discountValue` | number (decimale) | `12.5` |
 
 ### POST `/api/catalog/discounts/delete-voucher-item`
 

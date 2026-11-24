@@ -919,16 +919,12 @@
           "field_names": {
             "validity_period": "periodo di validità",
             "discount_value": "dello sconto",
-            "scope_choice": "categoria o settore",
+            "scope_choice": "settore o categoria",
             "day_of_week": "giorno"
           },
           "options": {
             "title": "Opzioni",
             "type": "Tipo di sconto/voucher",
-            "types": {
-              "percentage": "Percentuale",
-              "fixed": "Valore"
-            },
             "value": "Valore sconto/voucher",
             "applies_to": "Applica sconto/voucher a",
             "scopes": {

@@ -26,8 +26,12 @@ delle rotte non si confondono con `/{id:guid}`, perché non sono UUID. Per il fr
 ## Regole comuni
 
 - **Le API esistenti non cambiano**: `GET`, `POST`, `PUT` e `DELETE /api/catalog/discounts` e `bulk-delete` tengono rotte, richieste e
-  risposte di oggi; le nuove si aggiungono e possono riusarne la logica (`DiscountsService`). Le sole differenze sono i giorni e le
-  fasce orarie di ogni periodo ("Regole comuni dei popup", "API di oggi") e le lunghezze di codice e nome ("Lunghezze").
+  risposte di oggi; le nuove si aggiungono e possono riusarne la logica (`DiscountsService`). Le sole differenze sono:
+  - i giorni e le fasce orarie di ogni periodo ("Regole comuni dei popup", "API di oggi");
+  - le lunghezze e il confronto di codice e nome ("Codice e nome");
+  - il 409 `pricing.discount_code_taken` al posto del 500 quando due salvataggi prendono lo stesso codice nello stesso momento ("Codice
+    già usato"), e il 422 al posto del 500 quando gli utilizzi crescono durante il salvataggio ("Utilizzi"), anche in `POST` e `PUT`;
+  - `bulk-delete`, che elimina anche le righe figlie (sezione 2).
 - **Stabilimento dal token** (`CurrentProperty.IdAsync`): nessuna richiesta lo contiene.
 - **Permessi**: come le API degli sconti di oggi (`DiscountEndpoints.cs:16-17`): `CatalogRead` per la tabella e la lettura,
   `CatalogPricing` per il resto. Senza permesso: 403 `auth.forbidden`.
@@ -35,7 +39,16 @@ delle rotte non si confondono con `/{id:guid}`, perché non sono UUID. Per il fr
   `"HH:mm"`. Enum: i nomi .NET (`Percentage`, `Fixed`).
 - **Errori** nel formato Problem Details del backend, con `code`; gli errori di un campo in `errors[]` con i nomi del corpo di questo
   documento (es. `validityPeriods[0].validTo`). Senza token valido: 401 `auth.unauthenticated`.
-- **Sconto che non c'è**: 404 `pricing.discount_not_found` (`CatalogErrors.DiscountNotFound`), come oggi.
+- **Sconto che non c'è**: 404 `pricing.discount_not_found` (`CatalogErrors.DiscountNotFound`), come oggi. Vale anche per un `idVoucher`
+  (sezioni 5 e 6) mancante, `null` o non UUID, e per un elemento di `idVouchers` (sezioni 2 e 3) `null` o non UUID: il backend li riceve
+  come testo e li converte nel codice (con un `Guid` il framework risponderebbe 400 prima dell'endpoint).
+- **Valori che non si leggono** (una data, un'ora o un numero che non sono tali, un intero oltre i 32 bit, un `idSectors` non UUID): non
+  arrivano ai validatori. 400 `validation.failed` senza `errors[]`, come nelle altre pagine (`Impostazioni magazzino - Frontend
+  requests.md`, "Valori che non si leggono"). Il frontend non li manda. Gli errori di campo di questo documento valgono per i valori che
+  si leggono, e per quelli assenti o `null`.
+- **Elenchi**: assente o `null` vale `[]`; un elemento `null` è un errore di campo su quell'elenco ("Errori" dei popup; oggi un 500:
+  `DiscountValidators.cs:38,41`).
+- **Nessun valore del corpo dà un 500**, nemmeno per un vincolo del database.
 
 ## 1. POST /api/catalog/discounts/voucher-list
 
@@ -90,20 +103,20 @@ il `total` vero.
   "total": 2,
   "rows": [
     {
-      "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f04",
-      "voucherName": "Clienti abituali",
-      "validFrom": null,
-      "validTo": null,
-      "discountType": "Fixed",
-      "discountValue": 15
-    },
-    {
       "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02",
       "voucherName": "Ferragosto",
       "validFrom": "2026-08-12T00:00:00.000Z",
       "validTo": "2026-08-16T00:00:00.000Z",
       "discountType": "Percentage",
       "discountValue": 12.5
+    },
+    {
+      "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f04",
+      "voucherName": "Clienti abituali",
+      "validFrom": null,
+      "validTo": null,
+      "discountType": "Fixed",
+      "discountValue": 15
     }
   ]
 }
@@ -132,15 +145,18 @@ tabella (testo fisso, con "Riprova").
 
 - **Tutto o niente**: se anche un solo sconto della lista non c'è, non si elimina nessuno. `DELETE /api/catalog/discounts/{id}`
   elimina uno sconto solo; `bulk-delete` elimina quelli possibili e restituisce gli altri come falliti con un 200: restano come
-  sono e il frontend non le usa.
+  sono, a parte le righe figlie (sotto), e il frontend non le usa.
 - **Stessi effetti della `DELETE` di oggi** per ogni sconto (`DiscountsService.DeleteAsync`): soft delete dello sconto **e delle sue
-  righe figlie** (periodi, fasce orarie, settori) e una voce `catalog.discount_deleted` nel registro per sconto. Attenzione:
-  `bulk-delete` carica gli sconti senza le figlie (`DiscountRepository.FindManyAsync`), che quindi restano. Le righe di
-  `catalog.pricing_discount_sectors` rimaste contano ancora nel 409 `catalog.sector_in_use` dei settori
-  (`SectorRepository.CountUsagesAsync`): un settore risulterebbe usato da uno sconto che non c'è più. Se è così, va corretto anche in
-  `bulk-delete`.
-- **Nessun altro controllo**, come oggi: anche uno sconto già usato si elimina (le prenotazioni tengono la copia dei suoi dati,
-  `booking_discount`).
+  righe figlie** (periodi, fasce orarie, settori, e i giorni e le fasce di ogni periodo se stanno in righe loro) e una voce
+  `catalog.discount_deleted` nel registro per sconto.
+- **Righe figlie rimaste**: `bulk-delete` carica gli sconti senza le figlie (`DiscountRepository.FindManyAsync`), che restano non eliminate
+  (`SoftDeleteInterceptor` vede solo le entità caricate). Le righe di `catalog.pricing_discount_sectors` rimaste contano ancora nel 409
+  `catalog.sector_in_use` (`SectorRepository.CountUsagesAsync`, `SeasonSectorRepositories.cs:76`): il settore risulta usato da uno sconto
+  che non c'è più e l'utente non può liberarlo. Da correggere: `bulk-delete` elimina anche le figlie, e il conteggio dei settori guarda
+  **solo gli sconti non eliminati**, così vale anche per le righe già rimaste (con un filtro nel conteggio o con una migrazione che le
+  elimina: lo sceglie lo sviluppatore).
+- **Nessun altro controllo**, come oggi: anche uno sconto già usato si elimina (le prenotazioni tengono la copia dei suoi dati
+  in `booking.discounts`, `BookingDiscount`).
 - **Permesso**: `CatalogPricing`.
 
 ### Richiesta e risposta
@@ -181,7 +197,7 @@ degli sconti.
 
 - **La copia** è uno sconto nuovo dello stesso stabilimento, con un `public_id` nuovo, `created_by_user_id` dell'utente del token e
   **tutti** i dati dello sconto di partenza (tipo, valore, ambito con categorie e settori, canale, `requiresCode`, numero massimo di
-  utilizzi, periodi con giorni e fasce orarie), tranne:
+  utilizzi, periodi con giorni e fasce orarie, giorni e fasce dello sconto se non ha periodi), tranne:
   - **codice** (`code`): `CopyNames.Next` (`Domain/CopyNames.cs`) fra i codici dello stabilimento, al massimo **60** caratteri:
     "ESTATE" → "ESTATE copia", poi "ESTATE copia 2"; la copia di una copia riparte dal codice di base; senza distinguere maiuscole e
     minuscole;
@@ -216,20 +232,20 @@ le modifiche dell'utente.
 
 | Campo | Oggi | Tipo | Regola |
 |---|---|---|---|
-| `voucherName` | `name` | string | Obbligatorio, al massimo 120 caratteri. Il backend toglie gli spazi ai lati. |
-| `voucherCode` | `code` | string | Obbligatorio, al massimo 60 caratteri, unico nello stabilimento senza distinguere maiuscole e minuscole. Il backend toglie gli spazi ai lati. |
-| `isCodeRequired` | `requiresCode` | boolean | Il popup non lo mostra: `true` per uno sconto nuovo; in modifica torna com'è stato letto. |
-| `validityPeriods` | `periods`, `weekdays`, `timeRanges` | array | Al massimo 50. Almeno uno se `isCodeRequired` è falso; con il codice può essere `[]` (sempre valido). |
-| `validityPeriods[].validFrom`, `validTo` | `startsOn`, `endsOn` | string (giorno UTC) | Obbligatori; `validTo` non prima di `validFrom`. Compresi tutti e due. |
-| `validityPeriods[].daysOfWeek` | `weekdays` (dello sconto) | number[] | Giorni ISO, da 1 (lunedì) a 7 (domenica), almeno uno, senza ripetizioni. Tutti e sette = ogni giorno. |
+| `voucherName` | `name` | string | Obbligatorio, al massimo 120 caratteri ("Codice e nome"). |
+| `voucherCode` | `code` | string | Obbligatorio, al massimo 60 caratteri, unico nello stabilimento senza distinguere maiuscole e minuscole ("Codice e nome"). |
+| `isCodeRequired` | `requiresCode` | boolean | Obbligatorio (assente non vale `false`: nascerebbe uno sconto automatico, per tutti). Il popup non lo mostra: `true` per uno sconto nuovo; in modifica torna com'è stato letto. |
+| `validityPeriods` | `periods`, `weekdays`, `timeRanges` | array | Al massimo 50. Almeno uno se `isCodeRequired` è falso; con il codice può essere `[]` ("Senza periodi", sotto). |
+| `validityPeriods[].validFrom`, `validTo` | `startsOn`, `endsOn` | string (giorno UTC) | Obbligatori; `validTo` non prima di `validFrom`. Compresi tutti e due. Con un'ora diversa da mezzanotte vale il giorno UTC. I periodi possono avere giorni in comune, come oggi. |
+| `validityPeriods[].daysOfWeek` | `weekdays` (dello sconto) | number[] | Giorni ISO, da 1 (lunedì) a 7 (domenica), almeno uno; un giorno ripetuto conta una volta. Tutti e sette = ogni giorno. In `Weekday` il lunedì è 0: il giorno ISO è quel valore più 1. |
 | `validityPeriods[].timeSlots` | `timeRanges` (dello sconto) | array di `{ from, to }` | Al massimo 20, `"HH:mm"`, `to` dopo `from`. `[]` = tutto il giorno. |
 | `discountType` | `type` | string | `Percentage` o `Fixed`. |
 | `discountValue` | `value` | number | Più di 0, con al massimo 2 decimali. Fino a 100 per `Percentage`, fino a 100.000 per `Fixed`. |
 | `discountScope` | `scope` | string | `All`, `Custom` o `WithoutCustom` ("A cosa si applica"). |
-| `serviceCategories` | `serviceCategories` | string[] | `Bar`, `Normal`, `Hourly`, `Additional`; `[]` con `All`. |
-| `idSectors` | `sectorIds` | string[] (UUID) | `public_id` dei settori; `[]` con `All`. |
-| `maxUseQuantity` | `maxUses` | number (intero) o `null` | Da 1 a 2.147.483.647 (la colonna è `integer`); `null` = illimitato, come oggi. Non meno degli utilizzi già fatti. |
-| `isEnabled` | `isActive` | boolean | Obbligatorio. |
+| `serviceCategories` | `serviceCategories` | string[] | `Bar`, `Normal`, `Hourly`, `Additional`; `[]` con `All`. Una categoria ripetuta conta una volta, come oggi. |
+| `idSectors` | `sectorIds` | string[] (UUID) | `public_id` dei settori; `[]` con `All`. Un id ripetuto conta una volta, come oggi. |
+| `maxUseQuantity` | `maxUses` | number (intero) o `null` | Da 1 a 2.147.483.647 (la colonna è `integer`); `null` = illimitato, come oggi. Non meno degli utilizzi già fatti ("Utilizzi"). |
+| `isEnabled` | `isActive` | boolean | Obbligatorio (assente non vale `false`). |
 
 - **Canale** (`channel`): il frontend non lo manda. Uno sconto nuovo è `manager_and_online`; la modifica lascia quello salvato.
 - **Utilizzi già fatti** (`used_count`): il frontend non li manda né li legge; la modifica non li cambia.
@@ -242,38 +258,71 @@ scegliere **in ogni periodo**.
 
 - **Da aggiungere**: i giorni e le fasce orarie di ogni periodo (`DiscountDateRange`, `catalog.pricing_discount_date_ranges`). Come
   salvarli (colonna dei giorni e tabella delle fasce legate al periodo, o altro) lo sceglie lo sviluppatore del backend: l'agente
-  glielo chiede prima di scrivere codice.
+  glielo chiede prima di scrivere codice. Il backend ha già lo stesso modello per i prezzi automatici: `AutomaticPricePeriod` con i suoi
+  giorni e `catalog.automatic_price_time_ranges` con le sue fasce (`Covers` però guarda un giorno solo: qui servono tutti i giorni della
+  prenotazione).
+- **Con almeno un periodo, giorni e fasce stanno solo nei periodi**: quelli dello sconto (`Discount.Weekdays`, `Discount.TimeRanges`) sono
+  vuoti. Se poi si salva `validityPeriods` `[]` restano vuoti: altrimenti tornerebbero validi dei limiti che il popup non mostra e che
+  l'utente non può togliere.
 - **Quando lo sconto vale** (`DiscountRules.IsValid`, `Domain/Pricing/QuoteRules.cs:44`): deve esserci **almeno un periodo** che
   contiene le date della prenotazione, con tutti i giorni della prenotazione fra i suoi giorni e, se ha fasce orarie, con l'ora attuale
   dentro una di esse. Le tre condizioni si guardano **sullo stesso periodo**, non una per periodo. Per tutto il resto (attivo, canale,
   utilizzi, ora attuale e non quella della prenotazione, fascia da `from` compreso a `to` escluso) vale quello che c'è oggi.
-  `PublicCatalogRepository.Discounts()` deve caricare anche i dati nuovi.
-- **Senza periodi**, come oggi: uno sconto con il codice vale sempre, uno automatico mai.
-- **Dati già salvati** (migrazione): ogni periodo prende i giorni e le fasce orarie del suo sconto, così nessuno sconto cambia. Uno
-  sconto **senza** periodi con giorni o fasce li tiene come oggi (valgono finché non gli si salva un periodo); il popup non li mostra
-  e un salvataggio che lascia `validityPeriods` vuoto li lascia com'erano.
+- **Dove si caricano i dati nuovi**: nei due punti che leggono gli sconti, `PublicCatalogRepository.Discounts()` (preventivo) e
+  `DiscountRepository.WithChildren` (`DiscountRepository.cs:47`: lista, lettura, salvataggio, eliminazione e snapshot). Senza il secondo
+  `get-selected-item` li darebbe vuoti (tutti i giorni, nessuna fascia) e il salvataggio li cancellerebbe. Quando un salvataggio toglie o
+  ricrea un periodo (`Discount.ReplaceWindows`), le righe dei suoi giorni e delle sue fasce si eliminano con lui.
+- **Senza periodi**, come oggi (`QuoteRules.cs:53-60`): uno sconto automatico non vale mai; uno con il codice vale in ogni data, con i
+  giorni e le fasce dello sconto se ne ha (sono quelli salvati prima dalle API di oggi: il popup non li mostra).
+- **Dati già salvati** (migrazione): ogni periodo prende i giorni e le fasce orarie del suo sconto, che sullo sconto diventano vuoti:
+  nessuno sconto cambia. Uno sconto **senza** periodi con giorni o fasce li tiene; un salvataggio che lascia `validityPeriods` vuoto li
+  lascia com'erano, il primo con un periodo li svuota.
+- **Valori di partenza nel database**: le colonne nuove ne hanno uno (nessun giorno = tutti), perché l'importazione inserisce i periodi senza
+  nominarle (`DiscountDateRangeConfiguration.cs:41-44`).
 - **In lettura** un periodo senza giorni (vuoto = tutti) dà `daysOfWeek` `[1, 2, 3, 4, 5, 6, 7]`; tutti e sette e vuoto sono la stessa
   cosa.
-- **API di oggi**: `POST` e `PUT /api/catalog/discounts` mettono `weekdays` e `timeRanges` in tutti i periodi della richiesta. Se tutti i
-  periodi hanno gli stessi giorni e le stesse fasce, le letture di oggi (`DiscountDto`) li danno come ora. Se sono diversi, `DiscountDto`
-  non li può dire: **lo sviluppatore decide come** (per esempio un campo in più nei `periods`), purché
-  `PUT /api/catalog/discounts/{id}` non tolga senza volerlo quelli salvati dal popup.
+- **API di oggi**: `POST` e `PUT /api/catalog/discounts` mettono `weekdays` e `timeRanges` in tutti i periodi della richiesta; senza periodi
+  li scrivono sullo sconto, come ora. Se tutti i periodi hanno gli stessi giorni e le stesse fasce, le letture di oggi (`DiscountDto`) li
+  danno come ora. Se sono diversi, `DiscountDto` non li può dire: **lo sviluppatore decide come** (per esempio un campo in più nei
+  `periods`), purché `PUT /api/catalog/discounts/{id}` non tolga senza volerlo quelli salvati dal popup.
 - **Snapshot offline** `price_catalog` (`ConfigSnapshotBuilder.cs:153`): contiene `DiscountDto`, quindi deve dire i giorni e le fasce di
   ogni periodo. Si rigenera già quando cambiano le entità che cominciano con `Discount` (`SnapshotTriggers.cs:28`); se la tabella nuova ha
-  un altro prefisso, va aggiunta.
+  un altro prefisso, va aggiunta. **Dopo la migrazione** gli snapshot di tutti gli stabilimenti vanno rigenerati: una migrazione SQL non
+  passa da `SnapshotTriggers`, e all'avvio si costruiscono solo quelli mancanti (`CatalogNightlyJob.cs:41`); gli altri resterebbero
+  vecchi fino alla notte o a `POST /admin/snapshots/rebuild` (`SnapshotEndpoints.cs:54`). Se la forma cambia, lo sviluppatore decide se
+  alzare `ConfigSnapshot.CurrentSchema`. Restano nello snapshot i primi 300 sconti per codice, come oggi.
 
-### Lunghezze: una correzione
+### Dati già salvati fuori dai limiti
 
-`SaveDiscountRequestValidator` accetta un codice fino a **64** caratteri (`Discount.CodeMaxLength`) e un nome fino a **255**, ma le colonne
-ne tengono **60** (`code`) e **120** (`name`) (`DiscountConfiguration.cs:42,55`): un codice di 62 caratteri passa il controllo e il
-salvataggio fallisce nel database con un 500. Con le API nuove e con quelle di oggi: 400 `validation.max_length` oltre **60** e **120**,
-con `args.max`. Il frontend non fa scrivere di più.
+Un'importazione può aver salvato dati che i popup non salverebbero. `get-selected-item` li dà come sono e il salvataggio dà gli errori di
+"Errori": più di 50 periodi o di 20 fasce, un valore 0, un nome mancante. Un'ora con i secondi si legge `HH:mm`.
+
+- **`Custom` o `WithoutCustom` senza categorie né settori** (l'importazione scarta i settori che non trova): la migrazione porta quelli
+  `without_custom` ad `all`, che ha lo stesso effetto (`QuoteRules.cs:67-72`: nessuna riga esclusa), e lo stesso fa un'importazione
+  successiva. Quelli `custom` (nessuna riga scontata) restano così: il popup li mostra senza scelte e l'utente sceglie prima di salvare.
+
+### Codice e nome
+
+- **Spazi ai lati**: il backend li toglie prima di ogni controllo; le lunghezze si contano dopo.
+- **Confronto del codice** (`CodeExistsAsync` e, nel preventivo, `FindDiscountByCodeAsync`): senza distinguere maiuscole e minuscole e senza
+  spazi ai lati, **da tutte e due le parti**. Oggi si tolgono solo al codice ricevuto: un codice importato come "ESTATE " non si trova mai
+  e non conta come già usato. Come lo sceglie lo sviluppatore (per esempio la migrazione toglie gli spazi ai codici salvati).
+- **Lunghezze, una correzione**: `SaveDiscountRequestValidator` accetta un codice fino a **64** caratteri (`Discount.CodeMaxLength`) e un
+  nome fino a **255**, ma le colonne ne tengono **60** (`code`) e **120** (`name`) (`DiscountConfiguration.cs:42,55`): un codice di 62
+  caratteri passa il controllo e il salvataggio fallisce nel database con un 500. Con le API nuove e con quelle di oggi: 400
+  `validation.max_length` oltre **60** e **120**, con `args.max`. Il frontend non fa scrivere di più.
 
 ### Codice già usato
 
 `CodeExistsAsync` controlla prima di salvare, ma due salvataggi nello stesso momento con lo stesso codice passano tutti e due il controllo
 e il secondo viola l'indice unico: deve rispondere **409 `pricing.discount_code_taken`** con `args.code`, non un 500. Per la duplicazione
-vale la sezione 3.
+vale la sezione 3. Il codice di uno sconto eliminato è libero, come oggi (l'indice guarda solo quelli non eliminati).
+
+### Utilizzi
+
+`maxUseQuantity` non può essere meno degli utilizzi già fatti: 422 `pricing.discount_max_uses_below_used`, come oggi. Il controllo di oggi
+guarda gli utilizzi letti prima di salvare (`DiscountsService.cs:110`): se crescono durante il salvataggio, il vincolo
+`ck_catalog_pricing_discounts_used_count` dà un 500. Deve rispondere **422** anche allora.
 
 ### A cosa si applica
 
@@ -282,9 +331,11 @@ cambiano:
 
 | `discountScope` | `scope` | Nel popup | Su cosa vale lo sconto |
 |---|---|---|---|
-| `All` | `all` | Tutto | Tutte le righe della prenotazione |
+| `All` | `all` | Tutto | Tutte le righe |
 | `Custom` | `custom` | Solo alcune scelte | Le righe il cui settore è fra gli `idSectors` **oppure** la cui categoria è fra le `serviceCategories` |
 | `WithoutCustom` | `without_custom` | Tutto tranne alcune scelte | Tutte le altre righe |
+
+Le righe sono quelle della prenotazione, tranne il supplemento online (`QuoteService.cs:398`).
 
 - `serviceCategories`: `Bar` ("Servizi Bar"), `Normal` ("Servizi"), `Hourly` ("Servizi Orari"), `Additional` ("Articoli/Servizi aggiuntivi"): i
   nomi di `DiscountServiceCategory`.
@@ -311,7 +362,7 @@ Nell'ordine in cui si controllano, per le API 4 e 6 (le righe con "6" solo per l
 | 404 (6) | `pricing.discount_not_found` | `idVoucher` non è uno sconto dello stabilimento. |
 | 409 (6) | `resource.version_conflict` | Sezione 7. Si controlla subito dopo il 404 dello sconto. |
 | 409 | `pricing.discount_code_taken` | Il codice è di un altro sconto dello stabilimento. `args`: `code`, come oggi. |
-| 422 (6) | `pricing.discount_max_uses_below_used` | `maxUseQuantity` è meno degli utilizzi già fatti. `args`: `usedCount`, come oggi. |
+| 422 (6) | `pricing.discount_max_uses_below_used` | `maxUseQuantity` è meno degli utilizzi già fatti ("Utilizzi"). `args`: `usedCount`, come oggi. |
 | 404 | `catalog.sector_not_found` (`CatalogErrors.SectorNotFound`) | Un `idSectors` non è un settore dello stabilimento. |
 
 Errori dei campi (400 `validation.failed`, più di uno insieme):
@@ -321,21 +372,23 @@ Errori dei campi (400 `validation.failed`, più di uno insieme):
 | `voucherName`, `voucherCode` | `validation.required` | Vuoto o di soli spazi. |
 | `voucherName`, `voucherCode` | `validation.max_length` | Oltre 120 o 60 caratteri, con `args.max`. |
 | `validityPeriods` | `validation.required` | Vuoto con `isCodeRequired` falso. |
-| `validityPeriods` | `validation.invalid` | Più di 50 periodi. |
-| `validityPeriods[i].validFrom`, `.validTo` | `validation.required` | Mancante o non una data. |
+| `validityPeriods` | `validation.invalid` | Più di 50 periodi, o un periodo `null`. |
+| `validityPeriods[i].validFrom`, `.validTo` | `validation.required` | Mancante. |
 | `validityPeriods[i].validTo` | `validation.end_before_start` | Prima di `validFrom`. |
-| `validityPeriods[i].daysOfWeek` | `validation.required` | Vuoto, o con un numero che non va da 1 a 7. |
-| `validityPeriods[i].timeSlots` | `validation.invalid` | Più di 20, un'ora mancante o non `HH:mm`, o `to` non dopo `from`. |
-| `discountType`, `discountScope`, `isEnabled` | `validation.invalid` | Un valore che non esiste. |
-| `serviceCategories` | `validation.invalid` | Una categoria che non esiste. |
+| `validityPeriods[i].daysOfWeek` | `validation.required` | Vuoto, o con un giorno `null` o che non va da 1 a 7. |
+| `validityPeriods[i].timeSlots` | `validation.invalid` | Più di 20, una fascia `null`, un'ora mancante, o `to` non dopo `from`. |
+| `isCodeRequired`, `isEnabled` | `validation.invalid` | Mancante. |
+| `discountType`, `discountScope` | `validation.invalid` | Mancante, o un valore che non è il nome esatto di uno di quelli elencati (niente numeri). |
+| `serviceCategories` | `validation.invalid` | Una categoria che non esiste o `null`. |
 | `serviceCategories` | `validation.required` | Vuoto con `Custom` o `WithoutCustom`, se anche `idSectors` è vuoto. |
-| `discountValue` | `validation.out_of_range` | Mancante, 0 o meno, oltre 100 (`Percentage`) o oltre 100.000 (`Fixed`). |
-| `maxUseQuantity` | `validation.out_of_range` | Meno di 1, più di 2.147.483.647 o non intero. |
+| `discountValue` | `validation.out_of_range` | Mancante, 0 o meno, oltre 100 (`Percentage`) o oltre 100.000 (`Fixed`), o con più di 2 decimali (oggi 0,001 passa e la colonna `numeric(12,2)` salva 0). |
+| `maxUseQuantity` | `validation.out_of_range` | Meno di 1. Più di 2.147.483.647 o non intero: "Valori che non si leggono". |
 
 Il frontend controlla gli stessi limiti e mostra gli errori sotto i campi: `pricing.discount_code_taken` sotto il codice,
-`pricing.discount_max_uses_below_used` sotto il numero massimo di utilizzi; gli errori dentro un periodo compaiono sopra i bottoni. Con
-`catalog.sector_not_found` il messaggio compare sopra i bottoni e la tendina dei settori si rilegge: quello che non c'è più si vede come
-"Settore/fila non più disponibile" e l'utente lo toglie.
+`pricing.discount_max_uses_below_used` sotto il numero massimo di utilizzi; gli errori dentro un periodo, e quelli di un
+campo che il popup non mostra, compaiono sopra i bottoni. Con `pricing.discount_not_found` (6) il messaggio compare sopra i bottoni e la
+tabella si ricarica. Con `catalog.sector_not_found` il messaggio compare sopra i bottoni e la tendina dei settori si rilegge: quello che
+non c'è più si vede come "Settore/fila non più disponibile" e l'utente lo toglie.
 
 ```json
 {
@@ -392,8 +445,9 @@ Risposta: 204 senza corpo. Il popup si chiude e la tabella si ricarica. Errori: 
 Lettura del popup di modifica, a ogni apertura: `GET /api/catalog/discounts/get-selected-item?idVoucher=<uuid>`. Per il frontend
 sostituisce `GET /api/catalog/discounts/{id}`. **Permesso**: `CatalogRead`.
 
-200 con tutti i campi di "Regole comuni dei popup", più `idVoucher` e `version` (sezione 7). I periodi in ordine di `validFrom`, le fasce
-in ordine di `from`, i giorni in ordine:
+200 con tutti i campi di "Regole comuni dei popup", più `idVoucher` e `version` (sezione 7). L'ordine è sempre lo stesso: i periodi per
+`validFrom`, poi `validTo`, poi id interno; le fasce per `from`; i giorni da 1 a 7; `serviceCategories` `Bar`, `Normal`, `Hourly`,
+`Additional`; `idSectors` come in `POST /api/catalog/sectors/sector-combobox`:
 
 ```json
 {
@@ -454,7 +508,7 @@ Salva del popup di modifica. Per il frontend sostituisce `PUT /api/catalog/disco
 }
 ```
 
-- **Restano com'erano**: canale, utilizzi già fatti, giorni e fasce dello sconto senza periodi.
+- **Restano com'erano**: canale, utilizzi già fatti, giorni e fasce di uno sconto che non ha periodi né prima né dopo il salvataggio.
 - Nel registro una voce `catalog.discount_updated`, come oggi.
 - Risposta: 204 senza corpo, con la nuova versione nell'header `ETag`. Il popup si chiude e la tabella si ricarica. Errori: "Regole comuni
   dei popup".
@@ -473,15 +527,18 @@ già fatto, qui si aggiungono solo le API 5 e 6.
 
 - **Versione nella lettura** (sezione 5): il campo `version` (stringa opaca, sempre presente). Cambia ogni volta che cambiano i dati che il
   salvataggio scrive, anche quando li cambia un'altra API (per esempio `PUT /api/catalog/discounts/{id}`), e solo allora: non cambia per
-  `used_count` e `updated_at`, altrimenti uno sconto usato mentre il popup è aperto farebbe perdere le modifiche.
+  `used_count` e `updated_at`, altrimenti uno sconto usato mentre il popup è aperto farebbe perdere le modifiche. Non dipende dall'ordine in
+  cui il database restituisce le righe figlie (oggi i settori non hanno un ordine, `DiscountRepository.cs:48`).
 - **Dati coperti**: nome, codice, `isCodeRequired`, periodi con giorni e fasce orarie, tipo, valore, ambito con categorie e settori, numero
-  massimo di utilizzi e stato. Stanno in più tabelle: un token della sola riga di `catalog.pricing_discounts` (come `xmin`) non basta, e cambierebbe anche con
-  `used_count`.
+  massimo di utilizzi e stato. Stanno in più tabelle: un token della sola riga di `catalog.pricing_discounts` (come `xmin`) non basta, e
+  cambierebbe anche con `used_count`.
 - **`If-Match` nel salvataggio**: il frontend manda la versione letta nell'header `If-Match: "<version>"`. Se non è più quella attuale, il
   backend non salva niente e risponde **409 `resource.version_conflict`**, senza `errors[]`. Senza `If-Match` risponde allo stesso modo: il
   frontend lo manda sempre.
 - **`ETag` nella risposta**: il salvataggio riuscito risponde 204 con la nuova versione nell'header `ETag: "<version>"`.
 - Il 409 si controlla **subito dopo il 404 dello sconto**, prima del codice già usato e degli utilizzi.
+- **Controllo e salvataggio sono una cosa sola**: di due salvataggi nello stesso momento con lo stesso `If-Match` uno risponde 204 e l'altro
+  409 `resource.version_conflict`; mai i dati di tutti e due mescolati, mai un 500.
 - **Come farlo lo sceglie lo sviluppatore del backend** (un hash dei dati coperti, un contatore aggiornato da ogni API che li cambia...), nei
   limiti dei punti sopra: l'agente glielo chiede prima di scrivere codice. Il frontend tratta la versione come una stringa opaca e non la
   confronta mai.
@@ -497,32 +554,49 @@ Con un token con `CatalogRead` e `CatalogPricing`:
 
 1. `voucher-list` con ogni `sortField` nei due versi: ordine della sezione 1, sconti senza periodi in fondo per `validFrom` e `validTo`,
    "Sconto 2" prima di "Sconto 10"; `""` come `voucherName` crescente; uno sconto senza nome mostra il codice.
-2. `voucher-list` con `pageSize` 25 o un `sortField` sconosciuto: 400 `validation.failed`.
+2. `voucher-list` con `pageSize` 25 o un `sortField` sconosciuto: 400 `validation.failed`. Ogni API senza token: 401; con un token senza
+   il suo permesso: 403 `auth.forbidden`.
 3. `delete-voucher-item` con due id validi: 204 e non ci sono più. Con uno valido e uno sconosciuto (o di un altro stabilimento): 404
-   `pricing.discount_not_found` e il valido c'è ancora. Con `[]`: 400 `validation.required` su `idVouchers`.
+   `pricing.discount_not_found` e il valido c'è ancora; lo stesso con un id `null` o non UUID. Con `[]`: 400 `validation.required` su
+   `idVouchers`.
 4. Un settore usato solo da uno sconto eliminato con `delete-voucher-item` si può eliminare (niente `discounts` in
-   `catalog.sector_in_use`).
-5. `duplicate-voucher-item` di uno sconto attivo e usato: 204; la copia ha codice e nome con " copia", è spenta, con zero utilizzi e tutto il
-   resto uguale, periodi, giorni e fasce compresi. Di nuovo: " copia 2". Con un codice di 60 caratteri: la copia ne ha al massimo 60.
-6. Due `duplicate-voucher-item` dello stesso sconto nello stesso momento: due 204 e due codici diversi.
+   `catalog.sector_in_use`). Dopo l'eliminazione non resta nessuna riga figlia non eliminata, compresi i giorni e le fasce dei periodi.
+   Lo stesso con `bulk-delete`, e per un settore usato solo da uno sconto eliminato con `bulk-delete` prima della modifica.
+5. `duplicate-voucher-item` di uno sconto attivo e usato (nessuna API scrive ancora `used_count`: si imposta nel database di prova): 204;
+   la copia ha codice e nome con " copia", è spenta, con zero utilizzi e tutto il resto uguale, periodi, giorni e fasce compresi. Di
+   nuovo: " copia 2". Con un codice di 60 caratteri: la copia ne ha al massimo 60.
+6. Due `duplicate-voucher-item` dello stesso sconto nello stesso momento: due 204 e due codici diversi. Una chiamata con due sconti dello
+   stesso codice di base ("ESTATE" e "ESTATE copia"): due copie con codici diversi.
 7. `add-voucher-item` con il corpo della sezione 4: 204; `get-selected-item` lo rilegge uguale, periodo per periodo.
 8. `add-voucher-item` con un codice già usato, anche in maiuscole diverse o con spazi ai lati: 409 `pricing.discount_code_taken` con `code`. Due
-   richieste uguali nello stesso momento: una 204 e una 409, mai un 500.
+   richieste uguali nello stesso momento: una 204 e una 409, mai un 500 (anche con `POST /api/catalog/discounts`). Con il codice di uno
+   sconto eliminato: 204. Con un codice salvato prima con uno spazio in fondo: 409, e il preventivo lo trova.
 9. `add-voucher-item` con un codice di 61 caratteri o un nome di 121: 400 `validation.max_length`. Lo stesso con `POST /api/catalog/discounts`.
-10. `add-voucher-item` con `validityPeriods` `[]` e `isCodeRequired` vero: 204; con `isCodeRequired` falso: 400 `validation.required`.
+10. `add-voucher-item` con `validityPeriods` `[]` e `isCodeRequired` vero: 204; con `isCodeRequired` falso: 400 `validation.required`. Senza
+    `isCodeRequired` o senza `isEnabled`: 400 `validation.invalid` su quel campo. Una fascia con `to` uguale a `from` o senza un'ora, un
+    giorno 0 o 8, un periodo `null`, `discountValue` 12.345: 400 con il campo della tabella; `discountType` 0 o "percentage":
+    400. Un giorno o un settore ripetuto: 204 e conta una volta. Mai un 500.
 11. Il preventivo con il codice di uno sconto con due periodi (giugno lun-ven, agosto sab-dom): valido per un martedì di giugno, non per un
     sabato di giugno né per un martedì di agosto. Con una fascia oraria solo nel periodo di giugno, ad agosto l'ora non conta.
 12. Uno sconto salvato prima della migrazione con giorni e fasce orarie vale negli stessi momenti di prima; `get-selected-item` li dà in ogni
-    suo periodo. Senza giorni: `daysOfWeek` con tutti e sette.
+    suo periodo. Senza giorni: `daysOfWeek` con tutti e sette. Se poi si salva con `validityPeriods` `[]`, vale in ogni data, in ogni giorno
+    e a ogni ora. Uno sconto senza periodi ma con giorni (lunedì-venerdì), salvato prima: dopo la migrazione, dopo un salvataggio con
+    `validityPeriods` `[]` e nella sua copia vale ancora solo dal lunedì al venerdì; dopo un salvataggio con un periodo valgono i giorni del
+    periodo.
 13. `PUT /api/catalog/discounts/{id}` e lo snapshot `price_catalog` dopo la modifica: come deciso in "API di oggi" e "Snapshot offline".
 14. `update-voucher-item` con `maxUseQuantity` minore degli utilizzi: 422 `pricing.discount_max_uses_below_used` con `usedCount`; con `null`: 204
-    e illimitato; con 3000000000: 400 `validation.out_of_range` su `maxUseQuantity`.
+    e illimitato; con 3000000000: 400 `validation.failed`. Se gli utilizzi (impostati nel database di prova) crescono fra il controllo e il
+    salvataggio: 422, mai un 500.
 15. `update-voucher-item` di uno sconto `online_only`: il canale non cambia. Uno sconto `without_custom` con una categoria e un settore si
     rilegge uguale; salvato con `All`, categorie e settori sono vuoti. `Custom` senza categorie e settori: 400 `validation.required` su
     `serviceCategories`. Con un settore di un altro stabilimento: 404 `catalog.sector_not_found` e lo sconto non cambia.
-16. `get-selected-item` dà `version` (per esempio `v1`); `update-voucher-item` con `If-Match: "v1"`: 204 con un `ETag` diverso, che è la versione
-    della lettura dopo. Lo stesso salvataggio di nuovo con `"v1"`, o senza `If-Match`: 409 `resource.version_conflict` e lo sconto non cambia,
-    anche con un codice già usato.
-17. Cambiare solo una fascia oraria cambia la versione; cambiare `used_count` no.
-18. `update-voucher-item` con un `idVoucher` di un altro stabilimento o eliminato: 404 `pricing.discount_not_found`, anche con un `If-Match`
-    qualunque.
+16. `get-selected-item` dà `version` (per esempio `v1`), la stessa a ogni lettura senza modifiche; `update-voucher-item` che cambia un campo con
+    `If-Match: "v1"`: 204 con un `ETag` diverso, che è la versione della lettura dopo. Due nello stesso momento con `"v1"`: una 204, una 409.
+    Lo stesso salvataggio di nuovo con `"v1"`, o senza `If-Match`: 409 `resource.version_conflict` e lo sconto non cambia, anche con un
+    codice già usato.
+17. Cambiare solo una fascia oraria cambia la versione; cambiare `used_count` (nel database di prova) no.
+18. `update-voucher-item` con un `idVoucher` di un altro stabilimento, eliminato, mancante o non UUID: 404 `pricing.discount_not_found`, anche con
+    un `If-Match` qualunque. Lo stesso con `get-selected-item`.
+19. Uno sconto `without_custom` senza categorie né settori, salvato prima della migrazione: dopo è `all` e sconta le stesse righe. Uno
+    `custom` senza scelte si rilegge com'era.
+20. Subito dopo la migrazione lo snapshot `price_catalog` di ogni stabilimento ha giorni e fasce di ogni periodo.

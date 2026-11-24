@@ -205,7 +205,7 @@ Nell'ordine in cui si controllano:
 | 403 | `catalog.property_required` | Token senza stabilimento. |
 | 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
 | 404 | `catalog.sector_not_found` | Un id non è un settore dello stabilimento (anche perché già eliminato). Non si elimina nessun settore. |
-| 409 | `catalog.sector_in_use` | Un settore è ancora usato. Non si elimina nessun settore. `args` come in `DELETE /api/catalog/sectors/{id}` (`mapSpots`, `priceLists`, `stayLimits`, `discounts`, contati come `CountUsagesAsync`, più i listini di "Cosa ci serve") e **in più** `services` e `automaticPrices`, quanti servizi (bar, normali e orari insieme) e quanti prezzi automatici sono limitati a quel settore, e `sectorName`, il nome di quel settore, anche con un id solo: il messaggio dice sempre quale. I conteggi ci sono sempre tutti, 0 compreso. |
+| 409 | `catalog.sector_in_use` | Un settore è ancora usato. Non si elimina nessun settore. `args` come in `DELETE /api/catalog/sectors/{id}` (`mapSpots`, `priceLists`, `stayLimits`, `discounts`, contati come `CountUsagesAsync`, ma per `discounts` solo gli sconti non eliminati, come chiede `Sconti e voucher - Frontend requests.md`, sezione 2, più i listini di "Cosa ci serve") e **in più** `services` e `automaticPrices`, quanti servizi (bar, normali e orari insieme) e quanti prezzi automatici sono limitati a quel settore, e `sectorName`, il nome di quel settore, anche con un id solo: il messaggio dice sempre quale. I conteggi ci sono sempre tutti, 0 compreso. |
 
 Prima si controlla che tutti gli id siano settori dello stabilimento (404 se uno non lo è), poi che nessuno sia usato:
 con più settori in uso, `sectorName` e i conteggi sono quelli del primo in uso nell'ordine di `idSectors`.

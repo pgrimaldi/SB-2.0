@@ -925,10 +925,6 @@
           "options": {
             "title": "Optionen",
             "type": "Rabatt-/Gutscheintyp",
-            "types": {
-              "percentage": "Prozent",
-              "fixed": "Betrag"
-            },
             "value": "Rabatt-/Gutscheinwert",
             "applies_to": "Rabatt/Gutschein anwenden auf",
             "scopes": {

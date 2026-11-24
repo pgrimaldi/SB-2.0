@@ -3855,8 +3855,8 @@ Nessun payload.
       "voucherName": "string",
       "validFrom": "string (data ISO 8601 UTC) | null",
       "validTo": "string (data ISO 8601 UTC) | null",
-      "discountType": "string (enum DiscountType) | null",
-      "discountValue": "number (decimale) | null"
+      "discountType": "string (enum DiscountType)",
+      "discountValue": "number (decimale)"
     }
   ]
 }
@@ -3885,8 +3885,8 @@ Nessun payload.
 | `rows[].voucherName` | string |
 | `rows[].validFrom` | string (data ISO 8601 UTC) \| null |
 | `rows[].validTo` | string (data ISO 8601 UTC) \| null |
-| `rows[].discountType` | string (enum DiscountType) \| null |
-| `rows[].discountValue` | number (decimale) \| null |
+| `rows[].discountType` | string (enum DiscountType) |
+| `rows[].discountValue` | number (decimale) |
 
 ### POST `/api/catalog/discounts/add-voucher-item`
 

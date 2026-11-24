@@ -22,6 +22,7 @@ import {
   TreeValidationResult,
   applyEach,
   applyWhen,
+  disabled,
   form,
   max,
   metadata,
@@ -87,14 +88,11 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
 import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 import { comparableVoucher } from '../voucher-scope/comparable-voucher';
+import { hiddenVoucherFields } from '../voucher-scope/hidden-voucher-fields';
 import { VoucherScope } from '../voucher-scope/voucher-scope';
 import { withScope } from '../voucher-scope/with-scope';
 
 type DayKey = (typeof DAYS_OF_WEEK)[number]['key'];
-
-interface OptionsTexts {
-  types: Record<'percentage' | 'fixed', string>;
-}
 
 @Component({
   selector: 'app-voucher-edit-item-panel',
@@ -145,6 +143,7 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
   private readonly draft = signal(new VoucherUpdateItemRequest());
   private readonly loaded = signal<VoucherUpdateItemRequest | null>(null);
   private version: string | null = null;
+  protected readonly isFetching = signal(false);
   protected readonly draftForm = form(this.draft, (path) => {
     requiredText(path.voucherName);
     metadata(path.voucherName, MAX_LENGTH, () => MAX_VOUCHER_NAME_LENGTH);
@@ -180,6 +179,7 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
     );
     min(path.maxUseQuantity, 1);
     max(path.maxUseQuantity, MAX_VOUCHER_USE_QUANTITY);
+    disabled(path, () => this.isFetching());
   });
   protected readonly isPercentage = computed(
     () => this.draftForm.discountType().value() === DiscountType.Percentage,
@@ -204,7 +204,6 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
   );
   protected readonly sectorsVersion = signal(0);
   protected readonly isLoading = signal(false);
-  protected readonly isFetching = signal(false);
   protected readonly isLoaded = computed(() => this.loaded() !== null);
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly readError = signal<ApiProblem | null>(null);
@@ -227,15 +226,15 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
     >,
     { initialValue: null },
   );
-  private readonly optionsTexts = toSignal(
-    this.translateService.stream(
-      'management.settings.vouchers.form.options',
-    ) as Observable<OptionsTexts>,
+  private readonly typeNames = toSignal(
+    this.translateService.stream('management.settings.vouchers.discount_type') as Observable<
+      Record<'percentage' | 'fixed', string>
+    >,
     { initialValue: null },
   );
   protected readonly typeOptions = computed<readonly SelectOption<DiscountType>[]>(() => [
-    { value: DiscountType.Percentage, label: this.optionsTexts()?.types.percentage ?? '' },
-    { value: DiscountType.Fixed, label: this.optionsTexts()?.types.fixed ?? '' },
+    { value: DiscountType.Percentage, label: this.typeNames()?.percentage ?? '' },
+    { value: DiscountType.Fixed, label: this.typeNames()?.fixed ?? '' },
   ]);
   protected readonly dayOptions = computed<readonly SelectOption[]>(() =>
     DAYS_OF_WEEK.map(({ number, key }) => ({
@@ -346,8 +345,11 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
         if (problem.code === ApiErrorCode.PricingDiscountMaxUsesBelowUsed) {
           return apiFieldError(this.draftForm.maxUseQuantity, problem.code, problem.args);
         }
-        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
-          this.error.set(general),
+        return apiFieldErrorsOrGeneral(
+          problem,
+          this.draftForm,
+          (general) => this.error.set(general),
+          hiddenVoucherFields(this.draft()),
         );
       } finally {
         this.isLoading.set(false);
@@ -419,12 +421,11 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
   }
 
   private toUpdateRequest(item: VoucherSelectedItem): VoucherUpdateItemRequest {
-    const start = new VoucherUpdateItemRequest();
     return {
       idVoucher: item.idVoucher,
       voucherName: item.voucherName,
       voucherCode: item.voucherCode,
-      isCodeRequired: item.isCodeRequired ?? start.isCodeRequired,
+      isCodeRequired: item.isCodeRequired,
       validityPeriods: item.validityPeriods.map((period): VoucherValidityPeriod => ({
         validFrom: period.validFrom,
         validTo: period.validTo,
@@ -434,13 +435,13 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
           to: timeSlot.to,
         })),
       })),
-      discountType: item.discountType ?? start.discountType,
+      discountType: item.discountType,
       discountValue: item.discountValue,
-      discountScope: item.discountScope ?? start.discountScope,
+      discountScope: item.discountScope,
       serviceCategories: [...item.serviceCategories],
       idSectors: [...item.idSectors],
       maxUseQuantity: item.maxUseQuantity,
-      isEnabled: item.isEnabled ?? start.isEnabled,
+      isEnabled: item.isEnabled,
     };
   }
 

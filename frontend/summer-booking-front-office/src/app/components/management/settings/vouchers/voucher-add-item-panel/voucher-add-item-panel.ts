@@ -83,14 +83,11 @@ import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 import { comparableVoucher } from '../voucher-scope/comparable-voucher';
+import { hiddenVoucherFields } from '../voucher-scope/hidden-voucher-fields';
 import { VoucherScope } from '../voucher-scope/voucher-scope';
 import { withScope } from '../voucher-scope/with-scope';
 
 type DayKey = (typeof DAYS_OF_WEEK)[number]['key'];
-
-interface OptionsTexts {
-  types: Record<'percentage' | 'fixed', string>;
-}
 
 @Component({
   selector: 'app-voucher-add-item-panel',
@@ -213,15 +210,15 @@ export class VoucherAddItemPanel extends BasePopup implements UnsavedChanges, On
     >,
     { initialValue: null },
   );
-  private readonly optionsTexts = toSignal(
-    this.translateService.stream(
-      'management.settings.vouchers.form.options',
-    ) as Observable<OptionsTexts>,
+  private readonly typeNames = toSignal(
+    this.translateService.stream('management.settings.vouchers.discount_type') as Observable<
+      Record<'percentage' | 'fixed', string>
+    >,
     { initialValue: null },
   );
   protected readonly typeOptions = computed<readonly SelectOption<DiscountType>[]>(() => [
-    { value: DiscountType.Percentage, label: this.optionsTexts()?.types.percentage ?? '' },
-    { value: DiscountType.Fixed, label: this.optionsTexts()?.types.fixed ?? '' },
+    { value: DiscountType.Percentage, label: this.typeNames()?.percentage ?? '' },
+    { value: DiscountType.Fixed, label: this.typeNames()?.fixed ?? '' },
   ]);
   protected readonly dayOptions = computed<readonly SelectOption[]>(() =>
     DAYS_OF_WEEK.map(({ number, key }) => ({
@@ -312,8 +309,11 @@ export class VoucherAddItemPanel extends BasePopup implements UnsavedChanges, On
         if (problem.code === ApiErrorCode.PricingDiscountCodeTaken) {
           return apiFieldError(this.draftForm.voucherCode, problem.code, problem.args);
         }
-        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
-          this.error.set(general),
+        return apiFieldErrorsOrGeneral(
+          problem,
+          this.draftForm,
+          (general) => this.error.set(general),
+          hiddenVoucherFields(this.draft()),
         );
       } finally {
         this.isLoading.set(false);

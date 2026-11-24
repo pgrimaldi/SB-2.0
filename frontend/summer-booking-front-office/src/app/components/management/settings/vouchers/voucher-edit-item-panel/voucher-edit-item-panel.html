@@ -15,6 +15,7 @@
         <app-filled-text-field
           [label]="'management.settings.vouchers.form.code' | translate"
           [isMandatory]="true"
+          [isCodeField]="true"
           [formField]="draftForm.voucherCode"
           [error]="voucherCodeError()"
         />
@@ -25,7 +26,7 @@
           <app-button
             [size]="ButtonSize.Small"
             [pathIcon]="addPeriodIcon"
-            [disabled]="!canAddPeriod()"
+            [disabled]="!canAddPeriod() || isFetching()"
             (clicked)="addPeriod()"
           >
             {{ 'management.settings.vouchers.form.periods.add' | translate }}

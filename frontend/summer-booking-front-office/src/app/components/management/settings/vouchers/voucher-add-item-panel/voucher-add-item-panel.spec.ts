@@ -38,8 +38,10 @@ describe('VoucherAddItemPanel', () => {
       ],
     });
     const translate = TestBed.inject(TranslateService);
-    const texts = { options: { types: {}, scopes: {} }, periods: { days: {} } };
-    translate.setTranslation('it', { management: { settings: { vouchers: { form: texts } } } });
+    const texts = { options: { scopes: {} }, periods: { days: {} } };
+    translate.setTranslation('it', {
+      management: { settings: { vouchers: { form: texts, discount_type: {} } } },
+    });
     translate.use('it');
     const fixture = TestBed.createComponent(VoucherAddItemPanelHost);
     await fixture.whenStable();

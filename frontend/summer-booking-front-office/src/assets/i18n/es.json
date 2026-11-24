@@ -925,10 +925,6 @@
           "options": {
             "title": "Opciones",
             "type": "Tipo de descuento/vale",
-            "types": {
-              "percentage": "Porcentaje",
-              "fixed": "Importe"
-            },
             "value": "Valor del descuento/vale",
             "applies_to": "Aplicar descuento/vale a",
             "scopes": {

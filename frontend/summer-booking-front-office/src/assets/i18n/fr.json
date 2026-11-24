@@ -925,10 +925,6 @@
           "options": {
             "title": "Options",
             "type": "Type de remise/bon",
-            "types": {
-              "percentage": "Pourcentage",
-              "fixed": "Montant"
-            },
             "value": "Valeur de la remise/du bon",
             "applies_to": "Appliquer la remise/le bon à",
             "scopes": {
@@ -939,7 +935,7 @@
             "categories": "Catégories",
             "sectors": "Secteurs et rangées",
             "choose": "Sélectionner",
-            "missing_sector": "Rangée/secteur plus disponible",
+            "missing_sector": "Rangée/secteur indisponible",
             "max_uses": "Nombre maximal d'utilisations",
             "enabled": "Activer la remise/le bon"
           }
@@ -1517,7 +1513,7 @@
               "title": "Limites",
               "sectors": "Service en vente dans ces rangées/secteurs",
               "all_sectors": "Toutes les rangées/secteurs",
-              "missing_sector": "Rangée/secteur plus disponible"
+              "missing_sector": "Rangée/secteur indisponible"
             }
           },
           "bookings": {
@@ -1836,8 +1832,8 @@
             "enabled_areas": "Zones activées",
             "sectors": "Secteurs et rangées",
             "all_sectors": "Tous les secteurs et rangées",
-            "missing_sector": "Rangée/secteur plus disponible",
-            "missing_area": "Zone plus disponible",
+            "missing_sector": "Rangée/secteur indisponible",
+            "missing_area": "Zone indisponible",
             "is_default": "Définir comme forfait par défaut",
             "is_default_online": "Définir comme forfait par défaut en ligne",
             "online_enabled": "Activer aussi pour les réservations en ligne",
@@ -1904,8 +1900,8 @@
             "online_enabled": "Réservations en ligne",
             "online_only": "En ligne uniquement",
             "map_assignable": "Définir comme article attribuable sur la carte",
-            "missing_article": "Article plus disponible",
-            "missing_package": "Forfait plus disponible",
+            "missing_article": "Article indisponible",
+            "missing_package": "Forfait indisponible",
             "price_list": "Liste de prix"
           }
         },
