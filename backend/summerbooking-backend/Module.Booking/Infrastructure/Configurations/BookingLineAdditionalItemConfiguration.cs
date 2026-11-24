@@ -54,6 +54,13 @@ public sealed class BookingLineAdditionalItemConfiguration : IEntityTypeConfigur
 			.HasDefaultValueSql("'whole_stay'")
 			.HasComment("Copertura temporale: tutta la durata della riga o solo date puntuali.");
 
+		builder.Property(x => x.Dates)
+			.HasColumnName("dates")
+			.HasColumnType("date[]")
+			.IsRequired()
+			.HasDefaultValueSql("'{}'")
+			.HasComment("Giorni a cui vale l'articolo quando date_scope = specific_dates; vuoto = tutto il soggiorno della riga.");
+
 		builder.Property(x => x.Quantity)
 			.HasColumnName("quantity")
 			.HasColumnType("smallint")
@@ -75,10 +82,9 @@ public sealed class BookingLineAdditionalItemConfiguration : IEntityTypeConfigur
 			.HasComment("Totale bloccato dell'articolo (quantità × prezzo unitario, eventualmente × giorni); concorre al subtotal della testata.");
 
 
-		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a
-		// schema (nessuna convenzione EF globale lo applica, verificato in ModuleDbContextConventions
-		// - solo converter UTC e query filter soft-delete) - un ETL che omette queste colonne
-		// dall'INSERT (comportamento normale, per lasciare scattare il default) falliva NOT NULL.
+		// Default now() a schema su created_at/updated_at: nessuna convenzione EF globale lo applica
+		// (ModuleDbContextConventions mette solo il converter UTC e il query filter soft-delete), e un ETL
+		// che omette queste colonne dall'INSERT per lasciare scattare il default fallirebbe sul NOT NULL.
 		builder.Property(x => x.CreatedAt)
 			.HasColumnName("created_at")
 			.IsRequired()

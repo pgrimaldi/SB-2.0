@@ -30,8 +30,8 @@ public sealed class ServiceBookingOption : IAuditable, ISoftDeletable
 	public DateTime CreatedAt { get; private set; }
 	public DateTime UpdatedAt { get; private set; }
 	public DateTime? DeletedAt { get; private set; }
-	/// <summary>Servizi orari: disponibilità e prezzi validi nelle date dell'opzione.</summary>
-	public ServiceHourlyOption? HourlyOption { get; private set; }
+	/// <summary>Servizi orari: orari, durate e prezzi del periodo, uno per insieme di giorni della settimana.</summary>
+	public ICollection<ServiceHourlyOption> HourlyOptions { get; private set; } = new List<ServiceHourlyOption>();
 
 	private ServiceBookingOption() { }
 
@@ -57,4 +57,4 @@ public sealed class ServiceBookingOption : IAuditable, ISoftDeletable
 public sealed record ServiceBookingOptionData(
 	DateOnly? StartsOn, DateOnly? EndsOn, IReadOnlyList<Weekday> Weekdays, TimeOnly? ManagementFrom, TimeOnly? ManagementTo,
 	TimeOnly? OnlineFrom, TimeOnly? OnlineTo, short? MaxPerHour, short? MaxPerDay, short? MaxPerSlot, short? IntervalMinutes,
-	short? MinItems, short? MaxItems, HourlyOptionData? Hourly = null);
+	short? MinItems, short? MaxItems, IReadOnlyList<HourlyOptionData>? Hourly = null);

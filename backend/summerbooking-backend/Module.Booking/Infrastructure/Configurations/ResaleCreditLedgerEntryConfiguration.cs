@@ -92,7 +92,7 @@ public sealed class ResaleCreditLedgerEntryConfiguration : IEntityTypeConfigurat
 			.IsDescending(false, false, true);
 
 		// Overload con nome: due HasIndex sulle stesse colonne senza nome sono LO STESSO indice per EF,
-		// e il secondo ne sovrascrive nome, filtro e unicità. Fino al 2026-10-06 a DB ne esisteva uno solo.
+		// e il secondo ne sovrascrive nome, filtro e unicità.
 		builder.HasIndex(x => x.ResaleOfferId, "ix_booking_resale_credit_ledger_offer")
 			.HasDatabaseName("ix_booking_resale_credit_ledger_offer");
 

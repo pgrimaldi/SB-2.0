@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Module.Catalog.Application.Abstractions;
 using Module.Catalog.Application.Services;
 using Shared.Infrastructure;
@@ -8,7 +9,7 @@ using Shared.Infrastructure;
 namespace Module.Catalog.Infrastructure.Infras;
 
 /// <summary>
-/// Job notturno di Catalog (alle 00:05 ora italiana): azzera i contatori del banner sconto e ricostruisce tutta la
+/// Job notturno di Catalog, all'ora italiana di <see cref="CatalogJobOptions.NightlyAt"/>: azzera i contatori del banner sconto e ricostruisce tutta la
 /// proiezione di ricerca (così si aggiornano anche i prezzi «da» che dipendono dal giorno) e tutti gli snapshot di
 /// configurazione. All'avvio dell'host ricostruisce
 /// subito la proiezione (pochi secondi), così dopo una migrazione dei dati la ricerca è già allineata. Gira nel processo dell'host
@@ -17,14 +18,16 @@ namespace Module.Catalog.Infrastructure.Infras;
 public sealed class CatalogNightlyJob : BackgroundService
 {
 	private static readonly TimeZoneInfo Rome = TimeZoneInfo.FindSystemTimeZoneById("Europe/Rome");
-	private static readonly TimeSpan RunAt = new(0, 5, 0);
 
 	private readonly IServiceScopeFactory _scopes;
 	private readonly IDateTimeProvider _clock;
 	private readonly ILogger<CatalogNightlyJob> _logger;
 
-	public CatalogNightlyJob(IServiceScopeFactory scopes, IDateTimeProvider clock, ILogger<CatalogNightlyJob> logger)
+	private readonly TimeSpan _runAt;
+
+	public CatalogNightlyJob(IServiceScopeFactory scopes, IDateTimeProvider clock, ILogger<CatalogNightlyJob> logger, IOptions<CatalogJobOptions> options)
 	{
+		_runAt = options.Value.NightlyAt;
 		_scopes = scopes;
 		_clock = clock;
 		_logger = logger;
@@ -72,10 +75,10 @@ public sealed class CatalogNightlyJob : BackgroundService
 		}
 	}
 
-	private static DateTime NextRunUtc(DateTime nowUtc)
+	private DateTime NextRunUtc(DateTime nowUtc)
 	{
 		var local = TimeZoneInfo.ConvertTimeFromUtc(nowUtc, Rome);
-		var candidate = local.Date + RunAt;
+		var candidate = local.Date + _runAt;
 		if (candidate <= local)
 			candidate = candidate.AddDays(1);
 		return TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(candidate, DateTimeKind.Unspecified), Rome);

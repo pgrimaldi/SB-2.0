@@ -59,7 +59,7 @@ public sealed class PrinterDepartmentConfiguration : IEntityTypeConfiguration<Pr
 			.HasDatabaseName("uq_fiscalprint_printer_departments_number");
 
 		// Overload con nome: due HasIndex sulle stesse colonne senza nome sono LO STESSO indice per EF,
-		// e il secondo ne sovrascrive nome, filtro e unicità. Fino al 2026-10-06 a DB ne esisteva uno solo.
+		// e il secondo ne sovrascrive nome, filtro e unicità.
 		builder.HasIndex(x => new { x.PrinterId, x.VatRate }, "uq_fiscalprint_printer_departments_rate")
 			.IsUnique()
 			.HasFilter("deleted_at IS NULL")

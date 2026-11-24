@@ -23,8 +23,7 @@ public static class WalletTransactionItemConfiguration
 
 		// Riusa TransactionId come FK reale della relazione owned (come LedgerEntryLineConfiguration). Senza
 		// WithOwner().HasForeignKey(...) EF crea una shadow property con colonna propria (wallet_transaction_id),
-		// che porta la FK vera, e lascia transaction_id come colonna duplicata senza vincolo: era lo stato del
-		// DB fino al 2026-10-06 (migration FixOwnedItemsForeignKeys).
+		// che porta la FK vera, e lascia transaction_id come colonna duplicata senza vincolo.
 		builder.WithOwner().HasForeignKey(x => x.TransactionId);
 
 		builder.Property(x => x.TransactionId)

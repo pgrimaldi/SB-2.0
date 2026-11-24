@@ -105,10 +105,9 @@ public sealed class VoiceCallRecordConfiguration : IEntityTypeConfiguration<Voic
 			.HasColumnName("duration_seconds")
 			.HasComment("Durata conversazione (ended_at - answered_at) in secondi.");
 
-		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a
-		// schema (nessuna convenzione EF globale lo applica, verificato in ModuleDbContextConventions
-		// - solo converter UTC e query filter soft-delete) - un ETL che omette queste colonne
-		// dall'INSERT (comportamento normale, per lasciare scattare il default) falliva NOT NULL.
+		// Default now() a schema su created_at/updated_at: nessuna convenzione EF globale lo applica
+		// (ModuleDbContextConventions mette solo il converter UTC e il query filter soft-delete), e un ETL
+		// che omette queste colonne dall'INSERT per lasciare scattare il default fallirebbe sul NOT NULL.
 		builder.Property(x => x.CreatedAt)
 			.HasColumnName("created_at")
 			.IsRequired()
@@ -127,7 +126,7 @@ public sealed class VoiceCallRecordConfiguration : IEntityTypeConfiguration<Voic
 			.HasDatabaseName("uq_switchboard_voice_call_records_public_id");
 
 		// Overload con nome: due HasIndex sulle stesse colonne senza nome sono LO STESSO indice per EF,
-		// e il secondo ne sovrascrive nome, filtro e unicità. Fino al 2026-10-06 a DB ne esisteva uno solo.
+		// e il secondo ne sovrascrive nome, filtro e unicità.
 		builder.HasIndex(x => new { x.ConfigId, x.StartedAt }, "ix_switchboard_voice_call_records_config_started")
 			.IsDescending(false, true)
 			.HasDatabaseName("ix_switchboard_voice_call_records_config_started");

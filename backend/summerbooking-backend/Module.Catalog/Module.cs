@@ -1,4 +1,4 @@
-﻿using BuildingBlocks.Infrastructure.Storage;
+using BuildingBlocks.Infrastructure.Storage;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +8,7 @@ using Module.Catalog.Application.Services;
 using Module.Catalog.Endpoints;
 using Module.Catalog.Infrastructure.Infras;
 using Module.Catalog.Infrastructure.Repositories;
+using Shared.Contracts.Catalog;
 using Shared.Contracts.Events;
 using Shared.Contracts.Identity;
 
@@ -43,6 +44,7 @@ public static class Module
 		services.AddScoped<IPublicCatalogRepository, PublicCatalogRepository>();
 		services.AddScoped<ISearchProjection, SearchProjection>();
 		services.AddScoped<IConfigSnapshotRepository, ConfigSnapshotRepository>();
+		services.Configure<CatalogJobOptions>(configuration.GetSection(CatalogJobOptions.Section));
 		services.AddHostedService<CatalogNightlyJob>();
 		services.ConfigureSwaggerGen(CatalogOpenApi.Configure);
 		services.AddHttpClient(OpenMeteoWeather.HttpClientName, c => c.Timeout = TimeSpan.FromSeconds(10));
@@ -86,14 +88,22 @@ public static class Module
 		services.AddScoped<PublicShowcaseService>();
 		services.AddScoped<PublicBathhouseService>();
 		services.AddScoped<QuoteService>();
+		services.AddScoped<BookingCatalog>();
+		services.AddScoped<IBookingCatalog>(sp => sp.GetRequiredService<BookingCatalog>());
+		services.AddScoped<IQuoteCalculator>(sp => sp.GetRequiredService<BookingCatalog>());
+		services.AddScoped<IBookingServices>(sp => sp.GetRequiredService<BookingCatalog>());
+		services.AddScoped<IDiscountRedemption>(sp => sp.GetRequiredService<BookingCatalog>());
 		services.AddScoped<ConfigSnapshotBuilder>();
 		services.AddSingleton<ConfigSnapshotService>();
+		services.AddScoped<SnapshotReadService>();
 
 		// Gestori degli eventi che pubblica Identity: titolare, prenotazione online, abbonamento, «mi piace».
 		services.AddScoped<IIntegrationEventHandler<PropertyOwnerAssigned>, PropertyOwnerAssignedHandler>();
 		services.AddScoped<IIntegrationEventHandler<PropertyOnlineReservationSet>, PropertyOnlineReservationSetHandler>();
 		services.AddScoped<IIntegrationEventHandler<PropertySubscriptionChanged>, PropertySubscriptionChangedHandler>();
 		services.AddScoped<IIntegrationEventHandler<BathhouseLikeChanged>, BathhouseLikeChangedHandler>();
+		services.AddScoped<IIntegrationEventHandler<Shared.Contracts.Booking.ResaleCreditEarned>, ResaleVoucherHandler>();
+		services.AddScoped<IIntegrationEventHandler<Shared.Contracts.Booking.ResaleCreditReversed>, ResaleVoucherHandler>();
 		services.AddScoped<MapProjection>();
 		services.AddScoped<MapSettingsService>();
 		services.AddScoped<MapEditorService>();

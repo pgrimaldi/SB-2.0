@@ -60,6 +60,13 @@ public static class SecuritySetup
 				o.MapInboundClaims = false;
 				o.TokenValidationParameters = Parameters(jwt, jwt.UserAudience, jwt.UserKeys, "Jwt:UserKeys");
 				o.Events = ProblemEvents();
+				// i WebSocket del canale in tempo reale non mandano header: il token arriva in querystring
+				o.Events.OnMessageReceived = context =>
+				{
+					if (context.Request.Path.StartsWithSegments("/hubs") && context.Request.Query["access_token"].FirstOrDefault() is { Length: > 0 } token)
+						context.Token = token;
+					return Task.CompletedTask;
+				};
 			})
 			.AddJwtBearer(AuthSchemes.ApiBearer, o =>
 			{

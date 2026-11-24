@@ -123,9 +123,9 @@ Correzioni rispetto al legacy:
 - **Default**: `false` / `0`.
 - **Nullabile**: No.
 - **Relazioni**: movimento sulla tessera prepagata (Payment, contratto da definire).
-- **Note**: le tre modalità di credito sono **indipendenti** (checkbox nel front). La risposta BK-24 parlava di
-  «voucher o ricarica tessera scelto dal gestore una volta»: il front permette di attivarle insieme. Allineato al
-  front; se il committente le vuole esclusive basta un vincolo `CHECK`.
+- **Note**: le tre modalità di credito sono **indipendenti** e si possono attivare insieme (checkbox nel front).
+  La risposta BK-24 parlava di «voucher o ricarica tessera scelto dal gestore una volta»: deciso il 2026-11-05 di
+  seguire il front, nessun vincolo di esclusività.
 
 ### created_at / updated_at / deleted_at
 - **Legacy**: `configurations.createdAt` / `updatedAt` / —

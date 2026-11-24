@@ -9,8 +9,8 @@ public enum RetentionAction
 	ArchiveCold = 3,
 
 	/// <summary>
-	/// Rimuovi l'<b>oggetto dallo storage</b> (non la riga). Introdotta dalla politica sui file del
-	/// 2026-10-01: le tre azioni precedenti agiscono tutte su una riga, e <c>archive_cold</c> sposta la
+	/// Rimuovi l'<b>oggetto dallo storage</b> (non la riga). Serve ai file: <c>delete_row</c>,
+	/// <c>null_fields</c> e <c>anonymize</c> agiscono tutte su una riga, e <c>archive_cold</c> sposta la
 	/// riga, non il file.
 	/// <para>
 	/// Vincolo applicativo (non esprimibile a schema): la cancellazione non va eseguita in linea ma

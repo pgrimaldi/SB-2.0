@@ -7,8 +7,25 @@ namespace Module.Identity.Application.Services;
 public sealed class UserDirectory : IUserDirectory
 {
 	private readonly IAccountRepository _accounts;
+	private readonly IPasswordHasher _hasher;
 
-	public UserDirectory(IAccountRepository accounts) => _accounts = accounts;
+	public UserDirectory(IAccountRepository accounts, IPasswordHasher hasher)
+	{
+		_accounts = accounts;
+		_hasher = hasher;
+	}
+
+	public async Task<bool> VerifyPasswordAsync(Guid userId, string password, CancellationToken ct = default)
+	{
+		var account = await _accounts.GetByPublicIdAsync(userId, ct);
+		return account?.PasswordHash is { } hash && !string.IsNullOrEmpty(password) && _hasher.Verify(hash, password) != PasswordCheck.Failed;
+	}
+
+	public async Task<UserResourceScope> GetResourceScopeAsync(Guid userId, CancellationToken ct = default)
+	{
+		var account = await _accounts.GetByPublicIdAsync(userId, ct);
+		return account is null ? new UserResourceScope(false, []) : new UserResourceScope(account.IsResourceScopeRestricted, account.ResourceScopes);
+	}
 
 	public async Task<UserSummary?> FindAsync(Guid userId, CancellationToken ct = default)
 	{

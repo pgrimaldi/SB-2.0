@@ -1,4 +1,4 @@
-﻿namespace Shared.Security;
+namespace Shared.Security;
 
 /// <summary>
 /// Permessi verificati dagli endpoint (policy <c>perm:&lt;codice&gt;</c>). La matrice ruolo→permessi è
@@ -21,12 +21,25 @@ public static class Permissions
 	public const string InventoryManage = "inventory.manage";
 	public const string AgreementsManage = "agreements.manage";
 	public const string RevenueManage = "revenue.manage";
+	public const string BookingsRead = "bookings.read";
+	public const string BookingsAmounts = "bookings.amounts";
+	public const string BookingsList = "bookings.list";
+	public const string BookingsPlanner = "bookings.planner";
+	public const string BookingsWrite = "bookings.write";
+	public const string BookingsMove = "bookings.move";
+	public const string BookingsOnline = "bookings.online";
+	public const string BookingsPricing = "bookings.pricing";
+	public const string BookingsCheckIn = "bookings.checkin";
+	public const string BookingsDelete = "bookings.delete";
+	public const string BookingsCleanup = "bookings.cleanup";
+	public const string PaymentsRecord = "payments.record";
 
 	public static readonly IReadOnlyList<string> All =
 	[
 		StaffManage, SecurityManage, CustomersRead, CustomersContacts, CustomersWrite,
 		ContractsAccept, AuditRead, PlatformManage,
 		CatalogRead, CatalogSettings, CatalogPricing, InventoryRead, InventoryManage, AgreementsManage, RevenueManage,
+		BookingsRead, BookingsList, BookingsPlanner, BookingsAmounts, BookingsWrite, BookingsMove, BookingsOnline, BookingsPricing, BookingsCheckIn, BookingsDelete, BookingsCleanup, PaymentsRecord,
 	];
 
 	public static string PolicyName(string permission) => $"perm:{permission}";

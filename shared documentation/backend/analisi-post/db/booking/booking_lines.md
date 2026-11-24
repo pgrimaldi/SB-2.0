@@ -1,5 +1,7 @@
 # Tabella `booking_lines`
 
+> **Applicato il 2026-11-05** (migration `BookingApiFoundation`): check-in e check-out spostati sulla testata (colonne e indice `ix_booking_lines_checkin_open` tolti); nuove `spot_type_snapshot`, `spot_row_snapshot`, `spot_column_snapshot` (ricollegamento dopo «Reimposta mappa») e `manual_price` (prezzo del pacchetto scritto a mano, si perde cambiando le date). Gli ingressi sono in [`booking_entrances`](booking_entrances.md).
+
 > **Dominio**: C1 — `booking` · **sottoarea**: — (nucleo) · **schema**: `booking` · **nome flat**:
 > `booking_lines` · **forma canonica**: `booking.lines`.
 >

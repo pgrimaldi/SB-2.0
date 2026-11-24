@@ -26,10 +26,9 @@ public static class LedgerEntryLineConfiguration
 		// WithOwner().HasForeignKey(...), EF Core NON usa la proprieta' scalare EntryId per la FK
 		// della owned collection: crea invece una shadow property/colonna SEPARATA
 		// (ledger_entry_id, con la vera FK NOT NULL) e lascia entry_id come colonna duplicata,
-		// slegata, mai valorizzata da nessun vincolo - bug reale osservato il 2026-09-14: l'ETL di
-		// migrazione valorizzava solo entry_id (l'unica colonna nota al modello/alla spec), e ogni
-		// singola riga falliva il NOT NULL su ledger_entry_id (colonna "fantasma" invisibile
-		// all'entity, ma reale a schema).
+		// slegata, mai valorizzata da nessun vincolo: l'ETL di migrazione valorizza solo entry_id
+		// (l'unica colonna nota al modello/alla spec), e ogni riga fallirebbe il NOT NULL su
+		// ledger_entry_id (colonna "fantasma" invisibile all'entity, ma reale a schema).
 		builder.WithOwner().HasForeignKey(x => x.EntryId);
 
 		builder.Property(x => x.EntryId)

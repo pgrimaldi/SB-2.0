@@ -1,4 +1,4 @@
-﻿namespace Shared.Contracts.Audit;
+namespace Shared.Contracts.Audit;
 
 /// <summary>Un codice azione del catalogo con la categoria in cui viene registrato.</summary>
 public sealed record AuditActionDefinition(string Code, AuditCategory Category, string SourceModule);
@@ -165,6 +165,70 @@ public static class AuditActionCodes
 		public const string TableServiceDuplicated = "catalog.table_service_duplicated";
 	}
 
+	public static class Booking
+	{
+		public const string Module = "booking";
+
+		public static class Targets
+		{
+			public const string Reservation = "reservation";
+			public const string SpotHold = "spot_hold";
+			public const string Group = "group";
+			public const string SharingSettings = "sharing_settings";
+			public const string SharingCredit = "sharing_credit";
+		}
+
+		public const string ReservationCreated = "booking.reservation_created";
+		public const string ReservationUpdated = "booking.reservation_updated";
+		public const string ReservationMoved = "booking.reservation_moved";
+		public const string ReservationPriceSet = "booking.reservation_price_set";
+		public const string ReservationTrashed = "booking.reservation_trashed";
+		public const string ReservationRestored = "booking.reservation_restored";
+		public const string ReservationPurged = "booking.reservation_purged";
+		public const string ReservationCheckedIn = "booking.reservation_checked_in";
+		public const string ReservationCheckedOut = "booking.reservation_checked_out";
+		public const string EntranceRemoved = "booking.entrance_removed";
+		public const string SpotHoldCreated = "booking.spot_hold_created";
+		public const string SpotHoldRemoved = "booking.spot_hold_removed";
+		public const string ReservationsCleanedUp = "booking.reservations_cleaned_up";
+		public const string ReservationRenewed = "booking.reservation_renewed";
+		public const string ReservationSplit = "booking.reservation_split";
+		public const string ReservationsSwapped = "booking.reservations_swapped";
+		public const string GroupCreated = "booking.group_created";
+		public const string GroupRenamed = "booking.group_renamed";
+		public const string GroupMembersChanged = "booking.group_members_changed";
+		public const string GroupDeleted = "booking.group_deleted";
+		public const string GroupPaymentRecorded = "booking.group_payment_recorded";
+		public const string ReservationCancelledBySpotRemoval = "booking.reservation_cancelled_spot_removed";
+		public const string ReservationRelinked = "booking.reservation_relinked";
+		public const string AttachmentAdded = "booking.attachment_added";
+		public const string AttachmentRemoved = "booking.attachment_removed";
+		public const string OnlineConfirmed = "booking.online_confirmed";
+		public const string OnlineRejected = "booking.online_rejected";
+		public const string OnlineExpired = "booking.online_expired";
+		public const string OnlinePaymentExpired = "booking.online_payment_expired";
+		public const string CustomerCancelled = "booking.customer_cancelled";
+		public const string DaysReleased = "booking.days_released";
+		public const string DaysWithdrawn = "booking.days_withdrawn";
+		public const string SharingSettingsUpdated = "booking.sharing_settings_updated";
+		public const string SharingCreditAdjusted = "booking.sharing_credit_adjusted";
+	}
+
+	public static class Payment
+	{
+		public const string Module = "payment";
+
+		public static class Targets
+		{
+			public const string LedgerEntry = "ledger_entry";
+		}
+
+		public const string PaymentRecorded = "payment.payment_recorded";
+		public const string PaymentVoided = "payment.payment_voided";
+		public const string PaymentsRefunded = "payment.payments_refunded";
+		public const string PaymentsTransferred = "payment.payments_transferred";
+	}
+
 	public static class Audit
 	{
 		public const string Module = "audit";
@@ -284,6 +348,44 @@ public static class AuditActionCodes
 		new(Catalog.ServiceDuplicated, AuditCategory.Operator, Catalog.Module),
 		new(Catalog.AutomaticPriceDuplicated, AuditCategory.Operator, Catalog.Module),
 		new(Catalog.TableServiceDuplicated, AuditCategory.Operator, Catalog.Module),
+		new(Booking.ReservationCreated, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationUpdated, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationMoved, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationPriceSet, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationTrashed, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationRestored, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationPurged, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationCheckedIn, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationCheckedOut, AuditCategory.Operator, Booking.Module),
+		new(Booking.EntranceRemoved, AuditCategory.Operator, Booking.Module),
+		new(Booking.SpotHoldCreated, AuditCategory.Operator, Booking.Module),
+		new(Booking.SpotHoldRemoved, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationsCleanedUp, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationRenewed, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationSplit, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationsSwapped, AuditCategory.Operator, Booking.Module),
+		new(Booking.GroupCreated, AuditCategory.Operator, Booking.Module),
+		new(Booking.GroupRenamed, AuditCategory.Operator, Booking.Module),
+		new(Booking.GroupMembersChanged, AuditCategory.Operator, Booking.Module),
+		new(Booking.GroupDeleted, AuditCategory.Operator, Booking.Module),
+		new(Booking.GroupPaymentRecorded, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationCancelledBySpotRemoval, AuditCategory.Operator, Booking.Module),
+		new(Booking.ReservationRelinked, AuditCategory.Operator, Booking.Module),
+		new(Booking.AttachmentAdded, AuditCategory.Operator, Booking.Module),
+		new(Booking.AttachmentRemoved, AuditCategory.Operator, Booking.Module),
+		new(Booking.OnlineConfirmed, AuditCategory.Operator, Booking.Module),
+		new(Booking.OnlineRejected, AuditCategory.Operator, Booking.Module),
+		new(Booking.OnlineExpired, AuditCategory.Operator, Booking.Module),
+		new(Booking.OnlinePaymentExpired, AuditCategory.Operator, Booking.Module),
+		new(Booking.CustomerCancelled, AuditCategory.Operator, Booking.Module),
+		new(Booking.DaysReleased, AuditCategory.Operator, Booking.Module),
+		new(Booking.DaysWithdrawn, AuditCategory.Operator, Booking.Module),
+		new(Booking.SharingSettingsUpdated, AuditCategory.Operator, Booking.Module),
+		new(Booking.SharingCreditAdjusted, AuditCategory.Operator, Booking.Module),
+		new(Payment.PaymentRecorded, AuditCategory.Operator, Payment.Module),
+		new(Payment.PaymentVoided, AuditCategory.Operator, Payment.Module),
+		new(Payment.PaymentsRefunded, AuditCategory.Operator, Payment.Module),
+		new(Payment.PaymentsTransferred, AuditCategory.Operator, Payment.Module),
 		new(Audit.EntriesExported, AuditCategory.Operator, Audit.Module),
 		new(Audit.PlatformEntriesExported, AuditCategory.Platform, Audit.Module),
 	];

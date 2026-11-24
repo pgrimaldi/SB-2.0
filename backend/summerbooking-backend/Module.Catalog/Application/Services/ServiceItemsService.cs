@@ -234,24 +234,26 @@ public sealed class ServiceItemsService
 		item.SetTranslations(ContentMapping.Translations(r.Translations));
 		var bookingOptions = (r.BookingOptions ?? []).Select(o => new ServiceBookingOptionData(
 			o.StartsOn, o.EndsOn, ContentMapping.Weekdays(o.Weekdays), o.ManagementFrom, o.ManagementTo, o.OnlineFrom, o.OnlineTo,
-			o.MaxPerHour, o.MaxPerDay, o.MaxPerSlot, o.IntervalMinutes, o.MinItems, o.MaxItems, o.Hourly is { } h ? Hourly(h) : null)).ToList();
+			o.MaxPerHour, o.MaxPerDay, o.MaxPerSlot, o.IntervalMinutes, o.MinItems, o.MaxItems,
+			o.Hourly?.Select(h => Hourly(h, o.MaxPerSlot, o.HasFixedTimeSlots)).ToList())).ToList();
 		item.ReplaceBookingOptions(bookingOptions);
 		item.SetPeriodPrices(periodPrices);
 		item.SetSectors(r.IsSectorRestricted ? await ContentMapping.SectorIdsAsync(_sectors, propertyId, r.SectorIds, ct) : []);
-		item.ReplaceHourly((r.HourlyPrices ?? []).SelectMany(p => (p.Options ?? []).Select(o => (p.PeriodKey, Hourly(o)))).ToList(), bookingOptions);
+		item.ReplaceHourly((r.HourlyPrices ?? []).SelectMany(p => (p.Options ?? []).Select(o => (p.PeriodKey, Hourly(o, p.MaxPerSlot, p.HasFixedTimeSlots)))).ToList(), bookingOptions);
 	}
 
-	private static HourlyOptionData Hourly(HourlyOptionDto o) => new(
+	/// <summary>Fasce fisse e massimo per fascia sono del periodo: si scrivono uguali su ogni sua impostazione.</summary>
+	private static HourlyOptionData Hourly(HourlyOptionDto o, short? maxPerSlot, bool fixedSlots) => new(
 		o.TimeFrom, o.TimeTo, ContentMapping.Weekdays(o.Weekdays),
 		(o.Slots ?? []).OrderBy(s => s.DurationMinutes).Select(s => new HourlySlotData(s.DurationMinutes, s.IsEnabled, s.Price)).ToList(),
-		o.CustomSlot is { } c ? new HourlySlotData(c.DurationMinutes, c.IsEnabled, c.Price) : null, o.VatRate, o.MaxPerSlot, o.HasFixedTimeSlots);
+		o.CustomSlot is { } c ? new HourlySlotData(c.DurationMinutes, c.IsEnabled, c.Price) : null, o.VatRate, maxPerSlot, fixedSlots);
 
 	private static HourlyOptionDto HourlyDto(ServiceHourlyOption o)
 	{
 		var slots = o.Slots.Where(s => s.DeletedAt is null).OrderBy(s => s.SortOrder).ToList();
 		static HourlySlotDto Slot(ServiceSaleItemTimeSlot s) => new(s.DurationMinutes ?? 0, s.IsActive, s.Price, s.PublicId);
 		return new HourlyOptionDto(o.TimeFrom, o.TimeTo, ContentMapping.CodesOf(o.Weekdays), slots.Where(s => !s.IsCustom).Select(Slot).ToList(),
-			slots.FirstOrDefault(s => s.IsCustom) is { } custom ? Slot(custom) : null, o.VatRate, o.MaxPerSlot, o.HasFixedTimeSlots);
+			slots.FirstOrDefault(s => s.IsCustom) is { } custom ? Slot(custom) : null, o.VatRate);
 	}
 
 	private static ServiceSaleItemData Data(ServiceSaleItem s, int? iconId, long? iconAssetId) => new(
@@ -286,9 +288,11 @@ public sealed class ServiceItemsService
 			s.BookingOptions.OrderBy(o => o.SortOrder).Select(o => new BookingOptionDto(
 				o.StartsOn, o.EndsOn, ContentMapping.CodesOf(o.Weekdays), o.ManagementFrom, o.ManagementTo, o.OnlineFrom, o.OnlineTo, o.MaxPerHour,
 				o.MaxPerDay, o.MaxPerSlot, o.IntervalMinutes, o.MinItems, o.MaxItems,
-				o.HourlyOption is { DeletedAt: null } h ? HourlyDto(h) : null)).ToList(),
+				o.HourlyOptions.Where(h => h.DeletedAt is null).OrderBy(h => h.SortOrder).Select(HourlyDto).ToList() is { Count: > 0 } hours ? hours : null,
+				o.HourlyOptions.Any(h => h.DeletedAt is null && h.HasFixedTimeSlots))).ToList(),
 			s.HourlyOptions.Where(h => h.BookingOption is null && h.BookingOptionId is null).GroupBy(h => h.PeriodGroupKey).OrderBy(g => g.Key)
-				.Select(g => new HourlyPeriodDto(g.Key, g.OrderBy(h => h.SortOrder).Select(HourlyDto).ToList())).ToList());
+				.Select(g => new HourlyPeriodDto(g.Key, g.OrderBy(h => h.SortOrder).Select(HourlyDto).ToList(),
+					g.Any(h => h.HasFixedTimeSlots), g.Select(h => h.MaxPerSlot).FirstOrDefault(m => m is not null))).ToList());
 	}
 
 	private Task RecordAsync(string actionCode, ServiceSaleItem item, CancellationToken ct)

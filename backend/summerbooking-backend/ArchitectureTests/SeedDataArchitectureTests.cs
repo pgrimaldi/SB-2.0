@@ -11,19 +11,17 @@ namespace ArchitectureTests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Nasce da un difetto reale, trovato il 2026-09-30:
-/// <c>identity.access_roles.is_staff</c> era <c>true</c> per tutti e tredici i ruoli, mentre il seed
-/// ne dichiarava <c>false</c> due — <c>systemadmin</c> e <c>consumer</c>. La causa non era il seed,
-/// che era corretto, ma un <c>HasDefaultValue(true)</c> sulla colonna: <b>EF omette dall'INSERT le
-/// colonne il cui valore coincide col default CLR del tipo</b> (<c>false</c> per <c>bool</c>,
-/// <c>0</c> per i numerici), perche' non distingue "impostato a false" da "non impostato". Omessa la
-/// colonna, vince il default del database e il valore seminato evapora.
+/// Un <c>HasDefaultValue</c> su una colonna seminata fa evaporare i valori del seed: <b>EF omette
+/// dall'INSERT le colonne il cui valore coincide col default CLR del tipo</b> (<c>false</c> per
+/// <c>bool</c>, <c>0</c> per i numerici), perche' non distingue "impostato a false" da "non
+/// impostato". Omessa la colonna, vince il default del database. Esempio: con
+/// <c>HasDefaultValue(true)</c> su <c>identity.access_roles.is_staff</c>, i ruoli <c>systemadmin</c>
+/// e <c>consumer</c>, che il seed dichiara <c>false</c>, finirebbero a <c>true</c>.
 /// </para>
 /// <para>
-/// Il difetto e' <b>silenzioso</b>: nessun errore, nessuna migration che fallisce. Si manifesta mesi
-/// dopo, quando qualcuno legge quel flag — e nel caso di <c>is_staff</c> avrebbe dichiarato invalidi
-/// 5.987 utenti <c>consumer</c> legittimi, oppure fatto fallire ogni nuova registrazione dall'app.
-/// Undici valori su tredici erano giusti per coincidenza, non per controllo.
+/// Il difetto e' <b>silenzioso</b>: nessun errore, nessuna migration che fallisce. Si manifesta solo
+/// quando qualcuno legge quel flag — nel caso di <c>is_staff</c> dichiarerebbe invalidi gli utenti
+/// <c>consumer</c> legittimi, oppure farebbe fallire ogni nuova registrazione dall'app.
 /// </para>
 /// <para>
 /// Un controllo sull'entita' che legge il flag non lo avrebbe intercettato, perche' quel codice e'

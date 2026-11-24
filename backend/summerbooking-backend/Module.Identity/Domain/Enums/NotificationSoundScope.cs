@@ -5,10 +5,8 @@ namespace Module.Identity.Domain.Enums;
 /// (<see cref="Entities.Account.EnabledNotificationSounds"/>).
 /// </summary>
 /// <remarks>
-/// Sostituisce quattro colonne booleane parallele sullo stesso argomento.
-/// Lo schema usava gia' questo pattern altrove
-/// (enabled_payment_methods): qui non era stato applicato, ed era l'incoerenza di disegno da
-/// chiudere. Aggiungere un quinto ambito domani sara' un valore di enum, non una quinta colonna.
+/// Array di enum invece di colonne booleane parallele sullo stesso argomento, come altrove nello
+/// schema (enabled_payment_methods): aggiungere un ambito e' un valore di enum, non una colonna.
 /// </remarks>
 public enum NotificationSoundScope
 {

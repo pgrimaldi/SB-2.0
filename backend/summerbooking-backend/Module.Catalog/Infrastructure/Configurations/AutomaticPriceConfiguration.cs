@@ -79,11 +79,6 @@ public sealed class AutomaticPriceConfiguration : IEntityTypeConfiguration<Autom
 			.HasDefaultValue(false)
 			.HasComment("true = per ogni servizio dell'ordine; false = una volta per ordine.");
 
-		builder.Property(x => x.AppliesToAllServices)
-			.HasColumnName("applies_to_all_services")
-			.IsRequired()
-			.HasDefaultValue(true)
-			.HasComment("true = tutti i servizi; false = solo quelli di automatic_price_services.");
 
 		builder.Property(x => x.IsSectorRestricted)
 			.HasColumnName("is_sector_restricted")

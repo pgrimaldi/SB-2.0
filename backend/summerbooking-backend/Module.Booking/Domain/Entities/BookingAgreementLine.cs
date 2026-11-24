@@ -1,4 +1,4 @@
-﻿using Module.Booking.Domain.Enums;
+using Module.Booking.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Booking.Domain.Entities;
@@ -30,4 +30,22 @@ public sealed class BookingAgreementLine : IAuditable, ISoftDeletable
 	public BookingLine? BookingLine { get; private set; }
 
 	private BookingAgreementLine() { }
+
+	/// <summary>Convenzione applicata a una riga: listino della struttura (regular) o voucher.</summary>
+	public static BookingAgreementLine ForLine(
+		Reservation reservation, BookingLine line, Guid partnerId, Guid priceListId, Enums.AgreementLineType type, decimal appliedPrice)
+		=> new()
+		{
+			PublicId = Guid.CreateVersion7(),
+			Reservation = reservation,
+			BookingLine = line,
+			PropertyId = reservation.PropertyId,
+			AgreementPartnerId = partnerId,
+			AgreementPriceListId = priceListId,
+			CustomerId = reservation.CustomerId,
+			ListType = type,
+			Quantity = 1,
+			AppliedPrice = appliedPrice,
+			IsUsedAsDiscount = type == Enums.AgreementLineType.Voucher,
+		};
 }

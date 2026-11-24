@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Module.Payment.Domain.Enums;
 using Module.Payment.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -27,7 +28,7 @@ namespace Module.Payment.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment", "ledger_direction", new[] { "in", "out" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment", "ledger_entry_type", new[] { "deposit", "payment", "expense", "refund", "adjustment" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment", "ledger_line_kind", new[] { "package", "additional_item", "service", "agreement_voucher", "surcharge", "discount", "unspecified" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment", "ledger_source", new[] { "manual", "online_gateway", "payment_link", "pos_ofsale", "pos_teamsystem", "wallet", "agreement" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment", "ledger_source", new[] { "manual", "online_gateway", "payment_link", "pos_ofsale", "pos_teamsystem", "wallet", "agreement", "reservation_split" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment", "online_payment_type", new[] { "pay_now", "advance_balance", "pay_at_property" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment", "payment_mode", new[] { "cash", "credit_card", "bank_transfer", "other" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment", "payment_request_origin", new[] { "booking_detail", "booking_creation", "unknown" });
@@ -130,7 +131,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("paid_amount")
                         .HasComment("Importo effettivamente incassato (catturato).");
 
-                    b.Property<int>("PaymentType")
+                    b.Property<OnlinePaymentType>("PaymentType")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.online_payment_type")
                         .HasColumnName("payment_type")
@@ -159,14 +160,14 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("reservation_public_id")
                         .HasComment("public_id di booking.booking_reservations, copiato — nessuna FK cross-schema; prenotazione pagata.");
 
-                    b.Property<int>("SalesChannel")
+                    b.Property<SalesChannel>("SalesChannel")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.sales_channel")
                         .HasColumnName("sales_channel")
                         .HasDefaultValueSql("'redirect_checkout'")
                         .HasComment("Canale di partenza del pagamento, determina il tasso di commissione applicato.");
 
-                    b.Property<int>("Status")
+                    b.Property<ChargeStatus>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.charge_status")
                         .HasColumnName("status")
@@ -197,7 +198,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("stripe_status")
                         .HasComment("Stato grezzo del PaymentIntent Stripe conservato verbatim, snapshot per diagnostica/riconciliazione.");
 
-                    b.Property<int?>("SubjectKind")
+                    b.Property<TransactionSubject?>("SubjectKind")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.transaction_subject")
                         .HasColumnName("subject_kind")
@@ -277,7 +278,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("deleted_at")
                         .HasComment("Soft-delete alla cessazione dello stabilimento.");
 
-                    b.Property<int>("OnboardingState")
+                    b.Property<ConnectOnboardingState>("OnboardingState")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.connect_onboarding_state")
                         .HasColumnName("onboarding_state")
@@ -436,7 +437,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("deleted_at")
                         .HasComment("Soft-delete alla cessazione dello stabilimento.");
 
-                    b.Property<int>("Exemption")
+                    b.Property<CommissionExemption>("Exemption")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.commission_exemption")
                         .HasColumnName("exemption")
@@ -546,14 +547,14 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("deleted_at")
                         .HasComment("Esposto per uniformità: append-only (una correzione è una nuova riga adjustment, sempre NULL).");
 
-                    b.Property<int>("Direction")
+                    b.Property<LedgerDirection>("Direction")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.ledger_direction")
                         .HasColumnName("direction")
                         .HasDefaultValueSql("'in'")
                         .HasComment("Verso del denaro rispetto allo stabilimento; gli importi restano sempre positivi.");
 
-                    b.Property<int>("EntryType")
+                    b.Property<LedgerEntryType>("EntryType")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.ledger_entry_type")
                         .HasColumnName("entry_type")
@@ -579,7 +580,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasDefaultValueSql("now()")
                         .HasComment("Data/ora contabile del movimento, decorrenza retention.");
 
-                    b.Property<int?>("PaymentMode")
+                    b.Property<PaymentMode?>("PaymentMode")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.payment_mode")
                         .HasColumnName("payment_mode")
@@ -606,7 +607,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("reservation_public_id")
                         .HasComment("public_id di booking.booking_reservations, copiato — nessuna FK cross-schema; prenotazione del movimento.");
 
-                    b.Property<int>("Source")
+                    b.Property<LedgerSource>("Source")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.ledger_source")
                         .HasColumnName("source")
@@ -737,7 +738,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("expires_at")
                         .HasComment("Scadenza del link; NULL se senza scadenza.");
 
-                    b.Property<int>("Origin")
+                    b.Property<PaymentRequestOrigin>("Origin")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.payment_request_origin")
                         .HasColumnName("origin")
@@ -764,7 +765,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("reservation_public_id")
                         .HasComment("public_id di booking.booking_reservations, copiato — nessuna FK cross-schema; il link può precedere la prenotazione.");
 
-                    b.Property<int>("Status")
+                    b.Property<PaymentRequestStatus>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.payment_request_status")
                         .HasColumnName("status")
@@ -877,7 +878,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("ledger_entry_ref")
                         .HasComment("public_id di payment.ledger_entries — correlazione debole (non FK EF) verso la riga contabile generata dall'addebito, valorizzata a posteriori dall'handler dell'evento.");
 
-                    b.Property<int>("PosSystem")
+                    b.Property<PosSystem>("PosSystem")
                         .HasColumnType("payment.pos_system")
                         .HasColumnName("pos_system")
                         .HasComment("Sistema POS di origine, esclusivo per riga.");
@@ -897,7 +898,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("reservation_public_id")
                         .HasComment("public_id di booking.booking_reservations, copiato — nessuna FK cross-schema; prenotazione al cui conto la spesa confluisce.");
 
-                    b.Property<int>("Status")
+                    b.Property<PosChargeStatus>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.pos_charge_status")
                         .HasColumnName("status")
@@ -1011,7 +1012,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("public_id")
                         .HasComment("Id pubblico stabile, per il gestionale e per eventuale riferimento da Fiskaly/Notification.");
 
-                    b.Property<int>("Reason")
+                    b.Property<RefundReason>("Reason")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.refund_reason")
                         .HasColumnName("reason")
@@ -1028,7 +1029,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("reservation_public_id")
                         .HasComment("public_id di booking.booking_reservations, copiato — nessuna FK cross-schema; prenotazione a cui il rimborso si riferisce.");
 
-                    b.Property<int>("Status")
+                    b.Property<RefundStatus>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.refund_status")
                         .HasColumnName("status")
@@ -1154,7 +1155,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("public_id")
                         .HasComment("Id pubblico stabile, esposto al cliente e copiato da Booking sulla riga servizio pagata col borsellino.");
 
-                    b.Property<int>("Status")
+                    b.Property<WalletStatus>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.wallet_status")
                         .HasColumnName("status")
@@ -1168,7 +1169,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasDefaultValueSql("now()")
                         .HasComment("Ultima modifica della riga.");
 
-                    b.Property<int>("WalletKind")
+                    b.Property<WalletKind>("WalletKind")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.wallet_kind")
                         .HasColumnName("wallet_kind")
@@ -1254,7 +1255,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("ledger_entry_ref")
                         .HasComment("public_id di payment.ledger_entries — correlazione debole (non FK EF) verso la riga contabile generata quando il movimento salda una prenotazione: valorizzata a posteriori dall'handler di PaymentRecorded, non in un'unica transazione con l'inserimento del movimento.");
 
-                    b.Property<int>("MovementType")
+                    b.Property<WalletMovementType>("MovementType")
                         .HasColumnType("payment.wallet_movement_type")
                         .HasColumnName("movement_type")
                         .HasComment("Verso del movimento: credit incrementa balance/lifetime_credited, debit li decrementa.");
@@ -1296,7 +1297,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("reverses_transaction_id")
                         .HasComment("Movimento stornato, per source = Reversal.");
 
-                    b.Property<int>("Source")
+                    b.Property<WalletMovementSource>("Source")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("payment.wallet_movement_source")
                         .HasColumnName("source")
@@ -1396,7 +1397,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("processed_at")
                         .HasComment("Istante in cui l'evento e' stato elaborato; NULL finche' e' received.");
 
-                    b.Property<int>("ProcessingStatus")
+                    b.Property<WebhookProcessingStatus>("ProcessingStatus")
                         .HasColumnType("payment.webhook_processing_status")
                         .HasColumnName("processing_status")
                         .HasComment("received (registrato), processed (effetti applicati), ignored (riconosciuto e volutamente non gestito), failed (da riprovare o esaminare).");
@@ -1406,7 +1407,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnName("property_id")
                         .HasComment("public_id di catalog.properties, se l'evento e' attribuibile a uno stabilimento — nullable perche' l'attribuzione avviene leggendo il payload e puo' non riuscire (es. eventi di piattaforma).");
 
-                    b.Property<int>("Provider")
+                    b.Property<WebhookProvider>("Provider")
                         .HasColumnType("payment.webhook_provider")
                         .HasColumnName("provider")
                         .HasComment("Gateway che ha inviato l'evento; oggi solo stripe.");
@@ -1516,7 +1517,7 @@ namespace Module.Payment.Infrastructure.Migrations
                                 .HasColumnName("is_allocated")
                                 .HasComment("True = la quota è una ripartizione proporzionale del movimento (stima), non un importo pagato distintamente per l'articolo.");
 
-                            b1.Property<int>("LineKind")
+                            b1.Property<LedgerLineKind>("LineKind")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("payment.ledger_line_kind")
                                 .HasColumnName("line_kind")

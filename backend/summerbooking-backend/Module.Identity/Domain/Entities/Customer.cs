@@ -81,6 +81,9 @@ public sealed class Customer : IAuditable, ISoftDeletable
 	}
 
 	public void UnlinkUser() => UserId = null;
+
+	/// <summary>Il contatto appartiene all'account di un cliente registrato.</summary>
+	public void LinkUser(long userId) => UserId ??= userId;
 }
 
 /// <summary>Campi anagrafici modificabili di un contatto.</summary>

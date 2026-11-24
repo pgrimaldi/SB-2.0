@@ -5,6 +5,13 @@
 > migrazione completa a zero errori** (6.163.412 righe migrate secondo l'ultimo report).
 > Rigenerabile con `utility/01-migrazione-test/scripts_colonne_vuote_documento.py`.
 >
+> **Aggiornamento 2026-11-05 (ricarica di Booking).** Dopo la migration `BookingApiFoundation` il modulo è stato
+> ricaricato: `booking.resource_consumptions` ora ha 5.406.963 righe (si aggiunge un consumo per riga di prenotazione e
+> giorno sulle postazioni esclusive: 1.603.336 giorni, 9.801 conflitti scritti come `released` e registrati negli scarti).
+> Check-in e uscita sono passati dalle righe alla testata (`booking.reservations`); le colonne nuove della testata
+> (conferma, sconto/incremento manuale, rinnovo/divisione) e `booking.entrances` sono del modello nuovo e restano vuote
+> finché non le popola il backend. Il resto del censimento è quello del 2026-10-03.
+>
 > Il censimento e il suo **perché** stanno entrambi qui: la Parte 1 dice quali
 > colonne sono vuote, la Parte 2 perché lo sono e se sia un errore — oggi su 166
 > colonne e 26 tabelle vuote i difetti aperti sono **zero**.
@@ -133,7 +140,7 @@ Distribuzione per schema:
 |---|---|
 | `remaining_period` | `booking.day_period` |
 
-### `booking.resource_consumptions` (3.809.485 righe)
+### `booking.resource_consumptions` (5.406.963 righe)
 
 | Colonna | Tipo |
 |---|---|
@@ -725,8 +732,8 @@ la mappatura, non una ricostruzione a posteriori.
 | `lines` | `area_seat_count` | 310.802 | Numero di posti di un'area: il legacy non lo registrava per riga di prenotazione. | no |  |
 | `resale_credit_ledger` | `note` | 1.547 | Nessuna mapping spec tocca la colonna: campo del modello nuovo, che il backend popola a runtime. | no |  |
 | `resale_offers` | `remaining_period` | 12.900 | `remaining_period` lasciato SEMPRE NULL: la logica "FullDay ceduto, Morning ripreso -> resta… | no |  |
-| `resource_consumptions` | `time_slot_id` | 3.809.485 | `time_slot_id` lasciato SEMPRE NULL: verificato altrove… | no |  |
-| `resource_consumptions` | `held_until` | 3.809.485 | Nessuna mapping spec tocca la colonna: campo del modello nuovo, che il backend popola a runtime. | no |  |
+| `resource_consumptions` | `time_slot_id` | 5.406.963 | `time_slot_id` lasciato SEMPRE NULL: verificato altrove… | no |  |
+| `resource_consumptions` | `held_until` | 5.406.963 | Nessuna mapping spec tocca la colonna: campo del modello nuovo, che il backend popola a runtime. | no |  |
 | `service_lines` | `booking_line_id` | 10.611 | Come sopra: il servizio non era mai legato a una postazione. | no |  |
 | `service_time_slots` | `time_slot_id` | 559 | `time_slot_id` resta sempre NULL per ora… | no |  |
 | `service_time_slots` | `slot_label_snapshot` | 559 | Nessuna mapping spec tocca la colonna: campo del modello nuovo, che il backend popola a runtime. | no |  |

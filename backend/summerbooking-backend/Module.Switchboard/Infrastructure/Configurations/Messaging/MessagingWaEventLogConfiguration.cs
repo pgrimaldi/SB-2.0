@@ -134,17 +134,16 @@ public sealed class MessagingWaEventLogConfiguration : IEntityTypeConfiguration<
 		// Idempotenza del webhook: Meta ripete gli eventi. NULLS NOT DISTINCT perché due righe con status
 		// entrambi NULL (eventi message_in) devono collidere. La scheda lo progettava come
 		// coalesce(status, ''), che su una colonna enum non si può scrivere; AreNullsDistinct(false) dà
-		// la stessa garanzia senza SQL a mano. Fino al 2026-10-06 l'indice non esisteva.
+		// la stessa garanzia senza SQL a mano.
 		builder.HasIndex(x => new { x.Wamid, x.EventType, x.Status }, "uq_switchboard_messaging_wa_event_logs_event")
 			.IsUnique()
 			.AreNullsDistinct(false)
 			.HasFilter("wamid IS NOT NULL")
 			.HasDatabaseName("uq_switchboard_messaging_wa_event_logs_event");
 
-		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a
-		// schema (nessuna convenzione EF globale lo applica, verificato in ModuleDbContextConventions
-		// - solo converter UTC e query filter soft-delete) - un ETL che omette queste colonne
-		// dall'INSERT (comportamento normale, per lasciare scattare il default) falliva NOT NULL.
+		// Default now() a schema su created_at/updated_at: nessuna convenzione EF globale lo applica
+		// (ModuleDbContextConventions mette solo il converter UTC e il query filter soft-delete), e un ETL
+		// che omette queste colonne dall'INSERT per lasciare scattare il default fallirebbe sul NOT NULL.
 		builder.Property(x => x.CreatedAt)
 			.HasColumnName("created_at")
 			.IsRequired()

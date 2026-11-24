@@ -97,8 +97,8 @@ public sealed class ServiceHourlyOptionConfiguration : IEntityTypeConfiguration<
 			.OnDelete(DeleteBehavior.Cascade);
 
 		builder.HasOne(x => x.BookingOption)
-			.WithOne(x => x.HourlyOption)
-			.HasForeignKey<ServiceHourlyOption>(x => x.BookingOptionId)
+			.WithMany(x => x.HourlyOptions)
+			.HasForeignKey(x => x.BookingOptionId)
 			.HasConstraintName("fk_catalog_service_hourly_options_booking_option")
 			.OnDelete(DeleteBehavior.Cascade);
 

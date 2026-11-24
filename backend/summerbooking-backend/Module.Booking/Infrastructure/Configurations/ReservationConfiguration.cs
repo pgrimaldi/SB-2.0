@@ -68,7 +68,7 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
 			.HasColumnType("booking.online_confirmation_state")
 			.IsRequired()
 			.HasDefaultValueSql("'not_required'")
-			.HasComment("Stato del flusso di conferma online via reservation_code.");
+			.HasComment("Conferma del gestore delle prenotazioni online che la richiedono: not_required, pending, confirmed.");
 
 		builder.Property(x => x.OperatorUserId)
 			.HasColumnName("operator_user_id")
@@ -80,7 +80,7 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
 
 		builder.Property(x => x.AgreementPartnerId)
 			.HasColumnName("agreement_partner_id")
-			.HasComment("public_id di catalog.agreement_partners, copiato — valorizzato solo per reservation_kind = spot.");
+			.HasComment("public_id di catalog.agreement_partners, copiato — riepilogo: struttura della prima riga con una convenzione; il dettaglio per riga è in booking.agreement_lines.");
 
 		builder.Property(x => x.ListingType)
 			.HasColumnName("listing_type")
@@ -94,12 +94,6 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
 			.IsRequired()
 			.HasDefaultValue(false)
 			.HasComment("Prenotazione stagionale / abbonamento; false per reservation_kind = service.");
-
-		builder.Property(x => x.IsSplit)
-			.HasColumnName("is_split")
-			.IsRequired()
-			.HasDefaultValue(false)
-			.HasComment("Prenotazione split-location (derivabile dalle righe, tenuto per compatibilità di lettura).");
 
 		builder.Property(x => x.PriceFlags)
 			.HasColumnName("price_flags")
@@ -208,10 +202,120 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
 			.HasColumnType("booking.payment_mode")
 			.HasComment("Modalità di pagamento prevalente (riepilogo); NULL finché non ancora incassata/determinata.");
 
-		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a
-		// schema (nessuna convenzione EF globale lo applica, verificato in ModuleDbContextConventions
-		// - solo converter UTC e query filter soft-delete) - un ETL che omette queste colonne
-		// dall'INSERT (comportamento normale, per lasciare scattare il default) falliva NOT NULL.
+		builder.Property(x => x.NoteUpdatedAt)
+			.HasColumnName("note_updated_at")
+			.HasComment("Ultima modifica del testo della nota.");
+
+		builder.Property(x => x.NoteUpdatedByUserId)
+			.HasColumnName("note_updated_by_user_id")
+			.HasComment("public_id di identity.access_users, copiato — chi ha scritto per ultimo la nota.");
+
+		builder.Property(x => x.ManualDiscountType)
+			.HasColumnName("manual_discount_type")
+			.HasColumnType("booking.adjustment_type")
+			.HasComment("Sconto manuale dell'operatore: percentage o amount; NULL = nessuno. Si somma al codice sconto, entrambi sul subtotale.");
+
+		builder.Property(x => x.ManualDiscountValue)
+			.HasColumnName("manual_discount_value")
+			.HasColumnType("numeric(12,2)")
+			.HasComment("Valore dello sconto manuale: percentuale (0-100) o euro.");
+
+		builder.Property(x => x.ManualDiscountAmount)
+			.HasColumnName("manual_discount_amount")
+			.HasColumnType("numeric(12,2)")
+			.IsRequired()
+			.HasDefaultValue(0m)
+			.HasComment("Importo in euro dello sconto manuale, compreso in discount.");
+
+		builder.Property(x => x.SurchargeLabel)
+			.HasColumnName("surcharge_label")
+			.HasMaxLength(120)
+			.HasComment("Etichetta libera dell'unico incremento, riga a sé sullo scontrino.");
+
+		builder.Property(x => x.SurchargeType)
+			.HasColumnName("surcharge_type")
+			.HasColumnType("booking.adjustment_type")
+			.HasComment("Incremento: percentage o amount; NULL = nessuno.");
+
+		builder.Property(x => x.SurchargeValue)
+			.HasColumnName("surcharge_value")
+			.HasColumnType("numeric(12,2)")
+			.HasComment("Valore dell'incremento: percentuale (0-100) o euro.");
+
+		builder.Property(x => x.PaidMarkEntryId)
+			.HasColumnName("paid_mark_entry_id")
+			.HasComment("public_id di payment.ledger_entries, copiato — l'incasso creato con la spunta «Pagato», annullato togliendola.");
+
+		builder.Property(x => x.CheckedInAt)
+			.HasColumnName("checked_in_at")
+			.HasComment("Check-in dell'intera prenotazione; NULL = cliente non arrivato.");
+
+		builder.Property(x => x.CheckedOutAt)
+			.HasColumnName("checked_out_at")
+			.HasComment("Check-out dell'intera prenotazione, anche anticipato.");
+
+		builder.Property(x => x.CheckoutEffectiveAt)
+			.HasColumnName("checkout_effective_at")
+			.HasComment("Fine effettiva dell'occupazione con un check-out anticipato: i giorni da lì in poi tornano liberi.");
+
+		builder.Property(x => x.CancellationReason)
+			.HasColumnName("cancellation_reason")
+			.HasColumnType("booking.cancellation_reason")
+			.HasComment("Motivo dell'annullamento: customer, manager, rejected, property_trashed, spot_removed, payment_failed, confirmation_expired.");
+
+		builder.Property(x => x.CancelledAt)
+			.HasColumnName("cancelled_at")
+			.HasComment("Quando la prenotazione è stata annullata.");
+
+		builder.Property(x => x.ConfirmationExpiresAt)
+			.HasColumnName("confirmation_expires_at")
+			.HasComment("Scadenza della richiesta online da confermare: la prima fra 48 ore, le 23:00 della vigilia e, per il giorno stesso, 1 ora.");
+
+		builder.Property(x => x.ConfirmedByUserId)
+			.HasColumnName("confirmed_by_user_id")
+			.HasComment("public_id di identity.access_users, copiato — chi ha confermato la richiesta online.");
+
+		builder.Property(x => x.ConfirmedAt)
+			.HasColumnName("confirmed_at")
+			.HasComment("Quando il gestore ha confermato la richiesta online.");
+
+		builder.Property(x => x.Version).IsRowVersion();
+
+		builder.Property(x => x.SyncSeq)
+			.HasColumnName("sync_seq")
+			.HasDefaultValueSql("nextval('booking.sync_seq')")
+			.ValueGeneratedOnAddOrUpdate()
+			.HasComment("Cursore di sincronizzazione dei dispositivi: nuovo numero a ogni modifica (trigger).");
+		builder.HasIndex(x => new { x.PropertyId, x.SyncSeq }).HasDatabaseName("ix_booking_reservations_sync");
+
+		builder.Property(x => x.PaymentHoldUntil)
+			.HasColumnName("payment_hold_until")
+			.HasComment("Prenotazione online in attesa del pagamento: postazioni tenute fino a quest'ora.");
+
+		builder.HasIndex(x => x.PaymentHoldUntil)
+			.HasFilter("payment_hold_until IS NOT NULL")
+			.HasDatabaseName("ix_booking_reservations_payment_hold");
+
+		builder.Ignore(x => x.AwaitsPayment);
+		builder.Ignore(x => x.AwaitsConfirmation);
+
+		builder.Property(x => x.RenewedFromReservationId)
+			.HasColumnName("renewed_from_reservation_id")
+			.HasComment("Prenotazione da cui nasce il rinnovo; impedisce di rinnovarla due volte.");
+
+		builder.Property(x => x.SplitFromReservationId)
+			.HasColumnName("split_from_reservation_id")
+			.HasComment("Prenotazione da cui nasce con «Dividi conto».");
+
+		builder.HasOne<Reservation>().WithMany().HasForeignKey(x => x.RenewedFromReservationId)
+			.HasConstraintName("fk_booking_reservations_renewed_from").OnDelete(DeleteBehavior.SetNull);
+
+		builder.HasOne<Reservation>().WithMany().HasForeignKey(x => x.SplitFromReservationId)
+			.HasConstraintName("fk_booking_reservations_split_from").OnDelete(DeleteBehavior.SetNull);
+
+		// Default now() a schema su created_at/updated_at: nessuna convenzione EF globale lo applica
+		// (ModuleDbContextConventions mette solo il converter UTC e il query filter soft-delete), e un ETL
+		// che omette queste colonne dall'INSERT per lasciare scattare il default fallirebbe sul NOT NULL.
 		builder.Property(x => x.CreatedAt)
 			.HasColumnName("created_at")
 			.IsRequired()
@@ -240,7 +344,7 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
 			.HasDatabaseName("uq_booking_reservations_reservation_code");
 
 		// Overload con nome: due HasIndex sulle stesse colonne senza nome sono LO STESSO indice per EF,
-		// e il secondo ne sovrascrive nome, filtro e unicità. Fino al 2026-10-06 a DB ne esisteva uno solo.
+		// e il secondo ne sovrascrive nome, filtro e unicità.
 		builder.HasIndex(x => new { x.PropertyId, x.StayFrom }, "ix_booking_reservations_property_stay")
 			.HasFilter("deleted_at IS NULL")
 			.HasDatabaseName("ix_booking_reservations_property_stay");
@@ -268,5 +372,18 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
 		builder.HasIndex(x => x.PropertyId)
 			.HasFilter("online_confirmation_state = 'pending' AND deleted_at IS NULL")
 			.HasDatabaseName("ix_booking_reservations_online_pending");
+
+		builder.HasIndex(x => x.DeletedAt, "ix_booking_reservations_trash")
+			.HasFilter("deleted_at IS NOT NULL")
+			.HasDatabaseName("ix_booking_reservations_trash");
+
+		builder.HasIndex(x => x.RenewedFromReservationId)
+			.IsUnique()
+			.HasFilter("renewed_from_reservation_id IS NOT NULL AND deleted_at IS NULL")
+			.HasDatabaseName("uq_booking_reservations_renewed_from");
+
+		builder.HasIndex(x => x.SplitFromReservationId)
+			.HasFilter("split_from_reservation_id IS NOT NULL")
+			.HasDatabaseName("ix_booking_reservations_split_from");
 	}
 }

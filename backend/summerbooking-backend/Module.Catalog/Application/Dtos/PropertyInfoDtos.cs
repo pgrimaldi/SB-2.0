@@ -10,19 +10,29 @@ public sealed record PropertyInfoDto(
 	string? Website, string? Facebook, string? Instagram, string? Whatsapp, TimeOnly? OpenHoursFrom, TimeOnly? OpenHoursTo,
 	bool IsFreeCancellation, short? CancellationNoticeHours, string PetsPolicy, string? VirtualTourUrl,
 	string? MainPhotoUrl, IReadOnlyList<PhotoDto> Photos, DocumentDto? MenuPdf, DocumentDto? PriceListPdf,
-	IReadOnlyList<string> AmenityCodes);
+	IReadOnlyList<string> AmenityCodes, IReadOnlyList<CancellationPenaltyDto> CancellationPenalties);
+
+/// <summary>
+/// Trattenuta sull'annullamento online: annullando con meno di <paramref name="NoticeHours"/> ore di anticipo si trattiene
+/// <paramref name="Percent"/> del pagato. Oltre il preavviso di cancellazione non si annulla più.
+/// </summary>
+/// <param name="NoticeHours">3, 12, 24, 48, 72, 168 (una settimana); più del preavviso di cancellazione.</param>
+public sealed record CancellationPenaltyDto(short NoticeHours, short Percent);
 
 public sealed record PhotoDto(Guid Id, string? Url, short SortOrder);
 
 public sealed record DocumentDto(string FileName, string? Url);
 
 /// <param name="Slug">null = generato dal nome alla prima pubblicazione, poi invariato.</param>
-/// <param name="CancellationNoticeHours">Ore di preavviso, solo con la cancellazione gratuita.</param>
+/// <param name="IsFreeCancellation">Il cliente può annullare online; false = cancellazione non permessa.</param>
+/// <param name="CancellationNoticeHours">Ore di preavviso entro cui si annulla: 3, 12, 24, 48, 72, 168 (una settimana).</param>
+/// <param name="CancellationPenalties">Trattenute, al massimo due (con la cancellazione permessa).</param>
 public sealed record SavePropertyInfoRequest(
 	string Name, string? Slug, string? Description, string? Regulation, string? Address, string? City, string? Cap,
 	string? Province, string? Region, string? CountryCode, decimal? Latitude, decimal? Longitude, string? Phone, string? Email,
 	string? Website, string? Facebook, string? Instagram, string? Whatsapp, TimeOnly? OpenHoursFrom, TimeOnly? OpenHoursTo,
-	bool IsFreeCancellation, short? CancellationNoticeHours, string PetsPolicy, string? VirtualTourUrl);
+	bool IsFreeCancellation, short? CancellationNoticeHours, string PetsPolicy, string? VirtualTourUrl,
+	IReadOnlyList<CancellationPenaltyDto>? CancellationPenalties = null);
 
 public sealed record SetAmenitiesRequest(IReadOnlyList<string> Codes);
 

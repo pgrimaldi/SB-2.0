@@ -1,16 +1,22 @@
-﻿using BuildingBlocks.Infrastructure.Persistence;
+using BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Module.Catalog.Application.Abstractions;
 using Module.Catalog.Application.Dtos;
 using Module.Catalog.Domain.Entities;
+using Shared.Infrastructure;
 
 namespace Module.Catalog.Infrastructure.Repositories;
 
 public sealed class DiscountRepository : IDiscountRepository
 {
 	private readonly DbContext _db;
+	private readonly IDateTimeProvider _clock;
 
-	public DiscountRepository(DbContext db) => _db = db;
+	public DiscountRepository(DbContext db, IDateTimeProvider clock)
+	{
+		_db = db;
+		_clock = clock;
+	}
 
 	public async Task<(IReadOnlyList<Discount> Items, int Total)> ListAsync(DiscountFilter filter, int page, int pageSize, CancellationToken ct = default)
 	{
@@ -41,6 +47,20 @@ public sealed class DiscountRepository : IDiscountRepository
 	}
 
 	public void Add(Discount discount) => _db.Discounts.Add(discount);
+
+	/// <summary>
+	/// Un solo UPDATE condizionato: due prenotazioni contemporanee non possono prendere entrambe l'ultimo utilizzo, perché
+	/// la condizione sul massimo si valuta sulla riga bloccata dall'aggiornamento.
+	/// </summary>
+	public async Task<bool> TryRedeemAsync(long propertyId, Guid publicId, CancellationToken ct = default)
+		=> await _db.Discounts
+			.Where(d => d.PropertyId == propertyId && d.PublicId == publicId && (d.MaxUses == null || d.UsedCount < d.MaxUses))
+			.ExecuteUpdateAsync(u => u.SetProperty(d => d.UsedCount, d => d.UsedCount + 1).SetProperty(d => d.UpdatedAt, _clock.UtcNow), ct) == 1;
+
+	public async Task ReleaseAsync(long propertyId, Guid publicId, CancellationToken ct = default)
+		=> await _db.Discounts
+			.Where(d => d.PropertyId == propertyId && d.PublicId == publicId && d.UsedCount > 0)
+			.ExecuteUpdateAsync(u => u.SetProperty(d => d.UsedCount, d => d.UsedCount - 1).SetProperty(d => d.UpdatedAt, _clock.UtcNow), ct);
 
 	public void Remove(Discount discount) => _db.Discounts.Remove(discount);
 

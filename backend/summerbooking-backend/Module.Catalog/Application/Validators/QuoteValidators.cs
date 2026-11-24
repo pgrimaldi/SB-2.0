@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+using Shared.Contracts.Catalog;
+using FluentValidation;
 using Module.Catalog.Application.Dtos;
 using Shared.Contracts.Errors;
 
@@ -9,7 +10,7 @@ public static class QuoteRules
 	public const int MaxDays = 366;
 	public const int MaxSpots = 50;
 	public const int MaxServices = 100;
-	public static readonly IReadOnlySet<string> DayParts = new HashSet<string> { "full_day", "morning", "afternoon" };
+	public static readonly IReadOnlySet<string> DayParts = Shared.Contracts.Catalog.DayParts.All;
 }
 
 public sealed class QuoteRequestValidator : AbstractValidator<QuoteRequest>

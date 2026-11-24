@@ -1,9 +1,10 @@
-﻿using Boot.Web;
+using Boot.Web;
 using FluentValidation;
 using Microsoft.OpenApi;
 using Module.Audit;
 using Module.Audit.Endpoints;
 using Module.Booking;
+using Module.Booking.Endpoints;
 using Module.Catalog;
 using Module.Catalog.Endpoints;
 using Module.Chatbot;
@@ -14,6 +15,7 @@ using Module.Identity.Endpoints;
 using Module.Infra;
 using Module.Notification;
 using Module.Payment;
+using Module.Payment.Endpoints;
 using Module.Privacy;
 using Module.Switchboard;
 using Shared.Security;
@@ -103,6 +105,8 @@ namespace Boot
 			// moduli sotto carico il tetto teorico supera di molto un max_connections tipico. Per
 			// questo ogni modulo ha un tetto esplicito (ModuleConnectionStrings.ApplyModulePoolLimit,
 			// configurabile con Database:MaxPoolSizePerModule); in produzione va valutato un pooler.
+			builder.Services.AddSignalR();
+			builder.Services.AddSingleton<Shared.Realtime.IRealtimeNotifier, Boot.Web.SignalRRealtimeNotifier>();
 			builder.Services.AddBookingModule(builder.Configuration);
 			builder.Services.AddCatalogModule(builder.Configuration);
 			builder.Services.AddChatbotModule(builder.Configuration);
@@ -160,6 +164,9 @@ namespace Boot
 			app.MapIdentityEndpoints();
 			app.MapCatalogEndpoints();
 			app.MapAuditEndpoints();
+			app.MapBookingEndpoints();
+			app.MapHub<Boot.Web.PropertyHub>(Boot.Web.PropertyHub.Path).RequireAuthorization();
+			app.MapPaymentEndpoints();
 
 			app.Run();
 			return 0;

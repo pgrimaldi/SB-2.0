@@ -42,6 +42,8 @@ public sealed class LedgerEntryConfiguration : IEntityTypeConfiguration<LedgerEn
 			.HasColumnName("entry_type")
 			.HasColumnType("payment.ledger_entry_type")
 			.HasDefaultValueSql("'payment'")
+			// Il default del database non è il valore 0 dell'enum (deposit): senza sentinella EF non invierebbe deposit.
+			.HasSentinel((LedgerEntryType)(-1))
 			.IsRequired()
 			.HasComment("Natura del movimento: acconto, incasso, spesa cliente, rimborso o rettifica.");
 

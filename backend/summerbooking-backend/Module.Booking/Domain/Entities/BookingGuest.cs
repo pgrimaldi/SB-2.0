@@ -21,4 +21,10 @@ public sealed class BookingGuest : IAuditable, ISoftDeletable
 	public BookingLine? BookingLine { get; private set; }
 
 	private BookingGuest() { }
+
+	public static BookingGuest Create(Reservation reservation, string fullName, Guid? customerId)
+	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(fullName);
+		return new BookingGuest { Reservation = reservation, FullNameSnapshot = fullName.Trim(), CustomerId = customerId };
+	}
 }

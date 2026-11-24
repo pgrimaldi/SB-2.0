@@ -12,6 +12,20 @@
   <ItemGroup>
     <!-- Esportazione CSV/XLSX (Export/TabularExportWriter.cs). -->
     <PackageReference Include="ClosedXML" Version="0.105.1" />
+    <!-- Rapporti PDF (Export/PdfReportWriter.cs). Ferma alla 6.2.x: dalla 6.5.0 PDFsharp-MigraDoc e' passata alla
+         licenza AGPL-3.0, che non va bene per un servizio chiuso; le 6.2.x sono MIT. Non aggiornare oltre senza
+         ricontrollare la licenza. -->
+    <PackageReference Include="PDFsharp-MigraDoc" Version="6.2.4" />
+    <!-- Pinnato: la versione che PDFsharp tira da sola (8.0.1) ha avvisi NU1902/NU1903 (vulnerabilita' note) e la
+         build pretende zero avvisi. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Font dei PDF incorporati (sui server Linux non ci sono font di sistema); licenze e origine in Export/Fonts/README.md. -->
+    <EmbeddedResource Include="Export\Fonts\DejaVuSansPdf.ttf" LogicalName="BuildingBlocks.Fonts.DejaVuSansPdf.ttf" />
+    <EmbeddedResource Include="Export\Fonts\DejaVuSansPdf-Bold.ttf" LogicalName="BuildingBlocks.Fonts.DejaVuSansPdf-Bold.ttf" />
+    <EmbeddedResource Include="Export\Fonts\DroidSansFallbackFull.ttf" LogicalName="BuildingBlocks.Fonts.DroidSansFallbackFull.ttf" />
   </ItemGroup>
 
   <ItemGroup>

@@ -25,8 +25,8 @@ public sealed class VoiceCallRecord : IAuditable, ISoftDeletable
 	/// <b>Sulle righe storiche migrate questo valore e' un segnaposto, non un esito osservato.</b> Il
 	/// registro del vecchio centralino aveva quattro colonne - id, chiamante, destinazione, data - e
 	/// <b>non tracciava l'esito</b>. Dato che la colonna e' obbligatoria, la migrazione vi scrive
-	/// <see cref="CallOutcome.ForwardedAnswered"/> come assunzione dichiarata (decisione del titolare
-	/// del 2026-09-30). E' accettabile solo perche' quelle 214
+	/// <see cref="CallOutcome.ForwardedAnswered"/> come assunzione dichiarata (decisione del titolare).
+	/// E' accettabile solo perche' quelle 214
 	/// righe sono dati di test, presenti nel solo ambiente di sviluppo e assenti in produzione: il
 	/// valore storico e' nullo e il segnaposto non falsifica nulla di reale.
 	/// </para>

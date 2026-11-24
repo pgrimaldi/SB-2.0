@@ -20,14 +20,20 @@ public sealed record TranslationDto(string Language, string Name, string? Descri
 
 public sealed record VariantDto(string Name, decimal Price);
 
-/// <param name="Weekdays">monday…sunday; vuoto = tutti i giorni.</param>
+/// <summary>
+/// Opzione di prenotazione (periodo di disponibilità). Servizi bar e standard: niente giorni della settimana né massimo per
+/// fascia. Servizi orari: nello stesso periodo più impostazioni per giorni diversi (<paramref name="Hourly"/>), con fasce
+/// fisse e massimo per fascia che valgono per tutto il periodo.
+/// </summary>
+/// <param name="Weekdays">Solo servizi orari: monday…sunday; vuoto = tutti i giorni.</param>
 /// <param name="IntervalMinutes">Tempo minimo fra due ordini dello stesso cliente.</param>
-/// <param name="MaxPerSlot">Servizi orari: massimo di prenotazioni per fascia.</param>
-/// <param name="Hourly">Servizi orari: disponibilità e prezzi validi nelle date dell'opzione.</param>
+/// <param name="MaxPerSlot">Servizi orari: massimo di prenotazioni per fascia, per tutto il periodo.</param>
+/// <param name="Hourly">Servizi orari: orari, durate e prezzi, uno per insieme di giorni della settimana.</param>
+/// <param name="HasFixedTimeSlots">Servizi orari: le prenotazioni partono a orari fissi, una dopo l'altra, per tutto il periodo.</param>
 public sealed record BookingOptionDto(
 	DateOnly? StartsOn, DateOnly? EndsOn, IReadOnlyList<string> Weekdays, TimeOnly? ManagementFrom, TimeOnly? ManagementTo,
 	TimeOnly? OnlineFrom, TimeOnly? OnlineTo, short? MaxPerHour, short? MaxPerDay, short? MaxPerSlot, short? IntervalMinutes,
-	short? MinItems, short? MaxItems, HourlyOptionDto? Hourly = null);
+	short? MinItems, short? MaxItems, IReadOnlyList<HourlyOptionDto>? Hourly = null, bool HasFixedTimeSlots = false);
 
 /// <param name="PeriodKey">Chiave del periodo tariffario (<c>GET /tariff-periods</c>).</param>
 public sealed record PeriodPriceDto(short PeriodKey, decimal Price);
@@ -42,14 +48,15 @@ public sealed record HourlySlotDto(short DurationMinutes, bool IsEnabled, decima
 /// <param name="Weekdays">monday…sunday; vuoto = tutti i giorni.</param>
 /// <param name="CustomSlot">Durata personalizzata, oltre a quelle standard.</param>
 /// <param name="VatRate">Aliquota IVA; null = quella del servizio.</param>
-/// <param name="HasFixedTimeSlots">Le prenotazioni partono a orari fissi, una dopo l'altra.</param>
 public sealed record HourlyOptionDto(
 	TimeOnly? TimeFrom, TimeOnly? TimeTo, IReadOnlyList<string> Weekdays, IReadOnlyList<HourlySlotDto> Slots, HourlySlotDto? CustomSlot,
-	decimal? VatRate, short? MaxPerSlot, bool HasFixedTimeSlots);
+	decimal? VatRate);
 
 /// <summary>Prezzi di un servizio orario per periodo tariffario.</summary>
 /// <param name="PeriodKey">Periodo tariffario (<c>GET /tariff-periods</c>); null = senza periodo (con <c>hasPeriodPrices</c> = false).</param>
-public sealed record HourlyPeriodDto(short? PeriodKey, IReadOnlyList<HourlyOptionDto> Options);
+/// <param name="HasFixedTimeSlots">Fasce fisse per tutto il periodo.</param>
+/// <param name="MaxPerSlot">Massimo di prenotazioni per fascia, per tutto il periodo.</param>
+public sealed record HourlyPeriodDto(short? PeriodKey, IReadOnlyList<HourlyOptionDto> Options, bool HasFixedTimeSlots = false, short? MaxPerSlot = null);
 
 /// <summary>Servizio bar, normale o orario, completo.</summary>
 /// <param name="VatRate">Aliquota in percentuale; null con <paramref name="VatNature"/> = esente.</param>
@@ -79,16 +86,16 @@ public sealed record AutomaticPricePeriodDto(DateOnly? StartsOn, DateOnly? EndsO
 
 /// <summary>Prezzo automatico (es. «Coperto»).</summary>
 /// <param name="AppliesPerService">true = per ogni servizio dell'ordine; false = una volta per ordine.</param>
-/// <param name="ServiceIds">Servizi a cui si applica, se non <paramref name="AppliesToAllServices"/>.</param>
+/// <param name="ServiceIds">Servizi a cui si applica, scelti uno per uno.</param>
 public sealed record AutomaticPriceDto(
 	Guid Id, string Name, string? Description, decimal Price, decimal? VatRate, string? VatNature, Guid? IconId, string? ImageUrl,
-	bool IsPurchasable, bool AppliesPerService, bool AppliesToAllServices, IReadOnlyList<Guid> ServiceIds, IReadOnlyList<AutomaticPricePeriodDto> Periods,
+	bool IsPurchasable, bool AppliesPerService, IReadOnlyList<Guid> ServiceIds, IReadOnlyList<AutomaticPricePeriodDto> Periods,
 	bool IsSectorRestricted, IReadOnlyList<Guid> SectorIds,
 	IReadOnlyList<TranslationDto> Translations);
 
 public sealed record SaveAutomaticPriceRequest(
 	string Name, string? Description, decimal Price, decimal? VatRate, string? VatNature, Guid? IconId, bool IsPurchasable,
-	bool AppliesPerService, bool AppliesToAllServices, IReadOnlyList<Guid>? ServiceIds, IReadOnlyList<AutomaticPricePeriodDto>? Periods,
+	bool AppliesPerService, IReadOnlyList<Guid>? ServiceIds, IReadOnlyList<AutomaticPricePeriodDto>? Periods,
 	bool IsSectorRestricted, IReadOnlyList<Guid>? SectorIds,
 	IReadOnlyList<TranslationDto>? Translations);
 

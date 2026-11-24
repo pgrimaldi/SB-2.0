@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+using Module.Catalog.Application.Dtos;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -8,9 +9,6 @@ using Module.Catalog.Domain.Enums;
 using Shared.Infrastructure;
 
 namespace Module.Catalog.Application.Services;
-
-/// <summary>Esito di una rigenerazione: snapshot scritti, invariati, tolti (non piu' dovuti), in errore.</summary>
-public sealed record SnapshotRebuildResult(int Written, int Unchanged, int Removed, int Failed, IReadOnlyList<string> Errors);
 
 /// <summary>
 /// Rigenerazione degli snapshot di configurazione: dopo ogni salvataggio che li riguarda (per gli stabilimenti toccati),

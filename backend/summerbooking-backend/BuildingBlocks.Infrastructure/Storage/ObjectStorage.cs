@@ -30,6 +30,9 @@ public interface IObjectStorage
 	string Origin { get; }
 	Task<StoredObject> SaveAsync(string fileName, Stream content, string contentType, CancellationToken ct = default);
 	string GetDownloadUrl(string path);
+
+	/// <summary>Cancella il file (nessun errore se non c'è più).</summary>
+	Task DeleteAsync(string path, CancellationToken ct = default);
 }
 
 /// <summary>Implementazione su S3 (o LocalStack). Il client nasce al primo uso.</summary>
@@ -76,6 +79,9 @@ public sealed class S3ObjectStorage : IObjectStorage
 		Verb = HttpVerb.GET,
 		Expires = DateTime.UtcNow.AddMinutes(_options.DownloadUrlMinutes),
 	});
+
+	public async Task DeleteAsync(string path, CancellationToken ct = default)
+		=> await _client.Value.DeleteObjectAsync(new DeleteObjectRequest { BucketName = Bucket, Key = path }, ct);
 
 	private string Bucket => _options.Bucket ?? throw new InvalidOperationException("Bucket dell'archivio di file non configurato.");
 }

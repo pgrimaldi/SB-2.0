@@ -25,8 +25,6 @@ public sealed class AutomaticPrice : IAuditable, ISoftDeletable
 	public bool IsPurchasable { get; private set; }
 	/// <summary>true = si applica a ogni servizio dell'ordine; false = una volta per ordine.</summary>
 	public bool AppliesPerService { get; private set; }
-	/// <summary>true = vale per tutti i servizi; false = solo per quelli di <see cref="Services"/>.</summary>
-	public bool AppliesToAllServices { get; private set; }
 	public bool IsSectorRestricted { get; private set; }
 	/// <summary>Giorni di validità; vuoto = tutti.</summary>
 	public DateTime CreatedAt { get; private set; }
@@ -55,7 +53,6 @@ public sealed class AutomaticPrice : IAuditable, ISoftDeletable
 		IconAssetId = d.IconAssetId;
 		IsPurchasable = d.IsPurchasable;
 		AppliesPerService = d.AppliesPerService;
-		AppliesToAllServices = d.AppliesToAllServices;
 		IsSectorRestricted = d.IsSectorRestricted;
 	}
 
@@ -100,4 +97,4 @@ public sealed class AutomaticPrice : IAuditable, ISoftDeletable
 
 public sealed record AutomaticPriceData(
 	string Name, string? Description, decimal Price, decimal? VatRate, VatNature? VatNature, int? IconId, long? IconAssetId,
-	bool IsPurchasable, bool AppliesPerService, bool AppliesToAllServices, bool IsSectorRestricted);
+	bool IsPurchasable, bool AppliesPerService, bool IsSectorRestricted);

@@ -42,9 +42,8 @@ public sealed class ServiceSaleItem : IAuditable, ISoftDeletable
 
 	/// <summary>
 	/// Giorni della settimana in cui il servizio e' attivo.
-	/// Sostituisce catalog_service_sale_item_weekdays: sette righe figlie con un flag booleano per
-	/// rappresentare un insieme di al piu' sette valori, sempre letto e scritto per intero insieme
-	/// al padre, senza FK in ingresso e senza dato di audit per riga. Dal 2026-10-25 giorni e orari si
+	/// Array e non tabella figlia: e' un insieme di al piu' sette valori, sempre letto e scritto per
+	/// intero insieme al padre, senza FK in ingresso e senza dato di audit per riga. Giorni e orari si
 	/// impostano nelle opzioni di prenotazione.
 	/// </summary>
 	public Weekday[] ActiveWeekdays { get; private set; } = [];
@@ -166,7 +165,7 @@ public sealed class ServiceSaleItem : IAuditable, ISoftDeletable
 			AddHourly(option, periodKey, null, order++);
 		var booking = BookingOptions.OrderBy(o => o.SortOrder).ToList();
 		for (var i = 0; i < bookingOptions.Count && i < booking.Count; i++)
-			if (bookingOptions[i].Hourly is { } option)
+			foreach (var option in bookingOptions[i].Hourly ?? [])
 				AddHourly(option, null, booking[i], order++);
 		HasFixedTimeSlots = HourlyOptions.Any(o => o.HasFixedTimeSlots);
 	}

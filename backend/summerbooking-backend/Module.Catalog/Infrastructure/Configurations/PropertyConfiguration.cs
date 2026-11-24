@@ -101,8 +101,7 @@ public sealed class PropertyConfiguration : IEntityTypeConfiguration<Property>
 			.HasDatabaseName("ix_catalog_properties_country");
 
 		// Indice trigram gin_trgm_ops su lower(name): non esprimibile in Fluent API, aggiunto a mano
-		// nella migration AddMissingDesignedIndexes — richiede l'estensione
-		// pg_trgm. Fino al 2026-10-06 quel passo a mano non era mai stato fatto.
+		// nella migration AddMissingDesignedIndexes — richiede l'estensione pg_trgm.
 
 		builder.HasOne(x => x.Country)
 			.WithMany()

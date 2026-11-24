@@ -109,10 +109,9 @@ public sealed class MessagingWaTemplateConfiguration : IEntityTypeConfiguration<
 			.HasMaxLength(160)
 			.HasComment("Primi ~120 caratteri del testo BODY, derivato da components per la lista del pannello senza parsare il blob.");
 
-		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a
-		// schema (nessuna convenzione EF globale lo applica, verificato in ModuleDbContextConventions
-		// - solo converter UTC e query filter soft-delete) - un ETL che omette queste colonne
-		// dall'INSERT (comportamento normale, per lasciare scattare il default) falliva NOT NULL.
+		// Default now() a schema su created_at/updated_at: nessuna convenzione EF globale lo applica
+		// (ModuleDbContextConventions mette solo il converter UTC e il query filter soft-delete), e un ETL
+		// che omette queste colonne dall'INSERT per lasciare scattare il default fallirebbe sul NOT NULL.
 		builder.Property(x => x.CreatedAt)
 			.HasColumnName("created_at")
 			.IsRequired()
@@ -132,8 +131,7 @@ public sealed class MessagingWaTemplateConfiguration : IEntityTypeConfiguration<
 
 		// uq_switchboard_messaging_wa_templates_name_lang (property_id, lower(template_name), language)
 		// non è esprimibile con HasIndex su proprietà semplice — indice su espressione lower(template_name),
-		// creato via raw SQL nella migration AddMissingDesignedIndexes. Fino al
-		// 2026-10-06 quel passo a mano non era mai stato fatto.
+		// creato via raw SQL nella migration AddMissingDesignedIndexes.
 
 		builder.HasIndex(x => x.ConfigId)
 			.HasFilter("deleted_at IS NULL")

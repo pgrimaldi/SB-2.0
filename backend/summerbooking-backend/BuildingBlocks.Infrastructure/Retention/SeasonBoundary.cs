@@ -6,9 +6,8 @@
 /// <remarks>
 /// Esiste come punto singolo di proposito. La regola è: <b>il confine è il 1 gennaio dell'anno
 /// N−k</b>, ricalcolato a ogni esecuzione — non il 1 aprile, e non la data in cui il job gira. Se
-/// ogni job stagionale se la ricalcolasse, prima o poi uno userebbe il 1 aprile: è l'errore che la
-/// documentazione del progetto conteneva fino al 2026-10-01, e riguarda 10 policy (le 9 del blocco Booking
-/// più quella dei QR).
+/// ogni job stagionale se la ricalcolasse, prima o poi uno userebbe il 1 aprile. La regola riguarda
+/// 10 policy (le 9 del blocco Booking più quella dei QR).
 /// <para>
 /// Esempio dalla documentazione: eseguita nell'ottobre 2026, una policy «2 stagioni» taglia tutto ciò
 /// che precede il <b>1 gennaio 2024</b>.

@@ -75,6 +75,7 @@ public sealed class SmtpTransactionalEmailSender : ITransactionalEmailSender
 	{
 		var en = email.Language == "en";
 		string V(string key) => email.Values.TryGetValue(key, out var value) ? value : string.Empty;
+		string Pay(string label) => V("paymentUrl") is { Length: > 0 } url ? label + url : string.Empty;
 
 		return email.Kind switch
 		{
@@ -87,6 +88,24 @@ public sealed class SmtpTransactionalEmailSender : ITransactionalEmailSender
 			TransactionalEmailKind.Welcome => en
 				? ("Welcome to Summer Booking", $"Hi {V("firstName")},\n\nyour Summer Booking account is ready.")
 				: ("Benvenuto su Summer Booking", $"Ciao {V("firstName")},\n\nil tuo account Summer Booking è pronto."),
+			TransactionalEmailKind.BookingConfirmed => en
+				? ($"Booking confirmed - {V("propertyName")}", $"Your booking {V("bookingNumber")} at {V("propertyName")} ({V("dates")}) is confirmed.\n\nBooking code: {V("reservationCode")}\nTotal: {V("amount")} EUR{Pay("\n\nPay here: ")}")
+				: ($"Prenotazione confermata - {V("propertyName")}", $"La tua prenotazione {V("bookingNumber")} presso {V("propertyName")} ({V("dates")}) è confermata.\n\nCodice prenotazione: {V("reservationCode")}\nTotale: {V("amount")} EUR{Pay("\n\nPaga qui: ")}"),
+			TransactionalEmailKind.BookingRequestReceived => en
+				? ($"Booking request received - {V("propertyName")}", $"We have received your request {V("bookingNumber")} at {V("propertyName")} ({V("dates")}). The beach club will confirm it by {V("expiresAt")}.\n\nBooking code: {V("reservationCode")}")
+				: ($"Richiesta di prenotazione ricevuta - {V("propertyName")}", $"Abbiamo ricevuto la tua richiesta {V("bookingNumber")} presso {V("propertyName")} ({V("dates")}). Lo stabilimento la confermerà entro {V("expiresAt")}.\n\nCodice prenotazione: {V("reservationCode")}"),
+			TransactionalEmailKind.BookingRejected => en
+				? ($"Booking request declined - {V("propertyName")}", $"{V("propertyName")} could not accept your request {V("bookingNumber")} ({V("dates")}).")
+				: ($"Richiesta di prenotazione non accettata - {V("propertyName")}", $"{V("propertyName")} non ha potuto accettare la tua richiesta {V("bookingNumber")} ({V("dates")})."),
+			TransactionalEmailKind.BookingExpired => en
+				? ($"Booking request expired - {V("propertyName")}", $"Your request {V("bookingNumber")} at {V("propertyName")} ({V("dates")}) was not confirmed in time and has expired.")
+				: ($"Richiesta di prenotazione scaduta - {V("propertyName")}", $"La tua richiesta {V("bookingNumber")} presso {V("propertyName")} ({V("dates")}) non è stata confermata in tempo ed è scaduta."),
+			TransactionalEmailKind.BookingCancelled => en
+				? ($"Booking cancelled - {V("propertyName")}", $"Your booking {V("bookingNumber")} at {V("propertyName")} ({V("dates")}) has been cancelled. Refund: {V("amount")} EUR.")
+				: ($"Prenotazione annullata - {V("propertyName")}", $"La tua prenotazione {V("bookingNumber")} presso {V("propertyName")} ({V("dates")}) è stata annullata. Rimborso: {V("amount")} EUR."),
+			TransactionalEmailKind.BookingPaymentRefunded => en
+				? ($"Payment refunded - {V("propertyName")}", $"Your payment for {V("bookingNumber")} at {V("propertyName")} arrived when the spot was no longer available: we refund {V("amount")} EUR in full.")
+				: ($"Pagamento rimborsato - {V("propertyName")}", $"Il tuo pagamento per {V("bookingNumber")} presso {V("propertyName")} è arrivato quando la postazione non era più libera: ti rimborsiamo {V("amount")} EUR per intero."),
 			_ => throw new ArgumentOutOfRangeException(nameof(email), email.Kind, null),
 		};
 	}

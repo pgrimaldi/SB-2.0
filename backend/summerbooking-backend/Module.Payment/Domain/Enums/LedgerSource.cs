@@ -9,5 +9,7 @@ public enum LedgerSource
 	PosOfsale = 3,
 	PosTeamsystem = 4,
 	Wallet = 5,
-	Agreement = 6
+	Agreement = 6,
+	/// <summary>Incassato spostato fra prenotazioni con «Dividi conto»: non entra né esce dalla cassa.</summary>
+	ReservationSplit = 7
 }

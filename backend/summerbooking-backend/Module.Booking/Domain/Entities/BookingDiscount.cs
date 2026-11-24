@@ -31,4 +31,21 @@ public sealed class BookingDiscount : IAuditable, ISoftDeletable
 	public BookingLine? BookingLine { get; private set; }
 
 	private BookingDiscount() { }
+
+	/// <summary>Fotografia del codice o dello sconto automatico applicato dal preventivo.</summary>
+	public static BookingDiscount Applied(
+		Reservation reservation, Guid discountId, string code, bool codeEntered, Enums.DiscountType type, decimal value, decimal amount)
+		=> new()
+		{
+			Reservation = reservation,
+			PropertyId = reservation.PropertyId,
+			DiscountId = discountId,
+			Origin = codeEntered ? Enums.DiscountOrigin.CodeEntered : Enums.DiscountOrigin.AutoApplied,
+			CodeSnapshot = code,
+			DiscountType = type,
+			Value = value,
+			Scope = Enums.DiscountScope.All,
+			AppliedChannel = Enums.DiscountChannel.Any,
+			AppliedAmount = amount,
+		};
 }

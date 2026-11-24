@@ -8,8 +8,8 @@ namespace BuildingBlocks.Infrastructure.Retention;
 /// <para>
 /// <b>Perché serve un pezzo di codice e non una colonna.</b> «Cessazione» non corrisponde a nessuno
 /// stato a database: <c>catalog.property_status</c> è <c>pending | approved | rejected | imported</c>
-/// e non dice niente sull'abbonamento. La decisione del titolare (2026-10-02) è di
-/// <b>derivarla</b> invece di aggiungere uno stato che qualcuno deve ricordarsi di scrivere — una
+/// e non dice niente sull'abbonamento. Per decisione del titolare la cessazione si
+/// <b>deriva</b> invece di aggiungere uno stato che qualcuno deve ricordarsi di scrivere — una
 /// colonna che si dimentica di aggiornare fa scadere i dati di uno stabilimento ancora attivo.
 /// </para>
 /// <para>
@@ -21,8 +21,7 @@ namespace BuildingBlocks.Infrastructure.Retention;
 /// <item><b>E non è ripartito</b>: <i>nessun</i> abbonamento è <c>active</c> o <c>suspended</c>.
 /// ⚠️ Questa metà è quella che conta. Senza, uno stabilimento che ha disdetto il piano vecchio e ne
 /// ha sottoscritto uno nuovo risulterebbe cessato, e la retention gli cancellerebbe le foto mentre
-/// sta lavorando. Un abbonamento <b>sospeso</b> non è una cessazione: è l'obiezione che aveva
-/// bloccato la decisione, e sta scritta qui.</item>
+/// sta lavorando. Un abbonamento <b>sospeso</b> non è una cessazione.</item>
 /// </list>
 /// <para>
 /// <c>account_subscription_periods</c> porta <c>property_id</c> per conto proprio, quindi la data non

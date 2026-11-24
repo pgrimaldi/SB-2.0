@@ -27,45 +27,69 @@ public sealed class ResaleSettingsConfiguration : IEntityTypeConfiguration<Resal
 			.IsRequired()
 			.HasComment("La feature rivendita/sharing è attiva per lo stabilimento");
 
-		builder.Property(x => x.Mode)
-			.HasColumnName("mode")
-			.HasColumnType("booking.resale_mode")
-			.HasDefaultValueSql("'absence'")
-			.IsRequired()
-			.HasComment("Come viene gestita la cessione di un giorno: solo assenza pianificata senza credito, o sharing con credito al titolare");
+		builder.Property(x => x.MinBookingDays)
+			.HasColumnName("min_booking_days")
+			.HasComment("Giorni minimi della prenotazione per avere lo sharing; NULL = nessun minimo");
 
 		builder.Property(x => x.AppliesTo)
 			.HasColumnName("applies_to")
 			.HasColumnType("booking.resale_scope[]")
 			.HasDefaultValueSql("'{}'")
 			.IsRequired()
-			.HasComment("Estensioni della rivendita: consentita per pass stagionali, estesa a tutte le postazioni del pacchetto");
+			.HasComment("A cosa si applica lo sharing: solo alle stagionali, a tutti gli articoli (non solo agli ombrelloni)");
 
-		builder.Property(x => x.BothOptionsDisabled)
-			.HasColumnName("both_options_disabled")
+		builder.Property(x => x.AbsencesAsSharing)
+			.HasColumnName("absences_as_sharing")
 			.HasDefaultValue(false)
 			.IsRequired()
-			.HasComment("Disabilita entrambe le modalità (semantica esatta da riverificare col committente, migrato as-is)");
+			.HasComment("Le assenze programmate valgono come sharing: il giorno ripreso fa maturare il credito al titolare");
 
-		builder.Property(x => x.CreditUnitsPerDay)
-			.HasColumnName("credit_units_per_day")
+		builder.Property(x => x.ManualCreditEnabled)
+			.HasColumnName("manual_credit_enabled")
+			.HasDefaultValue(false)
+			.IsRequired()
+			.HasComment("Crediti assegnati a mano: per ogni giorno ripreso il titolare matura manual_credit_units_per_day crediti");
+
+		builder.Property(x => x.ManualCreditUnitsPerDay)
+			.HasColumnName("manual_credit_units_per_day")
 			.HasDefaultValue(0)
 			.IsRequired()
-			.HasComment("Quanti crediti simbolici matura il titolare per ogni giorno ceduto e ripreso");
+			.HasComment("Crediti per ogni giorno ceduto e ripreso");
 
-		builder.Property(x => x.CreditCalc)
-			.HasColumnName("credit_calc")
-			.HasColumnType("booking.resale_credit_calc")
-			.HasDefaultValueSql("'fixed_amount'")
-			.IsRequired()
-			.HasComment("Come si calcola il valore del credito per giorno ceduto: importo fisso o percentuale della tariffa giornaliera");
-
-		builder.Property(x => x.CreditAmount)
-			.HasColumnName("credit_amount")
+		builder.Property(x => x.ManualCreditAmount)
+			.HasColumnName("manual_credit_amount")
 			.HasColumnType("numeric(12,2)")
 			.HasDefaultValue(0m)
 			.IsRequired()
-			.HasComment("Valore del credito: importo € se credit_calc = fixed_amount, percentuale 0-100 se daily_percentage");
+			.HasComment("Valore in euro di un credito manuale");
+
+		builder.Property(x => x.VoucherCreditEnabled)
+			.HasColumnName("voucher_credit_enabled")
+			.HasDefaultValue(false)
+			.IsRequired()
+			.HasComment("Voucher automatico al titolare per ogni giorno ripreso");
+
+		builder.Property(x => x.VoucherCreditAmount)
+			.HasColumnName("voucher_credit_amount")
+			.HasColumnType("numeric(12,2)")
+			.HasDefaultValue(0m)
+			.IsRequired()
+			.HasComment("Valore in euro del voucher per giorno ripreso");
+
+		builder.Property(x => x.CardTopUpEnabled)
+			.HasColumnName("card_top_up_enabled")
+			.HasDefaultValue(false)
+			.IsRequired()
+			.HasComment("Ricarica della tessera prepagata del titolare per ogni giorno ripreso");
+
+		builder.Property(x => x.CardTopUpAmount)
+			.HasColumnName("card_top_up_amount")
+			.HasColumnType("numeric(12,2)")
+			.HasDefaultValue(0m)
+			.IsRequired()
+			.HasComment("Importo in euro della ricarica per giorno ripreso");
+
+		builder.Ignore(x => x.GivesCredit);
 
 		builder.Property(x => x.CreatedAt)
 			.HasColumnName("created_at")

@@ -26,8 +26,7 @@ public static class PosChargeItemConfiguration
 
 		// Riusa ChargeId come FK reale della relazione owned (come LedgerEntryLineConfiguration). Senza
 		// WithOwner().HasForeignKey(...) EF crea una shadow property con colonna propria (pos_charge_id),
-		// che porta la FK vera, e lascia charge_id come colonna duplicata senza vincolo: era lo stato del
-		// DB fino al 2026-10-06 (migration FixOwnedItemsForeignKeys).
+		// che porta la FK vera, e lascia charge_id come colonna duplicata senza vincolo.
 		builder.WithOwner().HasForeignKey(x => x.ChargeId);
 
 		builder.Property(x => x.ChargeId)

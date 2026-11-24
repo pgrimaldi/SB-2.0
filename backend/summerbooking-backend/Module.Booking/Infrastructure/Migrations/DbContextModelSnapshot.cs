@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Module.Booking.Domain.Enums;
 using Module.Booking.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -24,8 +25,10 @@ namespace Module.Booking.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "additional_item_date_scope", new[] { "whole_stay", "specific_dates" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "additional_item_source", new[] { "price_list", "inventory" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "adjustment_type", new[] { "percentage", "amount" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "agreement_line_type", new[] { "regular", "voucher" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "booking_channel", new[] { "customer", "manager" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "cancellation_reason", new[] { "customer", "manager", "rejected", "property_trashed", "spot_removed", "payment_failed", "confirmation_expired" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "consumption_source", new[] { "reservation_line", "service_line", "additional_item", "manual_hold", "resale" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "consumption_state", new[] { "held", "confirmed", "released" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "day_period", new[] { "full_day", "morning", "afternoon" });
@@ -36,18 +39,16 @@ namespace Module.Booking.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "hold_kind", new[] { "operational", "checkout" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "hold_status", new[] { "active", "released", "expired", "converted" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "listing_type", new[] { "standard", "agreement_price_list", "agreement_voucher" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "online_confirmation_state", new[] { "not_required", "pending", "confirmed" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "online_confirmation_state", new[] { "not_required", "pending", "confirmed", "rejected", "expired" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "participant_role", new[] { "viewer" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "payment_mode", new[] { "cash", "credit_card", "bank_transfer", "other" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "resale_credit_calc", new[] { "fixed_amount", "daily_percentage" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "resale_credit_entry", new[] { "earned", "reversed", "adjustment" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "resale_mode", new[] { "absence", "sharing" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "resale_offer_state", new[] { "available", "reassigned", "withdrawn" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "resale_origin", new[] { "absence", "sharing", "absence_as_sharing" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "resale_scope", new[] { "seasonal_workers", "all_articles" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "resale_scope", new[] { "seasonal_only", "all_articles" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "reservation_kind", new[] { "spot", "service" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "reservation_price_flag", new[] { "suggested_price_accepted", "recalculated", "manually_edited" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "reservation_status", new[] { "pending", "confirmed", "cancelled", "no_show" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "reservation_status", new[] { "pending", "confirmed", "cancelled" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "resource_type", new[] { "umbrella", "sunbed", "sunbed_xl", "cabin", "special_cabin", "deckchair", "chair", "tent", "parking", "ticket", "area_seat", "bar_service", "normal_service", "hourly_service", "inventory_item" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking", "service_category", new[] { "bar", "normal", "hourly", "additional" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -106,7 +107,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("is_used_as_discount")
                         .HasComment("La voce è applicata come sconto sulla prenotazione invece che come addebito.");
 
-                    b.Property<int>("ListType")
+                    b.Property<AgreementLineType>("ListType")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.agreement_line_type")
                         .HasColumnName("list_type")
@@ -178,6 +179,120 @@ namespace Module.Booking.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Module.Booking.Domain.Entities.BookingAttachment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("content_type")
+                        .HasComment("Tipo del file (PDF, JPEG, PNG).");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()")
+                        .HasComment("Caricamento.");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at")
+                        .HasComment("Soft-delete: allegato tolto dal gestore.");
+
+                    b.Property<DateTime?>("FileDeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("file_deleted_at")
+                        .HasComment("Quando il file è stato cancellato dall'archivio.");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("file_name")
+                        .HasComment("Nome del file; resta anche dopo la cancellazione del file.");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("property_id")
+                        .HasComment("public_id di catalog.properties, copiato — nessuna FK cross-schema");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()")
+                        .HasComment("Id pubblico dell'allegato nelle API.");
+
+                    b.Property<long>("ReservationId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("reservation_id")
+                        .HasComment("Prenotazione a cui è allegato.");
+
+                    b.Property<string>("Sha256")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("sha256")
+                        .HasComment("Impronta del contenuto.");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size_bytes")
+                        .HasComment("Dimensione in byte (al massimo 2 MB).");
+
+                    b.Property<string>("StorageOrigin")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("storage_origin")
+                        .HasComment("Archivio di file in cui sta.");
+
+                    b.Property<string>("StoragePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("storage_path")
+                        .HasComment("Percorso relativo nell'archivio; NULL dopo la cancellazione del file.");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()")
+                        .HasComment("Ultima modifica.");
+
+                    b.Property<Guid?>("UploadedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("uploaded_by_user_id")
+                        .HasComment("public_id di identity.access_users (chi l'ha caricato), copiato — nessuna FK cross-schema");
+
+                    b.HasKey("Id")
+                        .HasName("pk_booking_media_assets");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_booking_media_assets_file_alive")
+                        .HasFilter("storage_path IS NOT NULL");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_booking_media_assets_public_id");
+
+                    b.HasIndex("ReservationId")
+                        .HasDatabaseName("ix_booking_media_assets_reservation")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("media_assets", "booking", t =>
+                        {
+                            t.HasComment("File allegati alle prenotazioni (PDF, JPEG, PNG): al 31 dicembre si cancella il file, resta il nome.");
+
+                            t.HasCheckConstraint("ck_booking_media_assets_size", "size_bytes > 0");
+                        });
+                });
+
             modelBuilder.Entity("Module.Booking.Domain.Entities.BookingDiscount", b =>
                 {
                     b.Property<long>("Id")
@@ -194,14 +309,14 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("applied_amount")
                         .HasComment("Importo effettivamente scontato su questa prenotazione, calcolato dal motore prezzo server-side.");
 
-                    b.Property<int>("AppliedChannel")
+                    b.Property<DiscountChannel>("AppliedChannel")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.discount_channel")
                         .HasColumnName("applied_channel")
                         .HasDefaultValueSql("'any'")
                         .HasComment("Canale su cui il voucher era ammesso, congelato dalla regola di Catalog.");
 
-                    b.PrimitiveCollection<int[]>("AppliesToCategories")
+                    b.PrimitiveCollection<List<ServiceCategory>>("AppliesToCategories")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.service_category[]")
@@ -244,7 +359,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("discount_id")
                         .HasComment("public_id di catalog.pricing_discounts, copiato — riferimento vivo per l'audit del contatore utilizzi; NULL per sconto manuale non a catalogo.");
 
-                    b.Property<int>("DiscountType")
+                    b.Property<DiscountType>("DiscountType")
                         .HasColumnType("booking.discount_type")
                         .HasColumnName("discount_type")
                         .HasComment("Natura del valore: importo fisso o percentuale.");
@@ -256,7 +371,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("is_roundup")
                         .HasComment("Arrotondamento del prezzo dopo lo sconto, congelato dalla regola.");
 
-                    b.Property<int>("Origin")
+                    b.Property<DiscountOrigin>("Origin")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.discount_origin")
                         .HasColumnName("origin")
@@ -273,7 +388,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("reservation_id")
                         .HasComment("Prenotazione a cui si applica lo sconto.");
 
-                    b.Property<int>("Scope")
+                    b.Property<DiscountScope>("Scope")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.discount_scope")
                         .HasColumnName("scope")
@@ -316,6 +431,70 @@ namespace Module.Booking.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Module.Booking.Domain.Entities.BookingEntrance", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("BookingLineId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("booking_line_id")
+                        .HasComment("Riga (postazione) della prenotazione su cui è segnato l'ingresso.");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()")
+                        .HasComment("Creazione della riga.");
+
+                    b.Property<DateTime>("EnteredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("entered_at")
+                        .HasComment("Quando l'operatore ha segnato l'ingresso.");
+
+                    b.Property<DateOnly>("EntryDate")
+                        .HasColumnType("date")
+                        .HasColumnName("entry_date")
+                        .HasComment("Giorno dell'ingresso (ora italiana): il giorno dopo l'ingresso non risulta più segnato.");
+
+                    b.Property<Guid?>("OperatorUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("operator_user_id")
+                        .HasComment("public_id di identity.access_users, copiato dal token — chi ha segnato l'ingresso.");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("property_id")
+                        .HasComment("public_id di catalog.properties, copiato — nessuna FK cross-schema; discriminatore tenant.");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()")
+                        .HasComment("Ultima modifica della riga.");
+
+                    b.HasKey("Id")
+                        .HasName("pk_booking_entrances");
+
+                    b.HasIndex("BookingLineId", "EntryDate")
+                        .IsUnique()
+                        .HasDatabaseName("uq_booking_entrances_line_date");
+
+                    b.HasIndex("PropertyId", "EntryDate")
+                        .HasDatabaseName("ix_booking_entrances_property_date");
+
+                    b.ToTable("entrances", "booking", t =>
+                        {
+                            t.HasComment("«Segnala ingresso»: il cliente è entrato su questa postazione in questo giorno. Una riga per riga di prenotazione e giorno.");
+                        });
+                });
+
             modelBuilder.Entity("Module.Booking.Domain.Entities.BookingGroup", b =>
                 {
                     b.Property<long>("Id")
@@ -354,6 +533,12 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("property_id")
                         .HasComment("public_id di catalog.properties (stabilimento proprietario del gruppo), copiato — nessuna FK cross-schema");
 
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()")
+                        .HasComment("Id pubblico del gruppo nelle API; le righe migrate lo ricevono dal default.");
+
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -367,6 +552,10 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.HasIndex("PropertyId")
                         .HasDatabaseName("ix_booking_groups_property")
                         .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_booking_groups_public_id");
 
                     b.HasIndex("PropertyId", "Name")
                         .IsUnique()
@@ -555,27 +744,12 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("booking_number")
                         .HasComment("Numero prenotazione copiato dalla testata, per correlazioni dirette con Payment/Fiskaly senza join.");
 
-                    b.Property<int>("BookingPeriod")
+                    b.Property<DayPeriod>("BookingPeriod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.day_period")
                         .HasColumnName("booking_period")
                         .HasDefaultValueSql("'full_day'")
                         .HasComment("Fascia oraria della riga.");
-
-                    b.Property<DateTime?>("CheckedInAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("checked_in_at")
-                        .HasComment("Quando il cliente si è presentato per questa postazione; NULL = non arrivato.");
-
-                    b.Property<DateTime?>("CheckedOutAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("checked_out_at")
-                        .HasComment("Quando la postazione è stata liberata / cliente uscito.");
-
-                    b.Property<DateTime?>("CheckoutEffectiveAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("checkout_effective_at")
-                        .HasComment("Fine occupazione effettiva in caso di check-out anticipato; limite superiore per la disponibilità al posto di end_date.");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -613,6 +787,11 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasDefaultValue(0m)
                         .HasColumnName("line_price")
                         .HasComment("Prezzo bloccato della riga (pacchetto), al netto degli articoli aggiuntivi.");
+
+                    b.Property<decimal?>("ManualPrice")
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("manual_price")
+                        .HasComment("Prezzo del pacchetto scritto a mano; si perde cambiando le date della riga.");
 
                     b.Property<string>("PackageNameSnapshot")
                         .HasMaxLength(255)
@@ -663,11 +842,27 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("sector_label_snapshot")
                         .HasComment("Etichetta del settore/fila congelata al momento della prenotazione.");
 
+                    b.Property<short?>("SpotColumnSnapshot")
+                        .HasColumnType("smallint")
+                        .HasColumnName("spot_column_snapshot")
+                        .HasComment("Colonna della postazione nel reticolo della mappa, per il ricollegamento per posizione.");
+
                     b.Property<string>("SpotLabelSnapshot")
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)")
                         .HasColumnName("spot_label_snapshot")
                         .HasComment("Etichetta della postazione congelata al momento della prenotazione.");
+
+                    b.Property<short?>("SpotRowSnapshot")
+                        .HasColumnType("smallint")
+                        .HasColumnName("spot_row_snapshot")
+                        .HasComment("Fila della postazione nel reticolo della mappa, per il ricollegamento per posizione.");
+
+                    b.Property<string>("SpotTypeSnapshot")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("spot_type_snapshot")
+                        .HasComment("Tipo della postazione al momento della prenotazione (codice di catalog.map_spots): il ricollegamento dopo «Reimposta mappa» vale solo con lo stesso tipo.");
 
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date")
@@ -707,10 +902,6 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.HasIndex("PropertyId", "ResourceId", "StartDate", "EndDate")
                         .HasDatabaseName("ix_booking_lines_property_resource_dates")
                         .HasFilter("deleted_at IS NULL");
-
-                    b.HasIndex(new[] { "PropertyId", "StartDate" }, "ix_booking_lines_checkin_open")
-                        .HasDatabaseName("ix_booking_lines_checkin_open")
-                        .HasFilter("checked_in_at IS NOT NULL AND checked_out_at IS NULL AND deleted_at IS NULL");
 
                     b.HasIndex(new[] { "PropertyId", "StartDate" }, "ix_booking_lines_property_stay")
                         .HasDatabaseName("ix_booking_lines_property_stay")
@@ -752,18 +943,26 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasDefaultValueSql("now()")
                         .HasComment("Creazione della riga.");
 
-                    b.Property<int>("DateScope")
+                    b.Property<AdditionalItemDateScope>("DateScope")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.additional_item_date_scope")
                         .HasColumnName("date_scope")
                         .HasDefaultValueSql("'whole_stay'")
                         .HasComment("Copertura temporale: tutta la durata della riga o solo date puntuali.");
 
+                    b.PrimitiveCollection<List<DateOnly>>("Dates")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("date[]")
+                        .HasColumnName("dates")
+                        .HasDefaultValueSql("'{}'")
+                        .HasComment("Giorni a cui vale l'articolo quando date_scope = specific_dates; vuoto = tutto il soggiorno della riga.");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<int>("ItemSource")
+                    b.Property<AdditionalItemSource>("ItemSource")
                         .HasColumnType("booking.additional_item_source")
                         .HasColumnName("item_source")
                         .HasComment("Origine dell'anagrafica dell'articolo: voce di listino o articolo di magazzino.");
@@ -926,7 +1125,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("reservation_id")
                         .HasComment("Prenotazione (testata) resa visibile al partecipante.");
 
-                    b.Property<int>("Role")
+                    b.Property<ParticipantRole>("Role")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.participant_role")
                         .HasColumnName("role")
@@ -963,66 +1162,6 @@ namespace Module.Booking.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Module.Booking.Domain.Entities.BookingQuickActionDate", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
-
-                    b.Property<DateOnly>("ActionDate")
-                        .HasColumnType("date")
-                        .HasColumnName("action_date")
-                        .HasComment("Giorno marcato per un'azione rapida del planner.");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()")
-                        .HasComment("Creazione della riga.");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deleted_at");
-
-                    b.Property<Guid>("PropertyId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("property_id")
-                        .HasComment("public_id di catalog.properties, copiato dalla testata — nessuna FK cross-schema.");
-
-                    b.Property<long>("ReservationId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("reservation_id")
-                        .HasComment("Prenotazione a cui la data marcata è associata.");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()")
-                        .HasComment("Ultima modifica della riga.");
-
-                    b.HasKey("Id")
-                        .HasName("pk_booking_quick_action_dates");
-
-                    b.HasIndex("PropertyId", "ActionDate")
-                        .HasDatabaseName("ix_booking_quick_action_dates_property_date")
-                        .HasFilter("deleted_at IS NULL");
-
-                    b.HasIndex("ReservationId", "ActionDate")
-                        .IsUnique()
-                        .HasDatabaseName("uq_booking_quick_action_dates_reservation_date")
-                        .HasFilter("deleted_at IS NULL");
-
-                    b.ToTable("quick_action_dates", "booking", t =>
-                        {
-                            t.HasComment("Giorno marcato dall'operatore per un'azione rapida del planner su questa prenotazione.");
-                        });
-                });
-
             modelBuilder.Entity("Module.Booking.Domain.Entities.BookingServiceLine", b =>
                 {
                     b.Property<long>("Id")
@@ -1032,7 +1171,7 @@ namespace Module.Booking.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("BookingChannel")
+                    b.Property<BookingChannel>("BookingChannel")
                         .HasColumnType("booking.booking_channel")
                         .HasColumnName("booking_channel")
                         .HasComment("Canale della prenotazione di origine, denormalizzato dalla testata.");
@@ -1067,7 +1206,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("is_paid_with_wallet")
                         .HasComment("La riga è stata pagata col borsellino/tessera prepagata; il movimento wallet è in Payment.");
 
-                    b.Property<int>("Kind")
+                    b.Property<ServiceCategory>("Kind")
                         .HasColumnType("booking.service_category")
                         .HasColumnName("kind")
                         .HasComment("Categoria del servizio venduto: bar, normale o orario.");
@@ -1286,6 +1425,177 @@ namespace Module.Booking.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Module.Booking.Domain.Entities.BookingTableLine", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<short>("Covers")
+                        .HasColumnType("smallint")
+                        .HasColumnName("covers")
+                        .HasComment("Coperti.");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()")
+                        .HasComment("Creazione della riga.");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at")
+                        .HasComment("Soft-delete.");
+
+                    b.Property<decimal>("DepositDue")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("deposit_due")
+                        .HasComment("Caparra richiesta dal servizio tavoli (si incassa con Payment).");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("property_id")
+                        .HasComment("public_id di catalog.properties, copiato — nessuna FK cross-schema");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()")
+                        .HasComment("Id pubblico della riga nelle API.");
+
+                    b.Property<long>("ReservationId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("reservation_id")
+                        .HasComment("Prenotazione a cui appartiene il tavolo.");
+
+                    b.Property<DateOnly>("ServiceDate")
+                        .HasColumnType("date")
+                        .HasColumnName("service_date")
+                        .HasComment("Giorno del pasto.");
+
+                    b.Property<TimeOnly>("SlotEnd")
+                        .HasColumnType("time")
+                        .HasColumnName("slot_end")
+                        .HasComment("Fine della fascia.");
+
+                    b.Property<TimeOnly>("SlotStart")
+                        .HasColumnType("time")
+                        .HasColumnName("slot_start")
+                        .HasComment("Inizio della fascia.");
+
+                    b.PrimitiveCollection<short[]>("TableSeats")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint[]")
+                        .HasColumnName("table_seats")
+                        .HasDefaultValueSql("'{}'")
+                        .HasComment("Posti di ciascun tavolo assegnato; vuoto con la capienza a posti o senza tavolo.");
+
+                    b.Property<Guid>("TableServiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("table_service_id")
+                        .HasComment("public_id di catalog.table_services (pranzo, cena), copiato — nessuna FK cross-schema");
+
+                    b.Property<string>("TableServiceNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("table_service_name_snapshot")
+                        .HasComment("Nome del servizio tavoli al momento della prenotazione.");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()")
+                        .HasComment("Ultima modifica della riga.");
+
+                    b.HasKey("Id")
+                        .HasName("pk_booking_table_lines");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_booking_table_lines_public_id");
+
+                    b.HasIndex("ReservationId")
+                        .HasDatabaseName("ix_table_lines_reservation_id");
+
+                    b.HasIndex("PropertyId", "TableServiceId", "ServiceDate")
+                        .HasDatabaseName("ix_booking_table_lines_service_day")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("table_lines", "booking", t =>
+                        {
+                            t.HasComment("Tavolo prenotato: servizio tavoli, giorno, fascia, coperti e tavoli assegnati.");
+
+                            t.HasCheckConstraint("ck_booking_table_lines_covers", "covers > 0");
+
+                            t.HasCheckConstraint("ck_booking_table_lines_slot", "slot_end > slot_start");
+                        });
+                });
+
+            modelBuilder.Entity("Module.Booking.Domain.Entities.ProcessedCommand", b =>
+                {
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("property_id")
+                        .HasComment("public_id di catalog.properties, copiato — nessuna FK cross-schema");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("idempotency_key")
+                        .HasComment("Chiave mandata dal client nell'header Idempotency-Key.");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()")
+                        .HasComment("Quando è stato eseguito.");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("method")
+                        .HasComment("Metodo HTTP del comando.");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("path")
+                        .HasComment("Percorso del comando.");
+
+                    b.Property<string>("ResponseBody")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("response_body")
+                        .HasComment("Corpo della risposta.");
+
+                    b.Property<int>("StatusCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("status_code")
+                        .HasComment("Stato HTTP della risposta.");
+
+                    b.HasKey("PropertyId", "IdempotencyKey")
+                        .HasName("pk_booking_processed_commands");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_booking_processed_commands_created");
+
+                    b.ToTable("processed_commands", "booking", t =>
+                        {
+                            t.HasComment("Comandi già eseguiti con la chiave di idempotenza: chi li rimanda (offline) riceve la stessa risposta. Cancellati dopo 7 giorni.");
+                        });
+                });
+
             modelBuilder.Entity("Module.Booking.Domain.Entities.ResaleCreditLedgerEntry", b =>
                 {
                     b.Property<long>("Id")
@@ -1326,7 +1636,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("deleted_at")
                         .HasComment("Presente per uniformità di schema, non usato: il ledger è append-only, le correzioni sono righe reversed/adjustment");
 
-                    b.Property<int>("EntryType")
+                    b.Property<ResaleCreditEntryType>("EntryType")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.resale_credit_entry")
                         .HasColumnName("entry_type")
@@ -1432,26 +1742,33 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("deleted_at")
                         .HasComment("Soft-delete dell'offerta");
 
+                    b.Property<bool>("ExcludesFromPrice")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("excludes_from_price")
+                        .HasComment("Assenza con «ricalcola prezzo»: il giorno non si paga");
+
                     b.Property<DateOnly>("OfferDate")
                         .HasColumnType("date")
                         .HasColumnName("offer_date")
                         .HasComment("Giorno ceduto");
 
-                    b.Property<int>("OfferState")
+                    b.Property<ResaleOfferState>("OfferState")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.resale_offer_state")
                         .HasColumnName("offer_state")
                         .HasDefaultValueSql("'available'")
                         .HasComment("Stato dell'offerta: disponibile, ripreso da un'altra prenotazione, ritirato dal titolare");
 
-                    b.Property<int>("OfferedPeriod")
+                    b.Property<DayPeriod>("OfferedPeriod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.day_period")
                         .HasColumnName("offered_period")
                         .HasDefaultValueSql("'full_day'")
                         .HasComment("Fascia ceduta (full day, mattina, pomeriggio)");
 
-                    b.Property<int>("Origin")
+                    b.Property<ResaleOrigin>("Origin")
                         .HasColumnType("booking.resale_origin")
                         .HasColumnName("origin")
                         .HasComment("Come è nata l'offerta: assenza pianificata, sharing con credito, o assenza gestita come sharing");
@@ -1461,7 +1778,13 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("property_id")
                         .HasComment("public_id di catalog.properties, copiato — nessuna FK cross-schema");
 
-                    b.Property<int?>("RemainingPeriod")
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()")
+                        .HasComment("Id pubblico dell'offerta nelle API; le righe migrate lo ricevono dal default.");
+
+                    b.Property<DayPeriod?>("RemainingPeriod")
                         .HasColumnType("booking.day_period")
                         .HasColumnName("remaining_period")
                         .HasComment("Fascia ancora disponibile dopo una ripresa parziale; NULL se completamente ripresa o se offered_period non è full_day");
@@ -1504,6 +1827,10 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasDatabaseName("ix_booking_resale_offers_credit_pending")
                         .HasFilter("offer_state = 'reassigned' AND credit_settled = false AND origin = 'sharing' AND deleted_at IS NULL");
 
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_booking_resale_offers_public_id");
+
                     b.HasIndex("SourceReservationId")
                         .HasDatabaseName("ix_resale_offers_source_reservation_id");
 
@@ -1530,20 +1857,34 @@ namespace Module.Booking.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
-                    b.PrimitiveCollection<int[]>("AppliesTo")
+                    b.Property<bool>("AbsencesAsSharing")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("absences_as_sharing")
+                        .HasComment("Le assenze programmate valgono come sharing: il giorno ripreso fa maturare il credito al titolare");
+
+                    b.PrimitiveCollection<List<ResaleScope>>("AppliesTo")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.resale_scope[]")
                         .HasColumnName("applies_to")
                         .HasDefaultValueSql("'{}'")
-                        .HasComment("Estensioni della rivendita: consentita per pass stagionali, estesa a tutte le postazioni del pacchetto");
+                        .HasComment("A cosa si applica lo sharing: solo alle stagionali, a tutti gli articoli (non solo agli ombrelloni)");
 
-                    b.Property<bool>("BothOptionsDisabled")
+                    b.Property<decimal>("CardTopUpAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("card_top_up_amount")
+                        .HasComment("Importo in euro della ricarica per giorno ripreso");
+
+                    b.Property<bool>("CardTopUpEnabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
-                        .HasColumnName("both_options_disabled")
-                        .HasComment("Disabilita entrambe le modalità (semantica esatta da riverificare col committente, migrato as-is)");
+                        .HasColumnName("card_top_up_enabled")
+                        .HasComment("Ricarica della tessera prepagata del titolare per ogni giorno ripreso");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -1551,27 +1892,6 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()")
                         .HasComment("Data/ora di creazione della configurazione");
-
-                    b.Property<decimal>("CreditAmount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(12,2)")
-                        .HasDefaultValue(0m)
-                        .HasColumnName("credit_amount")
-                        .HasComment("Valore del credito: importo € se credit_calc = fixed_amount, percentuale 0-100 se daily_percentage");
-
-                    b.Property<int>("CreditCalc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("booking.resale_credit_calc")
-                        .HasColumnName("credit_calc")
-                        .HasDefaultValueSql("'fixed_amount'")
-                        .HasComment("Come si calcola il valore del credito per giorno ceduto: importo fisso o percentuale della tariffa giornaliera");
-
-                    b.Property<int>("CreditUnitsPerDay")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("credit_units_per_day")
-                        .HasComment("Quanti crediti simbolici matura il titolare per ogni giorno ceduto e ripreso");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1585,12 +1905,31 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("is_enabled")
                         .HasComment("La feature rivendita/sharing è attiva per lo stabilimento");
 
-                    b.Property<int>("Mode")
+                    b.Property<decimal>("ManualCreditAmount")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("booking.resale_mode")
-                        .HasColumnName("mode")
-                        .HasDefaultValueSql("'absence'")
-                        .HasComment("Come viene gestita la cessione di un giorno: solo assenza pianificata senza credito, o sharing con credito al titolare");
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("manual_credit_amount")
+                        .HasComment("Valore in euro di un credito manuale");
+
+                    b.Property<bool>("ManualCreditEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("manual_credit_enabled")
+                        .HasComment("Crediti assegnati a mano: per ogni giorno ripreso il titolare matura manual_credit_units_per_day crediti");
+
+                    b.Property<int>("ManualCreditUnitsPerDay")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("manual_credit_units_per_day")
+                        .HasComment("Crediti per ogni giorno ceduto e ripreso");
+
+                    b.Property<int?>("MinBookingDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("min_booking_days")
+                        .HasComment("Giorni minimi della prenotazione per avere lo sharing; NULL = nessun minimo");
 
                     b.Property<Guid>("PropertyId")
                         .HasColumnType("uuid")
@@ -1603,6 +1942,20 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()")
                         .HasComment("Data/ora di ultima modifica della configurazione");
+
+                    b.Property<decimal>("VoucherCreditAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("voucher_credit_amount")
+                        .HasComment("Valore in euro del voucher per giorno ripreso");
+
+                    b.Property<bool>("VoucherCreditEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("voucher_credit_enabled")
+                        .HasComment("Voucher automatico al titolare per ogni giorno ripreso");
 
                     b.HasKey("Id")
                         .HasName("pk_booking_resale_settings");
@@ -1629,7 +1982,7 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Property<Guid?>("AgreementPartnerId")
                         .HasColumnType("uuid")
                         .HasColumnName("agreement_partner_id")
-                        .HasComment("public_id di catalog.agreement_partners, copiato — valorizzato solo per reservation_kind = spot.");
+                        .HasComment("public_id di catalog.agreement_partners, copiato — riepilogo: struttura della prima riga con una convenzione; il dettaglio per riga è in booking.agreement_lines.");
 
                     b.Property<decimal>("BalanceDue")
                         .ValueGeneratedOnAdd()
@@ -1650,10 +2003,50 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("booking_number")
                         .HasComment("Numero prenotazione generato server-side da booking_number_sequences, univoco fra righe vive.");
 
-                    b.Property<int>("Channel")
+                    b.Property<CancellationReason?>("CancellationReason")
+                        .HasColumnType("booking.cancellation_reason")
+                        .HasColumnName("cancellation_reason")
+                        .HasComment("Motivo dell'annullamento: customer, manager, rejected, property_trashed, spot_removed, payment_failed, confirmation_expired.");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cancelled_at")
+                        .HasComment("Quando la prenotazione è stata annullata.");
+
+                    b.Property<BookingChannel>("Channel")
                         .HasColumnType("booking.booking_channel")
                         .HasColumnName("booking_channel")
                         .HasComment("Origine della prenotazione: customer (online) o manager (gestionale). Immutabile dopo la creazione.");
+
+                    b.Property<DateTime?>("CheckedInAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("checked_in_at")
+                        .HasComment("Check-in dell'intera prenotazione; NULL = cliente non arrivato.");
+
+                    b.Property<DateTime?>("CheckedOutAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("checked_out_at")
+                        .HasComment("Check-out dell'intera prenotazione, anche anticipato.");
+
+                    b.Property<DateTime?>("CheckoutEffectiveAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("checkout_effective_at")
+                        .HasComment("Fine effettiva dell'occupazione con un check-out anticipato: i giorni da lì in poi tornano liberi.");
+
+                    b.Property<DateTime?>("ConfirmationExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("confirmation_expires_at")
+                        .HasComment("Scadenza della richiesta online da confermare: la prima fra 48 ore, le 23:00 della vigilia e, per il giorno stesso, 1 ora.");
+
+                    b.Property<DateTime?>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("confirmed_at")
+                        .HasComment("Quando il gestore ha confermato la richiesta online.");
+
+                    b.Property<Guid?>("ConfirmedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("confirmed_by_user_id")
+                        .HasComment("public_id di identity.access_users, copiato — chi ha confermato la richiesta online.");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -1715,36 +2108,56 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("is_order_filled")
                         .HasComment("Riepilogo evasione ordini bar/servizio collegati; dettaglio per riga su booking_service_lines.");
 
-                    b.Property<bool>("IsSplit")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_split")
-                        .HasComment("Prenotazione split-location (derivabile dalle righe, tenuto per compatibilità di lettura).");
-
-                    b.Property<int>("Kind")
+                    b.Property<ReservationKind>("Kind")
                         .HasColumnType("booking.reservation_kind")
                         .HasColumnName("reservation_kind")
                         .HasComment("spot (con postazioni) o service (soli servizi).");
 
-                    b.Property<int>("ListingType")
+                    b.Property<ListingType>("ListingType")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.listing_type")
                         .HasColumnName("listing_type")
                         .HasDefaultValueSql("'standard'")
                         .HasComment("Tipo di listino applicato: standard, listino convenzione o voucher convenzione.");
 
+                    b.Property<decimal>("ManualDiscountAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("manual_discount_amount")
+                        .HasComment("Importo in euro dello sconto manuale, compreso in discount.");
+
+                    b.Property<AdjustmentType?>("ManualDiscountType")
+                        .HasColumnType("booking.adjustment_type")
+                        .HasColumnName("manual_discount_type")
+                        .HasComment("Sconto manuale dell'operatore: percentage o amount; NULL = nessuno. Si somma al codice sconto, entrambi sul subtotale.");
+
+                    b.Property<decimal?>("ManualDiscountValue")
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("manual_discount_value")
+                        .HasComment("Valore dello sconto manuale: percentuale (0-100) o euro.");
+
                     b.Property<string>("Note")
                         .HasColumnType("text")
                         .HasColumnName("note")
                         .HasComment("Nota libera dell'operatore sulla prenotazione.");
 
-                    b.Property<int>("OnlineConfirmationState")
+                    b.Property<DateTime?>("NoteUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("note_updated_at")
+                        .HasComment("Ultima modifica del testo della nota.");
+
+                    b.Property<Guid?>("NoteUpdatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("note_updated_by_user_id")
+                        .HasComment("public_id di identity.access_users, copiato — chi ha scritto per ultimo la nota.");
+
+                    b.Property<OnlineConfirmationState>("OnlineConfirmationState")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.online_confirmation_state")
                         .HasColumnName("online_confirmation_state")
                         .HasDefaultValueSql("'not_required'")
-                        .HasComment("Stato del flusso di conferma online via reservation_code.");
+                        .HasComment("Conferma del gestore delle prenotazioni online che la richiedono: not_required, pending, confirmed.");
 
                     b.Property<Guid?>("OperatorUserId")
                         .HasColumnType("uuid")
@@ -1758,6 +2171,11 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("paid")
                         .HasComment("Totale già incassato, proiezione dagli eventi di pagamento di Payment.");
 
+                    b.Property<Guid?>("PaidMarkEntryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("paid_mark_entry_id")
+                        .HasComment("public_id di payment.ledger_entries, copiato — l'incasso creato con la spunta «Pagato», annullato togliendola.");
+
                     b.Property<bool>("PayNow")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -1765,12 +2183,17 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("pay_now")
                         .HasComment("Il cliente ha scelto di pagare subito online al checkout (canale customer).");
 
-                    b.Property<int?>("PrevalentPaymentMode")
+                    b.Property<DateTime?>("PaymentHoldUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("payment_hold_until")
+                        .HasComment("Prenotazione online in attesa del pagamento: postazioni tenute fino a quest'ora.");
+
+                    b.Property<PaymentMode?>("PrevalentPaymentMode")
                         .HasColumnType("booking.payment_mode")
                         .HasColumnName("prevalent_payment_mode")
                         .HasComment("Modalità di pagamento prevalente (riepilogo); NULL finché non ancora incassata/determinata.");
 
-                    b.PrimitiveCollection<int[]>("PriceFlags")
+                    b.PrimitiveCollection<List<ReservationPriceFlag>>("PriceFlags")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.reservation_price_flag[]")
@@ -1793,6 +2216,11 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("public_id")
                         .HasComment("Id pubblico stabile, copiato cross-modulo da Payment/Fiskaly/Notification.");
 
+                    b.Property<long?>("RenewedFromReservationId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("renewed_from_reservation_id")
+                        .HasComment("Prenotazione da cui nasce il rinnovo; impedisce di rinnovarla due volte.");
+
                     b.Property<string>("ReservationCode")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -1800,7 +2228,12 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("reservation_code")
                         .HasComment("Codice pubblico (URL/QR) generato con RNG sicuro, univoco fra righe vive.");
 
-                    b.Property<int>("Status")
+                    b.Property<long?>("SplitFromReservationId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("split_from_reservation_id")
+                        .HasComment("Prenotazione da cui nasce con «Dividi conto».");
+
+                    b.Property<ReservationStatus>("Status")
                         .HasColumnType("booking.reservation_status")
                         .HasColumnName("reservation_status")
                         .HasComment("Stato del ciclo di vita, separato da soft-delete e da pagamento.");
@@ -1829,6 +2262,29 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("surcharge")
                         .HasComment("Supplemento/sovrapprezzo (commissione di servizio, extra manuale).");
 
+                    b.Property<string>("SurchargeLabel")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("surcharge_label")
+                        .HasComment("Etichetta libera dell'unico incremento, riga a sé sullo scontrino.");
+
+                    b.Property<AdjustmentType?>("SurchargeType")
+                        .HasColumnType("booking.adjustment_type")
+                        .HasColumnName("surcharge_type")
+                        .HasComment("Incremento: percentage o amount; NULL = nessuno.");
+
+                    b.Property<decimal?>("SurchargeValue")
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("surcharge_value")
+                        .HasComment("Valore dell'incremento: percentuale (0-100) o euro.");
+
+                    b.Property<long>("SyncSeq")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bigint")
+                        .HasColumnName("sync_seq")
+                        .HasDefaultValueSql("nextval('booking.sync_seq')")
+                        .HasComment("Cursore di sincronizzazione dei dispositivi: nuovo numero a ogni modifica (trigger).");
+
                     b.Property<decimal>("Total")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(12,2)")
@@ -1848,6 +2304,12 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("updated_by_user_id")
                         .HasComment("public_id di identity.access_users, copiato — ultimo operatore che ha modificato la prenotazione.");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id")
                         .HasName("pk_booking_reservations");
 
@@ -1864,6 +2326,10 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasDatabaseName("ix_booking_reservations_customer")
                         .HasFilter("deleted_at IS NULL");
 
+                    b.HasIndex("PaymentHoldUntil")
+                        .HasDatabaseName("ix_booking_reservations_payment_hold")
+                        .HasFilter("payment_hold_until IS NOT NULL");
+
                     b.HasIndex("PropertyId")
                         .HasDatabaseName("ix_booking_reservations_online_pending")
                         .HasFilter("online_confirmation_state = 'pending' AND deleted_at IS NULL");
@@ -1872,10 +2338,19 @@ namespace Module.Booking.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("uq_booking_reservations_public_id");
 
+                    b.HasIndex("RenewedFromReservationId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_booking_reservations_renewed_from")
+                        .HasFilter("renewed_from_reservation_id IS NOT NULL AND deleted_at IS NULL");
+
                     b.HasIndex("ReservationCode")
                         .IsUnique()
                         .HasDatabaseName("uq_booking_reservations_reservation_code")
                         .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("SplitFromReservationId")
+                        .HasDatabaseName("ix_booking_reservations_split_from")
+                        .HasFilter("split_from_reservation_id IS NOT NULL");
 
                     b.HasIndex("PropertyId", "Channel")
                         .HasDatabaseName("ix_booking_reservations_property_channel")
@@ -1885,9 +2360,16 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasDatabaseName("ix_booking_reservations_property_status")
                         .HasFilter("deleted_at IS NULL");
 
+                    b.HasIndex("PropertyId", "SyncSeq")
+                        .HasDatabaseName("ix_booking_reservations_sync");
+
                     b.HasIndex(new[] { "PropertyId", "StayFrom" }, "ix_booking_reservations_property_stay")
                         .HasDatabaseName("ix_booking_reservations_property_stay")
                         .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex(new[] { "DeletedAt" }, "ix_booking_reservations_trash")
+                        .HasDatabaseName("ix_booking_reservations_trash")
+                        .HasFilter("deleted_at IS NOT NULL");
 
                     b.HasIndex(new[] { "PropertyId", "StayFrom" }, "ix_booking_reservations_unpaid")
                         .HasDatabaseName("ix_booking_reservations_unpaid")
@@ -1927,7 +2409,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("booked_qty")
                         .HasComment("Unità occupate (state <> released) per la grana, mantenuto atomico dal trigger");
 
-                    b.Property<int>("BookingPeriod")
+                    b.Property<DayPeriod>("BookingPeriod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.day_period")
                         .HasColumnName("booking_period")
@@ -1970,7 +2452,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("resource_id")
                         .HasComment("public_id (Catalog) della risorsa (proiezione fine); NULL per la proiezione grossolana per tipo");
 
-                    b.Property<int>("ResourceType")
+                    b.Property<ResourceType>("ResourceType")
                         .HasColumnType("booking.resource_type")
                         .HasColumnName("resource_type")
                         .HasComment("Tipo di risorsa (stesso enum di booking_resource_consumptions.resource_type)");
@@ -2031,7 +2513,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("consumption_date")
                         .HasComment("Il giorno occupato: una riga per giorno, mai un intervallo");
 
-                    b.Property<int?>("BookingChannel")
+                    b.Property<BookingChannel?>("BookingChannel")
                         .HasColumnType("booking.booking_channel")
                         .HasColumnName("booking_channel")
                         .HasComment("Canale della prenotazione di origine, per statistiche sui consumi; NULL per manual_hold");
@@ -2042,7 +2524,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("booking_number")
                         .HasComment("Numero prenotazione copiato per query dirette; NULL per manual_hold");
 
-                    b.Property<int>("BookingPeriod")
+                    b.Property<DayPeriod>("BookingPeriod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.day_period")
                         .HasColumnName("booking_period")
@@ -2088,7 +2570,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("resource_name_snapshot")
                         .HasComment("Nome della risorsa congelato al momento del consumo, per reportistica anche se rinominata/non a catalogo");
 
-                    b.Property<int>("ResourceType")
+                    b.Property<ResourceType>("ResourceType")
                         .HasColumnType("booking.resource_type")
                         .HasColumnName("resource_type")
                         .HasComment("Tipo di risorsa consumata (postazione, articolo, servizio, slot orario)");
@@ -2108,12 +2590,12 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("source_id")
                         .HasComment("Id (interno di Booking) dell'entità di origine indicata da source_kind — nessuna FK polimorfa DB, coerenza gestita in applicazione; NULL per manual_hold senza entità a monte");
 
-                    b.Property<int>("SourceKind")
+                    b.Property<ConsumptionSource>("SourceKind")
                         .HasColumnType("booking.consumption_source")
                         .HasColumnName("source_kind")
                         .HasComment("Cosa ha generato il consumo: riga postazione, riga servizio, articolo aggiuntivo, blocco manuale, ripresa di rivendita");
 
-                    b.Property<int>("State")
+                    b.Property<ConsumptionState>("State")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.consumption_state")
                         .HasColumnName("state")
@@ -2173,7 +2655,7 @@ namespace Module.Booking.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("BookingPeriod")
+                    b.Property<DayPeriod>("BookingPeriod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.day_period")
                         .HasColumnName("booking_period")
@@ -2212,14 +2694,14 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("held_until")
                         .HasComment("Scadenza del blocco di checkout (now() + Booking:CheckoutHoldTtl, calcolato server-side); NULL per hold operational");
 
-                    b.Property<int>("HoldKind")
+                    b.Property<HoldKind>("HoldKind")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.hold_kind")
                         .HasColumnName("hold_kind")
                         .HasDefaultValueSql("'operational'")
                         .HasComment("Motivo del blocco: operativo (manutenzione/VIP/planner) o checkout temporaneo durante il pagamento online");
 
-                    b.Property<int>("HoldStatus")
+                    b.Property<HoldStatus>("HoldStatus")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("booking.hold_status")
                         .HasColumnName("hold_status")
@@ -2230,6 +2712,12 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("property_id")
                         .HasComment("public_id di catalog.properties, copiato dal token — nessuna FK cross-schema");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()")
+                        .HasComment("Id pubblico della riserva nelle API; le righe migrate lo ricevono dal default.");
 
                     b.Property<string>("ReasonNote")
                         .HasMaxLength(255)
@@ -2263,6 +2751,13 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnName("start_date")
                         .HasComment("Inizio dell'intervallo bloccato (estremi inclusi)");
 
+                    b.Property<long>("SyncSeq")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bigint")
+                        .HasColumnName("sync_seq")
+                        .HasDefaultValueSql("nextval('booking.sync_seq')")
+                        .HasComment("Cursore di sincronizzazione dei dispositivi: nuovo numero a ogni modifica (trigger).");
+
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -2283,6 +2778,13 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.HasIndex("PropertyId")
                         .HasDatabaseName("ix_booking_spot_holds_property_active")
                         .HasFilter("hold_status = 'active' AND deleted_at IS NULL");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_booking_spot_holds_public_id");
+
+                    b.HasIndex("PropertyId", "SyncSeq")
+                        .HasDatabaseName("ix_booking_spot_holds_sync");
 
                     b.HasIndex("PropertyId", "ResourceId", "StartDate", "EndDate")
                         .HasDatabaseName("ix_booking_spot_holds_property_resource_dates")
@@ -2314,6 +2816,18 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Navigation("Reservation");
                 });
 
+            modelBuilder.Entity("Module.Booking.Domain.Entities.BookingAttachment", b =>
+                {
+                    b.HasOne("Module.Booking.Domain.Entities.Reservation", "Reservation")
+                        .WithMany()
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_booking_media_assets_reservation");
+
+                    b.Navigation("Reservation");
+                });
+
             modelBuilder.Entity("Module.Booking.Domain.Entities.BookingDiscount", b =>
                 {
                     b.HasOne("Module.Booking.Domain.Entities.BookingLine", "BookingLine")
@@ -2332,6 +2846,18 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Navigation("BookingLine");
 
                     b.Navigation("Reservation");
+                });
+
+            modelBuilder.Entity("Module.Booking.Domain.Entities.BookingEntrance", b =>
+                {
+                    b.HasOne("Module.Booking.Domain.Entities.BookingLine", "BookingLine")
+                        .WithMany("Entrances")
+                        .HasForeignKey("BookingLineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_booking_entrances_line");
+
+                    b.Navigation("BookingLine");
                 });
 
             modelBuilder.Entity("Module.Booking.Domain.Entities.BookingGroupMember", b =>
@@ -2419,18 +2945,6 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Navigation("Reservation");
                 });
 
-            modelBuilder.Entity("Module.Booking.Domain.Entities.BookingQuickActionDate", b =>
-                {
-                    b.HasOne("Module.Booking.Domain.Entities.Reservation", "Reservation")
-                        .WithMany("QuickActionDates")
-                        .HasForeignKey("ReservationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_booking_quick_action_dates_reservation");
-
-                    b.Navigation("Reservation");
-                });
-
             modelBuilder.Entity("Module.Booking.Domain.Entities.BookingServiceLine", b =>
                 {
                     b.HasOne("Module.Booking.Domain.Entities.BookingLine", "BookingLine")
@@ -2470,6 +2984,18 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Navigation("Reservation");
 
                     b.Navigation("ServiceLine");
+                });
+
+            modelBuilder.Entity("Module.Booking.Domain.Entities.BookingTableLine", b =>
+                {
+                    b.HasOne("Module.Booking.Domain.Entities.Reservation", "Reservation")
+                        .WithMany("TableLines")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_booking_table_lines_reservation");
+
+                    b.Navigation("Reservation");
                 });
 
             modelBuilder.Entity("Module.Booking.Domain.Entities.ResaleCreditLedgerEntry", b =>
@@ -2519,6 +3045,21 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Navigation("TakenByReservation");
                 });
 
+            modelBuilder.Entity("Module.Booking.Domain.Entities.Reservation", b =>
+                {
+                    b.HasOne("Module.Booking.Domain.Entities.Reservation", null)
+                        .WithMany()
+                        .HasForeignKey("RenewedFromReservationId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_booking_reservations_renewed_from");
+
+                    b.HasOne("Module.Booking.Domain.Entities.Reservation", null)
+                        .WithMany()
+                        .HasForeignKey("SplitFromReservationId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_booking_reservations_split_from");
+                });
+
             modelBuilder.Entity("Module.Booking.Domain.Entities.SpotHold", b =>
                 {
                     b.HasOne("Module.Booking.Domain.Entities.Reservation", "ConvertedReservation")
@@ -2538,6 +3079,8 @@ namespace Module.Booking.Infrastructure.Migrations
             modelBuilder.Entity("Module.Booking.Domain.Entities.BookingLine", b =>
                 {
                     b.Navigation("AdditionalItems");
+
+                    b.Navigation("Entrances");
 
                     b.Navigation("ServiceLines");
                 });
@@ -2561,9 +3104,9 @@ namespace Module.Booking.Infrastructure.Migrations
 
                     b.Navigation("Participants");
 
-                    b.Navigation("QuickActionDates");
-
                     b.Navigation("ServiceLines");
+
+                    b.Navigation("TableLines");
                 });
 #pragma warning restore 612, 618
         }

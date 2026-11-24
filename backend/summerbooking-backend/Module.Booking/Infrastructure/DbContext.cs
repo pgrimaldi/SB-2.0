@@ -1,3 +1,5 @@
+using Module.Booking.Infrastructure.Infras;
+using Shared.Realtime;
 using BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Module.Booking.Domain.Entities;
@@ -16,10 +18,12 @@ public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext
 	public const string Schema = "booking";
 
 	private readonly IDateTimeProvider _dateTimeProvider;
+	private readonly IRealtimeNotifier? _realtime;
 
-	public DbContext(DbContextOptions<DbContext> options, IDateTimeProvider dateTimeProvider) : base(options)
+	public DbContext(DbContextOptions<DbContext> options, IDateTimeProvider dateTimeProvider, IRealtimeNotifier? realtime = null) : base(options)
 	{
 		_dateTimeProvider = dateTimeProvider;
+		_realtime = realtime;
 	}
 
 	// DbSet<TEntity> di ogni aggregato/entita del modulo — popolati
@@ -33,9 +37,10 @@ public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext
 	public DbSet<BookingLineAdditionalItem> BookingLineAdditionalItems => Set<BookingLineAdditionalItem>();
 	public DbSet<BookingNumberSequence> BookingNumberSequences => Set<BookingNumberSequence>();
 	public DbSet<BookingParticipant> BookingParticipants => Set<BookingParticipant>();
-	public DbSet<BookingQuickActionDate> BookingQuickActionDates => Set<BookingQuickActionDate>();
+	public DbSet<BookingEntrance> BookingEntrances => Set<BookingEntrance>();
 	public DbSet<BookingServiceLine> BookingServiceLines => Set<BookingServiceLine>();
 	public DbSet<BookingServiceTimeSlot> BookingServiceTimeSlots => Set<BookingServiceTimeSlot>();
+	public DbSet<BookingTableLine> BookingTableLines => Set<BookingTableLine>();
 	public DbSet<ResaleCreditLedgerEntry> ResaleCreditLedgerEntries => Set<ResaleCreditLedgerEntry>();
 	public DbSet<ResaleOffer> ResaleOffers => Set<ResaleOffer>();
 	public DbSet<ResaleSettings> ResaleSettings => Set<ResaleSettings>();
@@ -43,10 +48,14 @@ public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext
 	public DbSet<ResourceAvailabilityDaily> ResourceAvailabilityDailies => Set<ResourceAvailabilityDaily>();
 	public DbSet<ResourceConsumption> ResourceConsumptions => Set<ResourceConsumption>();
 	public DbSet<SpotHold> SpotHolds => Set<SpotHold>();
+	public DbSet<ProcessedCommand> ProcessedCommands => Set<ProcessedCommand>();
+	public DbSet<BookingAttachment> BookingAttachments => Set<BookingAttachment>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
-		optionsBuilder.AddInterceptors(new AuditInterceptor(_dateTimeProvider), new SoftDeleteInterceptor(_dateTimeProvider));
+		optionsBuilder.AddInterceptors(new ReservationTouchInterceptor(), new AuditInterceptor(_dateTimeProvider), new SoftDeleteInterceptor(_dateTimeProvider));
+		if (_realtime is not null)
+			optionsBuilder.AddInterceptors(new RealtimeInterceptor(_realtime));
 	}
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -62,8 +71,10 @@ public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext
 		// vanno qui.
 		modelBuilder.HasPostgresEnum<AdditionalItemDateScope>(Schema, "additional_item_date_scope");
 		modelBuilder.HasPostgresEnum<AdditionalItemSource>(Schema, "additional_item_source");
+		modelBuilder.HasPostgresEnum<AdjustmentType>(Schema, "adjustment_type");
 		modelBuilder.HasPostgresEnum<AgreementLineType>(Schema, "agreement_line_type");
 		modelBuilder.HasPostgresEnum<BookingChannel>(Schema, "booking_channel");
+		modelBuilder.HasPostgresEnum<CancellationReason>(Schema, "cancellation_reason");
 		modelBuilder.HasPostgresEnum<ConsumptionSource>(Schema, "consumption_source");
 		modelBuilder.HasPostgresEnum<ConsumptionState>(Schema, "consumption_state");
 		modelBuilder.HasPostgresEnum<DayPeriod>(Schema, "day_period");
@@ -77,9 +88,7 @@ public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext
 		modelBuilder.HasPostgresEnum<OnlineConfirmationState>(Schema, "online_confirmation_state");
 		modelBuilder.HasPostgresEnum<ParticipantRole>(Schema, "participant_role");
 		modelBuilder.HasPostgresEnum<PaymentMode>(Schema, "payment_mode");
-		modelBuilder.HasPostgresEnum<ResaleCreditCalc>(Schema, "resale_credit_calc");
 		modelBuilder.HasPostgresEnum<ResaleCreditEntryType>(Schema, "resale_credit_entry");
-		modelBuilder.HasPostgresEnum<ResaleMode>(Schema, "resale_mode");
 		modelBuilder.HasPostgresEnum<ResaleOfferState>(Schema, "resale_offer_state");
 		modelBuilder.HasPostgresEnum<ResaleOrigin>(Schema, "resale_origin");
 		modelBuilder.HasPostgresEnum<ResaleScope>(Schema, "resale_scope");

@@ -1,4 +1,5 @@
-﻿using BuildingBlocks.Application.Validation;
+using Shared.Contracts.Catalog;
+using BuildingBlocks.Application.Validation;
 using Module.Catalog.Application.Abstractions;
 using Module.Catalog.Application.Dtos;
 using Module.Catalog.Application.Validators;
@@ -60,9 +61,30 @@ public sealed class QuoteService
 
 	/// <summary>Preventivo dal gestionale, per lo stabilimento del token.</summary>
 	public async Task<QuoteDto> QuoteAsync(QuoteRequest request, CancellationToken ct = default)
+		=> await QuoteAsync(request, null, ct);
+
+	/// <param name="redeemedDiscountId">Codice sconto già usato dalla prenotazione che si sta modificando: non conta per il massimo di utilizzi.</param>
+	public async Task<QuoteDto> QuoteAsync(QuoteRequest request, Guid? redeemedDiscountId, CancellationToken ct = default)
 	{
 		_validator.EnsureValid(request);
-		return await BuildAsync(await _property.IdAsync(ct), QuoteChannel.Manager, request, ct);
+		return await BuildAsync(await _property.IdAsync(ct), QuoteChannel.Manager, request, ct, redeemedDiscountId: redeemedDiscountId);
+	}
+
+	/// <summary>Preventivo online per uno stabilimento già individuato (prenotazione online di Booking).</summary>
+	public async Task<QuoteDto> QuoteOnlineForPropertyAsync(long propertyId, QuoteRequest request, CancellationToken ct = default)
+	{
+		_validator.EnsureValid(request);
+		return await BuildAsync(propertyId, QuoteChannel.Online, request, ct);
+	}
+
+	/// <summary>
+	/// Preventivo del rinnovo: listino di oggi, ma i giorni si leggono sui periodi della stagione successiva (stessa
+	/// chiave di periodo). Giorni fuori da quei periodi: avviso <c>days_without_period</c>.
+	/// </summary>
+	public async Task<QuoteDto> QuoteNextSeasonAsync(QuoteRequest request, CancellationToken ct = default)
+	{
+		_validator.EnsureValid(request);
+		return await BuildAsync(await _property.IdAsync(ct), QuoteChannel.Manager, request, ct, nextSeason: true);
 	}
 
 	/// <summary>Preventivo dal sito pubblico: valgono le regole della prenotazione online dello stabilimento.</summary>
@@ -75,12 +97,54 @@ public sealed class QuoteService
 		return await BuildAsync(row.PropertyId, QuoteChannel.Online, request, ct);
 	}
 
-	private async Task<QuoteDto> BuildAsync(long propertyId, QuoteChannel channel, QuoteRequest r, CancellationToken ct)
+	/// <summary>
+	/// Cumulativo sulla stessa postazione con blocchi separati (prenotazione ripetuta): per ogni periodo la griglia a giornata
+	/// intera sui giorni totali, ripartita per i giorni di ciascun blocco. Null se non si applica.
+	/// </summary>
+	public async Task<IReadOnlyList<decimal>?> CumulativeBlocksAsync(
+		long propertyId, Guid spotId, Guid priceListId, IReadOnlyList<(DateOnly From, DateOnly To)> blocks, bool nextSeason, CancellationToken ct = default)
 	{
-		var part = r.DayPart switch { "morning" => DayPart.Morning, "afternoon" => DayPart.Afternoon, _ => DayPart.FullDay };
+		if (blocks.Count < 2)
+			return null;
+		var spot = (await _map.ListSpotsAsync(propertyId, ct)).FirstOrDefault(s => s.PublicId == spotId);
+		var list = (await _priceLists.FindManyAsync(propertyId, [priceListId], ct)).FirstOrDefault();
+		if (spot is null || list is null)
+			return null;
+		var source = PricingSource.From(list, await _priceLists.ListReducedSeasonsAsync(propertyId, ct));
+		if (source.Kind != PriceListKind.Package || !source.IsCumulative)
+			return null;
+		var sector = spot.SectorId;
+		if (source.IsSectorRestricted && (sector is null || !source.HasSector(sector.Value)))
+			return null;
+		if (blocks.Any(b => source.Reduced(sector, b.From, b.To) is not null))
+			return null;
+
+		var periods = nextSeason ? await _platform.FindNextSeasonPeriodsAsync(propertyId, ct) : await _platform.FindSeasonPeriodsAsync(propertyId, ct);
+		var none = new HashSet<DateOnly>();
+		var perBlock = blocks.Select(b => PackagePricer.Segments(periods, b.From, b.To, none)).ToList();
+		var amounts = new decimal[blocks.Count];
+		foreach (var period in perBlock.SelectMany(s => s).Select(s => s.PeriodGroup).Distinct().ToList())
+		{
+			if (period is not { } group || source.Rates(sector, group) is not { } rates)
+				return null;
+			var segments = perBlock.Select(s => s.Where(x => x.PeriodGroup == group).ToList()).ToList();
+			var days = segments.Select(s => s.Sum(x => x.Days.Count)).ToList();
+			var first = segments.SelectMany(s => s).Min(s => s.From);
+			var total = PackagePricer.FullDayGrid(source.Rules, rates, first, days.Sum()).For(days.Sum());
+			var shares = CumulativePricing.Distribute(total, days);
+			for (var i = 0; i < blocks.Count; i++)
+				amounts[i] += shares[i];
+		}
+		return amounts;
+	}
+
+	private async Task<QuoteDto> BuildAsync(
+		long propertyId, QuoteChannel channel, QuoteRequest r, CancellationToken ct, bool nextSeason = false, Guid? redeemedDiscountId = null)
+	{
+		var part = r.DayPart switch { DayParts.Morning => DayPart.Morning, DayParts.Afternoon => DayPart.Afternoon, _ => DayPart.FullDay };
 		var nowLocal = TimeZoneInfo.ConvertTimeFromUtc(_clock.UtcNow, Rome);
 		var today = DateOnly.FromDateTime(nowLocal);
-		var periods = await _platform.FindSeasonPeriodsAsync(propertyId, ct);
+		var periods = nextSeason ? await _platform.FindNextSeasonPeriodsAsync(propertyId, ct) : await _platform.FindSeasonPeriodsAsync(propertyId, ct);
 		var sectors = (await _sectors.ListAsync(propertyId, ct)).ToDictionary(s => s.PublicId);
 		var spotRows = (await _map.ListSpotsAsync(propertyId, ct)).ToDictionary(s => s.PublicId);
 		var online = await _online.FindAsync(propertyId, ct);
@@ -123,11 +187,11 @@ public sealed class QuoteService
 			if (spot.PriceListId is not null && package.IsDefault && revenueSettings is { IsSuggestedPriceEnabled: true })
 				package.WithSuggestedPrices(await _revenue.ListSuggestedPricesAsync(package.Id, r.From, r.To, ct));
 			var absences = (spot.Absences ?? []).ToHashSet();
-			var line = new Line("package", package.PublicId, spot.SpotId, sectorPublic, package.Name, 1, package.VatRate, package.VatNature);
+			var line = new Line(QuoteLineKinds.Package, package.PublicId, spot.SpotId, sectorPublic, package.Name, 1, package.VatRate, package.VatNature);
 			var segments = PackagePricer.Segments(periods, r.From, r.To, absences);
 			PriceSpot(line, package, sectorId, segments, part, r, spot.ManualPrice, revenueSettings, spotRow?.Id, warnings);
 			lines.Add(line);
-			if (package.IsCumulative && part == DayPart.FullDay && line.Rule == "grid")
+			if (package.IsCumulative && part == DayPart.FullDay && line.Rule == PriceRules.Grid)
 				cumulativeCandidates.Add((line, package, sectorId, segments));
 
 			// voucher della struttura convenzionata: si sottrae dal pacchetto, fino a 0
@@ -135,10 +199,10 @@ public sealed class QuoteService
 			{
 				var voucher = agreementLists.GetValueOrDefault(vid) is { ListType: AgreementListType.Voucher } v
 					? PricingSource.From(v, methods) : throw DomainException.NotFound(CatalogErrors.QuoteVoucherNotFound);
-				var voucherLine = new Line("voucher", voucher.PublicId, spot.SpotId, sectorPublic, voucher.Name, 1, voucher.VatRate, voucher.VatNature);
+				var voucherLine = new Line(QuoteLineKinds.Voucher, voucher.PublicId, spot.SpotId, sectorPublic, voucher.Name, 1, voucher.VatRate, voucher.VatNature);
 				PriceSpot(voucherLine, voucher, sectorId, segments, part, r, null, null, null, warnings);
 				voucherLine.Amount = -Math.Min(voucherLine.Amount, line.Amount);
-				voucherLine.Rule = "voucher";
+				voucherLine.Rule = PriceRules.Voucher;
 				lines.Add(voucherLine);
 			}
 
@@ -164,11 +228,11 @@ public sealed class QuoteService
 				additionalCount += a.Quantity;
 				var onlyDays = a.Dates is { Count: > 0 } d ? d.Where(x => x >= r.From && x <= r.To).ToHashSet() : null;
 				var addSegments = PackagePricer.Segments(periods, r.From, r.To, absences, onlyDays);
-				var addLine = new Line("additional", additional.PublicId, spot.SpotId, sectorPublic, additional.Name, a.Quantity, additional.VatRate, additional.VatNature);
+				var addLine = new Line(QuoteLineKinds.Additional, additional.PublicId, spot.SpotId, sectorPublic, additional.Name, a.Quantity, additional.VatRate, additional.VatNature);
 				PriceSpot(addLine, additional, sectorId, addSegments, part, r with { Seasonal = r.Seasonal && onlyDays is null }, null, null, null, warnings);
 				addLine.Amount *= a.Quantity;
 				lines.Add(addLine);
-				if (additional.IsCumulative && package.IsCumulative && part == DayPart.FullDay && addLine.Rule == "grid" && a.Quantity == 1)
+				if (additional.IsCumulative && package.IsCumulative && part == DayPart.FullDay && addLine.Rule == PriceRules.Grid && a.Quantity == 1)
 					cumulativeCandidates.Add((addLine, additional, sectorId, addSegments));
 			}
 			if (package.MaxAdditionalItems is { } maxItems && additionalCount > maxItems)
@@ -186,7 +250,7 @@ public sealed class QuoteService
 			lines.AddRange(await SurchargesAsync(propertyId, online, lines, ct));
 
 		var subtotal = decimal.Round(lines.Sum(l => l.Amount), 2, MidpointRounding.AwayFromZero);
-		var discount = await DiscountAsync(propertyId, channel, r, lines, nowLocal, ct);
+		var discount = await DiscountAsync(propertyId, channel, r, lines, nowLocal, redeemedDiscountId, ct);
 		var total = Math.Max(0, subtotal - (discount?.Amount ?? 0));
 		var requiresConfirmation = channel == QuoteChannel.Online && online is { RequiresManualConfirmation: true };
 		return new QuoteDto(lines.Select(l => l.ToDto()).ToList(), subtotal, discount, decimal.Round(total, 2, MidpointRounding.AwayFromZero), requiresConfirmation,
@@ -199,7 +263,7 @@ public sealed class QuoteService
 	{
 		if (manualPrice is { } manual)
 		{
-			line.Set(manual, "manual");
+			line.Set(manual, PriceRules.Manual);
 			return;
 		}
 		if (r.Seasonal)
@@ -207,33 +271,33 @@ public sealed class QuoteService
 			var (seasonal, seasonalHalf) = source.Seasonal(sectorId);
 			var price = part == DayPart.FullDay ? seasonal : seasonalHalf;
 			if (price is null)
-				warnings.Add("seasonal_price_missing");
-			line.Set(price ?? 0, "seasonal");
+				warnings.Add(QuoteWarnings.SeasonalPriceMissing);
+			line.Set(price ?? 0, PriceRules.Seasonal);
 			return;
 		}
 		if (source.Reduced(sectorId, r.From, r.To) is { } reduced)
 		{
-			line.Set(reduced, "reduced");
+			line.Set(reduced, PriceRules.Reduced);
 			return;
 		}
 
-		var rule = "grid";
+		var rule = PriceRules.Grid;
 		foreach (var segment in segments)
 		{
 			if (segment.PeriodGroup is not { } group)
 			{
-				warnings.Add("days_without_period");
-				line.Segments.Add(new SegmentPrice(segment, 0, "no_period"));
+				warnings.Add(QuoteWarnings.DaysWithoutPeriod);
+				line.Segments.Add(new SegmentPrice(segment, 0, PriceRules.NoPeriod));
 				continue;
 			}
 			if (source.Rates(sectorId, group) is not { } rates)
 			{
-				warnings.Add("period_without_price");
-				line.Segments.Add(new SegmentPrice(segment, 0, "no_price"));
+				warnings.Add(QuoteWarnings.PeriodWithoutPrice);
+				line.Segments.Add(new SegmentPrice(segment, 0, PriceRules.NoPrice));
 				continue;
 			}
 			var amount = PackagePricer.Price(source.Rules, rates, segment, part);
-			var segmentRule = "grid";
+			var segmentRule = PriceRules.Grid;
 			if (revenue is { IsSuggestedPriceEnabled: true } && source.IsDefault && source.Rules.Method == PricingMethod.DailyWithWeekend
 				&& part == DayPart.FullDay && segment.Span == 1 && segment.Days.Count == 1
 				&& source.SuggestedPrice(segment.From, sectorId) is { } suggested)
@@ -242,12 +306,12 @@ public sealed class QuoteService
 				var spotAllowed = !revenue.IsDiscountLimitedToSpots || spotId is { } s && revenue.DiscountedSpots.Any(d => d.SpotId == s);
 				(amount, segmentRule) = suggested.AppliedMode switch
 				{
-					SuggestedPriceMode.Suggested => (suggested.SuggestedPriceValue, "revenue_suggested"),
-					SuggestedPriceMode.Original => (basePrice, "revenue_original"),
-					SuggestedPriceMode.Discount when spotAllowed => (basePrice - basePrice * suggested.DiscountPercentage / 100, "revenue_discount"),
+					SuggestedPriceMode.Suggested => (suggested.SuggestedPriceValue, PriceRules.RevenueSuggested),
+					SuggestedPriceMode.Original => (basePrice, PriceRules.RevenueOriginal),
+					SuggestedPriceMode.Discount when spotAllowed => (basePrice - basePrice * suggested.DiscountPercentage / 100, PriceRules.RevenueDiscount),
 					_ => (amount, segmentRule),
 				};
-				if (segmentRule != "grid")
+				if (segmentRule != PriceRules.Grid)
 					rule = segmentRule;
 			}
 			line.Segments.Add(new SegmentPrice(segment, decimal.Round(amount, 2, MidpointRounding.AwayFromZero), segmentRule));
@@ -266,7 +330,7 @@ public sealed class QuoteService
 			{
 				item.Line.Segments.Clear();
 				item.Line.Amount = 0;
-				item.Line.Rule = "cumulative";
+				item.Line.Rule = PriceRules.Cumulative;
 			}
 			foreach (var period in items.SelectMany(i => i.Segments).Where(s => s.PeriodGroup is not null).Select(s => s.PeriodGroup!.Value).Distinct())
 			{
@@ -280,7 +344,7 @@ public sealed class QuoteService
 				for (var i = 0; i < items.Count; i++)
 				{
 					foreach (var segment in perItem[i])
-						items[i].Line.Segments.Add(new SegmentPrice(segment, segment == perItem[i][^1] ? shares[i] : 0, "cumulative"));
+						items[i].Line.Segments.Add(new SegmentPrice(segment, segment == perItem[i][^1] ? shares[i] : 0, PriceRules.Cumulative));
 					items[i].Line.Amount += shares[i];
 				}
 			}
@@ -324,9 +388,9 @@ public sealed class QuoteService
 				unit += variant.Price;
 			}
 			var name = Translations.Pick(item.Translations, t => t.Language, t => t.Name, language, item.Name) ?? item.Name;
-			var line = new Line("service", item.PublicId, null, null, string.IsNullOrWhiteSpace(s.Variant) ? name : $"{name} ({s.Variant.Trim()})",
+			var line = new Line(QuoteLineKinds.Service, item.PublicId, null, null, string.IsNullOrWhiteSpace(s.Variant) ? name : $"{name} ({s.Variant.Trim()})",
 				s.Quantity, vatRate, item.VatNature is { } n ? Codes.Of(n) : null) { Category = Category(item.Kind) };
-			line.Set(decimal.Round(unit * s.Quantity, 2, MidpointRounding.AwayFromZero), "list");
+			line.Set(decimal.Round(unit * s.Quantity, 2, MidpointRounding.AwayFromZero), PriceRules.List);
 			lines.Add(line);
 			ordered.Add((item, s.Quantity, date));
 		}
@@ -342,14 +406,14 @@ public sealed class QuoteService
 			if (auto.IsSectorRestricted && !auto.Sectors.Any(s => spotSectors.Contains(s.SectorId)))
 				continue;
 			// nessun periodo = sempre; altrimenti uno dei periodi copre giorno, giorno della settimana e ora
-			var matching = ordered.Where(o => (auto.AppliesToAllServices || auto.Services.Any(s => s.SaleItemId == o.Item.Id))
+			var matching = ordered.Where(o => auto.Services.Any(s => s.SaleItemId == o.Item.Id)
 				&& (auto.Periods.Count == 0 || auto.Periods.Any(p => p.Covers(o.Date, DiscountRules.ToWeekday(o.Date.DayOfWeek), time)))).ToList();
 			if (matching.Count == 0)
 				continue;
 			var count = (short)(auto.AppliesPerService ? matching.Sum(m => m.Quantity) : 1);
 			var name = Translations.Pick(auto.Translations, t => t.Language, t => t.Name, language, auto.Name) ?? auto.Name;
-			var line = new Line("automatic_price", auto.PublicId, null, null, name, count, auto.VatRate, auto.VatNature is { } n ? Codes.Of(n) : null);
-			line.Set(decimal.Round(auto.Price * count, 2, MidpointRounding.AwayFromZero), "list");
+			var line = new Line(QuoteLineKinds.AutomaticPrice, auto.PublicId, null, null, name, count, auto.VatRate, auto.VatNature is { } n ? Codes.Of(n) : null);
+			line.Set(decimal.Round(auto.Price * count, 2, MidpointRounding.AwayFromZero), PriceRules.List);
 			lines.Add(line);
 		}
 		return lines;
@@ -369,35 +433,38 @@ public sealed class QuoteService
 			};
 			if (amount > 0)
 			{
-				var line = new Line("surcharge", null, null, null, description, 1, null, null);
-				line.Set(decimal.Round(amount, 2, MidpointRounding.AwayFromZero), "list");
+				var line = new Line(QuoteLineKinds.Surcharge, null, null, null, description, 1, null, null);
+				line.Set(decimal.Round(amount, 2, MidpointRounding.AwayFromZero), PriceRules.List);
 				result.Add(line);
 			}
 		}
 		if (online is not null)
-			Add(online.SurchargeType, online.SurchargeValue, lines.Where(l => l.Kind is "package" or "additional" or "voucher"), "spots");
+			Add(online.SurchargeType, online.SurchargeValue, lines.Where(l => l.Kind is QuoteLineKinds.Package or QuoteLineKinds.Additional or QuoteLineKinds.Voucher), SurchargeScopes.Spots);
 		if (await _online.FindServiceSettingsAsync(propertyId, ct) is { } services)
-			Add(services.SurchargeType, services.SurchargeValue, lines.Where(l => l.Kind is "service" or "automatic_price"), "services");
+			Add(services.SurchargeType, services.SurchargeValue, lines.Where(l => l.Kind is QuoteLineKinds.Service or QuoteLineKinds.AutomaticPrice), SurchargeScopes.Services);
 		return result;
 	}
 
-	private async Task<QuoteDiscountDto?> DiscountAsync(long propertyId, QuoteChannel channel, QuoteRequest r, List<Line> lines, DateTime nowLocal, CancellationToken ct)
+	private async Task<QuoteDiscountDto?> DiscountAsync(
+		long propertyId, QuoteChannel channel, QuoteRequest r, List<Line> lines, DateTime nowLocal, Guid? redeemedDiscountId, CancellationToken ct)
 	{
 		Discount? discount;
 		if (!string.IsNullOrWhiteSpace(r.DiscountCode))
 		{
 			discount = await _public.FindDiscountByCodeAsync(propertyId, r.DiscountCode, ct);
-			if (discount is null || !discount.RequiresCode || !DiscountRules.IsValid(discount, channel, r.From, r.To, nowLocal))
+			if (discount is null || !discount.RequiresCode
+				|| !DiscountRules.IsValid(discount, channel, r.From, r.To, nowLocal, ignoreUses: discount.PublicId == redeemedDiscountId))
 				throw DomainException.Unprocessable(CatalogErrors.QuoteDiscountNotValid);
 		}
 		else
-			discount = (await _public.ListAutomaticDiscountsAsync(propertyId, ct)).FirstOrDefault(d => DiscountRules.IsValid(d, channel, r.From, r.To, nowLocal));
+			discount = (await _public.ListAutomaticDiscountsAsync(propertyId, ct))
+				.FirstOrDefault(d => DiscountRules.IsValid(d, channel, r.From, r.To, nowLocal, ignoreUses: d.PublicId == redeemedDiscountId));
 		if (discount is null)
 			return null;
 		var sectorIds = (await _sectors.ListAsync(propertyId, ct)).ToDictionary(s => s.PublicId, s => s.Id);
-		var amount = DiscountRules.Amount(discount, lines.Where(l => l.Kind != "surcharge")
+		var amount = DiscountRules.Amount(discount, lines.Where(l => l.Kind != QuoteLineKinds.Surcharge)
 			.Select(l => new DiscountableLine(l.Amount, l.SectorId is { } s ? sectorIds.GetValueOrDefault(s) : null,
-				l.Kind == "additional" ? DiscountServiceCategory.Additional : l.Category)).ToList());
+				l.Kind == QuoteLineKinds.Additional ? DiscountServiceCategory.Additional : l.Category)).ToList());
 		return new QuoteDiscountDto(discount.PublicId, discount.Code, discount.Name, Codes.Of(discount.Type), discount.Value, amount);
 	}
 
@@ -446,7 +513,7 @@ public sealed class QuoteService
 		public string Kind { get; } = kind;
 		public Guid? SectorId { get; } = sectorId;
 		public decimal Amount { get; set; }
-		public string Rule { get; set; } = "grid";
+		public string Rule { get; set; } = PriceRules.Grid;
 		public DiscountServiceCategory? Category { get; init; }
 		public List<SegmentPrice> Segments { get; } = [];
 

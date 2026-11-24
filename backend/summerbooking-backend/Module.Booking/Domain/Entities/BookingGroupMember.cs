@@ -20,4 +20,11 @@ public sealed class BookingGroupMember : IAuditable, ISoftDeletable
 	public Reservation Reservation { get; private set; } = null!;
 
 	private BookingGroupMember() { }
+
+	public static BookingGroupMember Create(BookingGroup group, Reservation reservation, DateTime now)
+	{
+		if (group.PropertyId != reservation.PropertyId)
+			throw new ArgumentException("Prenotazione di un altro stabilimento.", nameof(reservation));
+		return new BookingGroupMember { Group = group, Reservation = reservation, PropertyId = group.PropertyId, AddedAt = now };
+	}
 }

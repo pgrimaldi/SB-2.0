@@ -10,7 +10,7 @@ namespace BuildingBlocks.Infrastructure.Retention;
 /// <remarks>
 /// <para>
 /// <b>Perché esiste, dato che c'è un motore generico.</b> Il motore legge le regole da
-/// <c>privacy_retention_policies</c> e le applica: durata, decorrenza, azione, e dal 2026-10-05 anche
+/// <c>privacy_retention_policies</c> e le applica: durata, decorrenza, azione e anche
 /// il perimetro (<c>target_filter</c>). Copre tutto tranne i perimetri che non sono un confronto su
 /// una colonna.
 /// </para>

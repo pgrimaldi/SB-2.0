@@ -266,8 +266,7 @@ public sealed class StorageDeletionReconcilerTests
 		try
 		{
 			// ⚠️ Le due azioni nello STESSO lotto: è il caso che conta. Se il job le trattasse insieme,
-			// lo scontrino finirebbe in una DeleteObjectsRequest e sparirebbe — ed è esattamente il
-			// motivo per cui, fino al 2026-10-05, il motore si rifiutava di accodare archive_object.
+			// lo scontrino finirebbe in una DeleteObjectsRequest e sparirebbe.
 			await AccodaAsync(db, "prova_origin", daRaffreddare, "archive_object");
 			await AccodaAsync(db, "prova_origin", daRimuovere);
 
