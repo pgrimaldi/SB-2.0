@@ -27,7 +27,7 @@ import psycopg
 from botocore.exceptions import ClientError
 from psycopg import sql
 
-from app.env.awsutil import Aws, OperationError, Progress, check_cancel, my_public_ip, no_progress, sleep, stack_info
+from app.env.awsutil import UPLOAD, Aws, OperationError, Progress, check_cancel, my_public_ip, no_progress, sleep, stack_info
 from app.logging_setup import LOGGER_NAME
 from app.settings import EnvSettings as Settings
 
@@ -45,6 +45,39 @@ HISTORY_TABLE = "__ef_migrations_history"
 _NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 # Errori di pg_restore che su RDS sono attesi e innocui: l'utente master non e' superuser.
 _BENIGN = ("must be owner of", "already exists")
+# Difetto di PostgreSQL 17: il dump di un vincolo EXCLUDE su una tabella partizionata non si ripristina intero (il
+# vincolo del padre non riesce ad agganciare quelli delle partizioni). Dopo il restore si ricrea il vincolo dal padre,
+# che ricrea da se' quelli delle partizioni.
+_UNATTACHED = ("cannot attach index", "agganciare l'indice")
+_UNATTACHED_WHERE = """
+    FROM pg_constraint con JOIN pg_class t ON t.oid = con.conrelid
+    WHERE con.contype = 'x' AND t.relkind = 'p'
+      AND EXISTS (SELECT 1 FROM pg_inherits i JOIN pg_constraint cc ON cc.conrelid = i.inhrelid
+                  WHERE i.inhparent = t.oid AND cc.contype = 'x' AND cc.conparentid = 0)"""
+_UNATTACHED_COUNT = "SELECT count(*)" + _UNATTACHED_WHERE
+_REATTACH_EXCLUSIONS = """
+DO $$
+DECLARE r record; c record;
+BEGIN
+  FOR r IN
+    SELECT con.conname, con.conrelid AS rel, con.conrelid::regclass AS tbl, pg_get_constraintdef(con.oid) AS def,
+           obj_description(con.oid, 'pg_constraint') AS cmt""" + _UNATTACHED_WHERE + """
+  LOOP
+    FOR c IN SELECT cc.conname, cc.conrelid::regclass AS tbl
+             FROM pg_inherits i JOIN pg_constraint cc ON cc.conrelid = i.inhrelid
+             WHERE i.inhparent = r.rel AND cc.contype = 'x' AND cc.conparentid = 0
+               AND pg_get_constraintdef(cc.oid) = r.def
+    LOOP
+      EXECUTE format('ALTER TABLE %s DROP CONSTRAINT %I', c.tbl, c.conname);
+    END LOOP;
+    EXECUTE format('ALTER TABLE %s DROP CONSTRAINT %I', r.tbl, r.conname);
+    EXECUTE format('ALTER TABLE %s ADD CONSTRAINT %I %s', r.tbl, r.conname, r.def);
+    IF r.cmt IS NOT NULL THEN
+      EXECUTE format('COMMENT ON CONSTRAINT %I ON %s IS %L', r.conname, r.tbl, r.cmt);
+    END IF;
+  END LOOP;
+END $$;
+"""
 
 AskPassword = Callable[[str], str | None]
 
@@ -357,31 +390,54 @@ class PgTools:
         log.info("Dump %s: %.1f MB", out.name, out.stat().st_size / 1e6)
         return out
 
-    def restore(self, conn: Conn, dump: Path, extra: list[str], env_extra: dict | None = None,
+    @contextmanager
+    def staged(self, *dumps: Path | None):
+        """Carica i dump nel bucket di build e li toglie all'uscita; restituisce le chiavi S3 nello stesso ordine
+        (None per un dump assente).
+
+        Va aperto PRIMA di toccare il DB di AWS: se l'upload dal PC fallisce, il DB resta com'era.
+        """
+        if self.aws is None:
+            raise OperationError("restore su AWS senza sessione AWS")
+        bucket = stack_info(self.aws).need("BuildBucketName")[0]
+        s3 = self.aws.client("s3")
+        keys: list[str | None] = []
+        try:
+            for dump in dumps:
+                if dump is None:
+                    keys.append(None)
+                    continue
+                key = f"dump/{uuid.uuid4().hex}/{dump.name}"
+                log.info("Carico il dump %s (%.1f MB) in s3://%s/%s", dump.name, dump.stat().st_size / 1e6,
+                         bucket, key)
+                s3.upload_file(str(dump), bucket, key, Config=UPLOAD)
+                keys.append(key)
+                check_cancel(self.cancel)
+            yield keys
+        finally:
+            for key in keys:
+                if key:
+                    s3.delete_object(Bucket=bucket, Key=key)
+
+    def restore(self, conn: Conn, key: str, extra: list[str], env_extra: dict | None = None,
                 jobs: int | None = None) -> list[str]:
-        """pg_restore dentro la VPC, con il task usa-e-getta dbloader dello stack.
+        """pg_restore dentro la VPC, con il task usa-e-getta dbloader dello stack, di un dump gia' caricato
+        con `staged`.
 
         Dal PC una sessione lunga verso RDS viene interrotta dopo circa 10 minuti e la latenza rende il
-        restore lentissimo: il dump si carica nel bucket di build e il task lo scarica con un URL firmato.
+        restore lentissimo: il dump sta nel bucket di build e il task lo scarica con un URL firmato.
         """
         if self.aws is None:
             raise OperationError("restore su AWS senza sessione AWS")
         aws, out = self.aws, stack_info(self.aws).outputs
         stack_info(aws).need("ClusterName", "DbLoaderTaskFamily", "DbLoaderLogGroup", "SubnetIds",
                              "AppSecurityGroupId", "BuildBucketName")
-        bucket, key = out["BuildBucketName"], f"dump/{uuid.uuid4().hex}/{dump.name}"
-        s3 = aws.client("s3")
-        signer = presigner(aws)
-        log.info("Carico il dump %s (%.1f MB) in s3://%s/%s", dump.name, dump.stat().st_size / 1e6, bucket, key)
-        s3.upload_file(str(dump), bucket, key)
-        try:
-            url = signer.generate_presigned_url("get_object", Params={"Bucket": bucket, "Key": key}, ExpiresIn=7200)
-            env = {"DUMP_URL": url, "RESTORE_ARGS": " ".join(extra), "JOBS": str(jobs or self.jobs),
-                   "PGHOST": conn.host, "PGPORT": str(conn.port), "PGDATABASE": conn.dbname}
-            env.update(env_extra or {})
-            lines, status = self._run_loader(out, env)
-        finally:
-            s3.delete_object(Bucket=bucket, Key=key)
+        url = presigner(aws).generate_presigned_url("get_object", Params={"Bucket": out["BuildBucketName"], "Key": key},
+                                                    ExpiresIn=7200)
+        env = {"DUMP_URL": url, "RESTORE_ARGS": " ".join(extra), "JOBS": str(jobs or self.jobs),
+               "PGHOST": conn.host, "PGPORT": str(conn.port), "PGDATABASE": conn.dbname}
+        env.update(env_extra or {})
+        lines, status = self._run_loader(out, env)
         exit_line = next((x for x in reversed(lines) if x.startswith("PG_RESTORE_EXIT=")), None)
         if exit_line is None:
             raise OperationError(f"Il task di caricamento si e' fermato senza esito ({status}).\n"
@@ -390,12 +446,21 @@ class PgTools:
         if code == "download":
             raise OperationError("Il task di caricamento non ha potuto scaricare il dump dal bucket")
         errors = [x for x in lines if "error:" in x.lower()]
-        real = [x for x in errors if not any(b in x for b in _BENIGN)]
+        unattached = [x for x in errors if any(u in x for u in _UNATTACHED)]
+        real = [x for x in errors if not any(b in x for b in _BENIGN) and x not in unattached]
         if code != "0" and (real or not errors):
             raise OperationError("pg_restore fallito:\n" + "\n".join((real or lines)[-15:]))
-        if errors:
-            log.warning("pg_restore: %d errori attesi su RDS ignorati (es. %s)", len(errors) - len(real),
-                        errors[0][:160])
+        if unattached:
+            log.info("pg_restore: %d vincoli EXCLUDE di partizioni non agganciati, ricreo i vincoli dal padre",
+                     len(unattached))
+            with conn.connect(autocommit=True) as db:
+                db.execute(_REATTACH_EXCLUSIONS)
+                left = db.execute(_UNATTACHED_COUNT).fetchone()[0]
+            if left:
+                raise OperationError(f"Vincoli EXCLUDE di partizioni ancora scollegati dopo la riparazione: {left}")
+        ignored = [x for x in errors if x not in real and x not in unattached]
+        if ignored:
+            log.warning("pg_restore: %d errori attesi su RDS ignorati (es. %s)", len(ignored), ignored[0][:160])
         return lines
 
     def _run_loader(self, out: dict, env: dict) -> tuple[list[str], str]:
@@ -515,8 +580,9 @@ def load_full(aws: Aws, local: Conn, src: str, rds: Conn, cancel, progress: Prog
     with tempfile.TemporaryDirectory(prefix="sb22-dump-") as tmp:
         dump = tools.dump(local, src, Path(tmp) / f"{src}.dump", [])
         check_cancel(cancel)
-        _recreate_database(rds)
-        tools.restore(rds, dump, [])
+        with tools.staged(dump) as (key,):
+            _recreate_database(rds)
+            tools.restore(rds, key, [])
 
 
 def load_schema(aws: Aws, local: Conn, src: str, rds: Conn, cancel, progress: Progress) -> None:
@@ -537,21 +603,22 @@ def load_schema(aws: Aws, local: Conn, src: str, rds: Conn, cancel, progress: Pr
             args += ["-t", t]
         seed = tools.dump(local, src, Path(tmp) / f"{src}-seed.dump", args) if wanted else None
         check_cancel(cancel)
-        _recreate_database(rds)
-        tools.restore(rds, schema, [])
-        if seed:
-            _restore_data(tools, rds, seed)
+        with tools.staged(schema, seed) as (schema_key, seed_key):
+            _recreate_database(rds)
+            tools.restore(rds, schema_key, [])
+            if seed_key:
+                _restore_data(tools, rds, seed_key)
 
 
-def _restore_data(tools: PgTools, rds: Conn, dump: Path) -> None:
+def _restore_data(tools: PgTools, rds: Conn, key: str) -> None:
     """Dati con vincoli e trigger sospesi (session_replication_role), se RDS lo consente."""
     try:
-        tools.restore(rds, dump, ["--data-only"], {"PGOPTIONS": "-c session_replication_role=replica"})
+        tools.restore(rds, key, ["--data-only"], {"PGOPTIONS": "-c session_replication_role=replica"})
     except OperationError as exc:
         if "session_replication_role" not in str(exc):
             raise
         log.warning("RDS non consente session_replication_role: carico nell'ordine delle dipendenze")
-        tools.restore(rds, dump, ["--data-only"], jobs=1)
+        tools.restore(rds, key, ["--data-only"], jobs=1)
 
 
 def load_data(aws: Aws, local: Conn, src: str, rds: Conn, cancel, progress: Progress) -> None:
@@ -565,8 +632,9 @@ def load_data(aws: Aws, local: Conn, src: str, rds: Conn, cancel, progress: Prog
             args += ["-n", schema]
         dump = tools.dump(local, src, Path(tmp) / f"{src}-data.dump", args)
         check_cancel(cancel)
-        _truncate(rds, s.schemi, set())
-        _restore_data(tools, rds, dump)
+        with tools.staged(dump) as (key,):
+            _truncate(rds, s.schemi, set())
+            _restore_data(tools, rds, key)
 
 
 def empty_data(settings: Settings, rds: Conn) -> int:

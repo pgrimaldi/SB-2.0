@@ -22,7 +22,7 @@ from pathlib import Path, PurePosixPath
 
 from botocore.exceptions import ClientError
 
-from app.env.awsutil import Aws, Cancelled, OperationError, Progress, check_cancel, no_progress, stack_info
+from app.env.awsutil import UPLOAD, Aws, Cancelled, OperationError, Progress, check_cancel, no_progress, stack_info
 from app.logging_setup import LOGGER_NAME
 
 log = logging.getLogger(LOGGER_NAME)
@@ -230,7 +230,7 @@ def upload(aws: Aws, bucket: str, prefix: str, files: list[Path], cancel=None,
         check_cancel(cancel)
         key = prefix + f.name
         ctype = mimetypes.guess_type(f.name)[0] or "application/octet-stream"
-        s3.upload_file(str(f), bucket, key, ExtraArgs={"ContentType": ctype, "ServerSideEncryption": "AES256"})
+        s3.upload_file(str(f), bucket, key, ExtraArgs={"ContentType": ctype, "ServerSideEncryption": "AES256"}, Config=UPLOAD)
         log.info("Caricato s3://%s/%s (%.1f KB, %s)", bucket, key, f.stat().st_size / 1024, ctype)
         progress("caricamento", i, len(files), key)
     return len(files)

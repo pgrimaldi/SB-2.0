@@ -21,7 +21,7 @@ from botocore.exceptions import ClientError
 
 from app.env import database as D
 from app.env import plan as P
-from app.env.awsutil import (Aws, Cancelled, OperationError, Progress, check_cancel, http_get, no_progress, sleep,
+from app.env.awsutil import (UPLOAD, Aws, Cancelled, OperationError, Progress, check_cancel, http_get, no_progress, sleep,
                          stack_info, update_stack_parameters)
 from app.logging_setup import LOGGER_NAME
 from app.env.power import _stack_resources, apply_now, db_status, now_utc, read_plan, services_status, update_plan
@@ -166,7 +166,7 @@ def wait_backend(ctx: Ctx) -> str:
 
 def _upload(ctx: Ctx, path: Path, key: str) -> str:
     bucket = stack_info(ctx.aws).need("BuildBucketName")[0]
-    ctx.aws.client("s3").upload_file(str(path), bucket, key)
+    ctx.aws.client("s3").upload_file(str(path), bucket, key, Config=UPLOAD)
     log.info("Caricato s3://%s/%s (%.1f MB)", bucket, key, path.stat().st_size / 1e6)
     return f"{bucket}/{key}"
 

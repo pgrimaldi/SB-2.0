@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 import boto3
+from boto3.s3.transfer import TransferConfig
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
@@ -50,6 +51,11 @@ def sleep(seconds: float, cancel: threading.Event | None) -> None:
         if remaining <= 0:
             return
         time.sleep(min(1.0, remaining))
+
+
+# Caricamenti su S3 dal PC: con l'upload lento di una linea d'ufficio le 10 parti in parallelo di boto3 vanno in
+# timeout e la connessione si chiude; 2 alla volta, parti da 16 MB.
+UPLOAD = TransferConfig(max_concurrency=2, multipart_chunksize=16 * 1024 * 1024)
 
 
 class Aws:
